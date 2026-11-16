@@ -1,0 +1,32 @@
+file	line	text	under the dry path	on the real path	cases
+session_e197.sh	51	DRYRUN=; [ "${1:-}" = --dry ] && DRYRUN=1	the wrapper's mode: dry	the wrapper's mode: real	D1 P
+session_e197.sh	56	OUTD=build/e197/T$T0; [ -n "$DRYRUN" ] && OUTD=$OUTD-dry	the session directory build/e197/T<T0>-dry (every rest rule skips it)	build/e197/T<T0>	D1 P
+session_e197.sh	60	say() { echo "$(date '+%Y-%m-%d %H:%M:%S %Z') ${DRYRUN:+DRY }$*" | tee -a "$LOG"; }	every log line marked DRY	no mark	D1 P
+session_e197.sh	81	say "session start (T0 $T0 = $(date -d @"$T0" '+%H:%M:%S %Z' 2>/dev/null); E197 sitting $SIT, plan $PLAN; the proposal's reference session with the lab's runner (departure D1), kit-e197$DESK${DRYRUN:+; DRY})"	the start line ends '; DRY)'	no mark	D1 P
+session_e197.sh	115	if [ -n "$DRYRUN" ]; then	the dry path: the reference session's DRY mode, read by check_e197.py drycmp; nothing opened	the real path: the first card command and the cap, the free check, CAP_S, the watch, the session, SESSION_DONE, the summary, the crash line	D1 D2 D3 P SH P2 S1 K1 K2 K3 K4 G1 G2 G3 H1 H2 H3 H4 L1 X1 HG HG2 T1 T2 W1 C1 B7 B7p B7l B8 B9 NT S2 F2 R7 R7b R8 R9 R10
+session_e197.sh	118	DRY=1 bash "$OUTD/ref/run_session.sh" "$OUTD/run" "$PLAN" > "$OUTD/run_session.out" 2>&1; rc=$?	every device call listed (429, 331, 277), nothing opened	(the real path never runs this line)	D1 D2 D3
+proposal/src/run_session.sh	60	if [ -n "${DRY:-}" ]; then	the DRY block (lines 61-70): the DRY lines, the runner's --dry, exit 0	the real path, lines 73-214 (the rows below)	D1 D2 D3 P
+proposal/src/run_session.sh	61	say "DRY: holder check (et-who --check, other users' device processes), card lock probe ($LOCK), device nodes"	a DRY line	-	D1
+proposal/src/run_session.sh	62	say "DRY: sampler ($SAMPLER) for at most ${SAMPLER_S:-$((cap + 600))} s, stopwatch; cap $cap s"	a DRY line	-	D1
+proposal/src/run_session.sh	66	[ "$first" -eq 1 ] || say "DRY: card lock released; gap $GAP s; holder check; card lock taken"	a DRY line between blocks	-	D1
+proposal/src/run_session.sh	74	nodes=$(ls /dev/et*_ops 2>/dev/null | wc -l)	skipped	the node count and its refusals (lines 75, 77, 78, 82; line 87 NOT RUN: it needs a character device /dev/et<N>_ops on a several-card host, and the wrapper refuses several cards first, case TWO)	A0 A1 A2 A3 P
+proposal/src/run_session.sh	90	[ -e "$LOCK" ] || { say "refused: no card lock file $LOCK"; exit 2; }	skipped	no card lock file: refused	A4 P
+proposal/src/run_session.sh	99	free_before_sampler() {	skipped	free_before_sampler: et-who, other users' processes, the lock probe (its et-who failure, exit 2, NOT RUN: the wrapper reads et-who the same way just before)	P B7 B7p B7l
+proposal/src/run_session.sh	116	free_with_sampler() {	skipped	free_with_sampler: our own sampler's holder line passes, anything else stops (its et-who failure NOT RUN)	P B8 H4
+proposal/src/run_session.sh	137	locked_block() {	skipped	locked_block: the lock per block (75 when busy), kept by every device process	P L1
+proposal/src/run_session.sh	154	finish() {	skipped	finish (the EXIT trap): the sampler stopped by SIGTERM, SESSION_DONE	P L1 B8
+proposal/src/run_session.sh	163	on_signal() {  # $1: the signal's number. OUT/STOP first (the host and run_trains.py check it), then the EXIT trap.	skipped	on_signal: a TERM writes STOP {by run_session}	T2
+proposal/src/run_session.sh	178	"$ETTELEM" sample --seconds "$secs" --every-ms 100 > "$TEL" 2> "$out/sampler.err" < /dev/null & ;;	skipped	the one sampler: "$ETTELEM" sample (E128's guard); the pvt branch (line 176) is not on the session's path (E197.md 4: the plain sampler, SAMPLER unset)	P
+proposal/src/run_session.sh	183	python3 -B "$here/stopwatch.py" "$TEL" "$out" 2>> "$out/stopwatch.err" < /dev/null &	skipped	stopwatch.py: the board, die and quiet stops (its 'no telemetry sample in the first 60 s' NOT RUN: the runner's own reading stops first, B9)	K5 K3 K4
+proposal/src/run_session.sh	187	if ! free_with_sampler; then	skipped	a holder right after the sampler: no block runs	B8
+proposal/src/run_session.sh	190	locked_block smoke; rc=$?	skipped	the smoke block under the lock	P G3 L1 B9
+proposal/src/run_session.sh	196	[ -e "$out/STOP" ] && { say "STOP: $(cat "$out/STOP")"; rc=8; break; }	skipped	a STOP at the loop's top (NOT RUN on its own: a STOP between the smoke's end and block A's start, a few milliseconds; block A's own first check and its idle read the same file, G1)	G1
+proposal/src/run_session.sh	199	[ -e "$out/STOP" ] && { say "STOP: $(cat "$out/STOP")"; rc=8; break; }	skipped	a STOP read after the 30 s gap	S2
+proposal/src/run_session.sh	202	[ "$(date +%s)" -lt "$deadline" ] || { say "cap reached before block $b"; break; }	skipped	the deadline before a block	C1
+proposal/src/run_session.sh	203	free_with_sampler || { say "block $b: the card is not free, stopping"; rc=3; break; }	skipped	the holder check before a block	H4
+proposal/src/run_session.sh	204	locked_block "$b" --deadline "$deadline"; rc=$?	skipped (no deadline is passed under DRY)	a block with the deadline: the runner skips a train that cannot fit (C1; lab/run_trains.py lines 290-294); its mid-train cut (lines 298-304) NOT RUN: a train that fits at its start is cut only when its processes run slower than 6.2 s with its 30 s of slack spent, which a host inside its 8.5 s budget reaches only near the end of a long train; a non-zero exit stops the session	P S1 K3 K4 X1 F2 C1
+proposal/src/run_session.sh	212	[ "$rc" -ne 0 ] || nap 8	skipped	the closing 8 s only after a session that ended well	P S1
+lab/run_trains.py	157	if a.dry:	reading() returns 0.0	the telemetry read: stale, missing, without temp_c, hot	K4 B9 NT K3 P
+lab/run_trains.py	178	if a.dry:	device() prints the command	the device process with the lock's descriptor; THE REGFILE PARSE (a runtime line inside a host line drops that launch, SP1; a non-object raises, X1); the marks; a STOP while it ran (S1); exit 124 or a signal (HG2); two failed in a row (F2); a signal to the block (T2)	P SP1 SP2 X1 S1 HG2 F2 T2
+lab/run_trains.py	229	if a.dry:	idle() prints	the idle loop: the STOP check and the telemetry read every 0.25 s; its mark	P G1
+lab/run_trains.py	261	if a.dry:	returns before the smoke gate	the smoke gate: 26 launches (SP1: 25), ok (G3), letters (G5), rates within 3 % (G4)	P G3 G4 G5 SP1

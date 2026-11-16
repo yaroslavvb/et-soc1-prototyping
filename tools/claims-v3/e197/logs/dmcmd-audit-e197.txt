@@ -1,0 +1,25 @@
+# E197 kit (Q185, lane kit-e197; re-run by Q191's lane fix-e197 after the verifier's fixes, and by Q191's lane fix2-e197 after the second verifier's): the device-command preflight, bash tools/claims-v3/e197/preflight_e197.sh (the stock table, no --allow, no --except; exit 0)
+# run 2026-11-16 00:13:24 PST on aifoundry2 (Ubuntu 24.04; bash 5.2.21(1)-release (x86_64-pc-linux-gnu); /usr/bin/python3 3.12.3); paths masked as <lab clone>, <scratch>, <lane work>, <W>, /home/<login>; desk checks of code, nothing measured, no card, no device, no box reached
+dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:18: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+tools/claims-v3/e128/ettelem_guard.sh:31: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+note: tools/claims-v3/e197/proposal/src/run_session.sh:178: 'sample' goes through tools/claims-v3/e128/ettelem_guard.sh, which is scanned: its own lines are what it sends
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      2 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      2 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok

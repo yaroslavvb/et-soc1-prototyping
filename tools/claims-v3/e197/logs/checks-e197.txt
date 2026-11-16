@@ -1,0 +1,42 @@
+# E197 kit (Q185, lane kit-e197; re-run by Q191's lane fix-e197 after the verifier's fixes, and by Q191's lane fix2-e197 after the second verifier's): the harness, the history check's names and the kit's checker on the registration's synthetic sessions (arbitrary test values), /usr/bin/python3 -I -B tools/claims-v3/e197/desk/checks_e197.py <lab clone> <scratch> (exit 0)
+# run 2026-11-16 00:13:29 PST on aifoundry2 (Ubuntu 24.04; bash 5.2.21(1)-release (x86_64-pc-linux-gnu); /usr/bin/python3 3.12.3); paths masked as <lab clone>, <scratch>, <lane work>, <W>, /home/<login>; desk checks of code, nothing measured, no card, no device, no box reached
+ok   harness-e197.json re-made: CHECK PASS: harness-e197.json re-made equals the committed one (45 files)
+ok   every harness file at its sha256: HARNESS OK: 45 files at their sha256 under the root
+ok   the history check's names: SHADOW NAMES: 300 standard-library names from sys.stdlib_module_names (Python 3.12.3); with the day's own 20; json True, re True, subprocess True, _strptime True; read in 9 folders: (the top), tools/claims-v3/, tools/cla
+ok   the registered reducer on the synthetic exact session: rc 0
+    | T1 gates: check_bad 0 and ok; 1,024 participants; clock within 1 MHz;  APPLIED  {"processes": 134, "planned": 364, "units": 67, "dropped": {}}
+    | T1 gate: F and S median rates within 0.05 %; at least 8 units          PASS     {"rate_ratio_F_over_S": 1.0, "units": 67}
+    | T1 report: retired / body within 0.5 % of 131/128 plus the entry and e REPORTED {"retired_per_body": {"F": [1.0234441354192767, false], "S": [1.0234441354192767, false]}}
+ok   check_e197.py checks (exact): CHECKS READ: 109 rows (APPLIED 16, NOT SCORED 2, PASS 13, REPORTED 78)
+    | the runner's smoke gate: passed (26 launches, rates None-None)
+    | the kit's smoke check: not reached
+    | train blocks started: 4 of 4 (A B C D); complete: 4 (A B C D); train processes recorded: 400
+    | stop: none
+    | SITTING-RESULT: smoke not reached; train blocks complete 4 (A B C D); card stop none
+ok   check_e197.py summary on the exact session: 4 blocks complete, stop none
+ok   the registered reducer on the synthetic noisy session: rc 0
+    | T1 gates: check_bad 0 and ok; 1,024 participants; clock within 1 MHz;  APPLIED  {"processes": 134, "planned": 364, "units": 67, "dropped": {}}
+    | T1 gate: F and S median rates within 0.05 %; at least 8 units          PASS     {"rate_ratio_F_over_S": 1.0, "units": 67}
+    | T1 report: retired / body within 0.5 % of 131/128 plus the entry and e REPORTED {"retired_per_body": {"F": [1.0234441354192767, false], "S": [1.0234441354192767, false]}}
+ok   check_e197.py checks (noisy): CHECKS READ: 109 rows (APPLIED 16, NOT SCORED 3, PASS 12, REPORTED 78)
+ok   the noisy session's T11 (F 0.3 % slower) read NOT SCORED by its F/S rate gate, as the checker prints it  [['T11']]
+    | the runner's smoke gate: passed (26 launches, rates None-None)
+    | the kit's smoke check: not reached
+    | train blocks started: 4 of 4 (A B C D); complete: 4 (A B C D); train processes recorded: 400
+    | stop: none
+    | SITTING-RESULT: smoke not reached; train blocks complete 4 (A B C D); card stop none
+ok   check_e197.py summary on the noisy session: 4 blocks complete, stop none
+ok   the registered reducer on the synthetic stop session: rc 0
+    | T1 gates: check_bad 0 and ok; 1,024 participants; clock within 1 MHz;  APPLIED  {"processes": 134, "planned": 364, "units": 67, "dropped": {}}
+    | T1 gate: F and S median rates within 0.05 %; at least 8 units          PASS     {"rate_ratio_F_over_S": 1.0, "units": 67}
+    | T1 report: retired / body within 0.5 % of 131/128 plus the entry and e REPORTED {"retired_per_body": {"F": [1.0234441354192767, false], "S": [1.0234441354192767, false]}}
+ok   check_e197.py checks (stop): CHECKS READ: 109 rows (APPLIED 16, NOT SCORED 7, PASS 8, REPORTED 78)
+    | the runner's smoke gate: passed (26 launches, rates None-None)
+    | the kit's smoke check: not reached
+    | train blocks started: 4 of 4 (A B C D); complete: 4 (A B C D); train processes recorded: 400
+    | stop: by hand: an empty STOP file (does not name the card)
+    | SITTING-RESULT: smoke not reached; train blocks complete 4 (A B C D); card stop none
+ok   check_e197.py summary on the stop session: the hand-made STOP read as not naming the card
+ok   drycmp's negative control (the full listing against the short one): LISTING DIFFERS, exit 3  [LISTING DIFFERS short at line 2:]
+
+CHECKS-E197 14 of 14 PASS

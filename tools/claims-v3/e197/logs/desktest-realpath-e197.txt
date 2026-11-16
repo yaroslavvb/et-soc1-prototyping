@@ -1,0 +1,633 @@
+# E197 kit (Q185, lane kit-e197; re-run by Q191's lane fix-e197 after the verifier's fixes, and by Q191's lane fix2-e197 after the second verifier's): THE REAL-PATH DESK TEST, bash tools/claims-v3/e197/desk/desktest_realpath_e197.sh <scratch> (all cases; the harness re-made first)
+# run from 2026-11-16 00:50:01 PST on aifoundry2 (Ubuntu 24.04; /usr/bin/python3 3.12.3) inside W/nodev.sh through the round's CPU slot; paths masked as <lab clone>, <scratch>, <lane work>, <W>, /home/<login>; desk checks of code, nothing measured, no card, no device, no box reached; every watt, degree and rate a stand-in's arbitrary test value
+outside the cases: /dev/et*: 0 entries; /run/lock: 0 entries
+E197 real-path desk test, 2026-11-16 00:50:01 PST; the lab clone <lab clone> at HEAD 01edaa2a8b58; python 3.12.3
+E191's committed smoke stdout (1a4bc1e3): sha256 8a232ca704584edd, AT its data directory's SHA256SUMS
+
+== P (437 s, wrapper exit 0): PASS
+   ok   exit 0
+   ok   the first card command from step 7 and CAP_S
+   ok   the sampler: sample --seconds CAP_S+600 --every-ms 100
+   ok   the runner's smoke gate passed and the kit's smoke check passed
+   ok   429 host processes in the registered order (desk/dry-e197-full.txt, call for call)
+   ok   --window 240000000 and --stop-file run/STOP on every host call
+   ok   SESSION_DONE the reference's own (empty)
+   ok   4 blocks complete, stop none, SITTING-RESULT
+   ok   no STOP file
+   ok   card time logged
+   ok   the registered reducer on the session's files: rc 0, every train's units = processes / 2
+   ok   the kit's checker: CHECKS READ
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (429) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:57:17 PST stop: none
+   | 2026-11-16 00:57:17 PST SITTING-RESULT: smoke passed; train blocks complete 4 (A B C D); card stop none
+
+== P2 (163 s, wrapper exit 0): PASS
+   ok   exit 0
+   ok   277 host processes in the registered order (desk/dry-e197-ext.txt)
+   ok   block E complete, SITTING-RESULT
+   ok   THE POOLED REDUCTION of P and P2: rc 0, T1 67 + 115 = 182 units, T7 and T14 9 units each
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (277) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 01:03:18 PST stop: none
+   | 2026-11-16 01:03:18 PST SITTING-RESULT: smoke passed; train blocks complete 1 (E); card stop none
+
+== SH (409 s, wrapper exit 0): PASS
+   ok   exit 0
+   ok   331 host processes in the registered order (desk/dry-e197-short.txt)
+   ok   4 blocks complete
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (331) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:56:49 PST stop: none
+   | 2026-11-16 00:56:49 PST SITTING-RESULT: smoke passed; train blocks complete 4 (A B C D); card stop none
+
+== D1 (1 s, wrapper exit 0): PASS
+   ok   exit 0
+   ok   LISTING SAME full, 429 device calls
+   ok   the -dry directory and DRY lines
+   ok   no stand-in called
+   ok   the manifest exact
+
+== D2 (1 s, wrapper exit 0): PASS
+   ok   exit 0
+   ok   LISTING SAME short, 331 device calls
+   ok   the -dry directory and DRY lines
+   ok   no stand-in called
+   ok   the manifest exact
+
+== D3 (1 s, wrapper exit 0): PASS
+   ok   exit 0
+   ok   LISTING SAME ext, 277 device calls
+   ok   the -dry directory and DRY lines
+   ok   no stand-in called
+   ok   the manifest exact
+
+== S1 (177 s, wrapper exit 8): PASS
+   ok   exit 8
+   ok   blocks: A complete, B begun
+   ok   no device process began after the STOP
+   ok   SITTING-RESULT card stop none
+   ok   STOP by by hand: .
+   ok   the summary reads it as not naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (168) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:52:59 PST stop: by hand: an empty STOP file (does not name the card)
+   | 2026-11-16 00:52:59 PST SITTING-RESULT: smoke passed; train blocks complete 1 (A); card stop none
+
+== K1 (52 s, wrapper exit 8): PASS
+   ok   exit 8
+   ok   the stopwatch did not stop (it stops above 65 W only)
+   ok   no device process began after the STOP
+   ok   STOP by watch_e197: board 6[56]\.00 W at or above 65 W
+   ok   the summary reads it as naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (7) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:50:55 PST stop: watch_e197: board 65.00 W at or above 65 W on 3 distinct readings in a row (the kit's stop) (names the card)
+   | 2026-11-16 00:50:55 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop yes: watch_e197: board 65.00 W at or above 65 W on 3 distinct readings in a row (the kit's stop)
+
+== K2 (52 s, wrapper exit 8): PASS
+   ok   exit 8
+   ok   no device process began after the STOP
+   ok   STOP by watch_e197: minion clock 500
+   ok   the summary reads it as naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (7) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:51:48 PST stop: watch_e197: minion clock 500.0, not 600 MHz, on 3 samples in a row (the kit's stop) (names the card)
+   | 2026-11-16 00:51:48 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop yes: watch_e197: minion clock 500.0, not 600 MHz, on 3 samples in a row (the kit's stop)
+
+== K2b (61 s, wrapper exit 8): PASS
+   ok   exit 8
+   ok   no clock stop (500 MHz on 2 samples only): the stop is by hand
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (28) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:52:49 PST stop: by hand: an empty STOP file (does not name the card)
+   | 2026-11-16 00:52:49 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop none
+
+== K3 (52 s, wrapper exit 8): PASS
+   ok   exit 6 or 8
+   ok   a STOP naming the die
+   ok   the summary: names the card
+   ok   SITTING-RESULT card stop yes
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (7) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:53:41 PST stop: watch_e197: die reading 70 C at or above 70 C (the kit's stop) (names the card)
+   | 2026-11-16 00:53:41 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop yes: watch_e197: die reading 70 C at or above 70 C (the kit's stop)
+
+== K4 (57 s, wrapper exit 4): PASS
+   ok   exit 4 or 8
+   ok   a STOP naming the telemetry
+   ok   the summary: names the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (14) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:53:56 PST stop: run_trains: newest telemetry line 5.3 s old (names the card)
+   | 2026-11-16 00:53:56 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop yes: run_trains: newest telemetry line 5.3 s old
+
+== G1 (32 s, wrapper exit 8): PASS
+   ok   GATE-STOP (no block began), with a device opened
+   ok   no host process after the smoke's five
+   ok   SITTING-RESULT smoke failed
+   ok   exit 8
+   ok   the runner's smoke gate passed
+   ok   the kit's smoke check FAILED
+   ok   STOP by watch_e197: smoke check
+   ok   the summary reads it as naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (5) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   ok   the reason: participants [1023]
+   | 2026-11-16 00:54:14 PST stop: watch_e197: the kit's smoke check failed: anchor nop.z: participants [1023] (names the card)
+   | 2026-11-16 00:54:14 PST SITTING-RESULT: smoke failed; train blocks complete 0 (none); card stop yes: watch_e197: the kit's smoke check failed: anchor nop.z: participants [1023]
+   | 2026-11-16 00:54:14 PST GATE-STOP: no block of trains.tsv began (the kit's smoke check failed: anchor nop.z: participants [1023])
+
+== G2 (32 s, wrapper exit 8): PASS
+   ok   GATE-STOP (no block began), with a device opened
+   ok   no host process after the smoke's five
+   ok   SITTING-RESULT smoke failed
+   ok   exit 8
+   ok   the runner's smoke gate passed
+   ok   the kit's smoke check FAILED
+   ok   STOP by watch_e197: smoke check
+   ok   the summary reads it as naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (5) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   ok   the reason: an anchor's exit 1
+   | 2026-11-16 00:54:29 PST stop: watch_e197: the kit's smoke check failed: anchor res.k0: exit 1, 0 launches (< 2), participants [] (names the card)
+   | 2026-11-16 00:54:29 PST SITTING-RESULT: smoke failed; train blocks complete 0 (none); card stop yes: watch_e197: the kit's smoke check failed: anchor res.k0: exit 1, 0 launches (< 2), participants []
+   | 2026-11-16 00:54:29 PST GATE-STOP: no block of trains.tsv began (the kit's smoke check failed: anchor res.k0: exit 1, 0 launches (< 2), participants [])
+
+== G3 (31 s, wrapper exit 7): PASS
+   ok   GATE-STOP (no block began), with a device opened
+   ok   no host process after the smoke's five
+   ok   SITTING-RESULT smoke failed
+   ok   exit 7
+   ok   the runner's smoke gate failed
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (5) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:54:45 PST stop: run_trains: smoke gate failed (launches 14) (names the card)
+   | 2026-11-16 00:54:45 PST SITTING-RESULT: smoke failed; train blocks complete 0 (none); card stop yes: run_trains: smoke gate failed (launches 14)
+   | 2026-11-16 00:54:45 PST GATE-STOP: no block of trains.tsv began (smoke gate failed (launches 14))
+
+== SP1 (31 s, wrapper exit 7): PASS
+   ok   GATE-STOP (no block began), with a device opened
+   ok   no host process after the smoke's five
+   ok   SITTING-RESULT smoke failed
+   ok   exit 7
+   ok   the runner's smoke gate failed
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (5) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   ok   the split launch dropped: 25 of the smoke's 26 train launches recorded
+   | 2026-11-16 00:55:00 PST stop: run_trains: smoke gate failed (launches 25) (names the card)
+   | 2026-11-16 00:55:00 PST SITTING-RESULT: smoke failed; train blocks complete 0 (none); card stop yes: run_trains: smoke gate failed (launches 25)
+   | 2026-11-16 00:55:00 PST GATE-STOP: no block of trains.tsv began (smoke gate failed (launches 25))
+
+== SP2 (55 s, wrapper exit 8): PASS
+   ok   the smoke passed with a runtime line between two host lines: 26 train launches
+   ok   the kit's smoke check passed
+   ok   ended by hand: exit 8
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (10) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:55:40 PST stop: by hand: an empty STOP file (does not name the card)
+   | 2026-11-16 00:55:40 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop none
+
+== H1 (1 s, wrapper exit 3): PASS
+   ok   exit 3
+   ok   GATE-STOP ... (no device opened by the session)
+   ok   no sampler, no host started
+   ok   session end and the manifest exact
+   ok   the reason: et-who
+   | 2026-11-16 00:55:01 PST GATE-STOP: the card is not free: et-who --check exit 1 (1 holder lines) (no device opened by the session)
+
+== H2 (1 s, wrapper exit 3): PASS
+   ok   exit 3
+   ok   GATE-STOP ... (no device opened by the session)
+   ok   no sampler, no host started
+   ok   session end and the manifest exact
+   ok   the reason: another user's process
+   | 2026-11-16 00:55:03 PST GATE-STOP: the card is not free: 1 device process(es) of another user (no device opened by the session)
+
+== H3 (1 s, wrapper exit 3): PASS
+   ok   exit 3
+   ok   GATE-STOP ... (no device opened by the session)
+   ok   no sampler, no host started
+   ok   session end and the manifest exact
+   ok   the reason: the lock
+   | 2026-11-16 00:55:04 PST GATE-STOP: the card is not free: the card lock is held (probe exit 75) (no device opened by the session)
+
+== H4 (153 s, wrapper exit 3): PASS
+   ok   exit 3
+   ok   block A complete, B not begun
+   ok   run_session.sh: block B not free
+   ok   SITTING-RESULT card stop none
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (163) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:57:37 PST stop: none
+   | 2026-11-16 00:57:37 PST SITTING-RESULT: smoke passed; train blocks complete 1 (A); card stop none
+
+== L1 (12 s, wrapper exit 75): PASS
+   ok   exit 75
+   ok   GATE-STOP with a device opened
+   ok   no host started
+   ok   the sampler ended by SIGTERM
+   ok   no process left
+   ok   the manifest exact
+   | 2026-11-16 00:55:53 PST stop: none
+   | 2026-11-16 00:55:53 PST SITTING-RESULT: smoke not reached; train blocks complete 0 (none); card stop none
+   | 2026-11-16 00:55:53 PST GATE-STOP: no block of trains.tsv began (no block began)
+
+== X1 (51 s, wrapper exit 9): PASS
+   ok   exit 9
+   ok   the trains ended without a registered stop
+   ok   block A began
+   ok   no STOP file
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (7) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:56:44 PST stop: none
+   | 2026-11-16 00:56:44 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop none
+   | 2026-11-16 00:56:44 PST the trains ended without a registered stop: run_session.sh rc 1, no stop recorded (a crash); nothing is killed; a dated note decides whether its trains are reduced
+
+== HG (60 s, wrapper exit 8): PASS
+   ok   exit 8
+   ok   the HUNG line in the session log
+   ok   the host was sent TERM by its timeout, logged it, and ended by itself (no KILL)
+   ok   the watch's hang event
+   ok   STOP by watch_e197: still runs
+   ok   the summary reads it as naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (6) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:57:41 PST HUNG: a device process (pid 198) still runs 12 s after it was first seen: its timeout's TERM did not end it; nothing kills it (E197 departure D1); the card lock stays with its own descriptor; repo
+   | 2026-11-16 00:57:44 PST stop: watch_e197: a device process (pid 198) still runs 12 s after it was first seen: its timeout's TERM did not end it; nothing kills it (E197 departure D1) (names the card)
+   | 2026-11-16 00:57:44 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop yes: watch_e197: a device process (pid 198) still runs 12 s after it was first seen: its timeout's TERM did not end it; noth
+
+== T1 (56 s, wrapper exit 8): PASS
+   ok   exit 8
+   ok   the wrapper logged the signal
+   ok   STOP by session_e197: a signal to the wrapper
+   ok   the summary reads it as not naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (10) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:57:45 PST stop: session_e197: a signal to the wrapper: the launch in flight finishes (does not name the card)
+   | 2026-11-16 00:57:45 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop none
+
+== W1 (56 s, wrapper exit 8): PASS
+   ok   exit 8
+   ok   the wrapper logged the watch gone
+   ok   STOP by session_e197: the kit's watch is gone
+   ok   the summary reads it as not naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (10) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:58:13 PST stop: session_e197: the kit's watch is gone (does not name the card)
+   | 2026-11-16 00:58:13 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop none
+
+== C1 (280 s, wrapper exit 0): PASS
+   ok   exit 0
+   ok   trains skipped by the deadline
+   ok   the cap reached before a later block
+   ok   the sampler stopped inside the cap (first card command + 370 s)
+   ok   a train ran before the deadline (T2)
+   ok   no STOP
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (41) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 01:02:17 PST stop: none
+   | 2026-11-16 01:02:17 PST SITTING-RESULT: smoke passed; train blocks complete 3 (A B C); card stop none
+
+== R1 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:45 PST GATE-STOP: refused: E197_CAP_S is a desk-test variable, read only with E197_DESKTEST=1 (the card day never sets it) (no device opened by the session)
+
+== R2 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:46 PST GATE-STOP: refused: harness-e197.json is not at the sha256 the launch passed (E197_HARNESS_SHA256) (no device opened by the session)
+
+== R3 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:46 PST GATE-STOP: refused: the harness: HARNESS FAIL: differs tools/claims-v3/e197/proposal/src/run_session.sh (no device opened by the session)
+
+== R4 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:47 PST GATE-STOP: refused: the build record was not written today (Pacific) (no device opened by the session)
+
+== R5 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:48 PST GATE-STOP: refused: the host is not the one today's build recorded (no device opened by the session)
+
+== R6 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:48 PST GATE-STOP: refused: USER is not this login (E183 kit note 6's carried rule) (no device opened by the session)
+
+== R7 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:49 PST GATE-STOP: refused: the first card command was 700 s ago, more than 120 s: its cap counts from it (run step 9 right after step 7) (no device opened by the session)
+
+== R7b (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   ok   the reason: the first card command more than 120 s back
+   | 2026-11-16 00:57:50 PST GATE-STOP: refused: the first card command was 300 s ago, more than 120 s: its cap counts from it (run step 9 right after step 7) (no device opened by the session)
+
+== R8 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:50 PST GATE-STOP: refused: the first card command 1794819570 lies in the future (no device opened by the session)
+
+== R9 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:51 PST GATE-STOP: refused: the cap (3000 s from the first card command) passes the window's last end (no device opened by the session)
+
+== R10 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   ok   the reason: no card lock file
+   | 2026-11-16 00:57:51 PST GATE-STOP: refused: no card lock file /run/lock/etsoc-shire0.lock (the host makes it at boot; never created here) (no device opened by the session)
+
+== TWO (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:52 PST GATE-STOP: refused: the card nodes here are '/dev/et0_ops /dev/et1_ops' and '/dev/et0_mgmt /dev/et1_mgmt', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens 
+
+== NONE (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:52 PST GATE-STOP: refused: the card nodes here are '' and '/dev/et0_mgmt', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens a node (E197.md 3) (no device opened by
+
+== OPS (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:53 PST GATE-STOP: refused: the card nodes here are '/dev/et0_ops' and '', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens a node (E197.md 3) (no device opened by 
+
+== R13 (1 s, wrapper exit 2): PASS
+   ok   exit 2
+   ok   refused ... (no device opened by the session)
+   ok   no et-who, no sampler, no host called
+   ok   the manifest exact
+   | 2026-11-16 00:57:53 PST GATE-STOP: refused: this host is 'aifoundry1' (Python reads 'aifoundry1'), not aifoundry3 (E197.md 3: aifoundry3 card 0) (no device opened by the session)
+
+== B7 (2 s, wrapper exit 3): PASS
+   ok   exit 3
+   ok   GATE-STOP ... (no device opened by the session)
+   ok   no sampler, no host started
+   ok   session end and the manifest exact
+   ok   run_session.sh's own free check: not free, nothing opened
+   ok   SESSION_DONE written by the wrapper (run_session.sh exited before its EXIT trap)
+   | 2026-11-16 00:57:56 PST stop: none
+   | 2026-11-16 00:57:56 PST SITTING-RESULT: smoke not reached; train blocks complete 0 (none); card stop none
+   | 2026-11-16 00:57:56 PST GATE-STOP: no block of trains.tsv began (no block began) (no device opened by the session)
+
+== B7p (2 s, wrapper exit 3): PASS
+   ok   exit 3
+   ok   GATE-STOP ... (no device opened by the session)
+   ok   no sampler, no host started
+   ok   session end and the manifest exact
+   ok   run_session.sh's own free check: another user's device process
+   ok   SESSION_DONE written by the wrapper
+   | 2026-11-16 00:57:56 PST stop: none
+   | 2026-11-16 00:57:56 PST SITTING-RESULT: smoke not reached; train blocks complete 0 (none); card stop none
+   | 2026-11-16 00:57:56 PST GATE-STOP: no block of trains.tsv began (no block began) (no device opened by the session)
+
+== B7l (2 s, wrapper exit 3): PASS
+   ok   exit 3
+   ok   GATE-STOP ... (no device opened by the session)
+   ok   no sampler, no host started
+   ok   session end and the manifest exact
+   ok   run_session.sh's own lock probe: held
+   ok   SESSION_DONE written by the wrapper
+   | 2026-11-16 00:57:58 PST stop: none
+   | 2026-11-16 00:57:58 PST SITTING-RESULT: smoke not reached; train blocks complete 0 (none); card stop none
+   | 2026-11-16 00:57:58 PST GATE-STOP: no block of trains.tsv began (no block began) (no device opened by the session)
+
+== B8 (12 s, wrapper exit 3): PASS
+   ok   exit 3
+   ok   free_with_sampler: not free after the sampler started
+   ok   GATE-STOP with a device opened
+   ok   no host started
+   ok   the sampler ended by SIGTERM
+   ok   no process left
+   ok   the manifest exact
+   | 2026-11-16 00:58:08 PST stop: none
+   | 2026-11-16 00:58:08 PST SITTING-RESULT: smoke not reached; train blocks complete 0 (none); card stop none
+   | 2026-11-16 00:58:08 PST GATE-STOP: no block of trains.tsv began (no block began)
+
+== B9 (12 s, wrapper exit 4): PASS
+   ok   exit 4
+   ok   STOP by run_trains: no telemetry line
+   ok   the summary: names the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (0) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   ok   GATE-STOP (no block began)
+   | 2026-11-16 00:58:10 PST stop: run_trains: no telemetry line (names the card)
+   | 2026-11-16 00:58:10 PST SITTING-RESULT: smoke not reached; train blocks complete 0 (none); card stop yes: run_trains: no telemetry line
+   | 2026-11-16 00:58:10 PST GATE-STOP: no block of trains.tsv began (no telemetry line)
+
+== NT (52 s, wrapper exit 4): PASS
+   ok   exit 4
+   ok   STOP by run_trains: without temp_c.minshire
+   ok   the summary: names the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (7) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:59:01 PST stop: run_trains: telemetry line without temp_c.minshire (names the card)
+   | 2026-11-16 00:59:01 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop yes: run_trains: telemetry line without temp_c.minshire
+
+== T2 (56 s, wrapper exit 143): PASS
+   ok   exit 143 (run_session.sh's own signal trap)
+   ok   a registered end, not a crash
+   ok   STOP by run_session: signal 15
+   ok   the summary reads it as not naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (10) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:59:07 PST stop: run_session: signal 15 (does not name the card)
+   | 2026-11-16 00:59:07 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop none
+
+== S2 (153 s, wrapper exit 8): PASS
+   ok   exit 8
+   ok   block A complete, B not begun
+   ok   run_session.sh read the STOP after the gap
+   ok   STOP by by hand: .
+   ok   the summary reads it as not naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (163) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 01:00:47 PST stop: by hand: an empty STOP file (does not name the card)
+   | 2026-11-16 01:00:47 PST SITTING-RESULT: smoke passed; train blocks complete 1 (A); card stop none
+
+== HG2 (57 s, wrapper exit 5): PASS
+   ok   exit 5
+   ok   the host got its timeout's TERM, logged it, and ended by itself
+   ok   no HUNG line (it ended before 12 s)
+   ok   STOP by run_trains: killed by its timeout
+   ok   the summary reads it as naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (6) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:59:58 PST stop: run_trains: device process killed by its timeout, ended by a signal or not started (exit 124) (names the card)
+   | 2026-11-16 00:59:58 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop yes: run_trains: device process killed by its timeout, ended by a signal or not started (exit 124)
+
+== F2 (50 s, wrapper exit 5): PASS
+   ok   exit 5
+   ok   STOP by run_trains: two failed device processes in a row
+   ok   the summary reads it as naming the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (7) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 00:59:57 PST stop: run_trains: two failed device processes in a row (the last: exit 1, 0 launches) (names the card)
+   | 2026-11-16 00:59:57 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop yes: run_trains: two failed device processes in a row (the last: exit 1, 0 launches)
+
+== G4 (31 s, wrapper exit 7): PASS
+   ok   GATE-STOP (no block began), with a device opened
+   ok   no host process after the smoke's five
+   ok   SITTING-RESULT smoke failed
+   ok   exit 7
+   ok   the runner's smoke gate failed
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (5) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   ok   the gate's rates: rate_max over rate_min above 1.03
+   | 2026-11-16 01:00:28 PST stop: run_trains: smoke gate failed (launches 26) (names the card)
+   | 2026-11-16 01:00:28 PST SITTING-RESULT: smoke failed; train blocks complete 0 (none); card stop yes: run_trains: smoke gate failed (launches 26)
+   | 2026-11-16 01:00:28 PST GATE-STOP: no block of trains.tsv began (smoke gate failed (launches 26))
+
+== G5 (31 s, wrapper exit 7): PASS
+   ok   GATE-STOP (no block began), with a device opened
+   ok   no host process after the smoke's five
+   ok   SITTING-RESULT smoke failed
+   ok   exit 7
+   ok   the runner's smoke gate failed
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (5) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 01:00:29 PST stop: run_trains: smoke gate failed (launches 26) (names the card)
+   | 2026-11-16 01:00:29 PST SITTING-RESULT: smoke failed; train blocks complete 0 (none); card stop yes: run_trains: smoke gate failed (launches 26)
+   | 2026-11-16 01:00:29 PST GATE-STOP: no block of trains.tsv began (smoke gate failed (launches 26))
+
+== K5 (52 s, wrapper exit 8): PASS
+   ok   exit 8
+   ok   a board STOP by the stopwatch or the watch
+   ok   the summary: names the card
+   ok   one sampler through the guard, ended by SIGTERM
+   ok   every host process (7) under timeout with the card lock held
+   ok   session end and the manifest exact
+   ok   no process left
+   | 2026-11-16 01:01:21 PST stop: stopwatch: board 66.00 W above 65 W on 3 distinct readings in a row (names the card)
+   | 2026-11-16 01:01:21 PST SITTING-RESULT: smoke passed; train blocks complete 0 (none); card stop yes: stopwatch: board 66.00 W above 65 W on 3 distinct readings in a row
+
+== A0 (1 s, wrapper exit 2): PASS
+   ok   run_session.sh alone: exit 2
+   ok   its refusal: refused: no /dev/et*_ops node on this host
+   ok   no et-who, no sampler, no host called
+
+== A1 (1 s, wrapper exit 2): PASS
+   ok   run_session.sh alone: exit 2
+   ok   its refusal: refused: ET_DEVICES must be one card index
+   ok   no et-who, no sampler, no host called
+
+== A2 (1 s, wrapper exit 2): PASS
+   ok   run_session.sh alone: exit 2
+   ok   its refusal: refused: no /dev/et1_ops
+   ok   no et-who, no sampler, no host called
+
+== A3 (1 s, wrapper exit 2): PASS
+   ok   run_session.sh alone: exit 2
+   ok   its refusal: refused: 2 cards on this host and ET_DEVICES unset
+   ok   no et-who, no sampler, no host called
+
+== A4 (1 s, wrapper exit 2): PASS
+   ok   run_session.sh alone: exit 2
+   ok   its refusal: refused: no card lock file
+   ok   no et-who, no sampler, no host called
+
+== WE (the watch's end-stop alone): PASS
+   ok   the end-stop's STOP within 2 s
+   ok   not naming the card
+   ok   SESSION_DONE ends the watch (rc 0)
+
+== AUDIT (desk/dry-branches-e197.tsv): PASS
+   ok   the audit table's 31 rows read the files' own lines, and every dry-branching line has a row
+   ok   every case the audit names (49) passed in this run
+
+== Z: outside the cases, /dev/et* holds 0 entries; ok
+
+DESKTEST-REALPATH-E197 401 of 401 PASS

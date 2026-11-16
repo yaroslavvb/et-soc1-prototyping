@@ -1,0 +1,73 @@
+# E197 kit (Q185, lane kit-e197; re-run by Q191's lane fix-e197 after the verifier's fixes, and by Q191's lane fix2-e197 after the second verifier's): the rest rule's desk test, bash tools/claims-v3/e197/rb/selftest_rest_e197.sh <scratch> <the real-path test's scratch>
+# run at 2026-11-16 01:03:20 PST on aifoundry2 (Ubuntu 24.04; /usr/bin/python3 3.12.3) inside W/nodev.sh through the round's CPU slot; paths masked as <lab clone>, <scratch>, <lane work>, <W>, /home/<login>; desk checks of code, nothing measured, no card, no device, no box reached; every watt, degree and rate a stand-in's arbitrary test value
+E197 rest rule desk test, 2026-11-16 01:03:20 PST, GNU date; rest_rule_e197.sh sha256 7a8bc5b54d3b210d...
+
+== R1 no session of ours
+   rule: exit 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders
+-> PASS (R1 none: rest)
+
+== R2/R3 E183's form
+   rule: exit 3: REFUSED: 10 minutes since E183's session end (2026-11-16 00:53:20 PST): E197 sitting 1 starts on a rested card, at least 40 minutes after our last real session there (E197.md 6; the kit)
+-> PASS (R2 E183 10 min: REFUSED)
+   rule: exit 0: rest: 45 minutes since E183's session end (2026-11-16 00:18:20 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R3 E183 45 min: rest)
+
+== R4 E189's form
+   rule: exit 3: REFUSED: 20 minutes since E189's session end (2026-11-16 00:43:20 PST): E197 sitting 1 starts on a rested card, at least 40 minutes after our last real session there (E197.md 6; the kit)
+-> PASS (R4 E189 20 min: REFUSED)
+
+== R5/R6 E192's form
+   rule: exit 3: REFUSED: 39 minutes since E192's session end (2026-11-16 00:24:20 PST): E197 sitting 1 starts on a rested card, at least 40 minutes after our last real session there (E197.md 6; the kit)
+-> PASS (R5 E192 39 min: REFUSED)
+   rule: exit 0: rest: 41 minutes since E192's session end (2026-11-16 00:22:20 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R6 E192 41 min: rest)
+
+== R7/R8 E193's form
+   rule: exit 3: REFUSED: 30 minutes since E193's session end (2026-11-16 00:33:20 PST): E197 sitting 1 starts on a rested card, at least 40 minutes after our last real session there (E197.md 6; the kit)
+-> PASS (R7 E193 B 30 min: REFUSED)
+   rule: exit 0: rest: 40 minutes since E193's session end (2026-11-16 00:23:20 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R8 E193 B 40 min: rest)
+
+== R9/R10 E197's own sitting 1, read by sitting 2
+   rule: exit 3: REFUSED: 15 minutes since E197's session end (2026-11-16 00:48:20 PST): E197 sitting 2 starts on a rested card, at least 40 minutes after our last real session there (E197.md 6; the kit)
+-> PASS (R9 E197 sitting 1 15 min: sitting 2 REFUSED)
+   rule: exit 0: rest: 40 minutes since E197's session end (2026-11-16 00:23:20 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R10 E197 sitting 1 40 min: rest)
+
+== R11 a dry pass skipped
+   rule: exit 0: rest: 50 minutes since E197's session end (2026-11-16 00:13:20 PST; dry sessions and blocks that opened no device skipped)
+-> PASS (R11 dry skipped: rest 50)
+
+== R12 a gate stop before the session opened a node: skipped
+   rule: exit 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders
+-> PASS (R12 no device opened by the session: skipped)
+
+== R13 a cut sitting counted at its run's latest write
+   rule: exit 3: REFUSED: 5 minutes since E197's last real session activity (no 'session end': the latest of its last line and its run's latest write) (2026-11-16 00:58:20 PST (the latest write of E197's files outside the dry paths)): E197 sitting
+-> PASS (R13 cut: REFUSED at the latest write)
+
+== R14 energy.sh's folder
+   rule: exit 3: REFUSED: 10 minutes since energy.sh's run (2026-11-16 00:53:20 PST (the latest write of an energy.sh run's folder, aifoundry3-m4-20261115)): E197 sitting 1 starts on a rested card, at least 40 minutes after our last real session t
+-> PASS (R14 energy.sh 10 min: REFUSED)
+
+== R15 the newest wins
+   rule: exit 3: REFUSED: 30 minutes since E189's session end (2026-11-16 00:33:20 PST): E197 sitting 1 starts on a rested card, at least 40 minutes after our last real session there (E197.md 6; the kit)
+-> PASS (R15 newest (E189 30 min): REFUSED)
+
+== R16 a later kit's T<T0> form (E195 before E197 on aifoundry3)
+   rule: exit 3: REFUSED: 20 minutes since E195's session end (2026-11-16 00:43:20 PST): E197 sitting 1 starts on a rested card, at least 40 minutes after our last real session there (E197.md 6; the kit)
+-> PASS (R16 E195 20 min: REFUSED)
+
+== the real-path desk test's own log: P (read)
+   rule: exit 3: REFUSED: 6 minutes since E197's session end (2026-11-16 00:57:17 PST): E197 sitting 2 starts on a rested card, at least 40 minutes after our last real session there (E197.md 6; the kit)
+-> PASS (R-P the real-path log (T1794819001), ended 6 minutes ago: exit 3)
+
+== the real-path desk test's own log: H1 (skip)
+   rule: exit 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders
+-> PASS (R-H1 the real-path log (T1794819301): skipped)
+
+== the real-path desk test's own log: D1 (skip)
+   rule: exit 0: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log or energy.sh's folders
+-> PASS (R-D1 the real-path log (T1794819001-dry): skipped)
+
+SELFTEST-REST-E197 19 of 19 PASS
