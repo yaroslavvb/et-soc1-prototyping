@@ -1,0 +1,21 @@
+passes [910, 911, 912, 913, 914, 915, 916], headline [911, 912, 913, 914, 915, 916], set aside {}, leak 0.0367 W/C (53 runs)
+R0_tie: TIED  (outside +-12 % of E99: none)
+R1_write_inversion: LIVE  (Q -0.494 W [-0.564, -0.425]; K -0.003 W [-0.046, +0.039]; a08-l08 over a44-u4 +0.178 [+0.148, +0.208])
+R1b_write_pin: SMALL  (pin -0.04 pJ [-0.34, +0.27] (TERMINATED at or above 0.7, SMALL below); from K +0.02 pJ [-0.26, +0.30])
+R2_pin_write_over_read: WRITE LOWER  (write / read -0.02 [-0.22, +0.18], SAME inside 0.7-1.4)
+R3_one_write_over_read: SAME  (write / read +0.83 [+0.79, +0.87], SAME inside 0.75-1.33)
+R4_toggle_write_over_read: WRITE HIGHER  (write / read +3.66 [+2.53, +4.80], SAME inside 0.7-1.4)
+R5_path64_write: PAYS  (beyond the pin toggles, inside the line: +1.42 pJ a bit [+1.28, +1.56]; FREE inside +-0.25, PAYS above)
+R6_path256_write: BOTH DIRECTIONS  (+3.55 pJ a bit [+3.09, +4.01], low end >= 1.0)
+R7_channel_write: PAYS  (beyond the pin toggles, per designed k_chan bit: +3.26 pJ a bit [+2.78, +3.74]; FREE inside +-0.4, PAYS above)
+R8_rate_random: rd.rnd: UNRESOLVED (late slots 0.671), wr.rnd: UNRESOLVED (late slots 0.745)  (paced / flat pJ a line: rd.rnd +1.023 [+1.008, +1.039]; wr.rnd +1.058 [+1.023, +1.092])
+R8b_rate_0x0F: rd.u4: UNRESOLVED (late slots 0.680), wr.u4: UNRESOLVED (late slots 0.745)  (paced / flat pJ a line: rd.u4 +1.041 [+0.956, +1.125]; wr.u4 +1.189 [+1.087, +1.291])
+R9_zero_line_read: REPORTED  (zero line +3906 pJ [+3836, +3976]; any line +3947 pJ [+3781, +4113])
+R10_zero_line_write: REPORTED  (bracket: against the scratchpad store +4285 pJ [+4221, +4349], against storing nothing +4890 pJ [+4783, +4996]; any line +4450 pJ [+4367, +4534] to +5055 pJ [+4956, +5154])
+R11_closure_rd: REPORTED  (random lines less the priced terms +1576 pJ [+1485, +1668])
+R11_closure_wr: REPORTED  (random lines less the priced terms +118 pJ [+10, +225])
+R12_ddr_rail: REPORTED  (W.p64x moves, W.h256x unresolved, W.tog moves, W.inv unresolved, W.c44x unresolved, W.rnd moves, R.tog still, R.rnd moves, W.tie27 moves, R.tie27 still)
+checks: FAIL: C2_polls_per_slot_paced, C3_late_slots_paced  (C1-C6 (a FAIL names what it touches; the data stand, read with it))
+sensitivity leak_0.2936: differs on nothing
+sensitivity leak_0.3803: differs on nothing
+sensitivity unfiltered: differs on nothing
