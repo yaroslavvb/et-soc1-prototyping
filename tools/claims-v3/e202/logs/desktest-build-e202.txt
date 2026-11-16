@@ -1,0 +1,53 @@
+desktest_build_e202: 2026-11-16 10:07:01 PST; c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; riscv64-unknown-elf-gcc () 15.1.0; cmake version 3.28.3
+    COMPILER host: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+    COMPILER riscv: riscv64-unknown-elf-gcc () 15.1.0
+    COMPILER cmake: cmake version 3.28.3
+    HARNESS OK: 30 files
+    E202 kernel: ELF sha256 5bab536543306c37101f1d9d2d0eba9ad64b2c64047e2f93c03051c607d402c8 (E202.md's aifoundry3 build 0f74ff0d...: reported, not gated), .text sha256 ace7bcb04536329f1d75135446049c442b9f4b65f726083f7623b959b279d82d
+    E202 warnings: 1 compiler warning line(s) in the build log
+      fetch_mnist: train-images-idx3-ubyte.gz and train-images-idx3-ubyte OK
+      fetch_mnist: train-labels-idx1-ubyte.gz and train-labels-idx1-ubyte OK
+      fetch_mnist: t10k-images-idx3-ubyte.gz and t10k-images-idx3-ubyte OK
+      fetch_mnist: t10k-labels-idx1-ubyte.gz and t10k-labels-idx1-ubyte OK
+      FETCH-MNIST OK
+      files: the trained weights decompressed from the registration's .gz, at their pin
+      files: the random weights regenerated here, at their pin
+      files: expected outputs trained train regenerated here, at their pins
+      files: expected outputs trained test regenerated here, at their pins
+      files: expected outputs random train regenerated here, at their pins
+      files: expected outputs random test regenerated here, at their pins
+      E202-FILES OK: 18 of 18 pinned files at their sha256 (MNIST fetched and checked by sha256; the trained weights from the registration's .gz; the random weights and the expected outputs regenerated here)
+      PASS selftest: rc 0, 8 OK lines
+      PASS refusal at parse: no mode: rc 2, usage printed, --out absent
+      PASS refusal at parse: --budget 9.6: rc 2, usage printed, --out absent
+      PASS refusal at parse: --passes 1001: rc 2, usage printed, --out absent
+      PASS refusal at parse: --stage xyz: rc 2, usage printed, --out absent
+      PASS refusal at parse: --debug-logits without --expect-logits: rc 2, usage printed, --out absent
+      PASS refusal at parse: an unknown option: rc 2, usage printed, --out absent
+      PASS --dry train R1 scp: rc 0, status DRY, pins OK, groups 3750, rounds 118, model_s 0.0573193
+      PASS --dry train R1 dram: rc 0, status DRY, pins OK, groups 3750, rounds 118, model_s 0.0573193
+      PASS --dry test R1 scp: rc 0, status DRY, pins OK, groups 625, rounds 20, model_s 0.0158298
+      PASS --dry train R16 scp: rc 0, status DRY, pins OK, groups 60000, rounds 1875, model_s 0.81796
+      PASS --dry train R96 scp: rc 0, status DRY, pins OK, groups 360000, rounds 11250, model_s 4.8701
+      PASS --dry train R96 dram: rc 0, status DRY, pins OK, groups 360000, rounds 11250, model_s 4.8701
+      PASS --dry R1000: the guard's model over 6 s: model_s 50.6607
+      PASS --ref trained train: rc 0, status PASS, labels 0, tiles 0
+      PASS --ref trained test: rc 0, status PASS, labels 0, tiles 0
+      PASS --ref random train: rc 0, status PASS, labels 0, tiles 0
+      PASS --ref random test: rc 0, status PASS, labels 0, tiles 0
+      PASS --ref negative control (trained weights, random's expected file): rc 1, status FAIL, label mismatches 27
+      PASS a wrong pin refused: rc 2, status REFUSED, pins FAIL
+      HOST-BEHAVIOUR OK: 20 of 20
+    E202-BUILT rc=0
+PASS B1 the real build, AS IT IS: E202-BUILT rc=0 (44 s)
+PASS B1 the kernel's .text at E202.md's pin ace7bcb0... on this desk's toolchain
+PASS B1 the files: MNIST FETCHED into an empty folder and checked by sha256; 18 of 18 at their pins
+PASS B1 the host by its behaviour: 20 of 20 (self-test, six refusals at parse, seven --dry plans, four --ref, the negative control, a wrong pin)
+record: 5bab536543306c37 ace7bcb04536329f 99dc7f22685729fc
+PASS B1 the build record: the host's and the ELF's sha256 as built
+PASS B1 the harness with the built kernel (step 6's box read): HARNESS OK: 33 files
+PASS B2 a changed source: refused at the harness, nothing built
+PASS B3 a different kernel: built, refused at the .text gate, no record (E202-BUILD-FAILED: the kernel's .text sha256 43a566db5be5fa5c9e194706378cbb4b178f74dba2810)
+PASS B4 a second start: the files kept at their pins, built again
+PASS B5 a wrong pin: the files step refuses, no record (  E202-FILES-FAILED: the trained weights are not at the pin 0000000060a20fa5592b5ec095b251cfad4cfacb)
+DESKTEST-BUILD-E202 10 of 10 PASS

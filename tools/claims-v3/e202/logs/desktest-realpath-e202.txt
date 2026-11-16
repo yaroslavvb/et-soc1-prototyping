@@ -1,0 +1,44 @@
+inside the sandbox: hostname aifoundry3; /dev/et*: -rw-rw-r-- /dev/et0_mgmt -rw-rw-r-- /dev/et0_ops ; processes visible: 5
+realpath_e202: 2026-11-16 10:07:58 PST, /usr/bin/python3 3.12.3
+PASS ST the sandbox: host name aifoundry3, exactly two regular files /dev/et0_mgmt and /dev/et0_ops, a private PID namespace: 2 processes visible
+PASS ST the stand-in tree's harness with the built kernel: HARNESS OK: 33 files
+PASS D the dry pass in step 8's form: smoke gate passed, 4 bursts done PASS, every line DRY, no stand-in called: rc 0
+PASS P the session ran whole: runner.rc 0, no stop, 12 bursts: rc 0, stop None
+PASS P THE ORDER as registered, R 96 each, the dram pair REPORTED
+PASS P the session's steps in order, in the kits' log form: 9 of 9
+PASS P no line marked DRY on the real path
+PASS P what reached the card's tools: config twice (start, end), ONE sampler (sample --seconds 3300 --every-ms 100), 17 host processes (5 smoke + 12 bursts), nothing else: config 2, sampler 1, host 17
+PASS P et-who read before the first card command, before each of the 17 host processes and before the closing read (19): 19 et-who calls
+PASS P every host argv the registered one (smoke: R 1, the four with --debug-logits, ACC on the test split with --true-labels; bursts: R 96, no debug), every input pinned
+PASS P THE HOST'S RESULT read from its own --out file: every burst's stdout holds its JSON line split by a runtime line, every host-raw.json whole and PASS: 12 of 12
+PASS P the sampler's split lines lost, never misread; the session's telemetry and the manifest
+PASS P while it ran: card 0's lock held (flock -n refused), step 10's pattern matched the real wrapper and no decoy, k6's ours_live counted it: pattern '(^|[ /])session_e202\\.sh( |$)': ['bash tools/claims-v3/e202/session_e202.sh']
+PASS P the collection on the real path's files: COPY-BACK EXACT, 12 bursts reduced (the unchanged reducer), the scrub clean: COLLECTED e202-P-data: 12 bursts reduced; 145 files in SHA256SUMS; the scrub clean (no /home/ path, no login)
+PASS P each burst's reduced J over idle against the energy the stand-in card injected (within 3% + 0.33 W/C x (t + 7 s) / J): trained-s/b1 -2.5%; random-sc/b1 -2.5%; random-sc/b2 +2.3%; trained-s/b2 +2.0%; trained-s/b3 +0.9%; random-sc/b3 +0.1%; random-sc/b4 -0.8%; trained-s/b4 -1.7%; trained-d/b1 -1.9%; random-dr/b1 -2.5%; random-dr/b2 -2.3%; trained-d/b2 -3.2%
+PASS P the frozen scorer on the collected real-path data: the gate (scp), every rule a word, the dram pair REPORTED: {"E202-S1": "PASS", "E202-S1T": "PASS", "E202-S2": "PASS", "E202-S2T": "PASS", "E202-S3": "PASS"}
+PASS P the rest rule reads the real session's log (40 minutes not yet passed: refused): REFUSED: 0 minutes since E202's session end (2026-11-16 10:16:39 PST): E202's first card command comes on a rested card, at least 40 minutes
+PASS R1 refused before any card command (the host's name is 'aifoundry2'): rc 2, card calls 0
+PASS R2 refused before any card command (the card nodes are): rc 2, card calls 0
+PASS R3 refused before any card command (the synced files differ from harness-e202.json): rc 2, card calls 0
+PASS R4 refused before any card command (the build record was not written today): rc 2, card calls 0
+PASS R5 refused before any card command (the host differs from today's build record): rc 2, card calls 0
+PASS R6 refused before any card command (the input expect-trained-test.mlpe is not at its pin): rc 2, card calls 0
+PASS R7 refused before any card command (card 0's lock is held): rc 2, card calls 0
+PASS R8 refused before any card command (a holder or a foreign device process): rc 2, card calls 0
+PASS R9 a desk-test variable in the environment: refused, no device opened (the runner's own refusal): rc 2
+PASS G1 the start config at TDP 5 W: GATE-STOP, no sampler, no host process: rc 3
+PASS G2 a dead sampler: six attempts through the guard, GATE-STOP, no host process: rc 3
+PASS G3 the sampler quiet in anchor 1: THE STALE LINE stops it, no host process, GATE-STOP, the closing read: rc 3, stop no telemetry line for 1.01 s (older than 1 s)
+PASS S1 board 66 W in burst 1: STOP; the host finishes; its 10 s rest after whole; nothing after; the closing read: bursts ['trained-scp/b1'], rest after 10000 ms
+PASS FB T-scp's smoke fails: the dram pair scored; a holder before burst 3: STOP; the closing config NOT sent (et-who not free): stage dram, bursts ['trained-dram/b1', 'random-dram/b1'], closing not read: et-who does not read the card free (2 holder line(s) of another login, 0 other users' device process(es))
+PASS K1 a launch that does not finish (the host's own line): STOP, nothing further: stop K1: burst 1 (trained-scp/b1)'s launch did not finish (rc 1)
+PASS SG no pair passes the smoke (T-scp and T-dram core FAIL; a host that crashes is K1's since fix-e202, case K1b): GATE-STOP, no burst, the closing read: rc 3
+PASS W1 refused before any card command (a holder or a foreign device process (et-who unreadable (rc 1, nothing on its stdout))): rc 2, card calls 0
+PASS W2 et-who rc 0 with neither a holder line nor its no-holder sentence from its 9th read: STOP before burst 3; the closing config NOT sent: bursts ['trained-scp/b1', 'random-scp/b1'], closing not read: et-who does not read the card free (et-who unreadable (rc 0, but neither a holder line nor its no-holder sentence))
+PASS K1b a host that dies mid-launch in burst 1 (rc 134, no --out record): K1, nothing further: stop K1: burst 1 (trained-scp/b1)'s launch did not finish (rc 134; no record)
+PASS CR a crash of the runner in burst 1: 'CRASH: <type>: <message>' before the closing, queue.json's crash, the closing read, session end, the manifest, runner.rc 1 (never 0): rc 1, crash NotADirectoryError
+PASS T the operator's STOP file in burst 2's rest before its host: no host process for it (a stop starts nothing), nothing further, the closing read: bursts ['trained-scp/b1'], burst 2: stop: the operator's stop (the STOP file in the session's directory), stop the operator's stop (the STOP file in the session's directory)
+PASS SIG SIGTERM to the runner in anchor 1: a registered stop, never a kill: no host process, the closing, the manifest: rc 3, stop the operator's stop (signal 15 to the runner)
+PASS Z no stand-in, sampler or session process left in the sandbox: bwrap
+PASS AUDIT every DRY branch (18 lines) has a row naming its real-path cases, every row's line is the file's own, every named case passed in this run: missing [], stale [], cases not passed []
+DESKTEST-REALPATH-E202 41 of 41 PASS

@@ -1,0 +1,16 @@
+E202's ledger v3 note (v3note_e202.py): ledger v3's forecast of E202's load, per pass, aifoundry3 card 0, 600 MHz; die 50 C [48, 60] (v3's rule 5), 1.5 ms a launch; REPORTED beside v2, the verdicts stay v2's; /usr/bin/python3 3.12.3 wrote the files (named)
+
+config         J over idle [band]         J with rest, v3 [band]     J with rest, v2 [band]       v3/v2-1
+random-dram    0.5154 [0.4159, 0.8204] 1.2584 [0.9460, 2.1944] 1.3140 [0.9799, 2.1940]  -0.0423
+random-scp     0.5119 [0.4202, 0.6532] 1.2548 [0.9504, 2.0116] 1.3104 [0.9843, 2.0112]  -0.0424
+trained-dram   0.4977 [0.3998, 0.8098] 1.2401 [0.9295, 2.1827] 1.2956 [0.9634, 2.1823]  -0.0429
+trained-scp    0.4942 [0.4041, 0.6427] 1.2365 [0.9339, 2.0000] 1.2920 [0.9678, 1.9996]  -0.0430
+
+per image (uJ) and per multiply-add issued (pJ), over idle / with the card at rest (v3):
+  random-dram    8.5896 / 20.9732 uJ   0.7701 / 1.8804 pJ
+  random-scp     8.5318 / 20.9138 uJ   0.7649 / 1.8751 pJ
+  trained-dram   8.2947 / 20.6676 uJ   0.7437 / 1.8530 pJ
+  trained-scp    8.2366 / 20.6079 uJ   0.7385 / 1.8477 pJ
+
+checks: J over idle at the point v3 - v2 worst 0 J; J over idle's band and the seconds v3 / v2 (six digits) - 1 worst 1.48e-06; given-seconds readings v3 - v2 worst 0 J a pass
+rule 7 on aifoundry3: zero (a pinned card)

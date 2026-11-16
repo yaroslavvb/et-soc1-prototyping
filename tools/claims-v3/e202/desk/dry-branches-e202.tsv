@@ -1,0 +1,19 @@
+file	line	dry_does	real_does	real_cases
+tools/claims-v3/e202/run_e202.py	self.dry = a.dry	a dry session (the doubles, every line DRY)	a real session	P
+tools/claims-v3/e202/run_e202.py	if self.dry:	E202_FAKE_SCHED: the doubles' launch schedule in the session's directory	no variable set; the stand-ins read their case file	P,R9
+tools/claims-v3/e202/run_e202.py	w = ("DRY " + words) if self.dry and not words.startswith("session start") else words	every line marked DRY (every rest rule skips it)	plain lines in the kits' form (every rest rule counts them)	P
+tools/claims-v3/e202/run_e202.py	if self.dry:	the config double	timeout 10 bash tools/claims-v3/e128/ettelem_guard.sh config (the start and the closing reads)	P,G1,FB
+tools/claims-v3/e202/run_e202.py	if self.dry and self.a.double in ("alt", "base"):	energy_stub.py's sampler	bash <guard> sample --seconds 3300 --every-ms 100 (ONE sampler)	P,G2,G3
+tools/claims-v3/e202/run_e202.py	if self.dry:	the inject sampler double	the guard's sample, as above	P,G2
+tools/claims-v3/e202/run_e202.py	if self.dry:	the et-who double	timeout 20 et-who (before the first card command, each host process and the closing read)	P,R8,FB,W1,W2
+tools/claims-v3/e202/run_e202.py	if self.dry:	the host double	timeout 10 build/e202mnist/host/mnistmlp_host (the smoke, the bursts)	P,K1,SG,S1,K1b,CR
+tools/claims-v3/e202/run_e202.py	if not self.dry:	skipped	the host's name aifoundry3 and exactly /dev/et0_mgmt and /dev/et0_ops	R1,R2,P
+tools/claims-v3/e202/run_e202.py	if self.dry:	returns: no build, files or pins read	today's build record, the host and ELF at it, the .text pin, the 18 inputs at their pins	R4,R5,R6,P
+tools/claims-v3/e202/run_e202.py	if not self.dry:	skipped (no other user's process can be made at the desk)	ps: other users' device processes counted	P,R8
+tools/claims-v3/e202/run_e202.py	run = {"preset": key, "card": C.BOX, "dry": self.dry, "lock": C.LOCK if not self.dry else "DRY", "build": C.BUILD,	run.json: dry true, lock DRY	run.json: dry false, the card lock's path	P
+tools/claims-v3/e202/run_e202.py	"host_cpu_ext_s": cpu, "stub_card": self.a.double if self.dry else None}	run.json: the stub card	run.json: no stub card	P
+tools/claims-v3/e202/run_e202.py	"result_read": rwhy or "the host's own --out file", "dry": self.dry}, fo, indent=1)	burst.json: dry true	burst.json: dry false	P
+tools/claims-v3/e202/run_e202.py	tag = " DRY" if self.dry else ""	the session start line ends DRY	the session start line plain	P
+tools/claims-v3/e202/run_e202.py	result = {"t0": a.t0, "dry": self.dry, "smoke": self.smoke_res, "bursts": self.bursts}	queue.json: dry true	queue.json: dry false	P
+tools/claims-v3/e202/run_e202.py	lockp = os.path.join(self.out, "dry.lock") if self.dry else C.LOCK	a lock file in the session's directory	card 0's lock /run/lock/etsoc-shire0.lock (flock -n, held to the end)	P,R7
+tools/claims-v3/e202/run_e202.py	if not a.dry:	skipped	the desk-only arguments and any desk-test variable refused (no device opened)	R9

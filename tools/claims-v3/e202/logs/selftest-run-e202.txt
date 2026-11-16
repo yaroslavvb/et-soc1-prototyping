@@ -1,0 +1,56 @@
+selftest_run_e202: 2026-11-16 08:24:41 PST, /usr/bin/python3 3.12.3, scratch <S>
+PASS H0 the harness reads OK before the cases: HARNESS OK: 30 files
+PASS D0 the dry pass in step 8's form: rc 0, bursts ['trained-scp/b1', 'random-scp/b1', 'trained-dram/b1', 'random-dram/b1'], 15.7 s, every line DRY
+PASS D1 THE ORDER: T Z Z T T Z Z T scored, then T Z Z T dram REPORTED, R 96, order indices 1-12: rc 0, 12 bursts, 37.7 s
+PASS D1 the burst's files: host-raw.json is the host's own --out record; host.json the adapter's: passes 96, reps_done 1
+PASS D1 the smoke: five processes in the registered order, labels kept, ACC's accuracy recorded: 
+PASS D1 the closing: et-who read, then the closing config read: read
+PASS G1 the lock held: refused, no device opened: rc 2
+PASS G2 a holder of another login: refused, no device opened: rc 2
+PASS G3 the start config off TDP 0 W: GATE-STOP, no sampler: rc 3
+PASS G4 a runtime line inside the config line: no reading, GATE-STOP: rc 3
+PASS G5 a dead sampler: six attempts, GATE-STOP, no launch: rc 3, 13.8 s
+PASS S1 board 66 W in burst 1: STOP, the host finishes, its rest after runs whole, no burst after, the closing read: bursts ['trained-scp/b1'], rest after 1000 ms
+PASS S2 minshire[0] 70 C in the smoke: GATE-STOP (a stop during the smoke), no burst: rc 3, stop minshire[0] 70 C at or above 70 C
+PASS S3 THE CLOCK: one sample off in the smoke (outside a burst: nothing set aside), a second in burst 3: set aside, STOP: bursts ['trained-scp/b1', 'random-scp/b1', 'random-scp/b2'], set aside ['random-scp/b2'], stop a second sample off 600 MHz in the session (800 MHz)
+PASS S3b one sample off in burst 2 only: burst 2 set aside (burst.json), the session goes on: set aside ['random-scp/b1']
+PASS S4 the sampler goes quiet: no line for 1 s, STOP; the closing read: rc 0, stop no telemetry line for 1.03 s (older than 1 s), bursts 4
+PASS S5 lines 1.5 s old at their arrival: STOP: rc 0, stop a telemetry line 1.501 s old at its arrival (the line is older than 1 s)
+PASS S6 a runtime line inside every 25th sampler line: those lines lost, never misread; the session runs: rc 0, bursts 4
+PASS H1 a holder appears before burst 3: STOP before it; the closing config NOT read (et-who not free): bursts ['trained-scp/b1', 'random-scp/b1'], closing not read: et-who does not read the card free (2 holder line(s) of another login, 0 other users' device process(es))
+PASS W1 et-who's helper refused (rc 1, nothing on stdout) before the first card command: refused, no device opened: rc 2
+PASS W2 et-who rc 0 with neither a holder line nor its no-holder sentence: refused, no device opened: rc 2
+PASS W3 et-who rc 1 with a line of text from its 9th read (before burst 3): STOP before burst 3; the closing config NOT read: bursts ['trained-scp/b1', 'random-scp/b1'], closing not read: et-who does not read the card free (et-who unreadable (rc 1))
+PASS W4 et-who unreadable at the closing only (its 19th read): every burst ran; the closing config NOT read: bursts 12, closing not read: et-who does not read the card free (et-who unreadable (rc 1, nothing on its stdout))
+PASS X1 a crash inside burst 1 (its folder cannot be made): 'CRASH: <type>: <message>' before the closing, queue.json's crash, the closing read, session end and the manifest, rc 1: rc 1, crash NotADirectoryError
+PASS X2 a crash inside the smoke: CRASH named, no host process, the closing read, rc 1: rc 1, closing read
+PASS X3 the crash's session collected: COPY-BACK EXACT, named a crash's record (never a gate stop's), the facts carry the crash and runner.rc 1: COLLECTED e202-x1-crash-data: a crash's record (the runner crashed, no burst ran: NotADirectoryError; session/queue.json holds it); 38 files in SHA256SUMS; the 
+PASS K1b a host that dies mid-launch in burst 1 (rc 134, no --out record): K1, nothing further: stop K1: burst 1 (trained-scp/b1)'s launch did not finish (rc 134; no record)
+PASS K1c the first smoke process leaves no --out record after its device opened: K1, GATE-STOP, no burst: rc 3, stop K1: smoke T-scp's launch did not finish (rc 0; no record)
+PASS CL our sampler ignores every SIGTERM: left running (no kill), the closing config NOT read: rc 3, closing not read: our sampler did not stop on SIGTERM (it may still hold the single-open management node)
+PASS F1 T-scp's smoke fails its core checks: the dram pair is scored (the fallback), T Z Z T T Z Z T, nothing REPORTED: bursts ['trained-dram/b1', 'random-dram/b1', 'random-dram/b2', 'trained-dram/b2', 'trained-dram/b3', 'random-dram/b3', 'random-dram/b4', 'trained-dram/b4']
+PASS F2 no pair passes (T-scp and Z-dram core FAIL; a missing record is K1's since fix-e202, case K1c): GATE-STOP, no burst: rc 3
+PASS F3 a logits-only failure in T-scp and Z-scp: the gate passes, scp scored, the failure recorded: stage scp
+PASS F4 trained-scp b2's host checks fail: that arm ends (b3, b4 not run), random-scp and the dram pair go on: 10 bursts
+PASS K1 a launch that does not finish: STOP (the kit's K1), nothing further: stop K1: burst 1 (trained-scp/b1)'s launch did not finish (rc 1)
+PASS R1 THE R RULE per arm: Z-scp's smoke 2.2 x slower gives random-scp R 80, trained-scp keeps R 96: R {'trained-scp': 96, 'trained-dram': 96, 'random-scp': 80, 'random-dram': 96}
+PASS R2 no allowed R under 6 s for trained-scp: its bursts not run (no burst for the arm), random-scp's run: R {'trained-scp': None, 'trained-dram': 96, 'random-scp': 96, 'random-dram': 96}
+PASS R3 THE HOST'S TIMEOUT CAP (fix-e202, finding 7): Z-scp's 32.5 ms round gives the registered rule's R 48 at 5.72 s, past the host's 6 s timeout less 0.5 s: random-scp runs at R 16; trained-scp keeps R 96: R {'trained-scp': 96, 'trained-dram': 96, 'random-scp': 16, 'random-dram': 96}, rule 48
+PASS C1 THE CAP (25 s here): no burst starts after it: 8 bursts before the cap
+PASS C2 THE END BOUND (35 minutes here 120 s): a burst whose longest span would pass it does not start: 4 bursts
+PASS C3 THE DIE GATE held at 62 C after burst 1: each later burst waits its 5 s (here), skipped, no data: bursts ['trained-scp/b1']
+PASS W1 the window's last end too close (its longest span and 90 s do not fit): the smoke does not start, GATE-STOP, no burst: rc 3
+PASS N1 a desk-only argument without --dry: refused, no device opened: refused, no device opened: --idle-before change the registered session and are read with --dry only
+2026-11-16 08:32:55 
+PASS N2 a desk-test variable without --dry: refused, no device opened: refused, no device opened: a desk-test variable is set (E202_FAKE_SCALE) but --dry is not
+2026-11-16 08:32:55 PST sessio
+PASS N3 the REAL path on the desk: refused before anything (the host's name), no lock, no device: PST refused, no device opened: the host's name is 'aifoundry2', not aifoundry3
+PASS E2E the session (alt card, registered rests, two bursts of each scored configuration): rc 0, 97.6 s
+PASS E2E the collection: COPY-BACK EXACT, every burst reduced by the unchanged reducer, SHA256SUMS: COLLECTED e202-e2e-data: 4 bursts reduced; 73 files in SHA256SUMS; the scrub clean (no /home/ path, no login)
+PASS E2E each burst's reduced J over idle against the energy the card injected, within TOL = 3% + 0.33 W/C x (t + 7 s) / J: trained-scp/b1 -3.13% (tol 10.0%); random-scp/b1 -3.20% (tol 9.7%); random-scp/b2 +2.32% (tol 9.7%); trained-scp/b2 +2.20% (tol 10.0%)
+PASS E2E the frozen scorer on the collected data reads the gate and every rule (S1 and S3 PASS by construction: t_k is the point and the injected J over idle the forecast's): {"E202-S1": "PASS", "E202-S1T": "PASS", "E202-S2": "PASS", "E202-S2T": "PASS", "E202-S3": "PASS"}
+PASS E2E the ledger v3 note's REPORTED readings (v3note_e202.py --score, fix-e202 finding 3): S1, S1T and S2 through v3's route equal the frozen scorer's to 1e-5; S2T-v3 read: rc 0, trained-scp S2T-v3 -0.00802151; random-scp S2T-v3 -0.00748929
+PASS E2E the session facts: the scored stage, R, the peaks and the clock count: samples 972, peak 40.56 W / 59 C, minutes 1.62
+PASS E2E a gate stop is refused under docs/reports/data/ (its record goes under docs/reports/gate-stops/): COPY-BACK EXACT: every file of the box's MANIFEST.sha256 at its sha256, nothing else but runner.rc
+COLLECT-REFUSED: a session that ran no bu
+SELFTEST-RUN-E202 51 of 51 PASS
