@@ -1,0 +1,29 @@
+# E200 kit (Q192, lanes kit-e200 and fix-e200; run again by fix-e200 on the kit as fixed before the land): the device-command preflight, bash tools/claims-v3/e200/preflight_e200.sh (dmcmd_audit_v2 with the table v2, no --allow, no --except)
+# run from 2026-11-16 06:20:23 PST on aifoundry2 (Ubuntu 24.04; /usr/bin/python3 3.12.3), from the lab clone at the kit's state, through the round's CPU slot inside the no-device sandbox (no /dev/et* device node; some tests bind regular files there in sandboxes of their own), while THE QUIET DESK FLAG was absent (watched every 2 s); paths masked as <lab clone>, <scratch>, <lane work>, <W>, <session scratch>, /home/<login>; desk checks of code, nothing measured, no card, no device command, no other box; every watt, degree, clock and rate a stand-in's arbitrary test value
+dmcmd_audit: GO (12 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/e200/ettelem_guard_e200.sh:30: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e200/ettelem_guard_e200.sh:30: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e200/ettelem_guard_e200.sh:30: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e200/ettelem_guard_e200.sh:30: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e200/ettelem_guard_e200.sh:30: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e200/ettelem_guard_e200.sh:43: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e200/ettelem_guard_e200.sh:43: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e200/ettelem_guard_e200.sh:43: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e200/ettelem_guard_e200.sh:43: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/e200/ettelem_guard_e200.sh:43: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem-dv2
+tools/claims-v3/e200/ettelem_guard_e200.sh:43: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem-dv2
+tools/claims-v3/fwgate/fwgate.py:69: name: GET_MODULE_FIRMWARE_REVISIONS [READ, pmic read] ok
+note: tools/claims-v3/e200/session_e200.sh:232: 'sample' goes through tools/claims-v3/e200/ettelem_guard_e200.sh, which is scanned: its own lines are what it sends
+note: tools/claims-v3/e200/session_e200.sh:307: 'config' goes through tools/claims-v3/e200/ettelem_guard_e200.sh, which is scanned: its own lines are what it sends
+note: tools/claims-v3/e197/proposal/src/run_session.sh:178: 'sample' goes through tools/claims-v3/e200/ettelem_guard_e200.sh, which is scanned: its own lines are what it sends
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      2 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      2 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_FIRMWARE_REVISIONS              READ         pmic read      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok

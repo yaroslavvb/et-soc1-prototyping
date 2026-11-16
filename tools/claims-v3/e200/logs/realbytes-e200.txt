@@ -1,0 +1,46 @@
+# E200 kit (Q192, lanes kit-e200 and fix-e200; run again by fix-e200 on the kit as fixed before the land): the real-bytes parser test, /usr/bin/python3 -I -B tools/claims-v3/e200/desk/realbytes_e200.py <lab clone>
+# run from 2026-11-16 06:20:22 PST on aifoundry2 (Ubuntu 24.04; /usr/bin/python3 3.12.3), from the lab clone at the kit's state, through the round's CPU slot inside the no-device sandbox (no /dev/et* device node; some tests bind regular files there in sandboxes of their own), while THE QUIET DESK FLAG was absent (watched every 2 s); paths masked as <lab clone>, <scratch>, <lane work>, <W>, <session scratch>, /home/<login>; desk checks of code, nothing measured, no card, no device command, no other box; every watt, degree, clock and rate a stand-in's arbitrary test value
+ok   E197's lab runner at its registered sha256 (91c46f4e...)  [91c46f4e8a28a250]
+ok   E200's runner made by W1 (2 lines out, 2 in) reads E200's runner sha256 (8774027b...)  [8774027b4bba78c6]
+ok   the parse loop taken from the registered file's own syntax tree: lines 204-212
+    | for line in (text or "").splitlines():
+    |             if line.startswith("REGFILE "):
+    |                 try:
+    |                     rec = json.loads(line[len("REGFILE "):])
+    |                 except ValueError:
+    |                     continue
+    |                 rec.update({"host": host, "block": blk, "rc": rc, **info})
+    |                 jwrite("runs.jsonl", rec)
+    |                 recs.append(rec)
+ok   a clean REGFILE line in the host's form: kept, its fields whole, written to runs.jsonl
+ok   E191's committed smoke stdout (aifoundry1, 1a4bc1e3) at its data directory's SHA256SUMS  [8a232ca704584edd]
+ok   its runtime bytes, inside the ledger host's line: 'Opening device 1\n' at byte 217 of the line
+ok   the committed bytes as they are: no REGFILE line, nothing kept, no exception (expected: 0)  [0]
+ok   E191's runtime line transplanted INSIDE the REGFILE line, at every interior offset 1..715: the registered parser DROPS the launch (expected: 0 of 1 kept at each)  [kept at 0 of 715 interior offsets]
+ok   at offset 0 (the runtime line before the host's line, on its own line): kept (expected 1)
+ok   after the host's newline (offset 716): kept (expected 1)
+ok   E194's committed host stdouts on THIS CARD (72514ce5: 32 files, the ledger and sparse-parity hosts) at their data directory's SHA256SUMS  [32]
+ok   aifoundry2's runtime wrote NO byte on those hosts' stdout: every line the host's own (a whole JSON object; the ledger self-test's SELFTEST lines, a run that opens no device) (expected: 0 other lines); the parser keeps nothing from them and raises nothing  [31 host lines, 5 self-test lines, 0 other, 0 kept]
+ok   E190 arm A's committed device-process stdouts on THIS CARD (84 proc-NN.out, rgm136's host, ET_DEVICES unset) at their data directory's SHA256SUMS  [84]
+ok   aifoundry2's runtime wrote NO byte on those 84 processes' stdout: every line a whole SPARSITY line (expected: 0 other lines); the parser keeps nothing and raises nothing  [1663 host lines, 0 other, 0 kept]
+ok   aifoundry2's runtime prints its device table on STDERR (E194's committed host stderr of the 31 runs that opened the device: a table in each)  [31]
+ok   E193's four committed device-stdout files (aifoundry3, Sun 15 Nov 2026) at their data directories' SHA256SUMS
+ok   aifoundry3's runtime wrote NO byte on the host's stdout in those four whole device processes: every line the host's own and whole (expected: 0 other lines)  [30 host lines, 0 other]
+ok   E193's committed launch records: 2,808 and 1,350 (its plans', read whole by a parser that raises on a split host line)  [2808, 1350]
+ok   E192's committed launch records: 3,255 (read whole by run_block.py, which raises on a split INTBITS line)  [3255]
+ok   aifoundry3's runtime prints its device table on STDERR (E192's committed device stderr: one table an open)  [706 tables]
+ok   a runtime line BETWEEN two REGFILE lines: both kept (expected 2)
+ok   a runtime line INSIDE one of two: that one dropped, the other kept (expected 1)
+ok   a newline-less runtime fragment glued BEFORE a line: that line dropped (expected 1 of 2)
+ok   a newline-less runtime fragment glued AFTER a line's closing brace: that line dropped (expected 1 of 2)
+ok   thirteen clean lines (a train process's): 13 kept
+ok   main.cpp: each REGFILE line is ONE printf ending in its newline, then fflush(stdout)
+ok   main.cpp: the device is opened (the Session constructor) before the first launch's line
+ok   the longest REGFILE line the format can print (the registration's 34 kinds, every numeric field at its widest): 1554 B, at most PIPE_BUF (4096 B): one atomic write(2) to a pipe  [1554]
+ok   the typical line: 716 B
+
+E197's own outputs on aifoundry3: NOT RUN (none committed at this HEAD: E197 has not run)
+
+THE KIT'S READING: E200's runner keeps E197's parse loop line for line (W1 touches two window words only); it drops a REGFILE line that a runtime print splits (E191's bytes, every interior offset) and one with a newline-less fragment glued to it; THIS CARD's runtime wrote no byte on a host's stdout in any committed output (E194's 32 host stdouts, E190 arm A's 84 process stdouts; its device table goes to stderr), nor did aifoundry3's; E197's host writes each line in one write of at most PIPE_BUF bytes after the device is open, so no print can land inside it. A split cannot occur on aifoundry2 by these readings: no amendment is proposed. The residual (a newline-less runtime fragment glued to a line, which no committed output shows) fails safe: in the smoke the runner's gate stops the sitting before any train (no data; the real-path test's SP1 runs it end to end), in a train that one process gives no value (a unit lost; two in a row stop the sitting); never a wrong datum.
+
+REALBYTES-E200 29 of 29 PASS

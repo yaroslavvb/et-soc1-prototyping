@@ -1,0 +1,47 @@
+# E200 kit (Q192, lanes kit-e200 and fix-e200; run again by fix-e200 on the kit as fixed before the land): the desk test of THE REBOOT GATE as the runbook calls it (fwgate in its own desk mode), bash tools/claims-v3/e200/rb/selftest_fwgate_e200.sh <scratch>
+# run from 2026-11-16 06:20:13 PST on aifoundry2 (Ubuntu 24.04; /usr/bin/python3 3.12.3), from the lab clone at the kit's state, through the round's CPU slot inside the no-device sandbox (no /dev/et* device node; some tests bind regular files there in sandboxes of their own), while THE QUIET DESK FLAG was absent (watched every 2 s); paths masked as <lab clone>, <scratch>, <lane work>, <W>, <session scratch>, /home/<login>; desk checks of code, nothing measured, no card, no device command, no other box; every watt, degree, clock and rate a stand-in's arbitrary test value
+E200 fwgate desk test, 2026-11-16 06:20:13 PST, Python 3.12.3; inside its sandbox: host aifoundry2, /dev/et*: 0 entries
+
+== FW1. step 4: fwgate's look reads NEEDS-READ at the desk (no device); the box FREE
+    | NEEDS-READ: aifoundry2 card 0 booted 2026-11-16 05:20:13 PST; its newest firmware read of record is E72's firmware read of 2026-10-27 14:59:39 PDT, before the boot: read it again (fwgate.py read)
+HOLDER-RULE-ONE-CARD: FREE after 0 s of polls
+    identity (fwgate look, no device): NEEDS-READ: aifoundry2 card 0 booted 2026-11-16 05:20:13 PST; its newest firmware read of record is E72's firmware read of 2026-10-27 14:59:39 PDT, before the boot: read it again (f
+[s05_look_e200] aifoundry2: FREE (nothing holds card 0; no device process of anyone's; no session or job of ours); the identity by fwgate's look: NEEDS-READ (step 7 reads the firmware once, after the rest, as the sitting
+-> PASS (FW1 the look: NEEDS-READ, FREE, nothing sent)
+
+== FW2. step 7: the stamp, fwgate's read EQUAL into step 7's folder (one CLI call, the lock held), then the config read
+[s09_reads_e200] sitting 1: rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log, runs/*/run.log, run/run.log or energy.sh's folders, in any tree of ours on aifoundry2; the plan: full; the firmware identity:
+  release  record 1.4.0    this 1.4.0    EQUAL
+  bl1      record 0.22.0   this 0.22.0   EQUAL
+  bl2      record 0.22.0   this 0.22.0   EQUAL
+  pmic     record 1.5.0    this 1.5.0    EQUAL
+  mm       record 0.25.1   this 0.25.1   EQUAL
+  wm       record 0.25.1   this 0.25.1   EQUAL
+  machm    record 0.25.1   this 0.25.1   EQUAL
+EQUAL: aifoundry2 card 0 at 2026-11-16 06:20:14 PST matches E72's read of 2026-10-27 14:59:39 PDT in all seven fields: record fwgate-aifoundry2-c0-20261116-062014.json
+[s09_reads_e200] aifoundry2 card 0: the firmware identity read (fwgate EQUAL); config TDP 65 W / 65 C / 600 MHz at rest, minion_mv 519, identity /dev/et0_mgmt and device ID 0 (read, nothing set), kept in build/e200/first-s1-1794838813; the 
+-> PASS (FW2 the read EQUAL, its record in step 7's folder, one CLI call exactly as fwgate writes it with the card's lock held, one config read kept there)
+
+== FW3. step 7 again: no second read on this boot; fwgate's guard over the folder; the config read again
+-> PASS (FW3 again: the read not repeated (one CLI call in all), the stamp kept)
+
+== FW4. step 9: fwgate's guard over step 7's folder reads the identity ok; launched (the wrapper then meets this sandbox's missing card nodes)
+identity: aifoundry2 card 0 booted 2026-11-16 05:20:13 PST, before the firmware read of 2026-11-16 06:20:14 PST (fwgate-aifoundry2-c0-20261116-062014.json): ok
+LAUNCHED e200-1 T0 1794838814 2026-11-16 06:20:19 PST (sitting 1, plan full; first card command 1794838813; the firmware read; last start 2026-11-16 21:59 PST, last end 2026-11-16 23:59 PST)
+2026-11-16 06:20:14 PST GATE-STOP: refused: the card nodes here are '' and '', not exactly /dev/et0_ops and /dev/et0_mgmt: one card only, counted before anything opens a node (E197.md 3) (no device opened by the session)
+-> PASS (FW4 step 9 past fwgate's guard (identity ok over the read's record), launched; the wrapper stops at the node count in this node-less sandbox)
+
+== FW5-FW7. a DIFFERENT answer: step 7 stops (16) with no config read; then the look and step 9 stop for this boot
+[s09_reads_e200] STOP: fwgate's firmware read of aifoundry2 card 0 did not read EQUAL (rc 16: IDENTITY-STOP: DIFFERENT: aifoundry2 card 0 at 2026-11-16 06:20:20 PST against E72's read of 2026-10-27 14:59:39 PDT (fwgate-aifoundry2-c0-20261116-062020.json): stop and report; never a retry on this): no 
+[s05_look_e200] STOP: fwgate's look says stop (exit 16: STOPPED: a firmware read of aifoundry2 card 0 on this boot (booted 2026-11-16 05:20:13 PST) did not end EQUAL: DIFFERENT (<scratch>/box/aifoundry2/clau): no launch on aifoundr
+[s11_session_e200] STOP: IDENTITY-STOP: aifoundry2 card 0 booted '2026-11-16 05:20:13 PST': a firmware read on this boot did not end EQUAL, DIFFERENT (build/e200/first-s1-1794838820/fwgate-aifoundry2-c0-20261116-062020.json) and 1 more: nothing launched (the lab's firmware gate, E200.md 8; nothing l
+-> PASS (FW5 the read DIFFERENT: 16, no config read sent; FW6 the look then: 16 (STOPPED for this boot); FW7 step 9: IDENTITY-STOP, 16, nothing launched)
+
+== FW8. the card held at fwgate's read (a fresh ledger): step 7 17, nothing sent
+[s09_reads_e200] STOP: fwgate's read found the card held or its lock busy, or a read in flight (rc 17: nothing sent): look again (s05_look_e200.sh --wait), then this step again (the first card command stays) and step 9 within 2 minutes of it, else a new RB_OUT (steps 1, 6's wait, 8, then 7)
+-> PASS (FW8 the card held at the read: 17 (call again), the CLI never called, no config read)
+
+== Z. nothing left on the stand-in box
+-> PASS (Z no session or stand-in of this test left running)
+
+SELFTEST-FWGATE-E200 7 of 7 PASS
