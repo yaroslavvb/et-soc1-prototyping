@@ -1,0 +1,41 @@
+INPUTS: 45 files of this directory against its SHA256SUMS, 3 registration files against their pins: ALL OK
+
+1. THE HEAD TO HEAD PER W PAIR (raw wall ratios rgm211/rgm136; d = |ln(measured/second)| - |ln(measured/MM1)|; registered tie 0.005 in ln)
+   pair  measured   MM1      F1       NC       N0     | d H1 (F1)  d H2 (NC)  d H3 (N0) | closer H1 / H2 / H3
+   w01   0.94605  0.99933  0.97959  0.97959  1.000  | -0.0200    -0.0200    +0.0007   | F1 / NC / tie
+   w02   1.09107  1.04430  1.15267  1.35156  1.000  | +0.0111    +0.1703    +0.0433   | MM1 / MM1 / MM1
+   w03   0.98287  0.96806  0.82876  0.78621  1.000  | +0.1554    +0.2081    +0.0021   | MM1 / MM1 / tie
+   w04   0.99797  0.88052  0.87046  0.83622  1.000  | +0.0115    +0.0516    -0.1232   | MM1 / MM1 / N0
+   w05   0.81270  0.89506  0.87298  0.84223  1.000  | -0.0250    -0.0608    +0.1109   | F1 / NC / MM1
+   w06   1.17364  1.18060  1.02721  1.26796  1.000  | +0.1273    +0.0714    +0.1542   | MM1 / MM1 / MM1
+   w07   1.20269  1.14642  1.03425  1.28923  1.000  | +0.1030    +0.0216    +0.1366   | MM1 / MM1 / MM1
+   w08   1.15601  1.24789  0.98344  1.17451  1.000  | +0.0852    -0.0606    +0.0685   | MM1 / NC / MM1
+   w09   1.16732  1.23569  1.00000  1.25674  1.000  | +0.0978    +0.0169    +0.0978   | MM1 / MM1 / MM1
+   w10   1.16671  1.18060  1.02385  1.30059  1.000  | +0.1188    +0.0968    +0.1424   | MM1 / MM1 / MM1
+   H1 (MM1 against F1): MM1 closer 8, F1 closer 2, ties 0
+   H2 (MM1 against NC): MM1 closer 7, NC closer 3, ties 0
+   H3 (MM1 against N0): MM1 closer 7, N0 closer 1, ties 2
+   inside the tie (|d| <= 0.005): w01 H3 d +0.0007; w03 H3 d +0.0021
+
+2. THE SMOKE'S REST CELLS (the reducer's p_rest: the median board W of the 5 s before the process starts)
+   the smoke's 30 s rest reading: 13:21:35.820 to 13:22:05.821 PST, 299 samples, median 23.08 W (session/smoke/rest.json)
+   s01: process 13:22:05.827 to 13:22:08.852 PST; its 5 s window: 50 samples, 50 in the rest reading, 0 in neither; median 23.035 W (data-e211.json p_rest_w 23.035): AT REST
+       README cells: p_rest 23.035 W, mJ over idle 18.95, mJ at rest 36.75; post hoc on the session's rest reading (23.08 W): 24.48 W over it, mJ over idle 18.92
+       the smoke gate's own reading (smoke.json board_rise): 24.47 W over rest_w 23.08 W on 26 samples
+   s02: process 13:22:08.855 to 13:22:11.778 PST (3 ms after s01 ended); its 5 s window: 50 samples, 20 in the rest reading, 30 in s01's process, 0 in neither; median 25.26 W (data-e211.json p_rest_w 25.26): NOT A REST READING
+       README cells: p_rest 25.26 W, mJ over idle 17.93, mJ at rest 36.4; post hoc on the session's rest reading (23.08 W): 26.71 W over it, mJ over idle 19.52
+       the smoke gate's own reading (smoke.json board_rise): 26.7 W over rest_w 23.08 W on 26 samples
+   s03: process 13:22:11.780 to 13:22:14.253 PST (2 ms after s02 ended); its 5 s window: 50 samples, 0 in the rest reading, 21 in s01's process, 29 in s02's process, 0 in neither; median 47.7 W (data-e211.json p_rest_w 47.7): NOT A REST READING
+       README cells: p_rest 47.7 W, mJ over idle 8.266, mJ at rest 43.98; post hoc on the session's rest reading (23.08 W): 35.66 W over it, mJ over idle 26.7
+       the smoke gate's own reading (smoke.json board_rise): 35.66 W over rest_w 23.08 W on 21 samples
+   the runs: the 5 s window before the process lies inside the run's own 10 s rest read in 38 of 38
+
+3. THE SHIRES' MEAN PEAK (temp_c.minshire[0] over 10781 of 10781 telemetry samples)
+   highest 59 C on 25 samples, the first at 13:36:31.185 PST and the last at 13:37:46.990 PST (758 samples from the first to the last); where: 036-C-c01c process 13; 038-C-c01c process 12
+
+4. THE NEVER-RUN SEARCH'S OWN GAP (neverrun-e211-card.json, 2026-11-17 13:21:06 PST)
+   scan aifoundry2-work on aifoundry2: 90 roots, 123172 files read, unreadable 0, over 400 MB (skipped) 0
+   scan aifoundry3-box on aifoundry3: 206 roots, 41598 files read, unreadable 0, over 400 MB (skipped) 0
+   scan lab-head on aifoundry2: 227 roots, 70007 files read, unreadable 0, over 400 MB (skipped) 0
+   scan round-lanes on aifoundry2: 1194 roots, 415675 files read, unreadable 29, over 400 MB (skipped) 2
+   with a gap: round-lanes: 29 unreadable, 2 over 400 MB
