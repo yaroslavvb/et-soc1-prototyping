@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="764" viewBox="0 0 400 764" role="img" aria-labelledby="t d" style="max-width:100%;height:auto">
+<title id="t">MM1 prices a GEMM's tile op by where its 192 cache lines come from</title>
+<desc id="d">A flow of five boxes: the inputs; the cache-line map; cycles as the slowest of the tensor op and the two tile streams; joules from awake power, a price per op and a price per line; transistor switches counted and estimated.</desc>
+<style>
+  .bg{fill:#ffffff} .ink{fill:#1d1d1b} .ink2{fill:#52514e} .muted{fill:#6f6e69}
+  .grid{stroke:#e1e0d9;stroke-width:1} .base{stroke:#c3c2b7;stroke-width:1}
+  .acc{fill:#2a78d6} .accs{stroke:#2a78d6} .gry{fill:#898781} .gry2{fill:#52514e} .hol{fill:#ffffff;stroke:#2a78d6;stroke-width:2}
+  .box{fill:#f4f8fd;stroke:#2a78d6;stroke-width:1.2} .boxg{fill:#f6f6f4;stroke:#c3c2b7;stroke-width:1} .arrow{stroke:#52514e;stroke-width:1.5;fill:none}
+  .band{fill:#2a78d6;fill-opacity:0.10} .inv{fill:#ffffff}
+  text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  .t1{font-size:16px;font-weight:600} .t2{font-size:13px} .t3{font-size:12.5px} .tn{font-size:12px;font-variant-numeric:tabular-nums}
+  @media (prefers-color-scheme: dark){
+    .bg{fill:#1a1a19} .ink{fill:#f0efec} .ink2{fill:#c3c2b7} .muted{fill:#a9a8a0}
+    .grid{stroke:#2c2c2a} .base{stroke:#383835}
+    .acc{fill:#3987e5} .accs{stroke:#3987e5} .gry{fill:#898781} .gry2{fill:#c3c2b7} .hol{fill:#1a1a19;stroke:#3987e5}
+    .box{fill:#1f2733;stroke:#3987e5} .boxg{fill:#232321;stroke:#383835} .arrow{stroke:#c3c2b7} .band{fill:#3987e5}
+  }
+</style>
+<rect class="bg" x="0" y="0" width="400" height="764"/>
+<text x="16.0" y="26.0" class="t1 ink" text-anchor="start" >MM1 prices a GEMM's tile op by where its 192</text>
+<text x="16.0" y="46.0" class="t1 ink" text-anchor="start" >cache lines come from</text>
+<text x="16.0" y="67.0" class="t3 ink2" text-anchor="start" >Figure 1. The matmul model in four steps (MM1-v2, frozen</text>
+<text x="16.0" y="83.0" class="t3 ink2" text-anchor="start" >in 3ca4b717).</text>
+<rect class="boxg" x="16" y="105" width="368" height="94" rx="6"/>
+<text x="28.0" y="124.0" class="t2 ink" text-anchor="start" font-weight="600">What goes in</text>
+<text x="28.0" y="142.0" class="t3 ink2" text-anchor="start" >M x N x K on the kernel's grid; the format (fp32, fp16</text>
+<text x="28.0" y="158.0" class="t3 ink2" text-anchor="start" >or int8); the data kind (random, zeros, ones, real</text>
+<text x="28.0" y="174.0" class="t3 ink2" text-anchor="start" >tiles); the shire mask (which of the 32 groups of 32</text>
+<text x="28.0" y="190.0" class="t3 ink2" text-anchor="start" >cores run); the card, its clock and its voltage.</text>
+<path class="arrow" d="M 200 201 L 200 213 M 195 208 L 200 213 L 205 208"/>
+<rect class="box" x="16" y="215" width="368" height="110" rx="6"/>
+<text x="28.0" y="234.0" class="t2 ink" text-anchor="start" font-weight="600">1. Where each cache line comes from</text>
+<text x="28.0" y="252.0" class="t3 ink2" text-anchor="start" >Each tile op of a 32-core group asks for 192 cache lines</text>
+<text x="28.0" y="268.0" class="t3 ink2" text-anchor="start" >(64 of A, 128 of B). A closed-form reuse model of the</text>
+<text x="28.0" y="284.0" class="t3 ink2" text-anchor="start" >kernel's tile order says how many the group's L2 serves,</text>
+<text x="28.0" y="300.0" class="t3 ink2" text-anchor="start" >how many the chip's 32 MB L3, and how many come fresh</text>
+<text x="28.0" y="316.0" class="t3 ink2" text-anchor="start" >from DRAM.</text>
+<path class="arrow" d="M 200 327 L 200 339 M 195 334 L 200 339 L 205 334"/>
+<rect class="box" x="16" y="341" width="368" height="110" rx="6"/>
+<text x="28.0" y="360.0" class="t2 ink" text-anchor="start" font-weight="600">2. Cycles and seconds</text>
+<text x="28.0" y="378.0" class="t3 ink2" text-anchor="start" >An op takes the slowest of three: the tensor unit's own</text>
+<text x="28.0" y="394.0" class="t3 ink2" text-anchor="start" >op (a law measured on the card, never under 529 cycles</text>
+<text x="28.0" y="410.0" class="t3 ink2" text-anchor="start" >in fp32 and fp16 or 270 in int8), A's tile stream and</text>
+<text x="28.0" y="426.0" class="t3 ink2" text-anchor="start" >B's tile stream, each priced by where its lines come</text>
+<text x="28.0" y="442.0" class="t3 ink2" text-anchor="start" >from.</text>
+<path class="arrow" d="M 200 453 L 200 465 M 195 460 L 200 465 L 205 460"/>
+<rect class="box" x="16" y="467" width="368" height="110" rx="6"/>
+<text x="28.0" y="486.0" class="t2 ink" text-anchor="start" font-weight="600">3. Joules</text>
+<text x="28.0" y="504.0" class="t3 ink2" text-anchor="start" >Awake powers for the cores and the memory path while</text>
+<text x="28.0" y="520.0" class="t3 ink2" text-anchor="start" >they run (constant watts), plus a price per op for the</text>
+<text x="28.0" y="536.0" class="t3 ink2" text-anchor="start" >tensor work and a price per cache line by level (both</text>
+<text x="28.0" y="552.0" class="t3 ink2" text-anchor="start" >scaled by the square of the voltage). Over idle; add the</text>
+<text x="28.0" y="568.0" class="t3 ink2" text-anchor="start" >card at rest for the total.</text>
+<path class="arrow" d="M 200 579 L 200 591 M 195 586 L 200 591 L 205 586"/>
+<rect class="box" x="16" y="593" width="368" height="110" rx="6"/>
+<text x="28.0" y="612.0" class="t2 ink" text-anchor="start" font-weight="600">4. Transistor switches</text>
+<text x="28.0" y="630.0" class="t3 ink2" text-anchor="start" >Fin edges counted for the tensor unit on an open</text>
+<text x="28.0" y="646.0" class="t3 ink2" text-anchor="start" >stand-in netlist of its public RTL; estimated for the</text>
+<text x="28.0" y="662.0" class="t3 ink2" text-anchor="start" >rest of the die from its share of the energy. No card</text>
+<text x="28.0" y="678.0" class="t3 ink2" text-anchor="start" >counts them; E210 checked the counted difference through</text>
+<text x="28.0" y="694.0" class="t3 ink2" text-anchor="start" >energy.</text>
+<text x="16.0" y="723.0" class="t3 ink2" text-anchor="start" >What comes out: cycles an op and seconds a GEMM; joules</text>
+<text x="16.0" y="738.0" class="t3 ink2" text-anchor="start" >over idle and with the card at rest; transistor switches,</text>
+<text x="16.0" y="753.0" class="t3 ink2" text-anchor="start" >counted and estimated.</text>
+</svg>
