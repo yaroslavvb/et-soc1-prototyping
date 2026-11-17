@@ -1,0 +1,37 @@
+book.sh show at 01:14:43 PST: no booking of aifoundry3
+rsync rc=0: 42 files
+book.sh show at 01:14:43 PST: no booking of aifoundry3 (aifoundry1: card-e206b2 2026-11-17 00:00:31 PST;(end))
+host aifoundry3 at 2026-11-17 01:14:43 PST; load 0.89 0.76 0.76
+No process holds an ET-SoC-1 device node or card lock.
+HARNESS OK: 41 files at harness-e211.json's sha256
+== E211 build on aifoundry3, 2026-11-17 01:14:43 PST, into build/e211rgm (rgm136, rgm211)
+HARNESS OK: 20 files at harness-e211.json's sha256 (the two kernels' sources)
+COMPILER kernel: riscv64-unknown-elf-gcc (g1b306039a) 15.1.0; host: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+KERNEL rgm136 ff2723b81e2ce409d14e4ee54ae5a91b6fb3a11827097023c8c35ac088608684; KERNEL OK: rgm136: gemmL: rgm136, .text 61315bf6a449c282... the pinned one; ELF ff2723b81e2ce409... not the desk build's (sections the card never loads differ), its loadable identity 649d40793e459e51... the pinned one
+HOST rgm136 578f9119b0b24ba5255708149353c8c8671586a3d4785c3928f0a3d1aa82c89d
+KERNEL rgm211 70c066e830883d51ad71037d8597bbec8c0d93964d3ef361c9ff33c7f3c9e161; KERNEL OK: rgm211: gemmLn: rgm211, .text 82c7980716a0f0ca... the pinned one; ELF 70c066e830883d51... not the desk build's (sections the card never loads differ), its loadable identity 1351a569e4a200cb... the pinned one
+HOST rgm211 178fa3d855c27a2513e080345995dfd7ad52dae7eab99da1aac3bf35c7062162
+HOSTCHECK rgm136 unknown-option: rc 2, 'unknown option --no-such-option', before the device stage: ok
+HOSTCHECK rgm136 zero-shires: rc 2, 'bad --shires / --per-shire', before the device stage: ok
+HOSTCHECK rgm136 no-kernel: rc 1, 'cannot read kernel', before the device stage: ok
+HOSTCHECK rgm136 unknown-test: rc 2, '--test must be fma, tload, gemv, diverge or spin', before the device stage: ok
+HOSTCHECK rgm211 unknown-option: rc 2, 'unknown option --no-such-option', before the device stage: ok
+HOSTCHECK rgm211 zero-shires: rc 2, 'bad --shires / --per-shire', before the device stage: ok
+HOSTCHECK rgm211 no-kernel: rc 1, 'cannot read kernel', before the device stage: ok
+HOSTCHECK rgm211 unknown-test: rc 2, '--test must be fma, tload, gemv, diverge or spin', before the device stage: ok
+HOSTCHECK rgm211 arm-missing-kb: rc 1, 'want gemmL<MB>x<NB>x<KB>', before the device stage: ok
+HOSTCHECK rgm211 per-shire-16: rc 1, 'gemm needs --per-shire 32', before the device stage: ok
+HOSTCHECK rgm211 missing-tile: rc 1, 'cannot read 2 x 1024 bytes', before the device stage: ok
+HOSTCHECK rgm211 unknown-gen: rc 1, 'unknown gen', before the device stage: ok
+ETDEVICES hosts no; /opt/et/lib/libdeviceLayer.a no; CMakeCache deviceLayer_DIR from /opt/et yes
+RGM-BUILT rc=0
+build rc=0
+RECORD BUILT 2026-11-17 aifoundry3 build_e211.sh
+RECORD rgm136 ff2723b81e2ce409d14e4ee54ae5a91b6fb3a11827097023c8c35ac088608684 KERNEL OK: rgm136: gemmL: rgm136, .text 61315bf6a449c282... the pinned one; ELF ff2723b81e2ce409... not the desk build's (sections the card never loads differ), its loadable identity 649d40793e459e51.
+RECORD rgm211 70c066e830883d51ad71037d8597bbec8c0d93964d3ef361c9ff33c7f3c9e161 KERNEL OK: rgm211: gemmLn: rgm211, .text 82c7980716a0f0ca... the pinned one; ELF 70c066e830883d51... not the desk build's (sections the card never loads differ), its loadable identity 1351a569e4a200cb
+RECORD host checks 12 12
+E211-COMMON SELF-CHECK PASS
+E211-IDENT SELF-CHECK PASS
+dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+done at 2026-11-17 01:14:50 PST
+remote rc=0 at 01:14:50 PST

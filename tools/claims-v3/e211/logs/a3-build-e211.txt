@@ -1,0 +1,42 @@
+book.sh show at 00:25:07 PST: no booking of aifoundry3 (aifoundry1: card-e206b2 2026-11-17 00:00:31 PST;(end))
+host aifoundry3 at 2026-11-17 00:25:07 PST; load 0.48 0.60 0.62
+payload: 29 files OK; scratch clone HEAD 5f8df49b0352e1206fb4fc046468e42c707c14ff (GitHub main c931b3d8 + reg-e211's patch)
+rgm136: cmake config rc=0, build rc=0, 3 s; warnings: 0 in config, 1 in build
+-rwxr-xr-x 1 <login> <login> 3592472 Nov 17 00:25 ~/claude/work/q204-kit-e211/build/e211rgm136/host/sparsity_host
+-rwxr-xr-x 1 <login> <login>   20264 Nov 17 00:25 ~/claude/work/q204-kit-e211/build/e211rgm136/kernel/sparsity.elf
+rgm136 ELF sha256: ff2723b81e2ce409d14e4ee54ae5a91b6fb3a11827097023c8c35ac088608684
+rgm136 host sha256: 09bba984e3361d511f0a4a33321bfb8f2b5ea43d8193e3b743f371cb865b2054 (hosts carry the build path: gated by behaviour)
+rgm136 .text sha256 (objcopy): 61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763
+{
+ "elf_sha256": "ff2723b81e2ce409d14e4ee54ae5a91b6fb3a11827097023c8c35ac088608684",
+ "text_sha256": "61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763",
+ "loadable_identity_sha256": "649d40793e459e51db9a590ca90dd1363da3a00398f98938c3ef6e190514e2b7",
+ "why": ""
+}
+rgm211: cmake config rc=0, build rc=0, 3 s; warnings: 0 in config, 1 in build
+-rwxr-xr-x 1 <login> <login> 3597040 Nov 17 00:25 ~/claude/work/q204-kit-e211/build/e211rgm211/host/sparsity_host
+-rwxr-xr-x 1 <login> <login>   21456 Nov 17 00:25 ~/claude/work/q204-kit-e211/build/e211rgm211/kernel/sparsity.elf
+rgm211 ELF sha256: 70c066e830883d51ad71037d8597bbec8c0d93964d3ef361c9ff33c7f3c9e161
+rgm211 host sha256: 3fbd69348624c84063da59873c071471e72f5462280906357e4745da455a34eb (hosts carry the build path: gated by behaviour)
+rgm211 .text sha256 (objcopy): 82c7980716a0f0cacd24364ef9a23435343eb8f2c35c32b0ec5d60b46c8a4069
+{
+ "elf_sha256": "70c066e830883d51ad71037d8597bbec8c0d93964d3ef361c9ff33c7f3c9e161",
+ "text_sha256": "82c7980716a0f0cacd24364ef9a23435343eb8f2c35c32b0ec5d60b46c8a4069",
+ "loadable_identity_sha256": "1351a569e4a200cb4cd916c4c6af822b45ce6e1cac9b7aa8b71c945a1f5bd847",
+ "why": ""
+}
+riscv64-unknown-elf-gcc (g1b306039a) 15.1.0
+== the identity gate per arm family, both ways (want: gemmL rgm136 OK; gemmLn rgm211 OK; gemmLnc rgm136 OK; every other pairing FAILED)
+gate gemmL on rgm136's ELF: rc=0 GATE OK: gemmL: rgm136, .text 61315bf6a449c282... the pinned one; ELF ff2723b81e2ce409... not the desk build's (sections the card never loads differ), its loadable identity 649d40793e459e51... the pinned one
+gate gemmL on rgm211's ELF: rc=1 GATE FAILED: gemmL needs rgm136's .text 61315bf6a449c282...; this ELF's .text is 82c7980716a0f0cacd24364ef9a23435343eb8f2c35c32b0ec5d60b46c8a4069 (rgm211's)
+gate gemmLn on rgm136's ELF: rc=1 GATE FAILED: gemmLn needs rgm211's .text 82c7980716a0f0ca...; this ELF's .text is 61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763 (rgm136's)
+gate gemmLn on rgm211's ELF: rc=0 GATE OK: gemmLn: rgm211, .text 82c7980716a0f0ca... the pinned one; ELF 70c066e830883d51... not the desk build's (sections the card never loads differ), its loadable identity 1351a569e4a200cb... the pinned one
+gate gemmLnc on rgm136's ELF: rc=0 GATE OK: gemmLnc: rgm136, .text 61315bf6a449c282... the pinned one; ELF ff2723b81e2ce409... not the desk build's (sections the card never loads differ), its loadable identity 649d40793e459e51... the pinned one
+gate gemmLnc on rgm211's ELF: rc=1 GATE FAILED: gemmLnc needs rgm136's .text 61315bf6a449c282...; this ELF's .text is 82c7980716a0f0cacd24364ef9a23435343eb8f2c35c32b0ec5d60b46c8a4069 (rgm211's)
+rgm136 ELF: kernel-e211.json aace138caf8071cc... E206's aace138caf8071cc...: SAME
+rgm136 .text: kernel-e211.json 61315bf6a449c282... E206's 61315bf6a449c282...: SAME
+rgm136 loadable identity: kernel-e211.json 649d40793e459e51... E206's 649d40793e459e51...: SAME
+rgm211 pins: ELF 00402801a1a53a93... .text 82c7980716a0f0ca... identity 1351a569e4a200cb...; distinct from rgm136's: True
+CHECK PASS
+done at 2026-11-17 00:25:13 PST
+remote rc=0 at 00:25:13 PST

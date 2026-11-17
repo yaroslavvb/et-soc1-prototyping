@@ -1,0 +1,31 @@
+{
+ "case": "BAD",
+ "argv": [
+  "~/claude/work/q204-kit-e211/build/e211rgm211/host/sparsity_host",
+  "--sysemu",
+  "--test",
+  "fma",
+  "--type",
+  "fp32",
+  "--pattern",
+  "none",
+  "--values",
+  "gemmLn2x2x1:randn:~/claude/work/q204-kit-e211/tools/claims-v3/kinds/tiles/fp32/randn.bin",
+  "--shires",
+  "0x1",
+  "--per-shire",
+  "32",
+  "--seed",
+  "1",
+  "--kernel",
+  "~/claude/work/q204-kit-e211/build/e211rgm136/kernel/sparsity.elf"
+ ],
+ "host": "rgm211",
+ "kernel": "rgm136",
+ "rc": 1,
+ "wall_s": 36,
+ "peak_rss_kb": 195776,
+ "sandbox": "dev entries named et*: 0; run/lock entries: 0",
+ "family_read": "gemmLn",
+ "stated_before": "rc 1; walk_ok false (no tag: rgm136 ignores the walk bit); walk_launches_bad 1; the check line ok false"
+}

@@ -1,0 +1,35 @@
+E211 kit: the quick set, 2026-11-17 07:27:26 PST, /usr/bin/python3 3.12.3, on aifoundry2 (desk); fix-e211's pass, on the registration with Amendment A1
+== e211_common.py: E211-COMMON SELF-CHECK PASS
+== e211_ident.py: E211-IDENT SELF-CHECK PASS
+== check_e211.py --check: CHECK PASS
+== check_e211.py --box: HARNESS OK: 41 files at harness-e211.json's sha256
+== the registration's make_rgm211.py --check: make_rgm211 --check: PASS (the committed rgm211 tree is make_rgm211.py's output from rgm136 as committed, byte for byte)
+== the registration's desk/kernel_e211.py --check: CHECK PASS
+== the registration's ident_e211.py --check: CHECK PASS
+== the registration's points_e211.py --check: points_e211 --check: PASS
+== the registration's forecast_e211.py --check: forecast_e211 --check: json SAME, csv SAME, txt SAME
+== the registration's rules_e211.py --check: rules_e211 --check: PASS
+== the registration's plan_e211.py --check: plan_e211 --check: PASS
+== score_e211.py --selftest-standins: rc 0, 'SELFTEST PASS', the JSON byte-identical to the committed selftest-standins-e211.json: yes
+== the registration's list: 38 of 38 OK
+== the preflight: dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+== the kernel check under sys_emu on aifoundry3 (logs/simcheck-e211.txt, the kit lane's record, kept as written): SIMCHECK-E211 7 of 7 AS STATED
+== the build on aifoundry3 (logs/a3-build-e211.txt, the kit lane's record): 3 pairings OK and 3 refused, as stated; rgm211 .text 82c7980716a0f0ca..., its identity 1351a569e4a200cb...
+== the kit's own build script on aifoundry3 (logs/a3-boxbuild-e211.txt, the kit lane's record): RGM-BUILT rc=0; 12 host refusals before the device stage; dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+== bash -n of every shell file of the kit: 22 files, 0 with a syntax error
+== python3 parse of every Python file of the kit (in memory, no __pycache__ written): 22 files, 0 that do not parse
+== every line of the kit's code naming 'timeout -k', 'kill -9', SIGKILL or .kill() (a reader checks each is prose: a comment, a docstring or a message; no call):
+   e211_common.py:37:    `timeout 10 <the point's host> <the point's host_args> --kernel <the point's ELF> --stop-file <STOP>`, never `timeout -k`;
+   run_e211.py:23:  - NO SIGKILL ANYWHERE (W/out/orch/kill-rule.txt; AGENT.md "never kill -9"): every process this runner starts that can open a device is
+   run_e211.py:416:        """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s; each wait ends CLOSE_S / 2 before the end bound but lasts
+   run_e211.py:435:            self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+   run_e211.py:583:                 f"at {C.HOST_TIMEOUT_S} s: nothing kills it (no SIGKILL, ever); the stop file is touched, nothing further starts and no "
+   build_e211.sh:9:#      under a plain `timeout 300` (never -k: no SIGKILL anywhere in E211's kit), the compilers recorded;
+   rb/rb_e211.sh:7:# device process on the box runs under the runner's plain `timeout 10` and nothing of E211's ever sends it a SIGKILL), and changes only:
+== calls that could send a kill in the kit's own code (subprocess .kill(), os.kill, signal.SIGKILL, 'kill -9', 'timeout -k' outside prose): 0
+== the desk tests' own stand-in kills (the tests end THEIR OWN helper processes, never a device process: terminate() of a lock holder or a decoy, kill of a sleep decoy):
+   selftest_run_e211.py:300:        holder.terminate()          # the stand-in holder (a sleep under flock, no device), by SIGTERM
+   desk/realpath_e211.py:273:    holder.terminate()          # the stand-in holder (a sleep under flock, no device), by SIGTERM
+   desk/realpath_e211.py:289:    dp.terminate()              # the decoy (a copy of sleep named sys_emu, no device), by SIGTERM
+   rb/selftest_rb_e211.sh:302:kill "$p1" "$p2" 2>/dev/null
+   rb/selftest_rb_e211.sh:398:kill "$p3" 2>/dev/null
