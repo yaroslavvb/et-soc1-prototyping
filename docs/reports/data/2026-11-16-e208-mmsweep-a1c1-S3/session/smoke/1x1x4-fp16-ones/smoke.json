@@ -1,0 +1,64 @@
+{
+ "name": "proc",
+ "argv": [
+  "build/rgm/host/sparsity_host",
+  "--test",
+  "fma",
+  "--type",
+  "fp16",
+  "--pattern",
+  "none",
+  "--values",
+  "gemmL1x1x4:tiles:src/tiles/fp16/ones.bin",
+  "--shires",
+  "0xffffffff",
+  "--per-shire",
+  "32",
+  "--seconds",
+  "2",
+  "--budget",
+  "3.5",
+  "--seed",
+  "1",
+  "--kernel",
+  "build/rgm/kernel/sparsity.elf",
+  "--stop-file",
+  "sessions/1794895261-a1c1-S3/STOP"
+ ],
+ "rc": 0,
+ "t0_ms": 1794895338012,
+ "t1_ms": 1794895340880,
+ "n_launch": 7,
+ "launches_ok": true,
+ "check": "exact",
+ "check_ok": true,
+ "check_cycles_per_op": 831.711,
+ "stopped_by_file": false,
+ "launch_window_ms": [
+  1794895338256,
+  1794895340752
+ ],
+ "ident": {
+  "stderr_targets": [
+   "/dev/et1_ops"
+  ],
+  "stderr_ids": [
+   1
+  ],
+  "nodes_held": [
+   "/dev/et1_ops"
+  ],
+  "wrong": [],
+  "right": true,
+  "polls": 30,
+  "tripped": null
+ },
+ "identity_ok": true,
+ "board_rise": {
+  "ok": true,
+  "rise_w": 11.18,
+  "samples": 25,
+  "rest_w": 30.6
+ },
+ "good": true
+}
