@@ -1,0 +1,29 @@
+E210 kit: the quick set, 2026-11-17 08:08:17 PST, /usr/bin/python3 3.12.3, on aifoundry2 (desk)
+== e210_common.py: E210-COMMON SELF-CHECK PASS
+== e210_ident.py: E210-IDENT SELF-CHECK PASS
+== check_e210.py --check: CHECK PASS
+== check_e210.py --box: HARNESS OK: 518 files at harness-e210.json's sha256
+== the registration's points_e210.py <top> --check: points_e210 --check PASS
+== the registration's forecast_e210.py <top> --check: forecast_e210 --check PASS
+== the registration's desk/kernel_e210.py --check: PASS
+== score_e210.py --selftest (as re-frozen by E210.md A1): rc 0, its JSON and text byte-identical to the committed selftest-standins-e210.json and .txt: yes; E210 scorer self-test on stand-ins: PASS
+== the registration's list: 523 of 523 OK
+== MM1-v1's folder list (tools/matmul/mm1/v1/SHA256SUMS): 77 of 77 OK
+== the preflight: dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+== bash -n of every shell file of the kit: 24 files, 0 with a syntax error
+== python3 compile of every Python file of the kit (in memory, no __pycache__ written): 24 files (the registration's among them), 0 that do not parse
+== every line of the kit's code naming 'timeout -k', 'kill -9', SIGKILL or .kill() (a reader checks each is prose: a comment, a docstring or a message; no call):
+   e210_common.py:32:    one host process `timeout 10 <host> <the run's host_args> --kernel <ELF> --stop-file <STOP>`, never `timeout -k`; the tile paths in
+   run_e210.py:10:  - NO SIGKILL ANYWHERE (W/out/orch/kill-rule.txt; AGENT.md "never kill -9"): every process this runner starts that can open a device is
+   run_e210.py:394:        """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s; each wait ends CLOSE_S / 2 before the end bound but lasts
+   run_e210.py:413:            self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+   run_e210.py:561:                 f"at {C.HOST_TIMEOUT_S} s: nothing kills it (no SIGKILL, ever); the stop file is touched, nothing further starts and no "
+   build_e210.sh:7:#   2. cmake against the box's /opt/et into build/e210rgm (nice 10, -j2), each call under a plain `timeout 300` (never -k: no SIGKILL
+   rb/rb_e210.sh:7:# device process on the box runs under the runner's plain `timeout 10` and nothing of E210's ever sends it a SIGKILL), and changes only:
+== calls that could send a kill in the kit's own code (subprocess .kill(), os.kill, signal.SIGKILL, 'kill -9', 'timeout -k' outside prose): 0
+== the desk tests' own stand-in kills (the tests end THEIR OWN helper processes, never a device process: terminate() of a lock holder, kill of a sleep decoy):
+   selftest_run_e210.py:408:        holder.terminate()
+   desk/realpath_e210.py:249:    holder.terminate()
+   desk/realpath_e210.py:268:    dp.terminate()
+   rb/selftest_rb_e210.sh:283:kill "$p1" "$p2" 2>/dev/null
+   rb/selftest_rb_e210.sh:387:kill "$p3" 2>/dev/null

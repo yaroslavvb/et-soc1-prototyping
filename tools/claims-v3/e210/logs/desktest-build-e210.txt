@@ -1,0 +1,51 @@
+desktest_build_e210: 2026-11-17 07:41:02 PST; riscv gcc: riscv64-unknown-elf-gcc () 15.1.0; c++: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; cmake version 3.28.3; python3 Python 3.12.3
+
+== B1 on aifoundry3 (its hostname): the real build
+COMPILER kernel: riscv64-unknown-elf-gcc () 15.1.0; host: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+KERNEL aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 (the registered ELF aace138c...); KERNEL OK: .text 61315bf6a449c282... the registered; ELF aace138caf8071cc... the registered (E
+HOST 8bdb056c8fb8bc2030b08cd31fee1442ac3fd75c1471485c609e155cacfd8fcb
+HOSTCHECK unknown-option: rc 2, 'unknown option --no-such-option': ok
+HOSTCHECK zero-shires: rc 2, 'bad --shires / --per-shire': ok
+HOSTCHECK no-kernel: rc 1, 'cannot read kernel': ok
+HOSTCHECK unknown-test: rc 2, '--test must be fma, tload, gemv, diverge or spin': ok
+ETDEVICES host no; /opt/et/lib/libdeviceLayer.a no; CMakeCache deviceLayer_DIR from /opt/et yes
+RGM-BUILT rc=0
+record: BUILT build_e210.sh aifoundry3 aace138caf80 KERNEL OK notagate 4
+-> B1 on aifoundry3: BUILT, KERNEL OK on the registered ELF, the host's four refusals, the record: PASS
+
+== B2 on aifoundry1 (its hostname): refused before anything is built (E210 builds on aifoundry3 only)
+RGM-BUILD-FAILED: the box is 'aifoundry1': E210 builds on aifoundry3 (card 0) only
+-> B2 aifoundry1: refused, the record BUILD-FAILED, nothing built: PASS
+
+== B3 a changed rgm136 source: refused before the build
+HARNESS DIFFERS: tools/claims-v3/e136/rgm136/host/main.cpp: dcff130859054cac (want f9b2279f838ad304)
+RGM-BUILD-FAILED: rgm136's sources are not harness-e210.json's
+-> B3 a changed source: refused, nothing built: PASS
+
+== B4 the kernel gate on aifoundry3's form (.comment rewritten to '(g1b306039a) 15.1.0')
+      [     0]  GCC: (g1b306039a) 15.1.0
+    ELF 0c66189d5d540b4d017553b7bcb65d66f8f0f1569e710268eb17d0c0af04e2e9; KERNEL OK: .text 61315bf6a449c282... the registered; ELF 0c66189d5d540b4d... not the registered (the difference lies in sections the card never loads); its loadable identity 649d40793e45
+-> B4 aifoundry3's form: its ELF not the pin, its .text and loadable identity the pinned: KERNEL OK: PASS
+
+== B5 one byte of .rodata changed; B6 one byte of .text changed
+    .rodata at 0x37a0, .text at 0x1000: one byte flipped in each copy
+    KERNEL FAILED: .text the registered, but the ELF cccddf4cb4d812df8503574a755184250ff1b69b6b12d98cf54431ae89603508 is not the registered and its loadable identity 15617b8dc3cdaaf0c047a5dbbcabfae015b548e94257dba9b888ec516d90c196 is not th
+    KERNEL FAILED: .text sha256 a0fd6e924db1f0a48fa1f391b280c74659e55ba0ee357691e92f23c84eb3c056 is not the registered 61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763 (kernel-e210.json); ELF bd88bbfec04cd6b42f8ced0a46f005d3
+-> B5 a .rodata byte: refused by the identity; B6 a .text byte: refused by the .text: PASS
+
+== B7 on another box (hostname aifoundry2)
+RGM-BUILD-FAILED: the box is 'aifoundry2': E210 builds on aifoundry3 (card 0) only
+-> B7 another box: refused before anything is built: PASS
+
+== B8 the runner (no --dry) on B1's tree under aifoundry3: its box check
+2026-11-17 07:41:09 PST refused, no device opened: the box or the build is not the registered one (build/ettelem/ettelem: sha256 None, want 16037641ab75bdbe1209f323641e269c9b897468091243173bfaaaf0b21686e2)
+-> B8 the runner's box check: the build, the kernel and the host pass; it stops at the reader's pin, no device opened: PASS
+
+== B9 the guard on the other boxes (hostnames aifoundry1, aifoundry2) and with ET_DEVICES set on aifoundry3: refused (97) before the reader
+    ettelem_guard_e210: refused (box 'aifoundry1': E210 runs on aifoundry3 (card 0) only): not in E210's classified command list
+    ettelem_guard_e210: refused (box 'aifoundry2': E210 runs on aifoundry3 (card 0) only): not in E210's classified command list
+    ettelem_guard_e210: refused (ET_DEVICES is '0' on aifoundry3: its one card is opened with ET_DEVICES unset): not in E210's classified command list
+    ettelem_guard_e210: refused (sample --reset-ms 10): not in E210's classified command list
+-> B9 the guard: another box refused (aifoundry1, aifoundry2), ET_DEVICES refused on aifoundry3, the statistics reset refused; each rc 97 before the reader opens: PASS
+
+DESKTEST-BUILD-E210 8 of 8 PASS

@@ -1,0 +1,1105 @@
+E210 runbook (the switch test), arm A (aifoundry3 card 0), dry listing (nothing below was run). Sample window: 2026-11-17, last start 01:31, last end 03:31 (Pacific).
+
+---- the runbook's prelude for aifoundry3: every remote script on aifoundry3 starts with these lines
+    | set -u
+    | cd ~/aifoundry || { echo "NO-TREE: ~/aifoundry"; exit 1; }
+    | BOX=aifoundry3
+    | DEV_COMM='_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$'   # lib.sh's DEV_COMM
+    | OTHER_COMM="$DEV_COMM|^Runner.Worker$"                                                # lib.sh's OTHER_COMM
+    | hold_read() {  # the holder rule's read: et-who (et-holders) and ps, as counts; FREE=1 when nothing blocks this box's card
+    |   W=$(timeout 20 et-who 2>&1); WRC=$?
+    |   ME=$(id -un)
+    |   NH=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/ {n++} END {print n+0}')
+    |   NO=$(printf '%s\n' "$W" | awk -v me="$ME" '($1 ~ /^\/dev\/et/ || $1 ~ /^lock:/) && $2 == me {n++} END {print n+0}')
+    |   C1=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et1_/ || $1 == "lock:etsoc-shire1.lock" {n++} END {print n+0}')
+    |   PO=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {n++} END {print n+0}')
+    |   PX=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$OTHER_COMM" '$1 != me && $3 ~ re {n++} END {print n+0}')
+    |   LG=$(who | wc -l | tr -d ' ')
+    |   FREE=0
+    |   if [ "$BOX" = aifoundry1 ]; then
+    |     # card 1's own lines decide, and nothing of ours on either card (launch_e164_a1.sh's rule)
+    |     [ "$WRC" -eq 0 ] && [ "$C1" -eq 0 ] && [ "$NO" -eq 0 ] && [ "$PO" -eq 0 ] && FREE=1
+    |   else
+    |     # one card: et-who's "No process holds ..." (the E158-E169 queues' rule) and no other user's device process (lib.sh)
+    |     case "$(printf '%s\n' "$W" | head -n 1)" in "No process holds"*) [ "$WRC" -eq 0 ] && [ "$PX" -eq 0 ] && FREE=1 ;; esac
+    |   fi
+    |   echo "holders: et-who rc $WRC, holder lines $NH (ours $NO; card 1's $C1), our device processes $PO, other users' device processes $PX; logins $LG (an idle login does not block)"
+    | }
+    | ours_live() {  # our real card sessions on this box (a dry pass or a V3_DRY session is not one); E170's queue on aifoundry1 counts;
+    |   #             v3: any queue_eNNN.py or session_eNNN.sh of ours (the lab's naming convention), so a later card day's run counts too;
+    |   #             k6: E171's and E172's processes by name (their sessions, queues, blocks and runners), and E173's and E174's queues
+    |   n=0
+    |   for pid in $(pgrep -u "$(id -u)" -f '(queue|session)_e[0-9]+[a-z0-9_]*\.(py|sh)|(session|queue|block)_e17[12]\.sh|run_e17[12]\.py|queue_e17[34]\.py|session_e16[346]\.sh|queue_e16[5-9]\.py|queue_e170\.py|run_e170\.py' 2>/dev/null); do
+    |     case "$(tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null)" in *--dry*) continue ;; esac
+    |     tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | grep -q '^V3_DRY=' && continue
+    |     n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+    | jobs_live() {  # the runbook's own detached dry jobs still running on this box (any day's: a live process is live)
+    |   n=0
+    |   for p in build/q141k/jobs/*.pid; do
+    |     [ -e "$p" ] || continue
+    |     [ -e "${p%.pid}.rc" ] && continue
+    |     kill -0 "$(cat "$p")" 2>/dev/null && n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+    | fresh() {  # fresh <file>: it exists and was written today by the Pacific calendar (the card day's); another day's never counts
+    |   [ -e "$1" ] && [ "$(TZ=America/Los_Angeles date -r "$1" +%F 2>/dev/null)" = "$(TZ=America/Los_Angeles date +%F)" ]
+    | }
+    | job_ok_today() {  # job_ok_today <job>: the runbook's dry job <job> ended rc 0 today
+    |   fresh "build/q141k/jobs/$1.rc" && [ "$(cat "build/q141k/jobs/$1.rc" 2>/dev/null)" = 0 ]
+    | }
+    | ours_live() {  # E210's (rb/rb_e210.sh; E206's and E190's): our sessions and queues by each process's own script, never by a command string's text
+    |   local n=0 pid w s first dashc want=${1:-}
+    |   for pid in $(pgrep -u "$(id -u)" . 2>/dev/null); do
+    |     s=""; first=1; dashc=0
+    |     while IFS= read -r -d '' w; do
+    |       if [ "$first" = 1 ]; then first=0; continue; fi
+    |       case "$w" in -c) dashc=1; break ;; -*) continue ;; *) s=$w; break ;; esac
+    |     done 2>/dev/null < "/proc/$pid/cmdline"
+    |     [ "$dashc" = 0 ] && [ -n "$s" ] || continue
+    |     if [ -n "$want" ]; then
+    |       case "${s##*/}" in $want) ;; *) continue ;; esac
+    |     else
+    |       case "${s##*/}" in session_e[0-9]*.sh|queue_e[0-9]*.py|queue_e[0-9]*.sh|block_e17[12].sh|run_e17[012].py) ;; *) continue ;; esac
+    |     fi
+    |     case "$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null)" in *--dry*) continue ;; esac
+    |     tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null | grep -q '^V3_DRY=' && continue
+    |     n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+
+################ B (the card lane's): the queue ('python3 W/out/orch/queue_state.py aifoundry3 e207': QUEUE OVER, E207's card day done or its chain stopped), THE REST by the clock (40 minutes after our last session on aifoundry3 ended), THE DAY (G at 20:29:00 PST or earlier); then 'bash W/book.sh take aifoundry3 <lane>' (exit 0: G = that moment; 1: make no ssh call to aifoundry3, stop)
+
+################ 0 (the card lane's): uptime first, outside the span (THE LOAD RULE); 'bash W/onelab.sh desk <lane>'; GitHub main read; E210's anchor lines (the land record); any posted sealed forecast for E210 registered in tools/claims-v3/sealed-e210/ first. Any line not as stated: E (with undesk)
+
+################ H (the card lane's): 'bash W/hold.sh add <lane>' (THE QUIET HOLD, one owner a line); git -C <lab clone> status --porcelain --untracked-files=all reads 0 lines. Else E (with undesk)
+
+################ tools/claims-v3/e210/rb/s02_window_e210.sh A 2026-11-17 01:31 03:31
+=== [s02_window_e210] dry listing: nothing below is run
+[s02_window_e210] (dry listing; a real run would say:) window (arm A, aifoundry3): last start 2026-11-17 01:31 PST, last end 2026-11-17 03:31 PST (-277 min from now); fits now: nothing (before the box steps' own time: the look, the sync, the build, step 7, the dry pass, the copy-back)
+# E210's window, recorded 2026-11-17 08:08:16 PST by s02_window_e210.sh
+RB_DAY=2026-11-17
+RB_LAST_START=2026-11-17\ 01:31\ PST
+RB_LAST_END=2026-11-17\ 03:31\ PST
+RB_LAST_START_EPOCH=1794907860
+RB_LAST_END_EPOCH=1794915060
+RB_LAST_START_HM=01:31
+RB_LAST_END_HM=03:31
+RB_PLAN=e210
+RB_ARM=A
+RB_GO_EPOCH=1794931696
+(exit 0)
+
+################ tools/claims-v3/e210/rb/s03_desk_e210.sh A
+=== [s03_desk_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- copy, run on the desk (git pull --ff-only under the lab-git lock): /usr/bin/flock -w 600 -E 75 <RB_GITLOCK> git -C <lab clone> pull --ff-only
+--- read, run on the Intel (HEAD before the checks): git -C <lab clone> rev-parse HEAD
+--- read, run on the Intel (E210's registration, by its content (the commit that added E210.md)): git -C <lab clone> log --diff-filter=A --format=%H -- tools/claims-v3/e210/E210.md
+--- read, run on the Intel (E210's kit commit, by its content (the commit that added KIT.md)): git -C <lab clone> log --diff-filter=A --format=%H -- tools/claims-v3/e210/KIT.md
+--- read, run on the Intel (E210's paths clean): git -C <lab clone> status --short tools/claims-v3/e210 tools/claims-v3/sealed-e210 tools/matmul/mm1/v1 tools/claims-v3/e136/rgm136 tools/claims-v3/kinds/tiles tools/claims-v3/kinds/kinds.json tools/claims-v3/q141k-runbook tools/claims-v3/e128 tools/claims-v3/e206 tools/claims-v3/dmcmd_audit_v2.py tools/claims-v3/dmcmd_table_v2.json docs/reports/data/2026-10-26-e65-bit-prices-hart-ladder docs/reports/data/2026-11-16-e206-matmul-sweep-aifoundry3 docs/reports/data/2026-11-16-e208-mmsweep-a1c1-S1 docs/reports/data/2026-11-16-e208-mmsweep-a1c1-S2
+--- read, run on the Intel (the history check: additions only under tools/claims-v3/e210 since the registration, no shadowing addition (check_history_e210.py)): /usr/bin/python3 -I -B tools/claims-v3/e210/rb/check_history_e210.py tree
+--- read, run on the Intel (the own sha256 of the lists E210 reads (pinned)): sha256sum tools/claims-v3/e210/SHA256SUMS-e210-registration tools/claims-v3/e210/SHA256SUMS-e210-kit tools/matmul/mm1/v1/SHA256SUMS
+--- read, run on the Intel (the list tools/claims-v3/e210/SHA256SUMS-e210-registration (pinned at 523 entries and its own sha256)): sha256sum -c tools/claims-v3/e210/SHA256SUMS-e210-registration
+--- read, run on the Intel (the list tools/claims-v3/e210/SHA256SUMS-e210-kit (pinned at 45 entries and its own sha256)): sha256sum -c tools/claims-v3/e210/SHA256SUMS-e210-kit
+--- read, run on the Intel (the list tools/matmul/mm1/v1/SHA256SUMS (pinned at 77 entries and its own sha256)), in tools/matmul/mm1/v1: sha256sum -c SHA256SUMS
+--- read, run on the Intel (every file with SHA256SUMS anywhere in its name under tools/claims-v3/e210): find tools/claims-v3/e210 -name '*SHA256SUMS*' -type f
+--- desk, run on the Intel (harness-e210.json re-made): /usr/bin/python3 -I -B tools/claims-v3/e210/check_e210.py --check
+--- desk, run on the Intel (every harness file at its sha256 in the lab clone): /usr/bin/python3 -I -B tools/claims-v3/e210/check_e210.py --box
+--- read, run on the Intel (the common module's self-check (the arm, the order, the opening, the probe's rule, the stops and the latch reading, the gate, the argv, the tiles, the records)): /usr/bin/python3 -I -B tools/claims-v3/e210/e210_common.py
+--- read, run on the Intel (the identity module's self-check): /usr/bin/python3 -I -B tools/claims-v3/e210/e210_ident.py
+--- desk, run on the Intel (the registration's points_e210.py <top> --check (recomputed from every pinned input, byte for byte)): /usr/bin/python3 -I -B tools/claims-v3/e210/points_e210.py <lab clone> --check
+--- desk, run on the Intel (the registration's forecast_e210.py <top> --check (recomputed from every pinned input, byte for byte)): /usr/bin/python3 -I -B tools/claims-v3/e210/forecast_e210.py <lab clone> --check
+--- desk, run on the Intel (the registration's desk/kernel_e210.py --check (rgm136's sources re-hashed)): /usr/bin/python3 -I -B tools/claims-v3/e210/desk/kernel_e210.py --check
+--- desk, run on the Intel (the frozen scorer's stand-in self-test (it refuses, 4, if a frozen file changed)): /usr/bin/python3 -I -B tools/claims-v3/e210/score_e210.py --selftest <RB_OUT>/scorer-selftest
+--- desk, run on the Intel (the preflight: dmcmd_audit_v2 on the session's files, no WRITE allowed): bash tools/claims-v3/e210/preflight_e210.sh
+--- read, run on the Intel (a desk test's log, as committed: logs/selftest-run-e210.txt): grep -cE '^SELFTEST-RUN-E210.[0-9]+.of.[0-9]+.PASS$' tools/claims-v3/e210/logs/selftest-run-e210.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/realpath-e210.txt): grep -cE '^REALPATH-E210.[0-9]+.of.[0-9]+.PASS$' tools/claims-v3/e210/logs/realpath-e210.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/realbytes-e210.txt): grep -cE '^REALBYTES-E210.[0-9]+.of.[0-9]+.PASS$' tools/claims-v3/e210/logs/realbytes-e210.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/desktest-build-e210.txt): grep -cE '^DESKTEST-BUILD-E210.[0-9]+.of.[0-9]+.PASS$' tools/claims-v3/e210/logs/desktest-build-e210.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/selftest-rb-e210.txt): grep -cE '^SELFTEST-RB-E210.[0-9]+.of.[0-9]+.PASS$' tools/claims-v3/e210/logs/selftest-rb-e210.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/dry-listing-e210.txt): grep -cE '^dry.listing:.[0-9]+.steps.listed,.0.exited.non-zero,.0.box.calls$' tools/claims-v3/e210/logs/dry-listing-e210.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/dmcmd-audit-e210.txt): grep -cE '^dmcmd_audit:.GO' tools/claims-v3/e210/logs/dmcmd-audit-e210.txt
+--- read, run on the Intel (HEAD after the checks): git -C <lab clone> rev-parse HEAD
+--- read, run on the Intel (E210 data in any ref (want none before its session)): git -C <lab clone> log --all --oneline -- 'docs/reports/data/*e210*'
+--- read, run on the Intel (E210 gate-stop records in any ref (REPORTED)): git -C <lab clone> log --all --oneline -- 'docs/reports/gate-stops/*e210*'
+--- read, run on the Intel (a sealed-forecast note for E210 (REPORTED; E210.md 0)): git -C <lab clone> log --oneline -- tools/claims-v3/sealed-e210
+[s03_desk_e210] (dry listing; a real run would say:) desk check: the window written today for E210; pulled under the lab-git lock, HEAD DRY descends from the registration DRY (subtree adef3701) and the kit DRY, the paths clean, HISTORY OK, the lists at their pinned counts and bytes (523; the kit's 45; MM1-v1's 77), lists not pinned (reported): none; the harness re-made and at its sha256, both self-checks, the registration's checks, the scorer's self-test byte-identical, the preflight GO, the desk tests' logs; E210 data commits: 0; gate-stop commits (reported): 0; sealed-forecast note commits (reported): 0
+(exit 0)
+
+################ after step 2 (the card lane's): 'bash W/onelab.sh undesk <lane>' (on 0 and on every stop path inside steps 0-2: E with undesk)
+
+################ tools/claims-v3/q141k-runbook/k6/s05_look_k6.sh aifoundry3
+=== [s05_look_k6] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (look first: et-who, who, uptime; the holder rule): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | MODE=''
+    | LIM=520; POLL=30
+    | date '+%F %T %Z'; uptime; echo "booted $(uptime -s)"
+    | echo "login $(id -un)"
+    | hold_read
+    | while [ "$FREE" -eq 0 ] && [ "$MODE" = --wait ] && [ "$SECONDS" -lt "$LIM" ]; do   # v3: the box's clock bounds the loop
+    |   sleep "$POLL"; hold_read
+    | done
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD) after $SECONDS s of polls"
+(exit 0)
+
+################ 3: the post: none, by the owner's standing waiver (his words, Sun 15 Nov 2026 10:22:36 PST: "don't worry about discord post, just use the machines, nobody is using them")
+
+################ tools/claims-v3/e210/rb/s07_sync_e210.sh A
+=== [s07_sync_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- gate: now <= the round's last start (2026-11-17 01:31 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (no card session of ours and no runbook job on the box before the sync): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on $BOX: E210's sync never runs beside one"; exit 3; fi
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: $(jobs_live) runbook job(s) still run on $BOX: E210's sync never runs under one"; exit 3; fi
+    | echo "NOT-BESIDE-OURS: no card session of ours and no runbook job on $BOX"
+--- read, run on the Intel (the synced paths clean before the sync): git -C <lab clone> status --short tools/claims-v3/e210/run_e210.py tools/claims-v3/e210/e210_common.py tools/claims-v3/e210/e210_ident.py tools/claims-v3/e210/session_e210.sh tools/claims-v3/e210/build_e210.sh tools/claims-v3/e210/check_e210.py tools/claims-v3/e210/preflight_e210.sh tools/claims-v3/e210/ettelem_guard_e210.sh tools/claims-v3/e210/fake_card_e210.py tools/claims-v3/e210/points-e210.json tools/claims-v3/e210/forecast-e210.json tools/claims-v3/e210/SHA256SUMS-e210-registration tools/claims-v3/dmcmd_audit_v2.py tools/claims-v3/dmcmd_table_v2.json tools/claims-v3/kinds/kinds.json tools/claims-v3/e210/tiles/fp32/arow50/arow50_00.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_01.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_02.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_03.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_04.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_05.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_06.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_07.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_08.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_09.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_10.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_11.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_12.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_13.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_14.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_15.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_16.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_17.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_18.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_19.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_20.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_21.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_22.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_23.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_24.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_25.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_26.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_27.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_28.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_29.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_30.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_31.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_32.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_33.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_34.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_35.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_36.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_37.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_38.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_39.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_40.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_41.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_42.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_43.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_44.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_45.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_46.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_47.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_48.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_49.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_50.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_51.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_52.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_53.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_54.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_55.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_56.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_57.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_58.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_59.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_60.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_00.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_01.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_02.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_03.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_04.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_05.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_06.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_07.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_08.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_09.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_10.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_11.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_12.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_13.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_14.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_15.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_16.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_17.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_18.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_19.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_20.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_21.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_22.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_23.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_24.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_25.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_26.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_27.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_28.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_29.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_30.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_31.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_32.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_33.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_34.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_35.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_36.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_37.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_38.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_39.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_40.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_41.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_42.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_43.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_44.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_45.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_46.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_47.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_48.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_49.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_50.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_51.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_52.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_53.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_54.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_55.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_56.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_57.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_58.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_59.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_60.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_00.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_01.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_02.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_03.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_04.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_05.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_06.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_07.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_08.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_09.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_10.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_11.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_12.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_13.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_14.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_15.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_16.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_17.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_18.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_19.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_20.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_21.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_22.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_23.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_24.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_25.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_26.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_27.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_28.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_29.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_30.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_31.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_32.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_33.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_34.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_35.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_36.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_37.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_38.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_39.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_40.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_41.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_42.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_43.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_44.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_45.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_46.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_47.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_48.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_49.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_50.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_51.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_52.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_53.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_54.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_55.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_56.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_57.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_58.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_59.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_60.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_00.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_01.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_02.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_03.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_04.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_05.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_06.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_07.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_08.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_09.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_10.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_11.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_12.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_13.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_14.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_15.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_16.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_17.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_18.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_19.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_20.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_21.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_22.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_23.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_24.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_25.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_26.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_27.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_28.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_29.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_30.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_31.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_32.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_33.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_34.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_35.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_36.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_37.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_38.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_39.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_40.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_41.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_42.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_43.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_44.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_45.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_46.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_47.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_48.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_49.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_50.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_51.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_52.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_53.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_54.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_55.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_56.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_57.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_58.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_59.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_60.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_00.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_01.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_02.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_03.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_04.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_05.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_06.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_07.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_08.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_09.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_10.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_11.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_12.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_13.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_14.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_15.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_16.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_17.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_18.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_19.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_20.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_21.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_22.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_23.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_24.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_25.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_26.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_27.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_28.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_29.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_30.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_31.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_32.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_33.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_34.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_35.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_36.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_37.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_38.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_39.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_40.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_41.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_42.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_43.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_44.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_45.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_46.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_47.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_48.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_49.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_50.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_51.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_52.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_53.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_54.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_55.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_56.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_57.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_58.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_59.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_60.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_00.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_01.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_02.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_03.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_04.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_05.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_06.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_07.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_08.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_09.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_10.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_11.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_12.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_13.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_14.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_15.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_16.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_17.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_18.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_19.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_20.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_21.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_22.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_23.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_24.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_25.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_26.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_27.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_28.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_29.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_30.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_31.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_32.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_33.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_34.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_35.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_36.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_37.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_38.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_39.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_40.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_41.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_42.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_43.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_44.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_45.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_46.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_47.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_48.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_49.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_50.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_51.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_52.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_53.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_54.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_55.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_56.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_57.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_58.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_59.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_60.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_00.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_01.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_02.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_03.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_04.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_05.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_06.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_07.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_08.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_09.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_10.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_11.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_12.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_13.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_14.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_15.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_16.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_17.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_18.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_19.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_20.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_21.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_22.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_23.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_24.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_25.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_26.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_27.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_28.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_29.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_30.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_31.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_32.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_33.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_34.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_35.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_36.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_37.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_38.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_39.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_40.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_41.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_42.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_43.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_44.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_45.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_46.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_47.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_48.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_49.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_50.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_51.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_52.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_53.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_54.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_55.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_56.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_57.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_58.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_59.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_60.bin tools/claims-v3/e210/tiles/fp32/negzero/negzero_00.bin tools/claims-v3/e210/tiles/fp32/signs/signs_00.bin tools/claims-v3/e210/tiles/fp32/signs/signs_01.bin tools/claims-v3/e210/tiles/fp32/signs/signs_02.bin tools/claims-v3/e210/tiles/fp32/signs/signs_03.bin tools/claims-v3/e210/tiles/fp32/signs/signs_04.bin tools/claims-v3/e210/tiles/fp32/signs/signs_05.bin tools/claims-v3/e210/tiles/fp32/signs/signs_06.bin tools/claims-v3/e210/tiles/fp32/signs/signs_07.bin tools/claims-v3/e210/tiles/fp32/signs/signs_08.bin tools/claims-v3/e210/tiles/fp32/signs/signs_09.bin tools/claims-v3/e210/tiles/fp32/signs/signs_10.bin tools/claims-v3/e210/tiles/fp32/signs/signs_11.bin tools/claims-v3/e210/tiles/fp32/signs/signs_12.bin tools/claims-v3/e210/tiles/fp32/signs/signs_13.bin tools/claims-v3/e210/tiles/fp32/signs/signs_14.bin tools/claims-v3/e210/tiles/fp32/signs/signs_15.bin tools/claims-v3/e210/tiles/fp32/signs/signs_16.bin tools/claims-v3/e210/tiles/fp32/signs/signs_17.bin tools/claims-v3/e210/tiles/fp32/signs/signs_18.bin tools/claims-v3/e210/tiles/fp32/signs/signs_19.bin tools/claims-v3/e210/tiles/fp32/signs/signs_20.bin tools/claims-v3/e210/tiles/fp32/signs/signs_21.bin tools/claims-v3/e210/tiles/fp32/signs/signs_22.bin tools/claims-v3/e210/tiles/fp32/signs/signs_23.bin tools/claims-v3/e210/tiles/fp32/signs/signs_24.bin tools/claims-v3/e210/tiles/fp32/signs/signs_25.bin tools/claims-v3/e210/tiles/fp32/signs/signs_26.bin tools/claims-v3/e210/tiles/fp32/signs/signs_27.bin tools/claims-v3/e210/tiles/fp32/signs/signs_28.bin tools/claims-v3/e210/tiles/fp32/signs/signs_29.bin tools/claims-v3/e210/tiles/fp32/signs/signs_30.bin tools/claims-v3/e210/tiles/fp32/signs/signs_31.bin tools/claims-v3/e210/tiles/fp32/signs/signs_32.bin tools/claims-v3/e210/tiles/fp32/signs/signs_33.bin tools/claims-v3/e210/tiles/fp32/signs/signs_34.bin tools/claims-v3/e210/tiles/fp32/signs/signs_35.bin tools/claims-v3/e210/tiles/fp32/signs/signs_36.bin tools/claims-v3/e210/tiles/fp32/signs/signs_37.bin tools/claims-v3/e210/tiles/fp32/signs/signs_38.bin tools/claims-v3/e210/tiles/fp32/signs/signs_39.bin tools/claims-v3/e210/tiles/fp32/signs/signs_40.bin tools/claims-v3/e210/tiles/fp32/signs/signs_41.bin tools/claims-v3/e210/tiles/fp32/signs/signs_42.bin tools/claims-v3/e210/tiles/fp32/signs/signs_43.bin tools/claims-v3/e210/tiles/fp32/signs/signs_44.bin tools/claims-v3/e210/tiles/fp32/signs/signs_45.bin tools/claims-v3/e210/tiles/fp32/signs/signs_46.bin tools/claims-v3/e210/tiles/fp32/signs/signs_47.bin tools/claims-v3/e210/tiles/fp32/signs/signs_48.bin tools/claims-v3/e210/tiles/fp32/signs/signs_49.bin tools/claims-v3/e210/tiles/fp32/signs/signs_50.bin tools/claims-v3/e210/tiles/fp32/signs/signs_51.bin tools/claims-v3/e210/tiles/fp32/signs/signs_52.bin tools/claims-v3/e210/tiles/fp32/signs/signs_53.bin tools/claims-v3/e210/tiles/fp32/signs/signs_54.bin tools/claims-v3/e210/tiles/fp32/signs/signs_55.bin tools/claims-v3/e210/tiles/fp32/signs/signs_56.bin tools/claims-v3/e210/tiles/fp32/signs/signs_57.bin tools/claims-v3/e210/tiles/fp32/signs/signs_58.bin tools/claims-v3/e210/tiles/fp32/signs/signs_59.bin tools/claims-v3/e210/tiles/fp32/signs/signs_60.bin tools/claims-v3/kinds/tiles/fp32/ones.bin tools/claims-v3/kinds/tiles/fp32/randn.bin tools/claims-v3/kinds/tiles/fp32/sparse50.bin tools/claims-v3/kinds/tiles/fp32/zeros.bin tools/claims-v3/e136/rgm136/CMakeLists.txt tools/claims-v3/e136/rgm136/README.md tools/claims-v3/e136/rgm136/sparsity_args.h tools/claims-v3/e136/rgm136/host/CMakeLists.txt tools/claims-v3/e136/rgm136/host/Constants.h.in tools/claims-v3/e136/rgm136/host/main.cpp tools/claims-v3/e136/rgm136/kernel/CMakeLists.txt tools/claims-v3/e136/rgm136/kernel/crt.S tools/claims-v3/e136/rgm136/kernel/sections.ld tools/claims-v3/e136/rgm136/kernel/sparsity.c tools/claims-v3/e210/harness-e210.json
+--- read, run on the Intel (the lab clone's copies of harness-e210.json's files at their sha256): /usr/bin/python3 -I -B tools/claims-v3/e210/check_e210.py --box
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- copy, run on the Intel (aifoundry3's rsync: harness-e210.json's files (itemized)): rsync -a -c -R -i --exclude __pycache__ -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' tools/claims-v3/e210/run_e210.py tools/claims-v3/e210/e210_common.py tools/claims-v3/e210/e210_ident.py tools/claims-v3/e210/session_e210.sh tools/claims-v3/e210/build_e210.sh tools/claims-v3/e210/check_e210.py tools/claims-v3/e210/preflight_e210.sh tools/claims-v3/e210/ettelem_guard_e210.sh tools/claims-v3/e210/fake_card_e210.py tools/claims-v3/e210/points-e210.json tools/claims-v3/e210/forecast-e210.json tools/claims-v3/e210/SHA256SUMS-e210-registration tools/claims-v3/dmcmd_audit_v2.py tools/claims-v3/dmcmd_table_v2.json tools/claims-v3/kinds/kinds.json tools/claims-v3/e210/tiles/fp32/arow50/arow50_00.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_01.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_02.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_03.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_04.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_05.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_06.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_07.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_08.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_09.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_10.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_11.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_12.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_13.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_14.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_15.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_16.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_17.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_18.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_19.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_20.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_21.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_22.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_23.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_24.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_25.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_26.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_27.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_28.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_29.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_30.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_31.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_32.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_33.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_34.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_35.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_36.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_37.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_38.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_39.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_40.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_41.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_42.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_43.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_44.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_45.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_46.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_47.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_48.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_49.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_50.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_51.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_52.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_53.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_54.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_55.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_56.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_57.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_58.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_59.bin tools/claims-v3/e210/tiles/fp32/arow50/arow50_60.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_00.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_01.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_02.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_03.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_04.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_05.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_06.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_07.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_08.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_09.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_10.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_11.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_12.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_13.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_14.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_15.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_16.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_17.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_18.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_19.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_20.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_21.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_22.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_23.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_24.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_25.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_26.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_27.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_28.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_29.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_30.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_31.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_32.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_33.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_34.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_35.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_36.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_37.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_38.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_39.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_40.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_41.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_42.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_43.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_44.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_45.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_46.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_47.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_48.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_49.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_50.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_51.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_52.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_53.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_54.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_55.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_56.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_57.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_58.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_59.bin tools/claims-v3/e210/tiles/fp32/badjeq/badjeq_60.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_00.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_01.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_02.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_03.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_04.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_05.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_06.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_07.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_08.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_09.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_10.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_11.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_12.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_13.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_14.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_15.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_16.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_17.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_18.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_19.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_20.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_21.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_22.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_23.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_24.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_25.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_26.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_27.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_28.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_29.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_30.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_31.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_32.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_33.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_34.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_35.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_36.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_37.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_38.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_39.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_40.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_41.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_42.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_43.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_44.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_45.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_46.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_47.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_48.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_49.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_50.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_51.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_52.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_53.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_54.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_55.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_56.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_57.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_58.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_59.bin tools/claims-v3/e210/tiles/fp32/bhalfeq/bhalfeq_60.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_00.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_01.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_02.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_03.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_04.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_05.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_06.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_07.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_08.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_09.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_10.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_11.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_12.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_13.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_14.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_15.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_16.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_17.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_18.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_19.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_20.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_21.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_22.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_23.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_24.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_25.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_26.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_27.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_28.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_29.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_30.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_31.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_32.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_33.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_34.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_35.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_36.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_37.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_38.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_39.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_40.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_41.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_42.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_43.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_44.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_45.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_46.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_47.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_48.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_49.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_50.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_51.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_52.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_53.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_54.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_55.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_56.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_57.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_58.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_59.bin tools/claims-v3/e210/tiles/fp32/hd4/hd4_60.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_00.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_01.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_02.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_03.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_04.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_05.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_06.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_07.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_08.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_09.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_10.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_11.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_12.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_13.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_14.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_15.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_16.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_17.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_18.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_19.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_20.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_21.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_22.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_23.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_24.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_25.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_26.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_27.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_28.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_29.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_30.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_31.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_32.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_33.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_34.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_35.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_36.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_37.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_38.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_39.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_40.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_41.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_42.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_43.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_44.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_45.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_46.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_47.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_48.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_49.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_50.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_51.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_52.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_53.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_54.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_55.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_56.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_57.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_58.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_59.bin tools/claims-v3/e210/tiles/fp32/highmant8/highmant8_60.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_00.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_01.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_02.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_03.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_04.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_05.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_06.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_07.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_08.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_09.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_10.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_11.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_12.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_13.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_14.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_15.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_16.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_17.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_18.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_19.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_20.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_21.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_22.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_23.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_24.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_25.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_26.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_27.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_28.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_29.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_30.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_31.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_32.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_33.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_34.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_35.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_36.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_37.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_38.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_39.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_40.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_41.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_42.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_43.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_44.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_45.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_46.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_47.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_48.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_49.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_50.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_51.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_52.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_53.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_54.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_55.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_56.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_57.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_58.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_59.bin tools/claims-v3/e210/tiles/fp32/lowmant8/lowmant8_60.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_00.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_01.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_02.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_03.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_04.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_05.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_06.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_07.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_08.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_09.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_10.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_11.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_12.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_13.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_14.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_15.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_16.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_17.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_18.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_19.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_20.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_21.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_22.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_23.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_24.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_25.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_26.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_27.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_28.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_29.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_30.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_31.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_32.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_33.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_34.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_35.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_36.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_37.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_38.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_39.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_40.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_41.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_42.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_43.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_44.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_45.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_46.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_47.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_48.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_49.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_50.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_51.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_52.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_53.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_54.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_55.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_56.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_57.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_58.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_59.bin tools/claims-v3/e210/tiles/fp32/maxalte/maxalte_60.bin tools/claims-v3/e210/tiles/fp32/negzero/negzero_00.bin tools/claims-v3/e210/tiles/fp32/signs/signs_00.bin tools/claims-v3/e210/tiles/fp32/signs/signs_01.bin tools/claims-v3/e210/tiles/fp32/signs/signs_02.bin tools/claims-v3/e210/tiles/fp32/signs/signs_03.bin tools/claims-v3/e210/tiles/fp32/signs/signs_04.bin tools/claims-v3/e210/tiles/fp32/signs/signs_05.bin tools/claims-v3/e210/tiles/fp32/signs/signs_06.bin tools/claims-v3/e210/tiles/fp32/signs/signs_07.bin tools/claims-v3/e210/tiles/fp32/signs/signs_08.bin tools/claims-v3/e210/tiles/fp32/signs/signs_09.bin tools/claims-v3/e210/tiles/fp32/signs/signs_10.bin tools/claims-v3/e210/tiles/fp32/signs/signs_11.bin tools/claims-v3/e210/tiles/fp32/signs/signs_12.bin tools/claims-v3/e210/tiles/fp32/signs/signs_13.bin tools/claims-v3/e210/tiles/fp32/signs/signs_14.bin tools/claims-v3/e210/tiles/fp32/signs/signs_15.bin tools/claims-v3/e210/tiles/fp32/signs/signs_16.bin tools/claims-v3/e210/tiles/fp32/signs/signs_17.bin tools/claims-v3/e210/tiles/fp32/signs/signs_18.bin tools/claims-v3/e210/tiles/fp32/signs/signs_19.bin tools/claims-v3/e210/tiles/fp32/signs/signs_20.bin tools/claims-v3/e210/tiles/fp32/signs/signs_21.bin tools/claims-v3/e210/tiles/fp32/signs/signs_22.bin tools/claims-v3/e210/tiles/fp32/signs/signs_23.bin tools/claims-v3/e210/tiles/fp32/signs/signs_24.bin tools/claims-v3/e210/tiles/fp32/signs/signs_25.bin tools/claims-v3/e210/tiles/fp32/signs/signs_26.bin tools/claims-v3/e210/tiles/fp32/signs/signs_27.bin tools/claims-v3/e210/tiles/fp32/signs/signs_28.bin tools/claims-v3/e210/tiles/fp32/signs/signs_29.bin tools/claims-v3/e210/tiles/fp32/signs/signs_30.bin tools/claims-v3/e210/tiles/fp32/signs/signs_31.bin tools/claims-v3/e210/tiles/fp32/signs/signs_32.bin tools/claims-v3/e210/tiles/fp32/signs/signs_33.bin tools/claims-v3/e210/tiles/fp32/signs/signs_34.bin tools/claims-v3/e210/tiles/fp32/signs/signs_35.bin tools/claims-v3/e210/tiles/fp32/signs/signs_36.bin tools/claims-v3/e210/tiles/fp32/signs/signs_37.bin tools/claims-v3/e210/tiles/fp32/signs/signs_38.bin tools/claims-v3/e210/tiles/fp32/signs/signs_39.bin tools/claims-v3/e210/tiles/fp32/signs/signs_40.bin tools/claims-v3/e210/tiles/fp32/signs/signs_41.bin tools/claims-v3/e210/tiles/fp32/signs/signs_42.bin tools/claims-v3/e210/tiles/fp32/signs/signs_43.bin tools/claims-v3/e210/tiles/fp32/signs/signs_44.bin tools/claims-v3/e210/tiles/fp32/signs/signs_45.bin tools/claims-v3/e210/tiles/fp32/signs/signs_46.bin tools/claims-v3/e210/tiles/fp32/signs/signs_47.bin tools/claims-v3/e210/tiles/fp32/signs/signs_48.bin tools/claims-v3/e210/tiles/fp32/signs/signs_49.bin tools/claims-v3/e210/tiles/fp32/signs/signs_50.bin tools/claims-v3/e210/tiles/fp32/signs/signs_51.bin tools/claims-v3/e210/tiles/fp32/signs/signs_52.bin tools/claims-v3/e210/tiles/fp32/signs/signs_53.bin tools/claims-v3/e210/tiles/fp32/signs/signs_54.bin tools/claims-v3/e210/tiles/fp32/signs/signs_55.bin tools/claims-v3/e210/tiles/fp32/signs/signs_56.bin tools/claims-v3/e210/tiles/fp32/signs/signs_57.bin tools/claims-v3/e210/tiles/fp32/signs/signs_58.bin tools/claims-v3/e210/tiles/fp32/signs/signs_59.bin tools/claims-v3/e210/tiles/fp32/signs/signs_60.bin tools/claims-v3/kinds/tiles/fp32/ones.bin tools/claims-v3/kinds/tiles/fp32/randn.bin tools/claims-v3/kinds/tiles/fp32/sparse50.bin tools/claims-v3/kinds/tiles/fp32/zeros.bin tools/claims-v3/e136/rgm136/CMakeLists.txt tools/claims-v3/e136/rgm136/README.md tools/claims-v3/e136/rgm136/sparsity_args.h tools/claims-v3/e136/rgm136/host/CMakeLists.txt tools/claims-v3/e136/rgm136/host/Constants.h.in tools/claims-v3/e136/rgm136/host/main.cpp tools/claims-v3/e136/rgm136/kernel/CMakeLists.txt tools/claims-v3/e136/rgm136/kernel/crt.S tools/claims-v3/e136/rgm136/kernel/sections.ld tools/claims-v3/e136/rgm136/kernel/sparsity.c tools/claims-v3/e210/harness-e210.json aifoundry3:aifoundry/
+--- read on aifoundry3 (the harness at its sha256 on the box): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | python3 -B tools/claims-v3/e210/check_e210.py --box | tail -n 1
+(exit 0)
+
+################ tools/claims-v3/e210/rb/s08_build_e210.sh A start
+=== [s08_build_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- gate: now <= the round's last start (2026-11-17 01:31 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (the build-attempt count today and the last build's verdict): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | JOB=a3-build-e210
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on $BOX: E210's build never runs beside one"; exit 3; fi
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: $(jobs_live) runbook job(s) still run on $BOX: E210's build starts alone"; exit 3; fi
+    | TODAY=$(TZ=America/Los_Angeles date +%F)
+    | n=0; [ -f build/e210-build-attempts.txt ] && n=$(grep -cE "^$TODAY .* $JOB started\$" build/e210-build-attempts.txt)
+    | echo "E210-BUILDS-TODAY $n"
+    | if job_ok_today "$JOB" && grep -q '^RGM-BUILT rc=0' "build/q141k/jobs/$JOB.out" 2>/dev/null; then echo "BUILT-TODAY"; fi
+--- launch on aifoundry3 (start the dry pass a3-build-e210, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-build-e210
+    | MAXJ=1
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/aifoundry || exit 1
+    | echo "$$" > build/q141k/jobs/a3-build-e210.pid
+    | echo "JOB-BEGIN a3-build-e210 $(date '+%F %T %Z')"
+    | (
+    | JOB=a3-build-e210
+    | mkdir -p build/e210-build-logs
+    | TODAY=$(TZ=America/Los_Angeles date +%F)
+    | k=1; [ -f build/e210-build-attempts.txt ] && k=$(( $(grep -c "^$TODAY .* $JOB started\$" build/e210-build-attempts.txt) + 1 ))
+    | echo "$(TZ=America/Los_Angeles date '+%F %T %Z') $JOB started" >> build/e210-build-attempts.txt
+    | L=build/e210-build-logs/$TODAY-start$k.txt
+    | timeout 500 bash tools/claims-v3/e210/build_e210.sh > "$L" 2>&1
+    | rc=$?
+    | cat "$L"
+    | echo "$(TZ=America/Los_Angeles date '+%F %T %Z') $JOB ended rc=$rc: $(grep -E '^RGM-(BUILT|BUILD-FAILED)' "$L" | cut -c1-60)" >> build/e210-build-attempts.txt
+    | exit $rc
+    | )
+    | rc=$?
+    | echo "JOB-END a3-build-e210 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a3-build-e210.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+[s08_build_e210] (dry listing; a real run would say:) the build job a3-build-e210 started on aifoundry3: run this step's wait (bounded) until it ends
+(exit 0)
+
+################ tools/claims-v3/e210/rb/s08_build_e210.sh A wait
+=== [s08_build_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on the dry pass a3-build-e210): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-build-e210
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | fresh "$J.sh" || { echo "JOB-UNKNOWN ${J##*/}: not started today (its script is from $(TZ=America/Los_Angeles date -r "$J.sh" +%F)): start it again"; exit 3; }
+    | t=0; lost=0
+    | while [ ! -e "$J.rc" ] && [ "$SECONDS" -lt "$LIM" ]; do      # v3: the box's clock bounds the loop, not the sum of its sleeps
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then
+    |     # the grace: the job writes its pid as its first line and its exit status as its last; read both again before calling it lost
+    |     sleep 2
+    |     [ -e "$J.rc" ] && break
+    |     if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then lost=1; break; fi
+    |     continue
+    |   fi
+    |   sleep 10
+    | done
+    | t=$SECONDS
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"
+    | elif [ "$lost" -eq 1 ]; then echo "JOB-LOST ${J##*/}: no process (pid $(cat "$J.pid" 2>/dev/null || echo none)) and no exit status"
+    | else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+[s08_build_e210] (dry listing; a real run would say:) then: RB_OUT/e210-built-A.txt from the verdict line; the build record, the harness, the preflight and both self-checks, one 60 s read
+(exit 0)
+
+################ step 6's rule: at most two starts a Pacific day on the box (the third: NO-THIRD-BUILD, 16, no session that day); a 14 on wait is no reading, wait again
+
+################ 6n: THE NEVER-RUN SEARCH, REPEATED RIGHT BEFORE THE FIRST CARD COMMAND (E210.md 4, the kit's reading): E210_ROUND_OUT=<the round's OUT> (a pattern found run is REPORTED: it stays in E210; the README says which)
+
+################ tools/claims-v3/e210/rb/s06n_neverrun_e210.sh A
+=== [s06n_neverrun_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- desk, run on the Intel (the never-run search at the desk: E210's registered scanner (unchanged) over the lab at HEAD, the round's lane folders and HOME/claude/work, E210's own folders and the model session's left out): /usr/bin/python3 -I -B tools/claims-v3/e210/desk/neverrun_card_e210.py desk <RB_OUT>/neverrun-20261117T080817
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (the never-run search on aifoundry3: E210's registered scanner (unchanged) and A1's scanner, both on stdin, over our folders there, reads only): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | tops=""; for d in "$HOME/claude/work" "$HOME/claude/et-soc1-prototyping" "$HOME/aifoundry" "$HOME/e71" "$HOME"/q1[0-9][0-9]-* "$HOME/tmp"; do [ -d "$d" ] && tops="$tops $d"; done
+    | ex=""; for d in "$HOME"/aifoundry/build/e210 "$HOME"/aifoundry/build/e210rgm "$HOME"/aifoundry/tools/claims-v3/e210 "$HOME"/claude/work/ee-*; do [ -d "$d" ] && ex="$ex --exclude=$d"; done
+    | echo "A3HOME $HOME"
+    | echo "A3SCAN-BEGIN"
+    | nice -n 19 ionice -c 3 python3 -I -B - scan aifoundry3-ours $tops $ex 2>/dev/null <<'RB_NR_EOF'
+    | #!/usr/bin/env python3
+    | """E210 (Q202) desk: did any of E210's operand patterns ever run in a GEMM on any card? A search of every data directory of ours. No card.
+    | Standard library only; the scan mode imports nothing of the lab, so it runs on any box from stdin.
+    | 
+    |     python3 -I -B neverrun_e210.py scan LABEL TOP [TOP ...] [--exclude=DIR ...] > found.json   (on another box: the same, from stdin)
+    |     python3 -I -B tools/claims-v3/e210/desk/neverrun_e210.py report OUT_JSON OUT_TXT found.json [...] [--scrub=PREFIX=>LABEL ...]
+    |                      (the scrubs replace a box's folder prefixes by labels in the two outputs, so no login or home path is written)
+    | 
+    | WHAT IS SEARCHED, in every file under a top folder (gzip read through; directories holding a .git entry are skipped: the lab's committed
+    | data are scanned at their source):
+    |   (a) GEMM host records and host commands: a SPARSITY record ("arm": "gemm...", "values": "<arm>:<gen>:<files>") or a command line / argv
+    |       list with --values <gemm arm>:<gen>:<files>. From each: the generator and the tile files it names.
+    |   (b) every tile file: a file of exactly 2,048 bytes (rgm136's tile pair: A then B, 1,024 bytes each), classified by E210's laws below.
+    | THE LAWS (fp32 words, little-endian; a tile is 16 lines of 16 words; A = the first 256 words, B = the last 256), each tested bit for bit:
+    |   negzero    every word 0x80000000
+    |   signs      every word 0x3F800000 or 0xBF800000, both present
+    |   lowmant8   every word 0x3F800000 | (8 bits in mantissa bits 0-7), not all equal
+    |   highmant8  every word 0x3F800000 | (8 bits in mantissa bits 15-22), not all equal
+    |   bhalfeq    every word a normal fp32 value (exponent field 1-254); B[r][c] == B[r][c+8] for every r and c < 8; A and B each not constant
+    |   badjeq     every word a normal fp32 value; B[r][2m] == B[r][2m+1] for every r and m; A and B each not constant
+    |   hd4        every word a normal fp32 value; A: each column's successive rows differ in exactly 4 mantissa bits (and nothing else);
+    |              B[r][c+8] = B[r][c] xor (exactly 4 mantissa bits)
+    |   maxalte    every word a normal fp32 value; A: rows alternate down each column by xor 0x83FFFFFF; B[r][c+8] = B[r][c] xor 0x83FFFFFF
+    |   arow50     A's odd rows all +0.0, every word of A's even rows and of B a normal fp32 value
+    | The host (rgm136, unchanged) draws only randn, sparse50, sparse25 and e37 itself (every element independent: none of these laws) and otherwise
+    | reads tile files, so a GEMM can have run one of these laws only from a tile file that passes it.
+    | SPDX-License-Identifier: Apache-2.0
+    | """
+    | import gzip
+    | import hashlib
+    | import json
+    | import os
+    | import re
+    | import socket
+    | import struct
+    | import sys
+    | import time
+    | 
+    | RE_REC_VAL = re.compile(r'"values"\s*:\s*"(gemm[A-Za-z0-9]+:[^"]*)"')
+    | RE_CMD_VAL = re.compile(r'--values"?\s*,?\s*"?(gemm[A-Za-z0-9]+:[^"\s]*)')
+    | MAX_BYTES = 400 * 2 ** 20
+    | TEXT_EXT = ('.json', '.jsonl', '.log', '.txt', '.csv', '.md', '.sh', '.py', '.out', '.err', '.gz', '.tsv', '')
+    | LAWS = ('negzero', 'signs', 'lowmant8', 'highmant8', 'bhalfeq', 'badjeq', 'hd4', 'maxalte', 'arow50')
+    | HOST_GENS = ('randn', 'sparse50', 'sparse25', 'e37', 'tiles')
+    | 
+    | 
+    | def popcount(x):
+    |     return bin(x).count('1')
+    | 
+    | 
+    | def classify(raw):
+    |     """E210 laws a 2,048-byte tile pair passes (a list; empty for none)"""
+    |     w = struct.unpack('<512I', raw)
+    |     A, B = w[:256], w[256:]
+    |     out = []
+    |     if all(x == 0x80000000 for x in w):
+    |         out.append('negzero')
+    |     if all(x in (0x3F800000, 0xBF800000) for x in w) and len(set(w)) == 2:
+    |         out.append('signs')
+    |     if all((x & 0xFFFFFF00) == 0x3F800000 for x in w) and len(set(w)) > 1:
+    |         out.append('lowmant8')
+    |     if all((x & ~(0xFF << 15) & 0xFFFFFFFF) == 0x3F800000 for x in w) and len(set(w)) > 1:
+    |         out.append('highmant8')
+    |     a_var, b_var = len(set(A)) > 1, len(set(B)) > 1
+    |     nrm = all(0 < ((x >> 23) & 0xFF) < 255 for x in w)
+    |     if nrm and a_var and b_var and all(B[16 * r + c] == B[16 * r + c + 8] for r in range(16) for c in range(8)):
+    |         out.append('bhalfeq')
+    |     if nrm and a_var and b_var and all(B[16 * r + 2 * m] == B[16 * r + 2 * m + 1] for r in range(16) for m in range(8)):
+    |         out.append('badjeq')
+    |     mant = 0x007FFFFF
+    |     if nrm and all(((A[16 * r + c] ^ A[16 * (r - 1) + c]) & ~mant & 0xFFFFFFFF) == 0 and popcount(A[16 * r + c] ^ A[16 * (r - 1) + c]) == 4
+    |            for r in range(1, 16) for c in range(16)) and \
+    |        all(((B[16 * r + c] ^ B[16 * r + c + 8]) & ~mant & 0xFFFFFFFF) == 0 and popcount(B[16 * r + c] ^ B[16 * r + c + 8]) == 4
+    |            for r in range(16) for c in range(8)):
+    |         out.append('hd4')
+    |     F = 0x83FFFFFF
+    |     if nrm and all(A[16 * r + c] == (A[16 * (r - 1) + c] ^ F) for r in range(1, 16) for c in range(16)) and \
+    |        all(B[16 * r + c + 8] == (B[16 * r + c] ^ F) for r in range(16) for c in range(8)):
+    |         out.append('maxalte')
+    |     if all(A[16 * r + c] == 0 for r in range(1, 16, 2) for c in range(16)) and \
+    |        all(0 < ((A[16 * r + c] >> 23) & 0xFF) < 255 for r in range(0, 16, 2) for c in range(16)) and \
+    |        all(0 < ((x >> 23) & 0xFF) < 255 for x in B):
+    |         out.append('arow50')
+    |     return out
+    | 
+    | 
+    | def parse_values(v):
+    |     parts = v.split(':', 2)
+    |     arm = parts[0]
+    |     gen = parts[1] if len(parts) > 1 else ''
+    |     files = [f for f in (parts[2].split(',') if len(parts) > 2 else []) if f]
+    |     return arm, gen, files
+    | 
+    | 
+    | def read_lines(path):
+    |     try:
+    |         if os.path.getsize(path) > MAX_BYTES:
+    |             return None
+    |         if path.endswith('.gz'):
+    |             with gzip.open(path, 'rt', errors='replace') as f:
+    |                 return f.read().splitlines()
+    |         with open(path, 'r', errors='replace') as f:
+    |             return f.read().splitlines()
+    |     except Exception:
+    |         return None
+    | 
+    | 
+    | def scan(label, tops, excludes=()):
+    |     t0 = time.time()
+    |     res = {'label': label, 'host': socket.gethostname(), 'tops': tops, 'python': sys.version.split()[0],
+    |            'started_epoch': t0, 'files_seen': 0, 'text_files_read': 0, 'tile_files': 0, 'gemm_lines': 0,
+    |            'gens': {}, 'tile_names': {}, 'values_unique': 0, 'law_hits': [], 'skipped_git_dirs': 0, 'unreadable': 0,
+    |            'excludes': list(excludes), 'excluded_dirs': 0}
+    |     vals = set()
+    |     for top in tops:
+    |         if not os.path.isdir(top):
+    |             res.setdefault('missing_tops', []).append(top)
+    |             continue
+    |         for dirpath, dirs, files in os.walk(top):
+    |             if dirpath != top and ('.git' in dirs or '.git' in files):
+    |                 res['skipped_git_dirs'] += 1          # a scratch clone inside a top: the lab's data are scanned at their source
+    |                 dirs[:] = []
+    |                 continue
+    |             if any(dirpath == x or dirpath.startswith(x.rstrip('/') + '/') for x in excludes):
+    |                 res['excluded_dirs'] += 1
+    |                 dirs[:] = []
+    |                 continue
+    |             dirs[:] = [d for d in dirs if d != '.git']
+    |             for fn in files:
+    |                 p = os.path.join(dirpath, fn)
+    |                 res['files_seen'] += 1
+    |                 try:
+    |                     size = os.path.getsize(p)
+    |                 except OSError:
+    |                     res['unreadable'] += 1
+    |                     continue
+    |                 if size == 2048:
+    |                     try:
+    |                         raw = open(p, 'rb').read()
+    |                     except OSError:
+    |                         res['unreadable'] += 1
+    |                         continue
+    |                     res['tile_files'] += 1
+    |                     hits = classify(raw)
+    |                     if hits:
+    |                         res['law_hits'].append({'path': p, 'laws': hits, 'sha256': hashlib.sha256(raw).hexdigest()})
+    |                     continue
+    |                 ext = os.path.splitext(fn)[1].lower()
+    |                 if ext not in TEXT_EXT:
+    |                     continue
+    |                 lines = read_lines(p)
+    |                 if lines is None:
+    |                     res['unreadable'] += 1
+    |                     continue
+    |                 res['text_files_read'] += 1
+    |                 for line in lines:
+    |                     if 'gemm' not in line:
+    |                         continue
+    |                     for rx in (RE_REC_VAL, RE_CMD_VAL):
+    |                         for m in rx.finditer(line):
+    |                             v = m.group(1).rstrip("',]")
+    |                             res['gemm_lines'] += 1
+    |                             if v in vals:
+    |                                 continue
+    |                             vals.add(v)
+    |                             arm, gen, fl = parse_values(v)
+    |                             res['gens'][gen] = res['gens'].get(gen, 0) + 1
+    |                             for f in fl:
+    |                                 b = os.path.basename(f)
+    |                                 res['tile_names'][b] = res['tile_names'].get(b, 0) + 1
+    |     res['values_unique'] = len(vals)
+    |     res['seconds'] = round(time.time() - t0, 1)
+    |     return res
+    | 
+    | 
+    | def scrub_text(t, scrubs):
+    |     for pre, lab in scrubs:
+    |         t = t.replace(pre, lab)
+    |     return t
+    | 
+    | 
+    | def report(out_json, out_txt, founds, scrubs=()):
+    |     data = [json.load(open(f)) for f in founds]
+    |     gens, names, hits = {}, {}, []
+    |     for d in data:
+    |         for g, n in d['gens'].items():
+    |             gens[g] = gens.get(g, 0) + n
+    |         for b, n in d['tile_names'].items():
+    |             names[b] = names.get(b, 0) + n
+    |         for h in d['law_hits']:
+    |             hits.append(dict(h, scan=d['label']))
+    |     desk_marks = ('/out/sw-design-a/', '/out/reg-e210/', '/tools/claims-v3/e210/')
+    |     hits_desk = [h for h in hits if any(m in h['path'] for m in desk_marks)]
+    |     hits_other = [h for h in hits if not any(m in h['path'] for m in desk_marks)]
+    |     other_gens = sorted(g for g in gens if g not in HOST_GENS)
+    |     named_hit = sorted({os.path.basename(h['path']) for h in hits_other} & set(names))
+    |     verdict = {}
+    |     for law in LAWS:
+    |         bad = [h for h in hits_other if law in h['laws']]
+    |         verdict[law] = 'NEVER IN A GEMM' if not other_gens and not [h for h in bad if os.path.basename(h['path']) in names] else 'SEE HITS'
+    |     out = {'what': 'E210 never-run search: GEMM records and commands of the lab host, and every 2,048-byte tile file, in every data directory of ours',
+    |            'scans': [{k: d[k] for k in ('label', 'host', 'tops', 'files_seen', 'text_files_read', 'tile_files', 'gemm_lines', 'values_unique',
+    |                                        'skipped_git_dirs', 'unreadable', 'seconds', 'python', 'excludes', 'excluded_dirs')} for d in data],
+    |            'generators_seen_in_gemm_values': gens, 'generators_not_the_hosts': other_gens,
+    |            'tile_files_named_by_gemm_values': names,
+    |            'law_hits_outside_desk_folders': hits_other, 'law_hits_in_desk_folders_count': len(hits_desk),
+    |            'law_hit_files_named_by_a_gemm': named_hit, 'verdict': verdict}
+    |     open(out_json, 'w').write(scrub_text(json.dumps(out, indent=1, sort_keys=True), scrubs) + '\n')
+    |     L = ['E210 never-run search (desk; reads only)', '']
+    |     for s in out['scans']:
+    |         L.append(f"scan {s['label']} on {s['host']}: {s['files_seen']:,} files seen, {s['text_files_read']:,} text files read, {s['tile_files']:,} "
+    |                  f"tile files classified, {s['gemm_lines']:,} GEMM value strings ({s['values_unique']:,} distinct), {s['skipped_git_dirs']} git dirs "
+    |                  f"skipped, {s['unreadable']} unreadable, {s['seconds']} s, Python {s['python']}"
+    |                  + (f"; excluded (not read): {', '.join(s['excludes'])}" if s['excludes'] else ''))
+    |     L.append('')
+    |     L.append('generators in GEMM value strings: ' + ', '.join(f'{g} {n}' for g, n in sorted(gens.items())))
+    |     L.append('generators not the host\'s own (randn, sparse50, sparse25, e37, tiles): ' + (', '.join(other_gens) or 'none'))
+    |     L.append(f'tile files named by GEMM value strings ({len(names)} distinct names): ' + ', '.join(sorted(names)))
+    |     L.append(f'tile files passing an E210 law outside the desk folders: {len(hits_other)}; of them named by a GEMM: {len(named_hit)}; '
+    |              f'in the desk folders (sw-design-a, reg-e210, the registration): {len(hits_desk)}')
+    |     for h in hits_other[:40]:
+    |         L.append(f"  {h['scan']}: {h['path']} {','.join(h['laws'])} {h['sha256'][:16]}")
+    |     L.append('')
+    |     for law in LAWS:
+    |         L.append(f'{law:10s} {verdict[law]}')
+    |     txt = scrub_text('\n'.join(L) + '\n', scrubs)
+    |     open(out_txt, 'w').write(txt)
+    |     print(txt, end='')
+    | 
+    | 
+    | def main():
+    |     if len(sys.argv) >= 4 and sys.argv[1] == 'scan':
+    |         args = sys.argv[3:]
+    |         tops = [x for x in args if not x.startswith('--exclude=')]
+    |         excl = [x.split('=', 1)[1] for x in args if x.startswith('--exclude=')]
+    |         json.dump(scan(sys.argv[2], tops, excl), sys.stdout, indent=1, sort_keys=True)
+    |         return 0
+    |     if len(sys.argv) >= 5 and sys.argv[1] == 'report':
+    |         args = sys.argv[4:]
+    |         founds = [x for x in args if not x.startswith('--scrub=')]
+    |         scrubs = [tuple(x.split('=', 1)[1].split('=>', 1)) for x in args if x.startswith('--scrub=')]
+    |         report(sys.argv[2], sys.argv[3], founds, scrubs)
+    |         return 0
+    |     if len(sys.argv) == 3 and sys.argv[1] == 'classify':
+    |         print(json.dumps(classify(open(sys.argv[2], 'rb').read())))
+    |         return 0
+    |     print(__doc__)
+    |     return 2
+    | 
+    | 
+    | if __name__ == '__main__':
+    |     sys.exit(main())
+    | RB_NR_EOF
+    | rc=$?; echo; echo "A3SCAN-END rc $rc"
+    | echo "A3GENS-BEGIN"
+    | nice -n 19 ionice -c 3 python3 -I -B - scan aifoundry3-ours $tops $ex 2>/dev/null <<'RB_NG_EOF'
+    | #!/usr/bin/env python3
+    | """E210 (Q202, lane fix-e210, Tue 17 Nov 2026, before any E210 datum): the instrument of E210.md amendment A1 item 1 - which GEMM value strings
+    | are host LAUNCH RECORDS (a GEMM that ran) and which are not, for both conditions of the registered never-run rule. No card. Standard library
+    | only; it imports nothing of the lab, so it runs on any box from stdin, as the registered scanner does.
+    | 
+    |     python3 -I -B neverrun_gens_e210.py scan LABEL TOP [TOP ...] [--exclude=DIR ...] > gens.json     (on another box: the same, from stdin)
+    | 
+    | WHY (verify-e210's finding 1, kit-e210's finding 1): the registered rule (desk/neverrun_e210.py, unchanged) reads a law as run when a GEMM value
+    | string ANYWHERE (i) names a generator rgm136 does not draw (then all nine laws at once) or (ii) names a tile file that passes the law outside
+    | the desk folders, whatever file the string is in. On Tue 17 Nov 2026 such strings were not runs: (i) E211's host-refusal checks
+    | ("gemmLn2x2x2:noise:...", in shell scripts), which a GEMM host refuses before any kernel launch (rgm136 throws "unknown gen" while filling its
+    | operand pools: it draws only randn, sparse50, sparse25 and e37 and reads tile files); (ii) E212's planned arms (its arms.json and session
+    | schedules, copied into the round's folders), which name two of E212's own tiles that pass E210's signs and highmant8 laws and had not run.
+    | A1 item 1 counts, for both conditions, only a string inside a HOST LAUNCH RECORD; the registered rule's verdict is kept and quoted beside.
+    | WHAT IS READ: exactly the registered scanner's files (the same walk: every file under a top, directories holding a .git entry skipped below the
+    | top, the --exclude folders left out, 2,048-byte files skipped as tiles, text files by the same extensions and size cap, gzip read through) and,
+    | in each line holding "gemm", exactly the registered scanner's two patterns (a record's "values" field; a command's --values). Each string is
+    | classed:
+    |   LAUNCH RECORD  matched as a record's "values" field on a line that holds "SPARSITY" (the host's record of a launch: "SPARSITY {...}") or a
+    |                  "launch" field (a record split from its prefix by a runtime line, read as a record all the same: the conservative side);
+    |   ELSEWHERE      everything else: a command line, an argv list, a script, a document, a plan or a schedule (never a run: a GEMM that ran
+    |                  leaves its launch records, and a host refuses a generator it does not draw before any launch).
+    | OUTPUT (JSON): the scan's own counts; per generator not the host's own (randn, sparse50, sparse25, e37, tiles), the number of strings of each
+    | class and up to 50 files of each class with up to 2 strings each ("non_host"); and per tile file name (the basename, as the registered report
+    | matches names) the number of strings of each class that name it ("tile_names_launch_records", "tile_names_elsewhere"). desk/neverrun_card_e210.py
+    | reads it (steps 6n and 12n) beside the registered report. SPDX-License-Identifier: Apache-2.0
+    | """
+    | import gzip
+    | import json
+    | import os
+    | import re
+    | import socket
+    | import sys
+    | import time
+    | 
+    | RE_REC_VAL = re.compile(r'"values"\s*:\s*"(gemm[A-Za-z0-9]+:[^"]*)"')           # the registered scanner's two patterns, verbatim
+    | RE_CMD_VAL = re.compile(r'--values"?\s*,?\s*"?(gemm[A-Za-z0-9]+:[^"\s]*)')
+    | MAX_BYTES = 400 * 2 ** 20
+    | TEXT_EXT = ('.json', '.jsonl', '.log', '.txt', '.csv', '.md', '.sh', '.py', '.out', '.err', '.gz', '.tsv', '')
+    | HOST_GENS = ('randn', 'sparse50', 'sparse25', 'e37', 'tiles')
+    | RE_LAUNCH = re.compile(r'SPARSITY|"launch"\s*:')
+    | MAX_FILES = 50
+    | 
+    | 
+    | def parse_values(v):
+    |     parts = v.split(':', 2)
+    |     return parts[0], (parts[1] if len(parts) > 1 else ''), [f for f in (parts[2].split(',') if len(parts) > 2 else []) if f]
+    | 
+    | 
+    | def read_lines(path):
+    |     try:
+    |         if os.path.getsize(path) > MAX_BYTES:
+    |             return None
+    |         if path.endswith('.gz'):
+    |             with gzip.open(path, 'rt', errors='replace') as f:
+    |                 return f.read().splitlines()
+    |         with open(path, 'r', errors='replace') as f:
+    |             return f.read().splitlines()
+    |     except Exception:
+    |         return None
+    | 
+    | 
+    | def scan(label, tops, excludes=()):
+    |     t0 = time.time()
+    |     res = {'label': label, 'host': socket.gethostname(), 'tops': tops, 'python': sys.version.split()[0], 'started_epoch': t0,
+    |            'files_seen': 0, 'text_files_read': 0, 'gemm_strings': 0, 'skipped_git_dirs': 0, 'unreadable': 0, 'excludes': list(excludes),
+    |            'excluded_dirs': 0, 'non_host': {}, 'tile_names_launch_records': {}, 'tile_names_elsewhere': {}}
+    |     for top in tops:
+    |         if not os.path.isdir(top):
+    |             res.setdefault('missing_tops', []).append(top)
+    |             continue
+    |         for dirpath, dirs, files in os.walk(top):
+    |             if dirpath != top and ('.git' in dirs or '.git' in files):
+    |                 res['skipped_git_dirs'] += 1
+    |                 dirs[:] = []
+    |                 continue
+    |             if any(dirpath == x or dirpath.startswith(x.rstrip('/') + '/') for x in excludes):
+    |                 res['excluded_dirs'] += 1
+    |                 dirs[:] = []
+    |                 continue
+    |             dirs[:] = [d for d in dirs if d != '.git']
+    |             for fn in files:
+    |                 p = os.path.join(dirpath, fn)
+    |                 res['files_seen'] += 1
+    |                 try:
+    |                     size = os.path.getsize(p)
+    |                 except OSError:
+    |                     res['unreadable'] += 1
+    |                     continue
+    |                 if size == 2048:
+    |                     continue
+    |                 if os.path.splitext(fn)[1].lower() not in TEXT_EXT:
+    |                     continue
+    |                 lines = read_lines(p)
+    |                 if lines is None:
+    |                     res['unreadable'] += 1
+    |                     continue
+    |                 res['text_files_read'] += 1
+    |                 for line in lines:
+    |                     if 'gemm' not in line:
+    |                         continue
+    |                     launch_line = RE_LAUNCH.search(line) is not None
+    |                     for rx in (RE_REC_VAL, RE_CMD_VAL):
+    |                         for m in rx.finditer(line):
+    |                             v = m.group(1).rstrip("',]")
+    |                             res['gemm_strings'] += 1
+    |                             arm, gen, fl = parse_values(v)
+    |                             cls = 'launch_records' if (rx is RE_REC_VAL and launch_line) else 'elsewhere'
+    |                             tn = res['tile_names_' + cls]
+    |                             for f in fl:
+    |                                 b = os.path.basename(f)
+    |                                 tn[b] = tn.get(b, 0) + 1
+    |                             if gen in HOST_GENS:
+    |                                 continue
+    |                             g = res['non_host'].setdefault(gen, {'launch_records': 0, 'elsewhere': 0, 'files_launch_records': {}, 'files_elsewhere': {}})
+    |                             g[cls] += 1
+    |                             fs = g['files_' + cls]
+    |                             if p in fs or len(fs) < MAX_FILES:
+    |                                 lst = fs.setdefault(p, [])
+    |                                 if len(lst) < 2 and v not in lst:
+    |                                     lst.append(v[:200])
+    |     res['seconds'] = round(time.time() - t0, 1)
+    |     return res
+    | 
+    | 
+    | def main():
+    |     if len(sys.argv) >= 4 and sys.argv[1] == 'scan':
+    |         args = sys.argv[3:]
+    |         tops = [x for x in args if not x.startswith('--exclude=')]
+    |         excl = [x.split('=', 1)[1] for x in args if x.startswith('--exclude=')]
+    |         json.dump(scan(sys.argv[2], tops, excl), sys.stdout, indent=1, sort_keys=True)
+    |         return 0
+    |     print(__doc__)
+    |     return 2
+    | 
+    | 
+    | if __name__ == '__main__':
+    |     sys.exit(main())
+    | RB_NG_EOF
+    | rc=$?; echo; echo "A3GENS-END rc $rc"
+--- desk, run on the Intel (the report: E210's registered report (neverrun_e210.py report, unchanged), scrubbed, and the files naming any hit): /usr/bin/python3 -I -B tools/claims-v3/e210/desk/neverrun_card_e210.py report <RB_OUT>/neverrun-20261117T080817 --a3 <RB_OUT>/neverrun-20261117T080817/scan-aifoundry3-ours.json --a3-gens <RB_OUT>/neverrun-20261117T080817/gens-aifoundry3-ours.json
+(exit 0)
+
+################ 7: ONLY ONCE THE REST HAS OPENED (40 minutes after our last session on aifoundry3 ended) and within 30 minutes of 6n's report: the report's age and the rest rule first on the box, no card command; then the config read
+
+################ tools/claims-v3/e210/rb/s09_reads_e210.sh A
+=== [s09_reads_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- gate: RB_OUT/e210-neverrun.txt (step 6n's NEVER-RUN line) written within the last 30 minutes, else 10: run step 6n again
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (THE REST RULE before any card command (every session-log form of ours on the box, the floor, the model session's folders)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | # E210 (Q202, lane kit-e210, Tue 17 Nov 2026, before any E210 datum; ported from kit-e207's E207 kit, its local commit 4bd6e38c): THE REST RULE, the lines step 7 (rb/s09_reads_e210.sh, before its config
+    | # read) and step 9 (rb/s11_session_e210.sh, before the launch) send to aifoundry3. It is E206's rest rule (tools/claims-v3/e206/rb/rest_rule_e206.sh,
+    | # landed in 906699ea: E202's, E195's, E193's and E189's, with fix-e202's activity floor and E206's addition, the model session's folders) LINE FOR
+    | # LINE from its first line of code, with two changes: its refusal's words name E210; and the activity floor leaves out E210's own folders
+    | # (build/e210, build/e210rgm) where E206's left out E206's, so E207's session folders on this box (and E206 arm A's) count: E210 runs after
+    | # E207 on this card, and its rest counts from our latest session there, E207's on the card day. E210.md 6: "its first card command at
+    | # least 40 minutes after our previous session on aifoundry3 ended". Every card command counts: step 7's config read is a card command, so it too
+    | # waits for the rest (E192's data note 1). It reads every session log of ours on the box, whatever its form:
+    | #   build/eNNN/session.log, build/eNNN/session-*.log, build/eNNN/T<T0>/session.log, build/eNNN/T<T0>/session-*.log
+    | # and energy.sh's output folders in every tree of ours (~/aifoundry, ~/nekko, ~/claude/et-soc1-prototyping), the activity floor (the newest write
+    | # in a T0-named folder of ours under build/, outside the dry paths and E210's own folders and the runbook's build/q141k) and the model session's
+    | # folders (~/claude/work/ee-*/: it runs its own sweeps under the same login on aifoundry1 and aifoundry2; over-reading only delays a launch). A
+    | # real block with no "session end" is counted as ended at the latest of its last timestamped line, its log's last write and its run's latest
+    | # write. Dry paths and blocks are skipped; a block opened no device only by "refused, no device opened: ..." or "GATE-STOP: ... (no device
+    | # opened)" at a line's start after its stamp (E210's runner ends such a block with "...: no device opened", which is NOT one of those two forms,
+    | # so E210's own refusals count as sessions here: that only delays a launch).
+    | # Prints "rest: <m> minutes since ...", or "rest: no real session of ours ...", or "REFUSED: <m> minutes since ..." and exits 3 (steps 7 and 9
+    | # then stop with 10, nothing read or launched). Run from the box's tree, under the prelude's set -u; GNU date, find.
+    | # SPDX-License-Identifier: Apache-2.0
+    | latest_write() {  # latest_write <run, e.g. e189>: the newest write (epoch seconds) of a regular file of that run's real paths, or nothing
+    |   local d p=""
+    |   for d in "build/$1" "build/claims-v3/aifoundry3/$1" build/claims-v3/aifoundry3/"$1"-*; do [ -d "$d" ] && p="$p $d"; done
+    |   [ -n "$p" ] || return 0
+    |   find $p -type f ! -path '*-dry*' ! -path '*dry-t*' 2>/dev/null | while IFS= read -r f; do date -r "$f" +%s 2>/dev/null; done | sort -n | tail -n 1
+    | }
+    | last=""; lastw=""; lastt=0; lastkind=""
+    | for L in build/e[0-9]*/session.log build/e[0-9]*/session-*.log build/e[0-9]*/T[0-9]*/session.log build/e[0-9]*/T[0-9]*/session-*.log; do
+    |   [ -f "$L" ] || continue
+    |   case "$L" in *-dry*|*dry-t*) continue ;; esac
+    |   w=$(echo "$L" | cut -d/ -f2)
+    |   mt=$(date -r "$L" +%s 2>/dev/null || echo 0)
+    |   ends=$(awk '
+    |     function flush(final) {
+    |       if (inblk && !dry && !nodev) {
+    |         if (endts != "") print "END 0 " endts
+    |         else if (lastts != "") print "NOEND " final " " lastts
+    |       }
+    |     }
+    |     { m = $0; sub(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [A-Z][A-Z]* /, "", m) }
+    |     /session start/ { flush(0); inblk = 1; dry = 0; nodev = 0; endts = ""; lastts = "" }
+    |     inblk && (m ~ /^DRY[ :]/ || m ~ /^DESK: / || (m ~ /^session start/ && m ~ /( DRY|; DRY\))$/)) { dry = 1 }
+    |     inblk && (m ~ /^refused, no device opened: / || (m ~ /^GATE-STOP: / && m ~ /\(no device opened\)$/)) { nodev = 1 }
+    |     inblk && /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [A-Z][A-Z]* / { lastts = $1 " " $2 " " $3 }
+    |     inblk && /session end( \(T0 [0-9]+\))?$/ && $0 !~ /DRY session end/ { endts = $1 " " $2 " " $3 }
+    |     END { flush(1) }' "$L" 2>/dev/null)
+    |   while read -r kind fin d1 d2 d3; do
+    |     [ -n "$kind" ] || continue
+    |     t=$(date -d "$d1 $d2 $d3" +%s 2>/dev/null) || continue
+    |     ts="$d1 $d2 $d3"
+    |     if [ "$kind" = NOEND ] && [ "$fin" = 1 ] && [ "$mt" -gt "$t" ]; then t=$mt; ts="$(date -d @"$mt" '+%F %T %Z') (the log's last write)"; fi
+    |     if [ "$kind" = NOEND ]; then
+    |       lw=$(latest_write "$w")
+    |       case "$lw" in ''|*[!0-9]*) lw=0 ;; esac
+    |       if [ "$lw" -gt "$t" ]; then t=$lw; ts="$(date -d @"$lw" '+%F %T %Z') (the latest write of E${w#e}'s files outside the dry paths)"; fi
+    |     fi
+    |     if [ -z "$last" ] || [ "$t" -gt "$lastt" ]; then last=$ts; lastt=$t; lastw=E${w#e}; lastkind=$kind; fi
+    |   done <<< "$ends"
+    | done
+    | for T in "$HOME/aifoundry" "$HOME/nekko" "$HOME/claude/et-soc1-prototyping"; do                                   # E189's addition, kept: energy.sh's form
+    |   for F in "$T"/build/sparseparity-energy/*/; do
+    |     [ -d "$F" ] || continue
+    |     case "$F" in *-dry/|*-dry*) continue ;; esac
+    |     lw=$(find "$F" -type f 2>/dev/null | while IFS= read -r f; do date -r "$f" +%s 2>/dev/null; done | sort -n | tail -n 1)
+    |     case "$lw" in ''|*[!0-9]*) continue ;; esac
+    |     if [ -z "$last" ] || [ "$lw" -gt "$lastt" ]; then
+    |       last="$(date -d @"$lw" '+%F %T %Z') (the latest write of an energy.sh run's folder, $(basename "$F"))"; lastt=$lw; lastw="energy.sh"; lastkind=ENERGY
+    |     fi
+    |   done
+    | done
+    | fl=$(find build -path build/e210 -prune -o -path build/e210rgm -prune -o -path build/q141k -prune -o \
+    |   -type f -path '*/T[0-9]*/*' ! -path '*-dry*' ! -path '*dry-t*' -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -n 1)   # fix-e202's floor (E210's own folders left out)
+    | if [ -n "$fl" ]; then
+    |   ft=${fl%%.*}; fp=${fl#* }
+    |   case "$ft" in ''|*[!0-9]*) ft=0 ;; esac
+    |   fw=$(printf '%s\n' "$fp" | tr '/' '\n' | grep -m1 -E '^e[0-9]+' || true)
+    |   if [ "$ft" -gt 0 ] && { [ -z "$last" ] || [ "$ft" -gt $((lastt + 60)) ]; }; then   # more than a minute past the log rule's reading
+    |     last="$(date -d @"$ft" '+%F %T %Z') (the newest write in a session folder of ours: $fp)"; lastt=$ft
+    |     lastw=$( [ -n "$fw" ] && echo "E${fw#e}" || echo "a session of ours" ); lastkind=FLOOR
+    |   fi
+    | fi
+    | for F in "$HOME"/claude/work/ee-*/; do                                                       # E206's addition: the model session's folders
+    |   [ -d "$F" ] || continue
+    |   lw=$(find "$F" -type f -printf '%T@\n' 2>/dev/null | sort -n | tail -n 1)
+    |   lw=${lw%%.*}
+    |   case "$lw" in ''|*[!0-9]*) continue ;; esac
+    |   if [ -z "$last" ] || [ "$lw" -gt "$lastt" ]; then
+    |     last="$(date -d @"$lw" '+%F %T %Z') (the newest write in the model session's folder $(basename "$F"))"; lastt=$lw; lastw="the model session"; lastkind=MODEL
+    |   fi
+    | done
+    | if [ -n "$last" ]; then
+    |   what="session end"; [ "$lastkind" = NOEND ] && what="last real session activity (no 'session end': the latest of its last line and its run's latest write)"
+    |   [ "$lastkind" = ENERGY ] && what="run"
+    |   [ "$lastkind" = FLOOR ] && what="last write (THE ACTIVITY FLOOR: a session folder's newest file, whatever its log's form)"
+    |   [ "$lastkind" = MODEL ] && what="last write (a folder of the model session's own sweeps)"
+    |   [ "$lastkind" = NOEND ] && echo "note: $lastw's last real session block has no 'session end': counted as ended at $last"
+    |   rest=$(( ($(date +%s) - lastt) / 60 ))
+    |   [ "$rest" -ge 40 ] || { echo "REFUSED: $rest minutes since $lastw's $what ($last): E210's first card command comes on a rested card, at least 40 minutes after our last real session there (E210.md 6; the kit)"; exit 3; }
+    |   echo "rest: $rest minutes since $lastw's $what ($last; dry sessions and blocks that opened no device skipped)"
+    | else
+    |   echo "rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log, energy.sh's folders, any T0-named folder under build/ or the model session's folders"
+    | fi
+    | echo "REST-OK: the rest has run on $BOX"
+--- then the time stamped in RB_OUT/e210-step7-A.txt and k6's step 7, unchanged: bash tools/claims-v3/q141k-runbook/k6/s09_a3_reads_k6.sh (its own listing follows)
+=== [s09_a3_reads_k6] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (et-lab-manifest, the card config read through the guard, et-who): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | unset V3_DEVICE ET_DEVICES
+    | export LD_LIBRARY_PATH=/opt/et/lib
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on aifoundry3: the config read waits (it opens card 0)"; exit 3; fi
+    | mkdir -p build/q141k
+    | et-lab-manifest | tee build/q141k/et-lab-manifest-$(date +%Y%m%dT%H%M%S).txt
+    | c=$(flock -n /run/lock/etsoc-shire0.lock timeout 10 bash tools/claims-v3/e128/ettelem_guard.sh config < /dev/null 2>/dev/null | grep '^{' | tail -1)
+    | echo "CONFIG $c"
+    | hold_read
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD)"
+(exit 0)
+
+################ tools/claims-v3/e210/rb/s10_dry_e210.sh A start
+=== [s10_dry_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- gate: now <= the round's last start (2026-11-17 01:31 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- launch on aifoundry3 (start the dry pass a3-dry-e210, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-dry-e210
+    | MAXJ=1
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/aifoundry || exit 1
+    | echo "$$" > build/q141k/jobs/a3-dry-e210.pid
+    | echo "JOB-BEGIN a3-dry-e210 $(date '+%F %T %Z')"
+    | (
+    | ARM=A
+    | T0=$(date +%s)
+    | D=build/e210/T$T0-$ARM-dry
+    | E210_FAKE_SCALE=0.05 E210_FAKE_TAU_S=1 python3 -B tools/claims-v3/e210/run_e210.py session --dry --arm "$ARM" --t0 "$T0" --out "$D" \
+    |   --sequence short --rest-s 1 --smoke-rest-s 3 --tail-s 0.5 --gate-wait-s 20
+    | rc=$?
+    | grep -E 'identity|stop-path|smoke gate|the probe|run [0-9]+-.* done|STOP|HUNG|session end' "$D/session.log" | cut -c1-200
+    | n=$(grep -c 'run [0-9]*-.* done: .* rc \[0\]' "$D/session.log")
+    | echo "E210-DRY arm $ARM rc=$rc runs=$n"
+    | [ "$rc" -eq 0 ] && [ "$n" -ge 3 ] && grep -q 'smoke gate passed' "$D/session.log" && grep -q 'stop-path test passed' "$D/session.log" && \
+    |   grep -q 'the probe maxalte@S2: IN' "$D/session.log" && grep -q 'the identity read: ' "$D/session.log" && [ -s "$D/MANIFEST.sha256" ] && \
+    |   ! grep -rqs 'cannot read 2 x 1024 bytes' "$D"
+    | )
+    | rc=$?
+    | echo "JOB-END a3-dry-e210 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a3-dry-e210.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+[s10_dry_e210] (dry listing; a real run would say:) the dry pass a3-dry-e210 started on aifoundry3: run this step's wait (bounded) until it ends
+(exit 0)
+
+################ tools/claims-v3/e210/rb/s10_dry_e210.sh A wait
+=== [s10_dry_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on the dry pass a3-dry-e210): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-dry-e210
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | fresh "$J.sh" || { echo "JOB-UNKNOWN ${J##*/}: not started today (its script is from $(TZ=America/Los_Angeles date -r "$J.sh" +%F)): start it again"; exit 3; }
+    | t=0; lost=0
+    | while [ ! -e "$J.rc" ] && [ "$SECONDS" -lt "$LIM" ]; do      # v3: the box's clock bounds the loop, not the sum of its sleeps
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then
+    |     # the grace: the job writes its pid as its first line and its exit status as its last; read both again before calling it lost
+    |     sleep 2
+    |     [ -e "$J.rc" ] && break
+    |     if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then lost=1; break; fi
+    |     continue
+    |   fi
+    |   sleep 10
+    | done
+    | t=$SECONDS
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"
+    | elif [ "$lost" -eq 1 ]; then echo "JOB-LOST ${J##*/}: no process (pid $(cat "$J.pid" 2>/dev/null || echo none)) and no exit status"
+    | else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+(exit 0)
+
+################ tools/claims-v3/e210/rb/s11_session_e210.sh A
+=== [s11_session_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- gate: now <= the round's last start (2026-11-17 01:31 PST)
+--- gate: now + 100 min <= the round's last end (2026-11-17 03:31 PST)
+--- gate: RB_OUT/e210-neverrun.txt (step 6n's) written today
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- launch on aifoundry3 (launch e210 arm A, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | ARM=A; JD=a3-dry-e210; JB=a3-build-e210; DEADLINE=1794915060; LAST_START=2026-11-17\ 01:31\ PST; LAST_END=2026-11-17\ 03:31\ PST
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | case "$BOX" in   # the firmware identity by continuity, never the firmware-revisions query (look_e164.sh's E82 rule; s14's E69 rule)
+    |   aifoundry1) FWREAD='2026-10-31 13:45:24 PDT'; FWWHO="E82's firmware read" ;;
+    |   aifoundry2) FWREAD='2026-10-27 13:56:26 PDT'; FWWHO="E69's firmware read" ;;
+    |   *) FWREAD="" ;;
+    | esac
+    | if [ -n "$FWREAD" ]; then
+    |   BOOTED=$(uptime -s 2>/dev/null); boot=$(date -d "$BOOTED" +%s 2>/dev/null); fw=$(date -d "$FWREAD" +%s)
+    |   if [ -z "$BOOTED" ] || [ -z "$boot" ] || [ "$boot" -ge "$fw" ]; then
+    |     echo "IDENTITY-STOP: $BOX booted '$BOOTED', not before $FWWHO of $FWREAD: its firmware build is not carried by continuity: nothing launched"; exit 3
+    |   fi
+    |   echo "identity: $BOX booted $BOOTED, before $FWWHO of $FWREAD: ok"
+    | fi
+    | # E210 (Q202, lane kit-e210, Tue 17 Nov 2026, before any E210 datum; ported from kit-e207's E207 kit, its local commit 4bd6e38c): THE REST RULE, the lines step 7 (rb/s09_reads_e210.sh, before its config
+    | # read) and step 9 (rb/s11_session_e210.sh, before the launch) send to aifoundry3. It is E206's rest rule (tools/claims-v3/e206/rb/rest_rule_e206.sh,
+    | # landed in 906699ea: E202's, E195's, E193's and E189's, with fix-e202's activity floor and E206's addition, the model session's folders) LINE FOR
+    | # LINE from its first line of code, with two changes: its refusal's words name E210; and the activity floor leaves out E210's own folders
+    | # (build/e210, build/e210rgm) where E206's left out E206's, so E207's session folders on this box (and E206 arm A's) count: E210 runs after
+    | # E207 on this card, and its rest counts from our latest session there, E207's on the card day. E210.md 6: "its first card command at
+    | # least 40 minutes after our previous session on aifoundry3 ended". Every card command counts: step 7's config read is a card command, so it too
+    | # waits for the rest (E192's data note 1). It reads every session log of ours on the box, whatever its form:
+    | #   build/eNNN/session.log, build/eNNN/session-*.log, build/eNNN/T<T0>/session.log, build/eNNN/T<T0>/session-*.log
+    | # and energy.sh's output folders in every tree of ours (~/aifoundry, ~/nekko, ~/claude/et-soc1-prototyping), the activity floor (the newest write
+    | # in a T0-named folder of ours under build/, outside the dry paths and E210's own folders and the runbook's build/q141k) and the model session's
+    | # folders (~/claude/work/ee-*/: it runs its own sweeps under the same login on aifoundry1 and aifoundry2; over-reading only delays a launch). A
+    | # real block with no "session end" is counted as ended at the latest of its last timestamped line, its log's last write and its run's latest
+    | # write. Dry paths and blocks are skipped; a block opened no device only by "refused, no device opened: ..." or "GATE-STOP: ... (no device
+    | # opened)" at a line's start after its stamp (E210's runner ends such a block with "...: no device opened", which is NOT one of those two forms,
+    | # so E210's own refusals count as sessions here: that only delays a launch).
+    | # Prints "rest: <m> minutes since ...", or "rest: no real session of ours ...", or "REFUSED: <m> minutes since ..." and exits 3 (steps 7 and 9
+    | # then stop with 10, nothing read or launched). Run from the box's tree, under the prelude's set -u; GNU date, find.
+    | # SPDX-License-Identifier: Apache-2.0
+    | latest_write() {  # latest_write <run, e.g. e189>: the newest write (epoch seconds) of a regular file of that run's real paths, or nothing
+    |   local d p=""
+    |   for d in "build/$1" "build/claims-v3/aifoundry3/$1" build/claims-v3/aifoundry3/"$1"-*; do [ -d "$d" ] && p="$p $d"; done
+    |   [ -n "$p" ] || return 0
+    |   find $p -type f ! -path '*-dry*' ! -path '*dry-t*' 2>/dev/null | while IFS= read -r f; do date -r "$f" +%s 2>/dev/null; done | sort -n | tail -n 1
+    | }
+    | last=""; lastw=""; lastt=0; lastkind=""
+    | for L in build/e[0-9]*/session.log build/e[0-9]*/session-*.log build/e[0-9]*/T[0-9]*/session.log build/e[0-9]*/T[0-9]*/session-*.log; do
+    |   [ -f "$L" ] || continue
+    |   case "$L" in *-dry*|*dry-t*) continue ;; esac
+    |   w=$(echo "$L" | cut -d/ -f2)
+    |   mt=$(date -r "$L" +%s 2>/dev/null || echo 0)
+    |   ends=$(awk '
+    |     function flush(final) {
+    |       if (inblk && !dry && !nodev) {
+    |         if (endts != "") print "END 0 " endts
+    |         else if (lastts != "") print "NOEND " final " " lastts
+    |       }
+    |     }
+    |     { m = $0; sub(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [A-Z][A-Z]* /, "", m) }
+    |     /session start/ { flush(0); inblk = 1; dry = 0; nodev = 0; endts = ""; lastts = "" }
+    |     inblk && (m ~ /^DRY[ :]/ || m ~ /^DESK: / || (m ~ /^session start/ && m ~ /( DRY|; DRY\))$/)) { dry = 1 }
+    |     inblk && (m ~ /^refused, no device opened: / || (m ~ /^GATE-STOP: / && m ~ /\(no device opened\)$/)) { nodev = 1 }
+    |     inblk && /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [A-Z][A-Z]* / { lastts = $1 " " $2 " " $3 }
+    |     inblk && /session end( \(T0 [0-9]+\))?$/ && $0 !~ /DRY session end/ { endts = $1 " " $2 " " $3 }
+    |     END { flush(1) }' "$L" 2>/dev/null)
+    |   while read -r kind fin d1 d2 d3; do
+    |     [ -n "$kind" ] || continue
+    |     t=$(date -d "$d1 $d2 $d3" +%s 2>/dev/null) || continue
+    |     ts="$d1 $d2 $d3"
+    |     if [ "$kind" = NOEND ] && [ "$fin" = 1 ] && [ "$mt" -gt "$t" ]; then t=$mt; ts="$(date -d @"$mt" '+%F %T %Z') (the log's last write)"; fi
+    |     if [ "$kind" = NOEND ]; then
+    |       lw=$(latest_write "$w")
+    |       case "$lw" in ''|*[!0-9]*) lw=0 ;; esac
+    |       if [ "$lw" -gt "$t" ]; then t=$lw; ts="$(date -d @"$lw" '+%F %T %Z') (the latest write of E${w#e}'s files outside the dry paths)"; fi
+    |     fi
+    |     if [ -z "$last" ] || [ "$t" -gt "$lastt" ]; then last=$ts; lastt=$t; lastw=E${w#e}; lastkind=$kind; fi
+    |   done <<< "$ends"
+    | done
+    | for T in "$HOME/aifoundry" "$HOME/nekko" "$HOME/claude/et-soc1-prototyping"; do                                   # E189's addition, kept: energy.sh's form
+    |   for F in "$T"/build/sparseparity-energy/*/; do
+    |     [ -d "$F" ] || continue
+    |     case "$F" in *-dry/|*-dry*) continue ;; esac
+    |     lw=$(find "$F" -type f 2>/dev/null | while IFS= read -r f; do date -r "$f" +%s 2>/dev/null; done | sort -n | tail -n 1)
+    |     case "$lw" in ''|*[!0-9]*) continue ;; esac
+    |     if [ -z "$last" ] || [ "$lw" -gt "$lastt" ]; then
+    |       last="$(date -d @"$lw" '+%F %T %Z') (the latest write of an energy.sh run's folder, $(basename "$F"))"; lastt=$lw; lastw="energy.sh"; lastkind=ENERGY
+    |     fi
+    |   done
+    | done
+    | fl=$(find build -path build/e210 -prune -o -path build/e210rgm -prune -o -path build/q141k -prune -o \
+    |   -type f -path '*/T[0-9]*/*' ! -path '*-dry*' ! -path '*dry-t*' -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -n 1)   # fix-e202's floor (E210's own folders left out)
+    | if [ -n "$fl" ]; then
+    |   ft=${fl%%.*}; fp=${fl#* }
+    |   case "$ft" in ''|*[!0-9]*) ft=0 ;; esac
+    |   fw=$(printf '%s\n' "$fp" | tr '/' '\n' | grep -m1 -E '^e[0-9]+' || true)
+    |   if [ "$ft" -gt 0 ] && { [ -z "$last" ] || [ "$ft" -gt $((lastt + 60)) ]; }; then   # more than a minute past the log rule's reading
+    |     last="$(date -d @"$ft" '+%F %T %Z') (the newest write in a session folder of ours: $fp)"; lastt=$ft
+    |     lastw=$( [ -n "$fw" ] && echo "E${fw#e}" || echo "a session of ours" ); lastkind=FLOOR
+    |   fi
+    | fi
+    | for F in "$HOME"/claude/work/ee-*/; do                                                       # E206's addition: the model session's folders
+    |   [ -d "$F" ] || continue
+    |   lw=$(find "$F" -type f -printf '%T@\n' 2>/dev/null | sort -n | tail -n 1)
+    |   lw=${lw%%.*}
+    |   case "$lw" in ''|*[!0-9]*) continue ;; esac
+    |   if [ -z "$last" ] || [ "$lw" -gt "$lastt" ]; then
+    |     last="$(date -d @"$lw" '+%F %T %Z') (the newest write in the model session's folder $(basename "$F"))"; lastt=$lw; lastw="the model session"; lastkind=MODEL
+    |   fi
+    | done
+    | if [ -n "$last" ]; then
+    |   what="session end"; [ "$lastkind" = NOEND ] && what="last real session activity (no 'session end': the latest of its last line and its run's latest write)"
+    |   [ "$lastkind" = ENERGY ] && what="run"
+    |   [ "$lastkind" = FLOOR ] && what="last write (THE ACTIVITY FLOOR: a session folder's newest file, whatever its log's form)"
+    |   [ "$lastkind" = MODEL ] && what="last write (a folder of the model session's own sweeps)"
+    |   [ "$lastkind" = NOEND ] && echo "note: $lastw's last real session block has no 'session end': counted as ended at $last"
+    |   rest=$(( ($(date +%s) - lastt) / 60 ))
+    |   [ "$rest" -ge 40 ] || { echo "REFUSED: $rest minutes since $lastw's $what ($last): E210's first card command comes on a rested card, at least 40 minutes after our last real session there (E210.md 6; the kit)"; exit 3; }
+    |   echo "rest: $rest minutes since $lastw's $what ($last; dry sessions and blocks that opened no device skipped)"
+    | else
+    |   echo "rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log, energy.sh's folders, any T0-named folder under build/ or the model session's folders"
+    | fi
+    | hung=$(grep -RhsE --include='*.log' --exclude-dir='*-dry*' --exclude-dir='*dry-t*' \
+    |   '^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}:[0-9]{2}([^ ]*)( [A-Z]+)? HUNG[: ]' build 2>/dev/null | head -n 3)
+    | [ -z "$hung" ] || { echo "REFUSED: a HUNG marker of ours on the box ($(printf '%s\n' "$hung" | head -n 1 | cut -c1-220)): a device process of ours did not end after its timeout's TERM, so the card may hold a hung hart: stop and report to the owner; only his word and a dated kit amendment lift this"; exit 3; }
+    | echo "hung: no HUNG marker in our session logs on the box"
+    | TODAY=$(TZ=America/Los_Angeles date +%F)
+    | opened=0; nodev=0
+    | for L in build/e210/T*-"$ARM"/session.log; do
+    |   [ -f "$L" ] || continue
+    |   [ "$(TZ=America/Los_Angeles date -r "$L" +%F 2>/dev/null)" = "$TODAY" ] || continue
+    |   if grep -q 'the first card command' "$L"; then opened=$((opened + 1)); else nodev=$((nodev + 1)); fi
+    | done
+    | [ "$opened" -eq 0 ] || { echo "REFUSED: the same-day rule: an E210 session opened the card earlier today ($opened): not again today"; exit 3; }
+    | [ "$nodev" -lt 2 ] || { echo "REFUSED: the same-day rule: $nodev E210 sessions that opened no device ran today: a third try is not made"; exit 3; }
+    | echo "same-day: E210 sessions today: $opened that opened the card, $nodev that opened no device"
+    | job_ok_today "$JD" || { echo "REFUSED: E210's dry pass (step 8's job $JD) has not ended rc 0 today"; exit 3; }
+    | echo "dry pass: $JD ended rc 0 today"
+    | fresh "build/q141k/jobs/$JB.out" && grep -q '^RGM-BUILT rc=0' "build/q141k/jobs/$JB.out" ||
+    |   { echo "REFUSED: rgm136 was not built today (step 6's job $JB)"; exit 3; }
+    | mkdir -p build/e210 build/q141k
+    | T0=$(date +%s)
+    | echo "$T0" > "build/q141k/e210$ARM.T0"
+    | E210_T0=$T0 E210_ARM=$ARM E210_DEADLINE_EPOCH="$DEADLINE" setsid nohup bash tools/claims-v3/e210/session_e210.sh > "build/e210/session-$ARM.out" 2>&1 < /dev/null &
+    | sleep 5
+    | echo "LAUNCHED e210 arm $ARM T0 $T0 $(date '+%F %T %Z') (last start $LAST_START, last end $LAST_END; session_e210.sh)"
+    | tail -n 6 "build/e210/T$T0-$ARM/session.log" 2>/dev/null | cut -c1-300
+(exit 0)
+
+################ inside the session (session_e210.sh, detached on aifoundry3): the box and the build (the kernel gate, the 493 tiles, the harness with the registration's frozen points and forecasts, the preflight GO), the lock, the holders, THE FIRST CARD COMMAND (the start config and THE IDENTITY GATE), the sampler, THE IDENTITY READ, THE OPENING (60 s at rest; the smoke: random@S1, zeros@S1, random@S2 at 2 s each against E206's cycles an op at the shape, the host's card watched, the board's rise; THE PROBE: maxalte@S2 at 2 s under the die gate, every board sample at or under 64 W and the die under 63 C, else maxalte leaves the session; THEN the stop-path test), the registered sequence (171 runs: the warm-up ties 001 and 002, six passes of chained A B B A blocks, the closing tie 171; each the die gate, the holders, 10 s at rest, one process under a plain timeout 10, a 4 s read; no run after 85 card-minutes, the session ends at 95), the closing config (never after a HUNG), session end, the manifest last
+
+################ tools/claims-v3/e210/rb/s20_wait_e210.sh A
+=== [s20_wait_e210] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on e210 arm A): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | ARM=A; LIM=520; WANT='DRY'
+    | fresh "build/q141k/e210$ARM.T0" || { echo "RUN-UNKNOWN e210 arm $ARM: not launched today by the runbook (no T0 written today)"; exit 3; }
+    | T0=$(cat "build/q141k/e210$ARM.T0")
+    | [ "$WANT" = DRY ] || [ "$T0" = "$WANT" ] || { echo "RUN-UNKNOWN e210 arm $ARM: the box's last launch T0 $T0 is not this runbook's $WANT"; exit 3; }
+    | SD=build/e210/T$T0-$ARM; L=$SD/session.log
+    | ended() { grep -q 'session end' "$L" 2>/dev/null; }
+    | hung() { grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [A-Z]+ HUNG: ' "$L" 2>/dev/null; }
+    | while ! ended && ! hung && [ "$SECONDS" -lt "$LIM" ]; do
+    |   [ "$(ours_live 'session_e210.sh')" -gt 0 ] || { sleep 2; ended || { echo "RUN-GONE e210 arm $ARM: no session process and no session end"; break; }; }
+    |   sleep 15
+    | done
+    | t=$SECONDS
+    | date '+%F %T %Z'
+    | grep -E 'session start|box and the build|first card command|config|identity|sampler|smoke|stop-path|run [0-9]+-|STOP|HUNG|K1|CRASH|no device opened|session end' "$L" 2>/dev/null | cut -c1-240 | tail -n 40
+    | if hung; then echo "HUNG e210 arm $ARM"; fi
+    | if ended; then
+    |   echo "RUN-ENDED e210 arm $ARM"
+    |   sleep 2
+    |   if [ -s "$SD/MANIFEST.sha256" ]; then echo "MANIFEST-WRITTEN $(grep -c . "$SD/MANIFEST.sha256") files"; else echo "MANIFEST-ABSENT"; fi
+    |   k=0; while [ ! -s "$SD/runner.rc" ] && [ "$k" -lt 10 ]; do sleep 1; k=$((k + 1)); done
+    |   if [ -s "$SD/runner.rc" ]; then echo "RUNNER-RC $(cat "$SD/runner.rc")"; else echo "RUNNER-RC-ABSENT"; fi
+    | else echo "RUN-RUNNING e210 arm $ARM after $t s"; fi
+    | if grep -qE '^[0-9-]+ [0-9:]+ [A-Z]+ (STOP: )?K1: |STOP: K1: ' "$L" 2>/dev/null; then echo "K1-STOPPED e210 arm $ARM"; fi
+    | if grep -qE '^[0-9-]+ [0-9:]+ [A-Z]+ CRASH' "$L" 2>/dev/null; then echo "CRASHED e210 arm $ARM"; fi
+    | if grep -qE 'refused, no device opened|stop-path test failed|smoke gate failed|the gate, no launch|would not start' "$L" 2>/dev/null; then echo "GATE-STOPPED e210 arm $ARM"; fi
+(exit 0)
+
+################ 11 (the card lane's first): 'bash W/onelab.sh collect <lane>' (start the copy-back at least 10 minutes before the last end)
+
+################ tools/claims-v3/e210/rb/s22_collect_e210.sh A
+=== [s22_collect_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (the session ended, its manifest written, no session of ours running): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | T0=1794800000; ARM=A
+    | SD=build/e210/T$T0-$ARM
+    | [ -f "$SD/session.log" ] || { echo "REFUSED: no session directory $SD on $BOX"; exit 3; }
+    | grep -q 'session end' "$SD/session.log" || { echo "REFUSED: $SD has no 'session end' yet: wait (step 10)"; exit 3; }
+    | [ -s "$SD/MANIFEST.sha256" ] || { echo "REFUSED: $SD has no MANIFEST.sha256 yet: wait (step 10)"; exit 3; }
+    | if [ "$(ours_live 'session_e210*.sh')" -gt 0 ]; then echo "REFUSED: a session_e210.sh of ours still runs on $BOX"; exit 3; fi
+    | echo "BOXHOME $HOME"
+    | echo "FILES $(find "$SD" -type f | wc -l | tr -d ' ')"
+--- gate: now + 10 min <= the round's last end (2026-11-17 03:31 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- copy, run on the Intel (the session directory, copied from the box (read-only there)): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/e210/T1794800000-A/ <RB_OUT>/e210-raw/A/T1794800000-A/
+--- desk, run on the Intel (COPY-BACK EXACT (collect_e210.py copy-check)): /usr/bin/python3 -B tools/claims-v3/e210/collect_e210.py copy-check <RB_OUT>/e210-raw/A/T1794800000-A
+[s22_collect_e210] (dry listing; a real run would say:) copied back exact: <RB_OUT>/e210-raw/A/T1794800000-A; step 12 (s23_data_e210.sh A) makes the data directory
+(exit 0)
+
+################ 12n: THE NEVER-RUN SEARCH REPEATED BEFORE THE DATA COMMIT (E210.md 4): the desk's three roots again (no box call), after the copy-back
+
+################ tools/claims-v3/e210/rb/s06n_neverrun_e210.sh A --late
+=== [s06n_neverrun_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- desk, run on the Intel (the never-run search at the desk: E210's registered scanner (unchanged) over the lab at HEAD, the round's lane folders and HOME/claude/work, E210's own folders and the model session's left out): /usr/bin/python3 -I -B tools/claims-v3/e210/desk/neverrun_card_e210.py desk <RB_OUT>/neverrun-late-20261117T080817 --late
+--- desk, run on the Intel (the report: E210's registered report (neverrun_e210.py report, unchanged), scrubbed, and the files naming any hit): /usr/bin/python3 -I -B tools/claims-v3/e210/desk/neverrun_card_e210.py report <RB_OUT>/neverrun-late-20261117T080817 --late
+(exit 0)
+
+################ tools/claims-v3/e210/rb/s23_data_e210.sh A
+=== [s23_data_e210] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E210 arm A and naming today; its last start and last end read
+--- gate: step 12n's never-run report written today, after the copy-back (RB_OUT/e210-neverrun-late.txt)
+--- desk, run on the Intel (the data directory: COPY-BACK EXACT again, the scrub, the reducer, steps 6n's and 12n's never-run reports, SHA256SUMS (collect_e210.py data)): /usr/bin/python3 -B tools/claims-v3/e210/collect_e210.py data 2026-11-17 A '<RB_OUT>/e210-raw/A/T<T0>-A' '<the box home>' '<RB_OUT>/box-login-aifoundry3.txt' --neverrun '<RB_OUT>/neverrun-<time>' --neverrun-late '<RB_OUT>/neverrun-late-<time>'
+--- gate: no desk path (the lab clone's, RB_OUT's, a Mac home, a session scratch directory) in <lab clone>/docs/reports/data/2026-11-17-e210-switch-test-aifoundry3, and each of them there
+--- read, run on the Intel (the history check after the collection): /usr/bin/python3 -I -B tools/claims-v3/e210/rb/check_history_e210.py tree
+(exit 0)
+
+################ 12 (the card lane's): the README in DATA-README-FORM-e210.md's form (it says which patterns, if any, 6n's and 12n's reports found run before); the public-text scan; LAB_QUIET_HOLD_OWNER=<lane> bash W/commit_lab.sh "<subject>" "<body>" <the collected directory> (new files only; on exit 5 or 6 again); then 'bash W/onelab.sh uncollect <lane>', 'bash W/hold.sh remove <lane>', 'bash W/book.sh release aifoundry3 <lane>'
+
+################ tools/claims-v3/e210/rb/s24_score_e210.sh A
+=== [s24_score_e210] dry listing: nothing below is run
+--- read, run on the Intel (the data directory committed (a commit names it)): git -C <lab clone> log --oneline -1 -- docs/reports/data/2026-11-17-e210-switch-test-aifoundry3
+--- read, run on the Intel (the data directory clean): git -C <lab clone> status --short --untracked-files=all -- docs/reports/data/2026-11-17-e210-switch-test-aifoundry3
+--- read, run on the Intel (the data's SHA256SUMS, every entry), in docs/reports/data/2026-11-17-e210-switch-test-aifoundry3: sha256sum -c SHA256SUMS
+--- read, run on the Intel (the history check): /usr/bin/python3 -I -B tools/claims-v3/e210/rb/check_history_e210.py tree
+--- desk, run on the Intel (the frozen scorer on the committed data): /usr/bin/python3 -I -B tools/claims-v3/e210/score_e210.py docs/reports/data/2026-11-17-e210-switch-test-aifoundry3/data-e210.json --out <RB_OUT>/scores-e210-A.json --txt <RB_OUT>/scores-e210-A.txt
+(exit 0)
+
+################ E (every path ends here): 'bash W/onelab.sh undesk <lane>' if inside steps 0-2; 'bash W/onelab.sh uncollect <lane>' if between step 11's collect and the push; then 'bash W/hold.sh remove <lane>' and 'bash W/book.sh release aifoundry3 <lane>' (on a HUNG or K1 day: keep the booking and the hold until the owner or the orchestrator answers)
+
+dry listing: 16 steps listed, 0 exited non-zero, 0 box calls
