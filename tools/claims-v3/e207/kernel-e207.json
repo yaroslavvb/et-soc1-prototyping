@@ -1,0 +1,30 @@
+{
+ "experiment": "E207",
+ "kernel": "rgm136 (E136's, unchanged; E146, E158, E159, E168, E169, E190 and E206 ran it; E206 arm A on aifoundry3 card 0)",
+ "source_dir": "tools/claims-v3/e136/rgm136",
+ "source_sha256": {
+  "tools/claims-v3/e136/rgm136/CMakeLists.txt": "123ef6e4ac1572d31914b6049fa700b30af1338c13cc96ec850cd047966dfcfd",
+  "tools/claims-v3/e136/rgm136/README.md": "52815705cbea14c0aea28c81a9e094bbe9e16a04280cb67db5a975aa35d5f8ef",
+  "tools/claims-v3/e136/rgm136/host/CMakeLists.txt": "6b6c1c80139ec0eadc8940bb93c264806412ab93ae90779d9ec6ad13d88a0477",
+  "tools/claims-v3/e136/rgm136/host/Constants.h.in": "c464f57f54f0efd6d5659483c9121a0299bf86d82eacacc66938c8226f7ceebb",
+  "tools/claims-v3/e136/rgm136/host/main.cpp": "f9b2279f838ad30444748f2a5abad5dd646df631735fc029a6ac01f9036e2fda",
+  "tools/claims-v3/e136/rgm136/kernel/CMakeLists.txt": "061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948",
+  "tools/claims-v3/e136/rgm136/kernel/crt.S": "dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4",
+  "tools/claims-v3/e136/rgm136/kernel/sections.ld": "b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09",
+  "tools/claims-v3/e136/rgm136/kernel/sparsity.c": "4be70db597aa2120b9c9904643ff9fc6108ef5eb1f4fb17ac844f9e037619f74",
+  "tools/claims-v3/e136/rgm136/sparsity_args.h": "a7e0144ef468dec18ed2d20ec150688a825d6482f17fa7be4dc23c7d17a15332"
+ },
+ "equal_to_e206_record": {
+  "path": "tools/claims-v3/e206/kernel-e206.json",
+  "sha256": "5591ba0cc88289f471f5deb320cb772d2a4f362bbde360aa0d560d8d247ffc74",
+  "sources_equal": true
+ },
+ "kernel_elf_sha256": "aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0",
+ "kernel_elf_pin_source": "E136's build record; E190's kit (aifoundry2's and aifoundry1's builds byte-identical)",
+ "kernel_text_sha256": "61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763",
+ "kernel_text_pin_source": "E190's kit (KIT.md); the gate for aifoundry3's build (E191's kit fix; E206's kit on aifoundry3)",
+ "arm_used": {
+  "gemmL<MB>x<NB>x<KB>": "SP_GEMM_LARGE (E136): C (MB x NB blocks of 1,024 x 512) = A (MB x KB blocks) x B (KB x NB blocks); a shire mask runs the masked shires only (shire s: rows 128 (s >> 2), columns 128 (s & 3) of each C block)"
+ },
+ "host_arguments": "--test fma --type <fmt> --pattern none --values <arm>:<gen>:<tiles> --shires <mask> --per-shire 32 --seconds 6 --budget 7.5 --seed 1 (the kit adds --kernel, --stop-file and its absolute paths); gen randn, e37 or tiles (E101's grammar)"
+}

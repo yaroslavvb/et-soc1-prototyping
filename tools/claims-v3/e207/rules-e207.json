@@ -1,0 +1,179 @@
+{
+ "experiment": "E207",
+ "request": "Q199",
+ "what": "the registered numbers of every E207 rule (frozen before any E207 datum); the scorer reads this file and pins its sha256",
+ "inputs_sha256": {
+  "compare_e206.json": "a1841a8a158e8f25f33707e8424fa21c14f08b6fe37761858bb776e82f59554c",
+  "holdout_v1.json": "1a3b9091149bcaf5c301961ddc6ce7d12fc8c5dd6b4bb521ef7b7ffd77ecb83c",
+  "data-e206.json": "3fefd637c1d2ec8dad4712e1c3421e0ce5f62274b2fbe2c532134a559ece3318",
+  "mm1_v1_blind_day.csv": "90dffe943d611d139e091f481a32f6e04207d17937fd6cca96744658488032c6"
+ },
+ "inputs_paths": {
+  "mm1_v1_compare_e206": "tools/matmul/mm1/v1/out/compare_e206.json",
+  "mm1_v1_holdout": "tools/matmul/mm1/v1/out/holdout_v1.json",
+  "e206_data": "docs/reports/data/2026-11-16-e206-matmul-sweep-aifoundry3/data-e206.json",
+  "mm1_v1_blind_day_csv": "tools/matmul/mm1/v1/out/mm1_v1_blind_day.csv"
+ },
+ "verdict": {
+  "share": 0.9,
+  "min_scored": 10,
+  "form": "a rule's verdict: PASS if at least 90% of its scored cases (time) or points (energy) pass; FAIL otherwise; TOO FEW under 10 scored; NO DATA with none"
+ },
+ "bands_mm1_v1": {
+  "T1": {
+   "what": "cycles an op, the wall (cycles_max / passes / ops), per case",
+   "band_rel": 0.13,
+   "band_pct": 13,
+   "held_out_e206_rms_pct": 6.47,
+   "held_out_e206_source": "compare_e206.json > table > 'all | cycles an op, wall (the slowest minion) | v1_held_out'",
+   "loeo_all_rms_pct": 4.7,
+   "loeo_all_source": "holdout_v1.json > 'time v1_r1conf_dramr0_t2us' > loeo > 'all'",
+   "arithmetic": "2 x max(6.47, 4.7) = 12.94 -> 13%"
+  },
+  "T2": {
+   "what": "cycles an op, the counter's mean (the host's cycles_per_op), per case",
+   "band_rel": 0.16,
+   "band_pct": 16,
+   "held_out_e206_rms_pct": 7.87,
+   "held_out_e206_source": "compare_e206.json > table > 'all | cycles an op, the counter's mean | v1_held_out'",
+   "loeo_all_rms_pct": null,
+   "loeo_all_source": null,
+   "arithmetic": "2 x 7.87 = 15.74 -> 16%"
+  },
+  "T3": {
+   "what": "seconds a GEMM (t_gemm), per case",
+   "band_rel": 0.13,
+   "band_pct": 13,
+   "held_out_e206_rms_pct": 6.48,
+   "held_out_e206_source": "compare_e206.json > table > 'all | seconds a GEMM | v1_held_out'",
+   "loeo_all_rms_pct": null,
+   "loeo_all_source": null,
+   "arithmetic": "2 x 6.48 = 12.96 -> 13%"
+  },
+  "E1": {
+   "what": "J over idle given the measured seconds, per point (at 3 W and above)",
+   "band_rel": 0.15,
+   "band_pct": 15,
+   "held_out_e206_rms_pct": 7.02,
+   "held_out_e206_source": "compare_e206.json > table > 'all | J over idle, given the measured seconds | v1_held_out'",
+   "loeo_all_rms_pct": 6.31,
+   "loeo_all_source": "holdout_v1.json > 'energy pmem1 on time v1_r1conf_dramr0_t2us' > stats > 'LOEO | J over idle given t (>= 3 W) | all'",
+   "arithmetic": "2 x max(7.02, 6.31) = 14.04 -> 15%"
+  },
+  "E2": {
+   "what": "J over idle with the seconds forecast, per point (at 3 W and above)",
+   "band_rel": 0.16,
+   "band_pct": 16,
+   "held_out_e206_rms_pct": 7.57,
+   "held_out_e206_source": "compare_e206.json > table > 'all | J over idle, seconds forecast | v1_held_out'",
+   "loeo_all_rms_pct": 7.33,
+   "loeo_all_source": "holdout_v1.json > 'energy pmem1 on time v1_r1conf_dramr0_t2us' > stats > 'LOEO | J over idle t forecast (>= 3 W) | all'",
+   "arithmetic": "2 x max(7.57, 7.33) = 15.14 -> 16%"
+  },
+  "E3": {
+   "what": "J with the card at rest given the measured seconds and rest, per point",
+   "band_rel": 0.05,
+   "band_pct": 5,
+   "held_out_e206_rms_pct": 2.33,
+   "held_out_e206_source": "compare_e206.json > table > 'all | J at rest, given the measured seconds (measured rest) | v1_held_out'",
+   "loeo_all_rms_pct": 2.06,
+   "loeo_all_source": "holdout_v1.json > 'energy pmem1 on time v1_r1conf_dramr0_t2us' > stats > 'LOEO | J at rest given t | all'",
+   "arithmetic": "2 x max(2.33, 2.06) = 4.66 -> 5%"
+  },
+  "E4": {
+   "what": "J with the card at rest with the seconds forecast (the measured rest), per point",
+   "band_rel": 0.13,
+   "band_pct": 13,
+   "held_out_e206_rms_pct": 6.25,
+   "held_out_e206_source": "compare_e206.json > table > 'all | J at rest, seconds forecast (measured rest) | v1_held_out'",
+   "loeo_all_rms_pct": 4.9,
+   "loeo_all_source": "holdout_v1.json > 'energy pmem1 on time v1_r1conf_dramr0_t2us' > stats > 'LOEO | J at rest t forecast | all'",
+   "arithmetic": "2 x max(6.25, 4.9) = 12.50 -> 13%"
+  }
+ },
+ "band_rule": "twice the larger of MM1-v1's held-out rms on E206's fold and its leave-one-experiment-out rms over all points (where recorded), rounded up to a whole percent; a case or point passes when |measured / forecast - 1| <= the band",
+ "watts": {
+  "points": [
+   "b34",
+   "b38",
+   "b40"
+  ],
+  "sd_rep_w": 0.1075,
+  "band_w": 0.215,
+  "rule": "at these points E1 and E2 read |W measured - W forecast| <= band_w (W = J over idle / t); E3 and E4 stay relative",
+  "sd_rep_method": "E206 arm A (data-e206.json): per point the sample sd of its two runs' W over idle; pooled = sqrt(mean of the variances)",
+  "reported_beside": {
+   "e206_points": 119,
+   "sd_w_median": 0.0424,
+   "sd_w_median_over_0.6745": 0.0629,
+   "sd_w_under_3W_rms": 0.046,
+   "sd_w_under_3W_n": 8,
+   "mm_critic_c09_aifoundry3_gemm_groups_median": 0.105
+  }
+ },
+ "head_to_head": {
+  "rules": {
+   "H1": "cycles an op, the wall, per case: MM1-v1 (cycles_per_op_wall) against F1 (F1_cycles_per_op)",
+   "H2": "cycles an op, the counter's mean, per case: MM1-v1 (cycles_per_op_mean) against F1 (F1_cycles_per_op)",
+   "H3": "J over idle given the measured seconds, per point both price: MM1-v1 against F2",
+   "H4": "J over idle with the seconds forecast, per point both price: MM1-v1 against F2"
+  },
+  "d": "d = |ln(measured / other)| - |ln(measured / MM1-v1)| (in watts at the points scored in watts: |W - W_other| - |W - W_v1|)",
+  "ties": {
+   "cycles_ln": 0.001,
+   "j_ln": 0.005,
+   "watts_w": 0.05
+  },
+  "test": "exact two-sided sign test (binomial, p = 1/2) on the untied cases",
+  "alpha": 0.05,
+  "min_untied": 10,
+  "verdicts": [
+   "MM1-v1 BETTER",
+   "F1 BETTER / F2 BETTER",
+   "NOT DECIDED",
+   "TOO FEW",
+   "NO DATA"
+  ],
+  "bootstrap_reported": {
+   "resamples": 10000,
+   "interval": "percentile 95%",
+   "statistics": [
+    "median of d",
+    "mean of d"
+   ],
+   "seed": "random.Random('E207|bootstrap|<rule>')"
+  },
+  "replicate_floors_e206": {
+   "rel_sd_cycles_wall_median": 6.887720071835826e-05,
+   "rel_sd_cycles_mean_median": 4.792033450535983e-05,
+   "rel_sd_j_over_median_at_3W_and_above": 0.0032082524866532632,
+   "sd_w_median": 0.042426406871191945,
+   "ties_at_or_above_floors": true
+  }
+ },
+ "reported_head_to_head": [
+  "J over idle given / forecast: MM1-v1 against F1 (points F1 prices)",
+  "J over idle given / forecast: F1 against F2"
+ ],
+ "smoke": {
+  "points": [
+   "b01",
+   "b02",
+   "b03"
+  ],
+  "cycles_window": [
+   0.5,
+   2.5
+  ],
+  "rule": "the smoke's cycles an op (the host's counter mean) within 50-250% of MM1-v1's cycles_per_op_mean"
+ },
+ "clock_mhz": [
+  590.0,
+  610.0
+ ],
+ "f1f2_reported": {
+  "S2_rel": 0.1,
+  "S3_rel": 0.05,
+  "what": "F1's and F2's own E206 rules (C1, S1, S4 inside their bands; S2 within 10%, S3 within 5%) read on the day's points: REPORTED"
+ }
+}
