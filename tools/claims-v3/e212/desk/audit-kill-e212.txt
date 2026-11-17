@@ -1,0 +1,88 @@
+# E212: the kill-path audit of src (54 text files)
+
+== 1. kill words (SIGKILL, kill -9, timeout -k, os.kill, killpg, .kill(, .terminate(, pkill, killall): 15 line(s)
+  src/run_mms.py:31: (never SIGKILL): anything of it still alive then is a LEFTOVER (below), and the session makes no other read of the node;
+  src/run_mms.py:50: `timeout` wrapper (which ignores it once it has sent its own; never SIGKILL); alive 30 s later it is
+  src/run_mms.py:58: No child process of the runner is ever sent SIGKILL: every bounded wait (the config reads, et-who, the box check, the hosts)
+  src/run_mms.py:183: self.leftover = []                 # device processes of ours alive when they should not be (recorded; never kill -9)
+  src/run_mms.py:268: # ------------------------------------------------------------------ a bounded child process (never SIGKILL)
+  src/run_mms.py:273: nothing else is done to it (never SIGKILL, never kill -9). -> (rc or None, stdout, stderr, the pids left running)."""
+  src/run_mms.py:436: """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s, each wait ending CLOSE_S / 2 before the end bound
+  src/run_mms.py:457: self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+  src/run_mms.py:492: self.say(f"LEFTOVER: {why} (recorded; never kill -9; the card's lock stays held until no device process of ours is left)")
+  src/run_mms.py:604: more (never SIGKILL). Anything of it still running then holds or may hold the card's mgmt node: a LEFTOVER, the session
+  src/run_mms.py:668: # ignores it once it has sent its own), never SIGKILL; still alive 30 s later, the tree is a leftover and the
+  src/run_mms.py:1074: # hold the card's lock until no device process of ours is left, at most LEFTOVER_WAIT_S (never kill -9)
+  src/run_mms.py:1086: "the card's lock is released at the bound: tell the owner (no kill -9)"))
+  src/selftest_mms.py:34: D13 the start config read outlives its bound, deaf to SIGTERM: no SIGKILL (the double ends by itself), no re-run, no launch,
+  src/status_mms.sh:33: f"resolved {lo.get('resolved')}: do not post the release; tell the owner (never kill -9)")
+
+== 2a. process launches in Python files: 14 line(s)
+  src/run_mms.py:275: p = subprocess.Popen(cmd, cwd=ROOT, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+  src/run_mms.py:324: out = subprocess.run(["ps", "-eo", "uid=,pid=,ppid=,state=,comm="], capture_output=True, text=True).stdout.splitlines()
+  src/run_mms.py:408: self.sproc = subprocess.Popen(self.cmd_sampler(secs), cwd=ROOT, stdout=subprocess.PIPE, stderr=err,
+  src/run_mms.py:505: out = subprocess.run(["ps", "-eo", "uid=,pid=,state=,comm="], capture_output=True, text=True).stdout.splitlines()
+  src/run_mms.py:661: p = subprocess.Popen(self.host_cmd(argv), cwd=ROOT, stdout=so, stderr=se, stdin=subprocess.DEVNULL, env=self.env)
+  src/selftest_mms.py:100: r = subprocess.run(PY + [os.path.join(HERE, "make_schedule2.py"), "--plan", p, "--out", d], capture_output=True, text=True)
+  src/selftest_mms.py:107: r = subprocess.run(PY + [os.path.join(HERE, "run_mms.py"), "session", "--dry", "--scale", scale, "--card", card, "--sched",
+  src/selftest_mms.py:118: r = subprocess.run(PY + [os.path.join(HERE, "reduce_mms.py"), out, "--out", j], capture_output=True, text=True)
+  src/selftest_mms.py:144: r = subprocess.run(PY + [os.path.join(HERE, "make_schedule2.py"), "--check"], capture_output=True, text=True)
+  src/selftest_mms.py:146: r = subprocess.run(PY + [os.path.join(HERE, "check_mms.py"), "--check"], capture_output=True, text=True)
+  src/selftest_mms.py:148: r = subprocess.run(["bash", os.path.join(HERE, "preflight_mms.sh"), "a1c1", "--audit-only"], cwd=ROOT, capture_output=True,
+  src/selftest_mms.py:154: r = subprocess.run(PY + [os.path.join(HERE, "tiles_gen.py"), "--check"], capture_output=True, text=True)
+  src/selftest_mms.py:230: r = subprocess.run(PY + [os.path.join(HERE, "collect_mms.py"), os.path.join(scratch, "D1"), "--out", os.path.join(scratch, "D7")],
+  src/selftest_mms.py:347: r = subprocess.run(PY + [probe, HERE, lock], env=env, pass_fds=fds, capture_output=True, text=True, timeout=60)
+
+== 2b. process launches in C and C++ files: 0 line(s)
+
+== 2c. programs started under timeout, setsid, nohup or exec, or in the background, in shell files: 13 line(s)
+  src/build_mms.sh:31: if command -v et-who > /dev/null 2>&1; then timeout 20 et-who --check > /dev/null 2>&1; chk=$?; fi
+  src/build_mms.sh:41: exec 9>>run/box.lock    # held (fd 9, inherited by the build's own processes) until this script ends
+  src/build_mms.sh:79: env ${EV[@]+"${EV[@]}"} timeout 10 "$H" "$@" < /dev/null > "build/check-$name.out" 2> "build/check-$name.err"
+  src/dry_mms.sh:22: if command -v et-who > /dev/null 2>&1; then timeout 20 et-who --check > /dev/null 2>&1; chk=$?; fi
+  src/dry_mms.sh:32: exec 9>>run/box.lock    # held (fd 9) until this script ends
+  src/guard_ettelem.sh:33: exec "$R" config ;;
+  src/guard_ettelem.sh:40: exec "$R" sample --seconds "$3" --every-ms "$5" ;;
+  src/preflight_mms.sh:31: EW=$(timeout 20 et-who 2>/dev/null); EWRC=$?
+  src/preflight_mms.sh:32: timeout 20 et-who --check > /dev/null 2>&1; CHK=$?
+  src/preflight_mms.sh:45: EU=$(timeout 30 et-usage --since 30m 2>/dev/null)
+  src/start_mms.sh:33: exec 9>>run/box.lock    # held from here; handed to the session below
+  src/start_mms.sh:42: setsid nohup env MMS_CARD="$CARD" MMS_SESSION="$S" MMS_T0="$T0" MMS_DEADLINE="$DL" MMS_BOX_LOCK_FD=9 bash src/session_mms.sh \
+  src/start_mms.sh:43: > "sessions/$SID.start.out" 2>&1 < /dev/null &
+
+== 2d. the timeout program in a Python command list ("timeout", N, ...): 8 line(s)
+  src/run_mms.py:243: if real[-1] == "config" and real[0] == "timeout":          # the same tree as the real read: `timeout 10` over the reader
+  src/run_mms.py:244: return ["timeout", str(C.HOST_TIMEOUT_S)] + fake + ["config"]
+  src/run_mms.py:247: if real[0] == "timeout" and real[2] == C.HOST:
+  src/run_mms.py:248: return ["timeout", str(C.HOST_TIMEOUT_S)] + fake + ["host"] + real[3:]
+  src/run_mms.py:255: return self.device_call(["timeout", str(C.HOST_TIMEOUT_S), "bash", C.GUARD, self.card, "config"])
+  src/run_mms.py:263: return ["timeout", "20", "et-who"]
+  src/run_mms.py:266: return self.device_call(["timeout", str(C.HOST_TIMEOUT_S)] + argv)
+  src/dmcmd/dmcmd_audit.py:90: "sudo", "nohup", "setsid", "env", "nice", "ionice", "stdbuf", "timeout", "flock", "$(", "$"}
+
+== 3. signal uses: 12 line(s)
+  src/fake_card_mms.py:138: signal.signal(signal.SIGTERM, signal.SIG_IGN)
+  src/fake_card_mms.py:224: signal.signal(signal.SIGTERM, signal.SIG_IGN)
+  src/fake_card_mms.py:331: signal.signal(signal.SIGTERM, signal.SIG_IGN)
+  src/make_schedule2.py:26: first block opens with its own), right after the session's hottest arm, and through every block with a small-signal (sus3)
+  src/run_mms.py:286: p.send_signal(signal.SIGTERM)
+  src/run_mms.py:447: p.send_signal(signal.SIGTERM)
+  src/run_mms.py:671: p.send_signal(signal.SIGTERM)
+  src/ettelem/ettelem.cpp:141: struct sigaction sa {};
+  src/ettelem/ettelem.cpp:145: sigaction(SIGTERM, &sa, nullptr);
+  src/ettelem/ettelem.cpp:146: sigaction(SIGINT, &sa, nullptr);
+  src/ettelem/ettelem.cpp:232: std::signal(SIGTERM, SIG_IGN);
+  src/ettelem/ettelem.cpp:233: std::signal(SIGINT, SIG_IGN);
+
+== 4. subprocess.run calls, with or without a timeout= argument (on the line or the next two): 11
+  no timeout=    src/run_mms.py:324: out = subprocess.run(["ps", "-eo", "uid=,pid=,ppid=,state=,comm="], capture_output=True, text=True).stdout.splitlines()
+  no timeout=    src/run_mms.py:505: out = subprocess.run(["ps", "-eo", "uid=,pid=,state=,comm="], capture_output=True, text=True).stdout.splitlines()
+  no timeout=    src/selftest_mms.py:100: r = subprocess.run(PY + [os.path.join(HERE, "make_schedule2.py"), "--plan", p, "--out", d], capture_output=True, text=True)
+  WITH timeout=  src/selftest_mms.py:107: r = subprocess.run(PY + [os.path.join(HERE, "run_mms.py"), "session", "--dry", "--scale", scale, "--card", card, "--sched",
+  no timeout=    src/selftest_mms.py:118: r = subprocess.run(PY + [os.path.join(HERE, "reduce_mms.py"), out, "--out", j], capture_output=True, text=True)
+  no timeout=    src/selftest_mms.py:144: r = subprocess.run(PY + [os.path.join(HERE, "make_schedule2.py"), "--check"], capture_output=True, text=True)
+  no timeout=    src/selftest_mms.py:146: r = subprocess.run(PY + [os.path.join(HERE, "check_mms.py"), "--check"], capture_output=True, text=True)
+  no timeout=    src/selftest_mms.py:148: r = subprocess.run(["bash", os.path.join(HERE, "preflight_mms.sh"), "a1c1", "--audit-only"], cwd=ROOT, capture_output=True,
+  no timeout=    src/selftest_mms.py:154: r = subprocess.run(PY + [os.path.join(HERE, "tiles_gen.py"), "--check"], capture_output=True, text=True)
+  no timeout=    src/selftest_mms.py:230: r = subprocess.run(PY + [os.path.join(HERE, "collect_mms.py"), os.path.join(scratch, "D1"), "--out", os.path.join(scratch, "D7")],
+  WITH timeout=  src/selftest_mms.py:347: r = subprocess.run(PY + [probe, HERE, lock], env=env, pass_fds=fds, capture_output=True, text=True, timeout=60)
