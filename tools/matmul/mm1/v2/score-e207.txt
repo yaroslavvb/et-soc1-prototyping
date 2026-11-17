@@ -1,0 +1,88 @@
+MM1-v2's frozen E207 column scored on E207's committed data, beside MM1-v1, F1 and F2 (Q206 score-v2-e207; the lane's own code)
+interpreter /usr/bin/python3 3.12.3 -I -B (standard library only); labels: v2 = BLIND
+scored: {'points_measured': 53, 'points_scored': 53, 'cases_scored': 47, 'runs_scored': 106}; coverage {'v2': {'cases_time': 47, 'points_jo_given': 49, 'points_jo_fc': 49}, 'v1': {'cases_time': 47, 'points_jo_given': 53, 'points_jo_fc': 53}, 'F1': {'cases_time': 47, 'points_jo_given': 50, 'points_jo_fc': 50}, 'F2': {'cases_time': 47, 'points_jo_given': 49, 'points_jo_fc': 49}}
+error = forecast / measured - 1; rms (bias) in %
+quantity                                                                   v2                 v1                 F1                 F2
+cycles an op, the wall (the slowest minion), per case         4.80 ( -1.02) n47     5.62 ( -2.52) n47    18.07 (+14.00) n47                   -
+cycles an op, the wall (the slowest minion), per run          4.67 ( -1.14) n106    5.44 ( -2.55) n106   17.57 (+13.80) n106                  -
+cycles an op, the counter's mean, per case                    5.01 ( -0.86) n47     5.93 ( -2.37) n47    21.10 (+18.51) n47                   -
+cycles an op, the counter's mean, per run                     4.92 ( -1.14) n106    5.79 ( -2.56) n106   21.01 (+18.70) n106                  -
+seconds a GEMM, per case                                      4.81 ( -1.12) n47     5.66 ( -2.62) n47    17.97 (+13.89) n47    17.97 (+13.89) n47 
+seconds a GEMM, per run                                       4.68 ( -1.24) n106    5.48 ( -2.65) n106   17.47 (+13.69) n106   17.47 (+13.69) n106
+W over idle given the measured seconds (>=3 W)                4.82 ( -0.71) n46     5.42 ( -2.11) n50    25.26 (-24.39) n47    52.74 (+25.84) n46 
+W over idle given the measured seconds (b34,b38,b40 W)      0.168W (+0.146) n3  0.225W (+0.210) n3  0.215W (-0.210) n3  0.281W (-0.260) n3
+W over idle with the seconds forecast (>=3 W)                 4.33 ( +0.13) n46     4.92 ( -0.22) n50    25.26 (-24.39) n47    36.22 ( +8.34) n46 
+W over idle with the seconds forecast (b34,b38,b40 W)       0.189W (+0.176) n3  0.365W (+0.335) n3  0.215W (-0.210) n3  0.290W (-0.286) n3
+J over idle given the measured seconds (>=3 W)                4.82 ( -0.71) n46     5.42 ( -2.11) n50    25.26 (-24.39) n47    52.74 (+25.84) n46 
+J over idle given the measured seconds (b34,b38,b40 W)      0.168W (+0.146) n3  0.225W (+0.210) n3  0.215W (-0.210) n3  0.281W (-0.260) n3
+J over idle with the seconds forecast (>=3 W)                 5.15 ( -0.87) n46     5.80 ( -2.43) n50    16.44 (-13.78) n47    52.68 (+25.74) n46 
+J over idle with the seconds forecast (b34,b38,b40 W)       0.189W (+0.176) n3  0.365W (+0.335) n3  0.215W (-0.210) n3  0.290W (-0.286) n3
+J with the card at rest given the measured seconds (measur    1.92 ( -0.25) n49     2.13 ( -0.73) n53     9.21 ( -8.62) n50    17.45 ( +8.38) n49 
+J with the card at rest with the seconds forecast (measure    4.60 ( -1.13) n49     5.34 ( -2.79) n53    10.01 ( +3.64) n50    26.68 (+16.94) n49 
+on common points (energy on the points MM1-v2 and MM1-v1 both price (each quantity's own common set)):
+  jo_given_3W                                                 4.82 ( -0.71) n46     5.38 ( -2.29) n46    25.51 (-24.98) n44    52.74 (+25.84) n46 
+  jo_fc_3W                                                    5.15 ( -0.87) n46     5.82 ( -2.60) n46    16.29 (-14.16) n44    52.68 (+25.74) n46 
+  jr_given                                                    1.92 ( -0.25) n49     2.10 ( -0.76) n49     9.30 ( -8.81) n47    17.45 ( +8.38) n49 
+  jr_fc                                                       4.60 ( -1.13) n49     5.42 ( -2.79) n49    10.15 ( +3.70) n47    26.68 (+16.94) n49 
+on common points (energy on the points all four models price (each quantity's own common set)):
+  jo_given_3W                                                 4.83 ( -0.68) n44     5.41 ( -2.29) n44    25.51 (-24.98) n44    53.15 (+25.82) n44 
+  jo_fc_3W                                                    5.17 ( -0.84) n44     5.86 ( -2.60) n44    16.29 (-14.16) n44    53.09 (+25.72) n44 
+  jr_given                                                    1.92 ( -0.23) n47     2.12 ( -0.76) n47     9.30 ( -8.81) n47    17.59 ( +8.39) n47 
+  jr_fc                                                       4.66 ( -1.13) n47     5.51 ( -2.83) n47    10.15 ( +3.70) n47    26.85 (+16.91) n47 
+head to head (d > tie: the first closer), exact two-sided sign test:
+  v2_vs_v1.cyc_wall            v2 closer  24, v1 closer  18, ties  5; p 0.440799; NOT DECIDED | families 5/1/1 NOT DECIDED
+  v2_vs_v1.cyc_mean            v2 closer  25, v1 closer  18, ties  4; p 0.360378; NOT DECIDED | families 4/2/1 NOT DECIDED
+  v2_vs_v1.t                   v2 closer  26, v1 closer  16, ties  5; p 0.164149; NOT DECIDED | families 5/1/1 NOT DECIDED
+  v2_vs_v1.jo_given            v2 closer  28, v1 closer  19, ties  2; p 0.24296; NOT DECIDED | families 4/2/2 NOT DECIDED
+  v2_vs_v1.jo_fc               v2 closer  28, v1 closer  20, ties  1; p 0.312327; NOT DECIDED | families 4/3/1 NOT DECIDED
+  v2_vs_v1.jr_given            v2 closer  17, v1 closer   6, ties 26; p 0.03469; v2 BETTER | families 2/0/6 TOO FEW
+  v2_vs_v1.jr_fc               v2 closer  30, v1 closer  11, ties  8; p 0.004324; v2 BETTER | families 5/0/3 NOT DECIDED
+  v2_vs_v1.w_fc                v2 closer  21, v1 closer  20, ties  8; p 1.0; NOT DECIDED | families 2/2/4 TOO FEW
+  v2_vs_F1.cyc_wall            v2 closer  40, F1 closer   6, ties  1; p 0.0; v2 BETTER | families 7/0/0 v2 BETTER
+  v2_vs_F1.cyc_mean            v2 closer  44, F1 closer   3, ties  0; p 0.0; v2 BETTER | families 7/0/0 v2 BETTER
+  v2_vs_F1.t                   v2 closer  40, F1 closer   6, ties  1; p 0.0; v2 BETTER | families 7/0/0 v2 BETTER
+  v2_vs_F1.jo_given            v2 closer  46, F1 closer   1, ties  0; p 0.0; v2 BETTER | families 7/0/0 v2 BETTER
+  v2_vs_F1.jo_fc               v2 closer  44, F1 closer   3, ties  0; p 0.0; v2 BETTER | families 7/0/0 v2 BETTER
+  v2_vs_F1.jr_given            v2 closer  46, F1 closer   0, ties  1; p 0.0; v2 BETTER | families 7/0/0 v2 BETTER
+  v2_vs_F1.jr_fc               v2 closer  35, F1 closer  10, ties  2; p 0.000247; v2 BETTER | families 6/1/0 NOT DECIDED
+  v2_vs_F1.w_fc                v2 closer  46, F1 closer   1, ties  0; p 0.0; v2 BETTER | families 7/0/0 v2 BETTER
+  v2_vs_F2.jo_given            v2 closer  48, F2 closer   1, ties  0; p 0.0; v2 BETTER | families 8/0/0 v2 BETTER
+  v2_vs_F2.jo_fc               v2 closer  48, F2 closer   0, ties  1; p 0.0; v2 BETTER | families 8/0/0 v2 BETTER
+  v2_vs_F2.jr_given            v2 closer  47, F2 closer   1, ties  1; p 0.0; v2 BETTER | families 8/0/0 v2 BETTER
+  v2_vs_F2.jr_fc               v2 closer  44, F2 closer   2, ties  3; p 0.0; v2 BETTER | families 8/0/0 v2 BETTER
+  v2_vs_F2.w_fc                v2 closer  44, F2 closer   4, ties  1; p 0.0; v2 BETTER | families 8/0/0 v2 BETTER
+  v1_vs_F1.cyc_wall            v1 closer  39, F1 closer   8, ties  0; p 6e-06; v1 BETTER | families 7/0/0 v1 BETTER
+  v1_vs_F1.cyc_mean            v1 closer  45, F1 closer   2, ties  0; p 0.0; v1 BETTER | families 7/0/0 v1 BETTER
+  v1_vs_F1.t                   v1 closer  39, F1 closer   8, ties  0; p 6e-06; v1 BETTER | families 7/0/0 v1 BETTER
+  v1_vs_F1.jo_given            v1 closer  48, F1 closer   2, ties  0; p 0.0; v1 BETTER | families 8/0/0 v1 BETTER
+  v1_vs_F1.jo_fc               v1 closer  45, F1 closer   2, ties  3; p 0.0; v1 BETTER | families 8/0/0 v1 BETTER
+  v1_vs_F1.jr_given            v1 closer  46, F1 closer   2, ties  2; p 0.0; v1 BETTER | families 8/0/0 v1 BETTER
+  v1_vs_F1.jr_fc               v1 closer  34, F1 closer  15, ties  1; p 0.009399; v1 BETTER | families 6/2/0 NOT DECIDED
+  v1_vs_F1.w_fc                v1 closer  46, F1 closer   1, ties  3; p 0.0; v1 BETTER | families 8/0/0 v1 BETTER
+  v1_vs_F2.jo_given            v1 closer  47, F2 closer   2, ties  0; p 0.0; v1 BETTER | families 8/0/0 v1 BETTER
+  v1_vs_F2.jo_fc               v1 closer  47, F2 closer   2, ties  0; p 0.0; v1 BETTER | families 8/0/0 v1 BETTER
+  v1_vs_F2.jr_given            v1 closer  45, F2 closer   2, ties  2; p 0.0; v1 BETTER | families 8/0/0 v1 BETTER
+  v1_vs_F2.jr_fc               v1 closer  37, F2 closer   8, ties  4; p 1.5e-05; v1 BETTER | families 7/0/1 v1 BETTER
+  v1_vs_F2.w_fc                v1 closer  42, F2 closer   3, ties  4; p 0.0; v1 BETTER | families 8/0/0 v1 BETTER
+  F1_vs_F2.jo_given            F1 closer  24, F2 closer  21, ties  2; p 0.765992; NOT DECIDED | families 4/3/0 NOT DECIDED
+  F1_vs_F2.jo_fc               F1 closer  42, F2 closer   4, ties  1; p 0.0; F1 BETTER | families 6/1/0 NOT DECIDED
+  F1_vs_F2.jr_given            F1 closer  26, F2 closer  16, ties  5; p 0.164149; NOT DECIDED | families 4/2/1 NOT DECIDED
+  F1_vs_F2.jr_fc               F1 closer  39, F2 closer   5, ties  3; p 0.0; F1 BETTER | families 6/1/0 NOT DECIDED
+  F1_vs_F2.w_fc                F1 closer  23, F2 closer  22, ties  2; p 1.0; NOT DECIDED | families 2/4/1 NOT DECIDED
+inside MM1-v1's bands (REPORTED): {"v2": {"T1": {"inside": 46, "of": 47}, "T2": {"inside": 46, "of": 47}, "T3": {"inside": 46, "of": 47}, "E1": {"inside": 46, "of": 49}, "E2": {"inside": 46, "of": 49}, "E3": {"inside": 47, "of": 49}, "E4": {"inside": 47, "of": 49}}, "v1": {"T1": {"inside": 45, "of": 47}, "T2": {"inside": 44, "of": 47}, "T3": {"inside": 45, "of": 47}, "E1": {"inside": 50, "of": 53}, "E2": {"inside": 48, "of": 53}, "E3": {"inside": 51, "of": 53}, "E4": {"inside": 50, "of": 53}}}
+worst v2 cyc_wall: gemmL1x3x1|int8|0xffffffff -14.0%; gemmL3x6x4|fp32|0xfff +13.3%; gemmL3x5x1|int8|0xffffffff -10.4%; gemmL1x8x16|fp32|0xffffffff +8.4%
+worst v2 t: gemmL1x3x1|int8|0xffffffff -14.1%; gemmL3x6x4|fp32|0xfff +13.2%; gemmL3x5x1|int8|0xffffffff -10.5%; gemmL1x8x16|fp32|0xffffffff +8.3%
+worst v2 jo_given: gemmL3x5x1|int8|0xffffffff[n02] -18.4%; gemmL3x5x1|fp32|0xffffffff[n03] -13.6%; gemmL2x3x2|fp32|0xffffffff[b04] -6.0%; gemmL1x3x2|fp32|0xffffffff[b01] -6.0%
+worst v2 jo_fc: gemmL3x5x1|int8|0xffffffff[n02] -19.7%; gemmL3x5x1|fp32|0xffffffff[n03] -13.9%; gemmL3x6x4|fp32|0xfff[b35] +7.0%; gemmL1x3x1|int8|0xffffffff[n01] -6.1%
+worst v1 cyc_wall: gemmL1x2x2|fp32|0x3 -14.0%; gemmL1x3x1|int8|0xffffffff -13.8%; gemmL3x6x4|int8|0x3 -11.4%; gemmL1x2x2|fp32|0xfff -10.2%
+worst v1 t: gemmL1x2x2|fp32|0x3 -14.1%; gemmL1x3x1|int8|0xffffffff -13.9%; gemmL3x6x4|int8|0x3 -11.5%; gemmL1x2x2|fp32|0xfff -10.3%
+worst v1 jo_given: gemmL3x5x1|int8|0xffffffff[n02] -19.9%; gemmL3x5x1|fp32|0xffffffff[n03] -14.3%; gemmL1x3x2|fp32|0xffffffff[b01] -7.3%; gemmL2x3x2|fp32|0xffffffff[b04] -7.2%
+worst v1 jo_fc: gemmL3x5x1|int8|0xffffffff[n02] -21.3%; gemmL3x5x1|fp32|0xffffffff[n03] -14.6%; gemmL1x3x1|int8|0xffffffff[n01] -8.1%; gemmL1x3x2|fp32|0xffffffff[b01] -7.5%
+worst F1 cyc_wall: gemmL3x6x4|fp32|0xfff +38.8%; gemmL1x8x16|fp32|0xffffffff +31.3%; gemmL3x6x4|fp32|0xffffff +26.9%; gemmL3x6x4|fp32|0xf0f0f0f +25.4%
+worst F1 t: gemmL3x6x4|fp32|0xfff +38.7%; gemmL1x8x16|fp32|0xffffffff +31.2%; gemmL3x6x4|fp32|0xffffff +26.8%; gemmL3x6x4|fp32|0xf0f0f0f +25.3%
+worst F1 jo_given: gemmL3x6x4|int8|0xffffff[b39] -34.8%; gemmL1x4x3|int8|0xffffffff[b09] -33.0%; gemmL3x6x4|fp32|0xf0f0f0f[b37] -32.2%; gemmL3x6x4|fp32|0xfff[b35] -31.8%
+worst F1 jo_fc: gemmL3x5x1|int8|0xffffffff[n02] -39.5%; gemmL1x3x1|int8|0xffffffff[n01] -31.9%; gemmL1x3x2|int8|0xffffffff[b02] -26.9%; gemmL2x3x2|int8|0xffffffff[b05] -26.8%
+worst F2 cyc_wall: 
+worst F2 t: gemmL3x6x4|fp32|0xfff +38.7%; gemmL1x8x16|fp32|0xffffffff +31.2%; gemmL3x6x4|fp32|0xffffff +26.8%; gemmL3x6x4|fp32|0xf0f0f0f +25.3%
+worst F2 jo_given: gemmL2x3x16|int8|0xffffffff[n06] +159.8%; gemmL1x3x24|int8|0xffffffff[b24] +149.9%; gemmL1x8x16|fp32|0xffffffff[n05] +99.2%; gemmL1x7x16|fp32|0xffffffff[n04] +94.2%
+worst F2 jo_fc: gemmL2x3x16|int8|0xffffffff[n06] +159.8%; gemmL1x3x24|int8|0xffffffff[b24] +149.6%; gemmL1x8x16|fp32|0xffffffff[n05] +99.2%; gemmL1x7x16|fp32|0xffffffff[n04] +94.0%
