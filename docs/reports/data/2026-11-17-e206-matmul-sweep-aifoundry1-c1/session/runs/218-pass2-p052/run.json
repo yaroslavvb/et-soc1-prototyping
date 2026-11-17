@@ -1,0 +1,92 @@
+{
+ "n": 218,
+ "block": "pass2",
+ "id": "p052",
+ "name": "gemmL6x12x12.fp32.random",
+ "arm": "B",
+ "run": "218-pass2-p052",
+ "gate": {
+  "c": 55.0,
+  "die": 55,
+  "waited_s": 7.5
+ },
+ "rest": {
+  "t0_ms": 1794908030211,
+  "t1_ms": 1794908040211
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/nekko/build/e206rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL6x12x12:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/nekko/build/e206rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "~/nekko/build/e206/T1794903205-B/STOP"
+   ],
+   "rc": 0,
+   "hung": false,
+   "t0_ms": 1794908040212,
+   "t1_ms": 1794908047492,
+   "n_launch": 18,
+   "runtime_other_cards": [],
+   "launches_ok": true,
+   "check": "approx",
+   "check_ok": true,
+   "check_cycles_per_op": 1432.644,
+   "stopped_by_file": false,
+   "k1": false,
+   "records": {
+    "runtime_lines": 1,
+    "unparsed": 0,
+    "mismatched": 0,
+    "other": 0
+   },
+   "launch_window_ms": [
+    1794908040646,
+    1794908047285
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et1_ops"
+    ],
+    "stderr_ids": [
+     1
+    ],
+    "nodes_held": [
+     "/dev/et1_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 74,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1794908040212,
+  "t1_ms": 1794908047493
+ },
+ "tail_end_ms": 1794908051493,
+ "stop": null
+}
