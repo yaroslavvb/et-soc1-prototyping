@@ -1,0 +1,5244 @@
+{
+ "what": "MM1-v2's forecasts for E207's 53 points (THE BLIND MATMUL DAY: aifoundry3 card 0 at its pinned 600 MHz, rgm136 unchanged), from the frozen predictor in tools/matmul/mm1/v2 unchanged",
+ "model": "MM1-v2",
+ "card": "aifoundry3 card 0",
+ "card_key": "a3",
+ "f_mhz": 600.0,
+ "V": 0.522,
+ "s_V": 1.0194358914882395,
+ "G": 0.0,
+ "V_why": "the predictor's own default for this card (mm1_core_v2.CARD_V, 0.522 V: the footing of MM1-v2's aifoundry3 fit and of MM1-v1's blind day)",
+ "clock_routes": "one: the card is pinned at 600 MHz, so 'given the measured clock' and 'with the clock forecast' are the same call",
+ "kind_specs": "as MM1-v1's blind day (blind_day_v1.kind_specs): random from ledger v2's own rows; e37 from ledger v2's fp32.small_int with the e37 generator's phi; blind4 and blind3 by their own sources, which MM1-v2's predictor does not price",
+ "points_file": "tools/matmul/mm1/v1/out/mm1_v1_blind_day.csv",
+ "points_sha256": "90dffe943d611d139e091f481a32f6e04207d17937fd6cca96744658488032c6",
+ "e207_registration_points": {
+  "path": "tools/claims-v3/e207/points-e207.csv",
+  "sha256_pinned": "1e6067bcf0fc123c81bf927472bbc27a312b64139de5890add3b4c2991d9b114",
+  "rule": "checked when found (exit 4 on any difference); the mask compared as a number"
+ },
+ "n_points": 53,
+ "n_cases_time": 47,
+ "n_energy_forecast": 49,
+ "energy_not_forecast": [
+  {
+   "id": "b49",
+   "fmt": "fp32",
+   "kind": "real:blind4",
+   "why": "NOT FORECAST: no resident price source for this kind on this card: energy NOT FORECAST"
+  },
+  {
+   "id": "b50",
+   "fmt": "fp16",
+   "kind": "real:blind4",
+   "why": "NOT FORECAST: no resident price source for this kind on this card: energy NOT FORECAST"
+  },
+  {
+   "id": "b51",
+   "fmt": "int8",
+   "kind": "real:blind4",
+   "why": "NOT FORECAST: no resident price source for this kind on this card: energy NOT FORECAST"
+  },
+  {
+   "id": "b52",
+   "fmt": "fp32",
+   "kind": "designed:blind3 a_colconst_b_randn",
+   "why": "NOT FORECAST: no resident price source for this kind on this card: energy NOT FORECAST"
+  }
+ ],
+ "scored_in_watts_E207": [
+  "b34",
+  "b38",
+  "b40"
+ ],
+ "frozen_files_sha256": {
+  "mm1_v2.py": "5abf3a0a49757e15a776f3a1b5cdb4f7fa90943de2e016fe8b26aa4bf5324c08",
+  "mm1_core_v2.py": "f78c21b4f8b4c43a9a6c7319f12092937e9e92c69d3e7dc036f0e1f92b9d7e08",
+  "kinds_v2.py": "14c72c298956c551439a6eddb77f9d75a7b7fe3414cbb78cfbd0ad5a70ed686d",
+  "governor_v2.py": "6276d4c7f7f074fbc2681040a8d63eb2ab07104e96e4ebd5459d8ef7adbadd44",
+  "out/mm1_v2_params.json": "9d79040bb8f86336987ff4b6aeaf7e5e6e3b2b2ba07e4bcdc4aa5f5b65c43fa5",
+  "inputs/MANIFEST.json": "d099622c7d2786dfd38358f2ed9a561817dbd8fc8952fb6ac657da7776322ed9",
+  "inputs/v1/ledger_frozen-v2.json": "59ff911705137e5486efcb15c482919e3d257f800193bcc9f1d78ee7283753ce",
+  "inputs/v1/predictions-blind4.json": "a58f0dc441347849de980d8912436643e540268ac9aa511a45b5b54801998829",
+  "inputs/v1/predictions-blind3-extract.json": "a02ae59817bc94e1d9c9af3b67d4e12eb9daf5af03259687f24a3f1d5af01116",
+  "SHA256SUMS": "eafb6558c4eaa053e4e33b8a4d6b2a644175f325df9e9ba56a1b6373b556f2f2"
+ },
+ "sha256sums_checked": 114,
+ "python": "3.12.3",
+ "numpy": "1.26.4",
+ "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+ "rows": [
+  {
+   "id": "b01",
+   "listed": {
+    "family": "inside",
+    "arm": "gemmL1x3x2",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "1536",
+    "K": "1024",
+    "ops_per_minion_per_gemm": "384",
+    "values": "gemmL1x3x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4791435319852657,
+    "cycles_per_op_wall": 887.4861191911594,
+    "cycles_per_op_mean": 788.1759495480991,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     175.63185002002223,
+     0.368149979977785
+    ],
+    "footprint_MB": 16.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 18141.5,
+    "ops_per_minion_per_gemm": 384,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 340794.6697694053,
+    "seconds_per_gemm": 0.000567991116282342,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 23.855686674605668,
+    "W_affine": {
+     "A_W": 1.5468617199678143,
+     "B_W_us": 32.99795413784407,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.013549818103991066,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0007830095440551429,
+     "awake_memory_path": 9.559417100379955e-05,
+     "governed_base": 0.0,
+     "resident_op": 0.009479437459270964,
+     "lines_L2": 0.00011225897414681955,
+     "lines_L3": 0.0030698644536251386,
+     "lines_fresh": 9.653501889199754e-06
+    },
+    "switches": {
+     "counted_fin_edges": [
+      114501680627712,
+      173153754021888
+     ],
+     "estimated_fin_edges": [
+      110003890943617.4,
+      265565783912802.34,
+      458392644898203.06
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.011464999663083713,
+     "die_J_band": [
+      0.010463805720326015,
+      0.013540164602101865
+     ],
+     "fresh_lines_J_apart": 9.653501889199754e-06,
+     "in_run_leakage_J": [
+      0.0007642097410650961,
+      0.000923420103786991
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0031606891284554598,
+      0.004443025860571675
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.027602489536267795,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b02",
+   "listed": {
+    "family": "inside",
+    "arm": "gemmL1x3x2",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "1536",
+    "K": "4096",
+    "ops_per_minion_per_gemm": "384",
+    "values": "gemmL1x3x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4791435319852657,
+    "cycles_per_op_wall": 887.4861191911594,
+    "cycles_per_op_mean": 788.1759495480991,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     175.63185002002223,
+     0.368149979977785
+    ],
+    "footprint_MB": 16.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 18141.5,
+    "ops_per_minion_per_gemm": 384,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 340794.6697694053,
+    "seconds_per_gemm": 0.000567991116282342,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 10.786926345243451,
+    "W_affine": {
+     "A_W": 1.5468617199678143,
+     "B_W_us": 13.667381825602314,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.006126878336090232,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0007830095440551429,
+     "awake_memory_path": 9.559417100379955e-05,
+     "governed_base": 0.0,
+     "resident_op": 0.0020564976913701317,
+     "lines_L2": 0.00011225897414681955,
+     "lines_L3": 0.0030698644536251386,
+     "lines_fresh": 9.653501889199754e-06
+    },
+    "switches": {
+     "counted_fin_edges": [
+      12414602969088,
+      17929340977152
+     ],
+     "estimated_fin_edges": [
+      83080264263091.47,
+      171224039940709.38,
+      258817965644158.03
+     ],
+     "of_which_int8_arithmetic_central": 52181625719918.34,
+     "die_J_over_idle": 0.005179699266893338,
+     "die_J_band": [
+      0.00472737622426664,
+      0.006117224834201032
+     ],
+     "fresh_lines_J_apart": 9.653501889199754e-06,
+     "in_run_leakage_J": [
+      0.000345555938155489,
+      0.00041754675860454927
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0003426910454359799,
+      0.0004600565900201277
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.020179549768366962,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b03",
+   "listed": {
+    "family": "inside",
+    "arm": "gemmL1x3x2",
+    "fmt": "fp16",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "1536",
+    "K": "2048",
+    "ops_per_minion_per_gemm": "384",
+    "values": "gemmL1x3x2:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4791435319852657,
+    "cycles_per_op_wall": 887.4861191911594,
+    "cycles_per_op_mean": 788.1759495480991,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     175.63185002002223,
+     0.368149979977785
+    ],
+    "footprint_MB": 16.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 18141.5,
+    "ops_per_minion_per_gemm": 384,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 340794.6697694053,
+    "seconds_per_gemm": 0.000567991116282342,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 21.503020867803137,
+    "e_res_source": "ledger v2 fp16.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 22.34198572283449,
+    "W_affine": {
+     "A_W": 1.5468617199678143,
+     "B_W_us": 30.75897316567179,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.012690049410676911,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0007830095440551429,
+     "awake_memory_path": 9.559417100379955e-05,
+     "governed_base": 0.0,
+     "resident_op": 0.008619668765956812,
+     "lines_L2": 0.00011225897414681955,
+     "lines_L3": 0.0030698644536251386,
+     "lines_fresh": 9.653501889199754e-06
+    },
+    "switches": {
+     "counted_fin_edges": [
+      97403415822336,
+      146279069908992
+     ],
+     "estimated_fin_edges": [
+      111811372526706.11,
+      261917792259611.1,
+      442217075012517.94
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.010736999076026852,
+     "die_J_band": [
+      0.009799378600299623,
+      0.012680395908787712
+     ],
+     "fresh_lines_J_apart": 9.653501889199754e-06,
+     "in_run_leakage_J": [
+      0.0007157187867621777,
+      0.0008648268673376314
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.002688710906043892,
+      0.0037534369043126154
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.02674272084295364,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b04",
+   "listed": {
+    "family": "inside",
+    "arm": "gemmL2x3x2",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "2048",
+    "N": "1536",
+    "K": "1024",
+    "ops_per_minion_per_gemm": "768",
+    "values": "gemmL2x3x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4857053976689065,
+    "cycles_per_op_wall": 891.4232386013439,
+    "cycles_per_op_mean": 791.6725031983517,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     175.10740040474997,
+     0.8925995952500241
+    ],
+    "footprint_MB": 26.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 36191.0,
+    "ops_per_minion_per_gemm": 768,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 684613.047245832,
+    "seconds_per_gemm": 0.0011410217454097202,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 23.76519285353434,
+    "W_affine": {
+     "A_W": 1.5468617199678143,
+     "B_W_us": 33.0098944923349,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.027116601829738362,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0015729663563719433,
+     "awake_memory_path": 0.00019203650325321398,
+     "governed_base": 0.0,
+     "resident_op": 0.018958874918541927,
+     "lines_L2": 0.00022451794829363904,
+     "lines_L3": 0.006121395225387241,
+     "lines_fresh": 4.681087789039127e-05
+    },
+    "switches": {
+     "counted_fin_edges": [
+      229003361255424,
+      346307508043776
+     ],
+     "estimated_fin_edges": [
+      219807079580865.0,
+      530742927527398.4,
+      916237278374586.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.022921076165832315,
+     "die_J_band": [
+      0.02091946750529209,
+      0.027069790951847965
+     ],
+     "fresh_lines_J_apart": 4.681087789039127e-05,
+     "in_run_leakage_J": [
+      0.0015293763431972432,
+      0.001847996414696669
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0063213782569109195,
+      0.00888605172114335
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.055346627310198834,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b05",
+   "listed": {
+    "family": "inside",
+    "arm": "gemmL2x3x2",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "2048",
+    "N": "1536",
+    "K": "4096",
+    "ops_per_minion_per_gemm": "768",
+    "values": "gemmL2x3x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4857053976689065,
+    "cycles_per_op_wall": 891.4232386013439,
+    "cycles_per_op_mean": 791.6725031983517,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     175.10740040474997,
+     0.8925995952500241
+    ],
+    "footprint_MB": 26.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 36191.0,
+    "ops_per_minion_per_gemm": 768,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 684613.047245832,
+    "seconds_per_gemm": 0.0011410217454097202,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 10.754152883852798,
+    "W_affine": {
+     "A_W": 1.5468617199678143,
+     "B_W_us": 13.679322180093147,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.012270722293936696,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0015729663563719433,
+     "awake_memory_path": 0.00019203650325321398,
+     "governed_base": 0.0,
+     "resident_op": 0.0041129953827402635,
+     "lines_L2": 0.00022451794829363904,
+     "lines_L3": 0.006121395225387241,
+     "lines_fresh": 4.681087789039127e-05
+    },
+    "switches": {
+     "counted_fin_edges": [
+      24829205938176,
+      35858681954304
+     ],
+     "estimated_fin_edges": [
+      165959826219813.16,
+      342059439583212.6,
+      517087919866496.1
+     ],
+     "of_which_int8_arithmetic_central": 104363251439836.69,
+     "die_J_over_idle": 0.010350475373451568,
+     "die_J_band": [
+      0.00944660851317334,
+      0.012223911416046302
+     ],
+     "fresh_lines_J_apart": 4.681087789039127e-05,
+     "in_run_leakage_J": [
+      0.0006920687373780296,
+      0.0008362497243317856
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0006853820908719598,
+      0.0009201131800402553
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.04050074777439717,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b06",
+   "listed": {
+    "family": "inside",
+    "arm": "gemmL3x2x2",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "3072",
+    "N": "1024",
+    "K": "1024",
+    "ops_per_minion_per_gemm": "768",
+    "values": "gemmL3x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4987083609173775,
+    "cycles_per_op_wall": 899.2250165504265,
+    "cycles_per_op_mean": 798.601258037679,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     174.47163467989841,
+     1.5283653201015974
+    ],
+    "footprint_MB": 28.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 36191.0,
+    "ops_per_minion_per_gemm": 768,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 690604.8127107276,
+    "seconds_per_gemm": 0.001151008021184546,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 23.582082238169427,
+    "W_affine": {
+     "A_W": 1.5468617199678143,
+     "B_W_us": 33.024369225286904,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.02714316581236662,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.001586733031619322,
+     "awake_memory_path": 0.00019371721572695495,
+     "governed_base": 0.0,
+     "resident_op": 0.01895887491854193,
+     "lines_L2": 0.0002245179482936391,
+     "lines_L3": 0.006099170160863553,
+     "lines_fresh": 8.015253732122139e-05
+    },
+    "switches": {
+     "counted_fin_edges": [
+      229003361255424,
+      346307508043776
+     ],
+     "estimated_fin_edges": [
+      219654977460823.44,
+      530455013261815.0,
+      915842738575755.8
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.022915337235432175,
+     "die_J_band": [
+      0.02091422973341994,
+      0.0270630132750454
+     ],
+     "fresh_lines_J_apart": 8.015253732122139e-05,
+     "in_run_leakage_J": [
+      0.0015308745518174771,
+      0.0018498067501127849
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0063213782569109195,
+      0.00888605172114335
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.0556202617984615,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b07",
+   "listed": {
+    "family": "inside",
+    "arm": "gemmL3x2x2",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "3072",
+    "N": "1024",
+    "K": "4096",
+    "ops_per_minion_per_gemm": "768",
+    "values": "gemmL3x2x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4987083609173775,
+    "cycles_per_op_wall": 899.2250165504265,
+    "cycles_per_op_mean": 798.601258037679,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     174.47163467989841,
+     1.5283653201015974
+    ],
+    "footprint_MB": 28.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 36191.0,
+    "ops_per_minion_per_gemm": 768,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 690604.8127107276,
+    "seconds_per_gemm": 0.001151008021184546,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 10.68392752285892,
+    "W_affine": {
+     "A_W": 1.5468617199678143,
+     "B_W_us": 13.69379691304515,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.012297286276564953,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.001586733031619322,
+     "awake_memory_path": 0.00019371721572695495,
+     "governed_base": 0.0,
+     "resident_op": 0.004112995382740264,
+     "lines_L2": 0.0002245179482936391,
+     "lines_L3": 0.006099170160863553,
+     "lines_fresh": 8.015253732122139e-05
+    },
+    "switches": {
+     "counted_fin_edges": [
+      24829205938176,
+      35858681954304
+     ],
+     "estimated_fin_edges": [
+      165807724099771.5,
+      341771525317629.25,
+      516693380067665.8
+     ],
+     "of_which_int8_arithmetic_central": 104363251439836.72,
+     "die_J_over_idle": 0.010344736443051426,
+     "die_J_band": [
+      0.009441370741301185,
+      0.012217133739243734
+     ],
+     "fresh_lines_J_apart": 8.015253732122139e-05,
+     "in_run_leakage_J": [
+      0.0006935669459982632,
+      0.0008380600597479014
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0006853820908719598,
+      0.0009201131800402553
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.04077438226265983,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b08",
+   "listed": {
+    "family": "inside",
+    "arm": "gemmL1x4x3",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "2048",
+    "K": "1536",
+    "ops_per_minion_per_gemm": "768",
+    "values": "gemmL1x4x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.5022377923359478,
+    "cycles_per_op_wall": 901.3426754015687,
+    "cycles_per_op_mean": 800.4819497349635,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     0.0,
+     189.40555553192945,
+     2.5944444680705634
+    ],
+    "footprint_MB": 26.0,
+    "power_of_two_NB": true,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 36094.0,
+    "ops_per_minion_per_gemm": 768,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 692231.1747084047,
+    "seconds_per_gemm": 0.0011537186245140078,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 23.85196899009928,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 33.484590560648506,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.027518460855208107,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0015904697595650128,
+     "awake_memory_path": 0.0002118255450650467,
+     "governed_base": 0.0,
+     "resident_op": 0.018958874918541927,
+     "lines_L2": 0.0,
+     "lines_L3": 0.006621229374743893,
+     "lines_fresh": 0.0001360612572922282
+    },
+    "switches": {
+     "counted_fin_edges": [
+      229003361255424,
+      346307508043776
+     ],
+     "estimated_fin_edges": [
+      224429560456798.88,
+      540076518716530.6,
+      930059892090055.4
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.023185774426685755,
+     "die_J_band": [
+      0.02116105069390717,
+      0.027382399597915878
+     ],
+     "fresh_lines_J_apart": 0.0001360612572922282,
+     "in_run_leakage_J": [
+      0.001552041192233737,
+      0.0018753831072824323
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0063213782569109195,
+      0.00888605172114335
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.05606261989366459,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b09",
+   "listed": {
+    "family": "inside",
+    "arm": "gemmL1x4x3",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "2048",
+    "K": "6144",
+    "ops_per_minion_per_gemm": "768",
+    "values": "gemmL1x4x3:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.5022377923359478,
+    "cycles_per_op_wall": 901.3426754015687,
+    "cycles_per_op_mean": 800.4819497349635,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     0.0,
+     189.40555553192945,
+     2.5944444680705634
+    ],
+    "footprint_MB": 26.0,
+    "power_of_two_NB": true,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 36094.0,
+    "ops_per_minion_per_gemm": 768,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 692231.1747084047,
+    "seconds_per_gemm": 0.0011537186245140078,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 10.984117834402333,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 14.15401824840675,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.012672581319406441,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0015904697595650128,
+     "awake_memory_path": 0.0002118255450650467,
+     "governed_base": 0.0,
+     "resident_op": 0.0041129953827402635,
+     "lines_L2": 0.0,
+     "lines_L3": 0.006621229374743893,
+     "lines_fresh": 0.0001360612572922282
+    },
+    "switches": {
+     "counted_fin_edges": [
+      24829205938176,
+      35858681954304
+     ],
+     "estimated_fin_edges": [
+      170582307095747.03,
+      351393030772344.8,
+      530910533581965.44
+     ],
+     "of_which_int8_arithmetic_central": 104363251439836.69,
+     "die_J_over_idle": 0.010615173634305008,
+     "die_J_band": [
+      0.00968819170178842,
+      0.012536520062114215
+     ],
+     "fresh_lines_J_apart": 0.0001360612572922282,
+     "in_run_leakage_J": [
+      0.0007147335864145232,
+      0.0008636364169175489
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0006853820908719598,
+      0.0009201131800402553
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.04121674035786292,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b10",
+   "listed": {
+    "family": "knee",
+    "arm": "gemmL1x9x3",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "4608",
+    "K": "1536",
+    "ops_per_minion_per_gemm": "1728",
+    "values": "gemmL1x9x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.8257673701905284,
+    "cycles_per_op_wall": 1095.460422114317,
+    "cycles_per_op_mean": 1083.5414659884443,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     133.8282007116984,
+     58.17179928830161
+    ],
+    "footprint_MB": 51.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 81096.5,
+    "ops_per_minion_per_gemm": 1728,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 1892955.6094135398,
+    "seconds_per_gemm": 0.0031549260156892326,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 20.595223324670904,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 34.749942462702464,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.06497640586593392,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.004349253201778173,
+     "awake_memory_path": 0.0005792520886059023,
+     "governed_base": 0.0,
+     "resident_op": 0.04265746856671934,
+     "lines_L2": 0.0,
+     "lines_L3": 0.010526308086760916,
+     "lines_fresh": 0.006864123922069598
+    },
+    "switches": {
+     "counted_fin_edges": [
+      515257562824704,
+      779191893098496
+     ],
+     "estimated_fin_edges": [
+      442126797136666.6,
+      1092402108111566.5,
+      1917640215403766.2
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.049205996565507476,
+     "die_J_band": [
+      0.04490902777732947,
+      0.058112281943864336
+     ],
+     "fresh_lines_J_apart": 0.006864123922069598,
+     "in_run_leakage_J": [
+      0.0036646692908386728,
+      0.004428142059763396
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.014223101078049569,
+      0.019993616372572534
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.14303244832978157,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b11",
+   "listed": {
+    "family": "knee",
+    "arm": "gemmL1x9x3",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "4608",
+    "K": "6144",
+    "ops_per_minion_per_gemm": "1728",
+    "values": "gemmL1x9x3:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.8257673701905284,
+    "cycles_per_op_wall": 1095.460422114317,
+    "cycles_per_op_mean": 1083.5414659884443,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     133.8282007116984,
+     58.17179928830161
+    ],
+    "footprint_MB": 51.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 81096.5,
+    "ops_per_minion_per_gemm": 1728,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 1892955.6094135398,
+    "seconds_per_gemm": 0.0031549260156892326,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 10.00758076524423,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 15.41937015046071,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.03157317691038018,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.004349253201778173,
+     "awake_memory_path": 0.0005792520886059023,
+     "governed_base": 0.0,
+     "resident_op": 0.009254239611165591,
+     "lines_L2": 0.0,
+     "lines_L3": 0.010526308086760916,
+     "lines_fresh": 0.006864123922069598
+    },
+    "switches": {
+     "counted_fin_edges": [
+      55865713360896,
+      80682034397184
+     ],
+     "estimated_fin_edges": [
+      320970477074299.8,
+      667864260237148.1,
+      1019554158760563.2
+     ],
+     "of_which_int8_arithmetic_central": 234817315739632.53,
+     "die_J_over_idle": 0.020922144782650788,
+     "die_J_band": [
+      0.019095095045062273,
+      0.02470905298831058
+     ],
+     "fresh_lines_J_apart": 0.006864123922069598,
+     "in_run_leakage_J": [
+      0.001780727177745442,
+      0.0021517120064424087
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0015421097044619097,
+      0.0020702546550905743
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.10962921937422783,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b12",
+   "listed": {
+    "family": "knee",
+    "arm": "gemmL2x3x5",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "2048",
+    "N": "1536",
+    "K": "2560",
+    "ops_per_minion_per_gemm": "1920",
+    "values": "gemmL2x3x5:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.7882482463456912,
+    "cycles_per_op_wall": 1072.9489478074147,
+    "cycles_per_op_mean": 1061.2749236472946,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     159.20517142955384,
+     32.79482857044616
+    ],
+    "footprint_MB": 47.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 89903.0,
+    "ops_per_minion_per_gemm": 1920,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 2060061.9797902363,
+    "seconds_per_gemm": 0.003433436632983727,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 20.671463371073266,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 34.172174804092755,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.07097415959562424,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.004733196656544945,
+     "awake_memory_path": 0.0006303873152211961,
+     "governed_base": 0.0,
+     "resident_op": 0.04739718729635483,
+     "lines_L2": 0.0,
+     "lines_L3": 0.013913714868606325,
+     "lines_fresh": 0.004299673458896936
+    },
+    "switches": {
+     "counted_fin_edges": [
+      572508403138560,
+      865768770109440
+     ],
+     "estimated_fin_edges": [
+      528159660093720.5,
+      1286164402575670.8,
+      2234362726122005.5
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.056455957778769925,
+     "die_J_band": [
+      0.051525878003653235,
+      0.06667448613672729
+     ],
+     "fresh_lines_J_apart": 0.004299673458896936,
+     "in_run_leakage_J": [
+      0.004002942601193206,
+      0.00483688897644179
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0158034456422773,
+      0.022215129302858374
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.15592083482298605,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b13",
+   "listed": {
+    "family": "knee",
+    "arm": "gemmL2x3x5",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "2048",
+    "N": "1536",
+    "K": "10240",
+    "ops_per_minion_per_gemm": "1920",
+    "values": "gemmL2x3x5:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.7882482463456912,
+    "cycles_per_op_wall": 1072.9489478074147,
+    "cycles_per_op_mean": 1061.2749236472946,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     159.20517142955384,
+     32.79482857044616
+    ],
+    "footprint_MB": 47.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 89903.0,
+    "ops_per_minion_per_gemm": 1920,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 2060061.9797902363,
+    "seconds_per_gemm": 0.003433436632983727,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 9.861682149845151,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 14.841602491850997,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.033859460756120056,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.004733196656544945,
+     "awake_memory_path": 0.0006303873152211961,
+     "governed_base": 0.0,
+     "resident_op": 0.01028248845685066,
+     "lines_L2": 0.0,
+     "lines_L3": 0.013913714868606325,
+     "lines_fresh": 0.004299673458896936
+    },
+    "switches": {
+     "counted_fin_edges": [
+      62073014845440,
+      89646704885760
+     ],
+     "estimated_fin_edges": [
+      393541526691090.75,
+      814455682715206.5,
+      1236489329851780.2
+     ],
+     "of_which_int8_arithmetic_central": 260908128599591.8,
+     "die_J_over_idle": 0.025029455797818057,
+     "die_J_band": [
+      0.022843730523356354,
+      0.029559787297223125
+     ],
+     "fresh_lines_J_apart": 0.004299673458896936,
+     "in_run_leakage_J": [
+      0.001909673586645171,
+      0.0023075222505295812
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0017134552271798997,
+      0.002300282950100638
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.11880613598348189,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b14",
+   "listed": {
+    "family": "knee",
+    "arm": "gemmL2x3x5",
+    "fmt": "fp16",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "2048",
+    "N": "1536",
+    "K": "5120",
+    "ops_per_minion_per_gemm": "1920",
+    "values": "gemmL2x3x5:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.7882482463456912,
+    "cycles_per_op_wall": 1072.9489478074147,
+    "cycles_per_op_mean": 1061.2749236472946,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     159.20517142955384,
+     32.79482857044616
+    ],
+    "footprint_MB": 47.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 89903.0,
+    "ops_per_minion_per_gemm": 1920,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 2060061.9797902363,
+    "seconds_per_gemm": 0.003433436632983727,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 21.503020867803137,
+    "e_res_source": "ledger v2 fp16.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 19.41941071185905,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 31.93319383192048,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.06667531612905346,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.004733196656544945,
+     "awake_memory_path": 0.0006303873152211961,
+     "governed_base": 0.0,
+     "resident_op": 0.04309834382978405,
+     "lines_L2": 0.0,
+     "lines_L3": 0.013913714868606325,
+     "lines_fresh": 0.004299673458896936
+    },
+    "switches": {
+     "counted_fin_edges": [
+      487017079111680,
+      731395349544960
+     ],
+     "estimated_fin_edges": [
+      537197068009163.75,
+      1267924444309714.2,
+      2153484876693578.5
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.05281595484348561,
+     "die_J_band": [
+      0.048203742403521266,
+      0.062375642670156516
+     ],
+     "fresh_lines_J_apart": 0.004299673458896936,
+     "in_run_leakage_J": [
+      0.0037604878296786147,
+      0.0045439227941949925
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.01344355453021946,
+      0.018767184521563077
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.1516219913564153,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b15",
+   "listed": {
+    "family": "knee",
+    "arm": "gemmL3x3x4",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "3072",
+    "N": "1536",
+    "K": "2048",
+    "ops_per_minion_per_gemm": "2304",
+    "values": "gemmL3x3x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.8086805706703044,
+    "cycles_per_op_wall": 1085.2083424021826,
+    "cycles_per_op_mean": 1073.4009321485487,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     166.15752811673025,
+     25.842471883269756
+    ],
+    "footprint_MB": 54.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 107952.5,
+    "ops_per_minion_per_gemm": 2304,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 2500320.0208946285,
+    "seconds_per_gemm": 0.004167200034824381,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 20.36807395914905,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 34.01388771420999,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.08487783851187149,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.005744733158172203,
+     "awake_memory_path": 0.0007651080601594626,
+     "governed_base": 0.0,
+     "resident_op": 0.056876624755625785,
+     "lines_L2": 0.0,
+     "lines_L3": 0.01742557819243901,
+     "lines_fresh": 0.004065794345475011
+    },
+    "switches": {
+     "counted_fin_edges": [
+      687010083766272,
+      1038922524131328
+     ],
+     "estimated_fin_edges": [
+      647606094861356.8,
+      1570570871270755.0,
+      2720283707204228.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.06842679438306219,
+     "die_J_band": [
+      0.062451347887477936,
+      0.08081204416639645
+     ],
+     "fresh_lines_J_apart": 0.004065794345475011,
+     "in_run_leakage_J": [
+      0.004787110092069551,
+      0.005784424694584041
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.018964134770732756,
+      0.02665815516343005
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.18797855822955364,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b16",
+   "listed": {
+    "family": "knee",
+    "arm": "gemmL3x3x4",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "3072",
+    "N": "1536",
+    "K": "8192",
+    "ops_per_minion_per_gemm": "2304",
+    "values": "gemmL3x3x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.8086805706703044,
+    "cycles_per_op_wall": 1085.2083424021826,
+    "cycles_per_op_mean": 1073.4009321485487,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     166.15752811673025,
+     25.842471883269756
+    ],
+    "footprint_MB": 54.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 107952.5,
+    "ops_per_minion_per_gemm": 2304,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 2500320.0208946285,
+    "seconds_per_gemm": 0.004167200034824381,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 9.680408803837645,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 14.683315401968235,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.040340199904466474,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.005744733158172203,
+     "awake_memory_path": 0.0007651080601594626,
+     "governed_base": 0.0,
+     "resident_op": 0.012338986148220791,
+     "lines_L2": 0.0,
+     "lines_L3": 0.01742557819243901,
+     "lines_fresh": 0.004065794345475011
+    },
+    "switches": {
+     "counted_fin_edges": [
+      74487617814528,
+      107576045862912
+     ],
+     "estimated_fin_edges": [
+      486064334778201.4,
+      1004520407438197.9,
+      1522835631679958.2
+     ],
+     "of_which_int8_arithmetic_central": 313089754319510.06,
+     "die_J_over_idle": 0.030714992005919952,
+     "die_J_band": [
+      0.02803277091112169,
+      0.03627440555899147
+     ],
+     "fresh_lines_J_apart": 0.004065794345475011,
+     "in_run_leakage_J": [
+      0.002275187274611909,
+      0.00274918462348939
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0020561462726158795,
+      0.002760339540120766
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.1434409196221486,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b17",
+   "listed": {
+    "family": "knee",
+    "arm": "gemmL5x2x3",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "5120",
+    "N": "1024",
+    "K": "1536",
+    "ops_per_minion_per_gemm": "1920",
+    "values": "gemmL5x2x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.960627104933058,
+    "cycles_per_op_wall": 1176.3762629598348,
+    "cycles_per_op_mean": 1163.5769168742186,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     160.95718583978396,
+     31.04281416021603
+    ],
+    "footprint_MB": 56.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 90097.0,
+    "ops_per_minion_per_gemm": 1920,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 2258642.4248828827,
+    "seconds_per_gemm": 0.003764404041471471,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 18.97102355890747,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 34.13228599014,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.07141459775600177,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.005189454918669383,
+     "awake_memory_path": 0.0006911537362636009,
+     "governed_base": 0.0,
+     "resident_op": 0.04739718729635482,
+     "lines_L2": 0.0,
+     "lines_L3": 0.014066831935914764,
+     "lines_fresh": 0.004069969868799193
+    },
+    "switches": {
+     "counted_fin_edges": [
+      572508403138560,
+      865768770109440
+     ],
+     "estimated_fin_edges": [
+      538688126554060.7,
+      1307193974756933.8,
+      2265126436444381.5
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.05702339363861353,
+     "die_J_band": [
+      0.0520437618911921,
+      0.06734462788720258
+     ],
+     "fresh_lines_J_apart": 0.004069969868799193,
+     "in_run_leakage_J": [
+      0.004027783313438499,
+      0.00486690483707152
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0158034456422773,
+      0.022215129302858374
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.16454973951557328,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b18",
+   "listed": {
+    "family": "knee",
+    "arm": "gemmL5x2x3",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "5120",
+    "N": "1024",
+    "K": "6144",
+    "ops_per_minion_per_gemm": "1920",
+    "values": "gemmL5x2x3:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.960627104933058,
+    "cycles_per_op_wall": 1176.3762629598348,
+    "cycles_per_op_mean": 1163.5769168742186,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     160.95718583978396,
+     31.04281416021603
+    ],
+    "footprint_MB": 56.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 90097.0,
+    "ops_per_minion_per_gemm": 1920,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 2258642.4248828827,
+    "seconds_per_gemm": 0.003764404041471471,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 9.111641189049962,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 14.801713677898238,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.034299898916497595,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.005189454918669383,
+     "awake_memory_path": 0.0006911537362636009,
+     "governed_base": 0.0,
+     "resident_op": 0.010282488456850659,
+     "lines_L2": 0.0,
+     "lines_L3": 0.014066831935914764,
+     "lines_fresh": 0.004069969868799193
+    },
+    "switches": {
+     "counted_fin_edges": [
+      62073014845440,
+      89646704885760
+     ],
+     "estimated_fin_edges": [
+      404069993151430.94,
+      835485254896468.8,
+      1267253040174156.5
+     ],
+     "of_which_int8_arithmetic_central": 260908128599591.75,
+     "die_J_over_idle": 0.025596891657661647,
+     "die_J_band": [
+      0.023361614410895213,
+      0.030229929047698407
+     ],
+     "fresh_lines_J_apart": 0.004069969868799193,
+     "in_run_leakage_J": [
+      0.0019345142988904643,
+      0.002337538111159311
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0017134552271798997,
+      0.002300282950100638
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.12743504067606912,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b19",
+   "listed": {
+    "family": "past",
+    "arm": "gemmL3x5x5",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "3072",
+    "N": "2560",
+    "K": "2560",
+    "ops_per_minion_per_gemm": "4800",
+    "values": "gemmL3x5x5:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.9613313249480444,
+    "cycles_per_op_wall": 1176.7987949688265,
+    "cycles_per_op_mean": 1163.9948516012132,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     120.89335730381725,
+     71.10664269618273
+    ],
+    "footprint_MB": 85.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 224619.5,
+    "ops_per_minion_per_gemm": 4800,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 5648634.215850367,
+    "seconds_per_gemm": 0.009414390359750611,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 19.4298392388553,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 35.04443522440142,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.1829200912217835,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.01297829718076284,
+     "awake_memory_path": 0.0017285049638938906,
+     "governed_base": 0.0,
+     "resident_op": 0.11849296824088705,
+     "lines_L2": 0.0,
+     "lines_L3": 0.026413647369773963,
+     "lines_fresh": 0.023306673466465776
+    },
+    "switches": {
+     "counted_fin_edges": [
+      1431271007846400,
+      2164421925273600
+     ],
+     "estimated_fin_edges": [
+      1194376816913815.5,
+      2968886339316877.0,
+      5233975196556778.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.13515107345920216,
+     "die_J_band": [
+      0.12334885452497509,
+      0.15961341775531776
+     ],
+     "fresh_lines_J_apart": 0.023306673466465776,
+     "in_run_leakage_J": [
+      0.010316693144908587,
+      0.012466004216764543
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.03950861410569325,
+      0.05553782325714594
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.41584157655537685,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b20",
+   "listed": {
+    "family": "past",
+    "arm": "gemmL3x5x5",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "3072",
+    "N": "2560",
+    "K": "10240",
+    "ops_per_minion_per_gemm": "4800",
+    "values": "gemmL3x5x5:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.9613313249480444,
+    "cycles_per_op_wall": 1176.7987949688265,
+    "cycles_per_op_mean": 1163.9948516012132,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     120.89335730381725,
+     71.10664269618273
+    ],
+    "footprint_MB": 85.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 224619.5,
+    "ops_per_minion_per_gemm": 4800,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 5648634.215850367,
+    "seconds_per_gemm": 0.009414390359750611,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 9.573996900359116,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 15.713862912159662,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.0901333441230231,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.01297829718076284,
+     "awake_memory_path": 0.0017285049638938906,
+     "governed_base": 0.0,
+     "resident_op": 0.02570622114212664,
+     "lines_L2": 0.0,
+     "lines_L3": 0.026413647369773963,
+     "lines_fresh": 0.023306673466465776
+    },
+    "switches": {
+     "counted_fin_edges": [
+      155182537113600,
+      224116762214400
+     ],
+     "estimated_fin_edges": [
+      857831483407241.0,
+      1789614539665714.2,
+      2739291705881215.5
+     ],
+     "of_which_int8_arithmetic_central": 652270321498979.2,
+     "die_J_over_idle": 0.05658481850682247,
+     "die_J_band": [
+      0.05164348582423287,
+      0.06682667065655734
+     ],
+     "fresh_lines_J_apart": 0.023306673466465776,
+     "in_run_leakage_J": [
+      0.005083520608538502,
+      0.006142587401984023
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0042836380679497485,
+      0.005750707375251596
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.3230548294566164,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b21",
+   "listed": {
+    "family": "past",
+    "arm": "gemmL5x3x6",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "5120",
+    "N": "1536",
+    "K": "3072",
+    "ops_per_minion_per_gemm": "5760",
+    "values": "gemmL5x3x6:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.9680360295537198,
+    "cycles_per_op_wall": 1180.821617732232,
+    "cycles_per_op_mean": 1167.9739047796559,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     134.20559524938596,
+     57.79440475061404
+    ],
+    "footprint_MB": 108.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 269379.5,
+    "ops_per_minion_per_gemm": 5760,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 6801532.518137655,
+    "seconds_per_gemm": 0.011335887530229426,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 19.214963826834804,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 34.74135017007479,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.21781866883842615,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.015627195341719233,
+     "awake_memory_path": 0.00208129651707617,
+     "governed_base": 0.0,
+     "resident_op": 0.14219156188906448,
+     "lines_L2": 0.0,
+     "lines_L3": 0.0351866406594298,
+     "lines_fresh": 0.022731974431136486
+    },
+    "switches": {
+     "counted_fin_edges": [
+      1717525209415680,
+      2597306310328320
+     ],
+     "estimated_fin_edges": [
+      1494945664068172.0,
+      3683830805511817.0,
+      6454570948950425.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.16518771753369152,
+     "die_J_band": [
+      0.15076251499790547,
+      0.19508669440728968
+     ],
+     "fresh_lines_J_apart": 0.022731974431136486,
+     "in_run_leakage_J": [
+      0.012284972922487234,
+      0.014844342281338739
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.04741033692683189,
+      0.06664538790857513
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.4982799265746669,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b22",
+   "listed": {
+    "family": "past",
+    "arm": "gemmL2x6x10",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "2048",
+    "N": "3072",
+    "K": "5120",
+    "ops_per_minion_per_gemm": "7680",
+    "values": "gemmL2x6x10:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 2.158355620616745,
+    "cycles_per_op_wall": 1295.013372370047,
+    "cycles_per_op_mean": 1280.9232169832314,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     96.82395939138058,
+     95.17604060861943
+    ],
+    "footprint_MB": 124.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 358754.0,
+    "ops_per_minion_per_gemm": 7680,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 9945702.699801961,
+    "seconds_per_gemm": 0.0165761711663366,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 18.052694117192495,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 35.592432849123,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.2992445477001006,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.02285123808288819,
+     "awake_memory_path": 0.0030434253359477854,
+     "governed_base": 0.0,
+     "resident_op": 0.18958874918541932,
+     "lines_L2": 0.0,
+     "lines_L3": 0.03384766842243681,
+     "lines_fresh": 0.04991346667340857
+    },
+    "switches": {
+     "counted_fin_edges": [
+      2290033612554240,
+      3463075080437760
+     ],
+     "estimated_fin_edges": [
+      1800432012101968.2,
+      4534769239398158.0,
+      8068245878613478.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.211118612215658,
+     "die_J_band": [
+      0.19268244283361058,
+      0.2493310810266921
+     ],
+     "fresh_lines_J_apart": 0.04991346667340857,
+     "in_run_leakage_J": [
+      0.01687739249028567,
+      0.020393515925761854
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0632137825691092,
+      0.0888605172114335
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.7093556926249729,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b23",
+   "listed": {
+    "family": "past",
+    "arm": "gemmL1x3x24",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "1536",
+    "K": "12288",
+    "ops_per_minion_per_gemm": "4608",
+    "values": "gemmL1x3x24:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 2.4861454727161485,
+    "cycles_per_op_wall": 1491.687283629689,
+    "cycles_per_op_mean": 1475.457253837477,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     7.35919334784431,
+     184.64080665215567
+    ],
+    "footprint_MB": 126.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 215085.5,
+    "ops_per_minion_per_gemm": 4608,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 6873695.002965608,
+    "seconds_per_gemm": 0.011456158338276012,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 16.697765784540024,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 37.62931301814452,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.1912922487231381,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.01579299580562101,
+     "awake_memory_path": 0.0021033785299071693,
+     "governed_base": 0.0,
+     "resident_op": 0.11375324951125158,
+     "lines_L2": 0.0,
+     "lines_L3": 0.0015435737467886157,
+     "lines_fresh": 0.058099051129569756
+    },
+    "switches": {
+     "counted_fin_edges": [
+      1374020167532544,
+      2077845048262656
+     ],
+     "estimated_fin_edges": [
+      789384533991427.2,
+      2151411898689733.5,
+      4027262363598556.5
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.11278001489717897,
+     "die_J_band": [
+      0.10293137371991373,
+      0.13319319759356837
+     ],
+     "fresh_lines_J_apart": 0.058099051129569756,
+     "in_run_leakage_J": [
+      0.010788882827984988,
+      0.01303656675048186
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.03792826954146551,
+      0.0533163103268601
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.47472912720400506,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b24",
+   "listed": {
+    "family": "past",
+    "arm": "gemmL1x3x24",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "1536",
+    "K": "49152",
+    "ops_per_minion_per_gemm": "4608",
+    "values": "gemmL1x3x24:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 2.4861454727161485,
+    "cycles_per_op_wall": 1491.687283629689,
+    "cycles_per_op_mean": 1475.457253837477,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     7.35919334784431,
+     184.64080665215567
+    ],
+    "footprint_MB": 126.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 215085.5,
+    "ops_per_minion_per_gemm": 4608,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 6873695.002965608,
+    "seconds_per_gemm": 0.011456158338276012,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 8.922447516006514,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 18.298740705902766,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.10221697150832812,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.01579299580562101,
+     "awake_memory_path": 0.0021033785299071693,
+     "governed_base": 0.0,
+     "resident_op": 0.024677972296441582,
+     "lines_L2": 0.0,
+     "lines_L3": 0.0015435737467886157,
+     "lines_fresh": 0.058099051129569756
+    },
+    "switches": {
+     "counted_fin_edges": [
+      148975235629056,
+      215152091725824
+     ],
+     "estimated_fin_edges": [
+      466301013825115.8,
+      1019310971024618.6,
+      1632366212550015.5
+     ],
+     "of_which_int8_arithmetic_central": 626179508639020.1,
+     "die_J_over_idle": 0.03735641014289448,
+     "die_J_band": [
+      0.03409421976720122,
+      0.044117920378758384
+     ],
+     "fresh_lines_J_apart": 0.058099051129569756,
+     "in_run_leakage_J": [
+      0.005765037193069704,
+      0.00696608660829256
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.004112292545231759,
+      0.005520679080241532
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.38565384998919505,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b25",
+   "listed": {
+    "family": "past",
+    "arm": "gemmL6x6x6",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "6144",
+    "N": "3072",
+    "K": "3072",
+    "ops_per_minion_per_gemm": "13824",
+    "values": "gemmL6x6x6:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.977773684682063,
+    "cycles_per_op_wall": 1186.6642108092378,
+    "cycles_per_op_mean": 1173.7529285946962,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     115.98236189595886,
+     76.01763810404115
+    ],
+    "footprint_MB": 180.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 646382.0,
+    "ops_per_minion_per_gemm": 13824,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 16404446.050226904,
+    "seconds_per_gemm": 0.027340743417044837,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 19.33782862125622,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 35.15624582424756,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.5287106105765522,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.03769084132377031,
+     "awake_memory_path": 0.005019826978383665,
+     "governed_base": 0.0,
+     "resident_op": 0.3412597485337548,
+     "lines_L2": 0.0,
+     "lines_L3": 0.07298109471423792,
+     "lines_fresh": 0.07175909902640563
+    },
+    "switches": {
+     "counted_fin_edges": [
+      4122060502597632,
+      6233535144787968
+     ],
+     "estimated_fin_edges": [
+      3391394875543677.5,
+      8455592888402654.0,
+      1.4938344781980226e+16
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.38691914610511996,
+     "die_J_band": [
+      0.3531309981067594,
+      0.4569515115501467
+     ],
+     "fresh_lines_J_apart": 0.07175909902640563,
+     "in_run_leakage_J": [
+      0.029819278436517545,
+      0.03603162811079203
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.11378480862439655,
+      0.15994893098058027
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 1.2051480986638259,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b26",
+   "listed": {
+    "family": "past",
+    "arm": "gemmL6x6x6",
+    "fmt": "fp16",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "6144",
+    "N": "3072",
+    "K": "6144",
+    "ops_per_minion_per_gemm": "13824",
+    "values": "gemmL6x6x6:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.977773684682063,
+    "cycles_per_op_wall": 1186.6642108092378,
+    "cycles_per_op_mean": 1173.7529285946962,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     115.98236189595886,
+     76.01763810404115
+    ],
+    "footprint_MB": 180.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 646382.0,
+    "ops_per_minion_per_gemm": 13824,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 16404446.050226904,
+    "seconds_per_gemm": 0.027340743417044837,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 21.503020867803137,
+    "e_res_source": "ledger v2 fp16.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 18.205757247512466,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 32.917264852075284,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.49775893761724277,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.03769084132377031,
+     "awake_memory_path": 0.005019826978383665,
+     "governed_base": 0.0,
+     "resident_op": 0.31030807557444523,
+     "lines_L2": 0.0,
+     "lines_L3": 0.07298109471423792,
+     "lines_fresh": 0.07175909902640563
+    },
+    "switches": {
+     "counted_fin_edges": [
+      3506522969604096,
+      5266046516723712
+     ],
+     "estimated_fin_edges": [
+      3456464212534867.5,
+      8324265188887763.0,
+      1.435602426609556e+16
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.3607111249710729,
+     "die_J_band": [
+      0.3292116217858092,
+      0.4259998385908371
+     ],
+     "fresh_lines_J_apart": 0.07175909902640563,
+     "in_run_leakage_J": [
+      0.02807360408161249,
+      0.03392227159861509
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.09679359261758011,
+      0.13512372855525417
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 1.1741964257045163,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b27",
+   "listed": {
+    "family": "stride",
+    "arm": "gemmL1x7x6",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "3584",
+    "K": "3072",
+    "ops_per_minion_per_gemm": "2688",
+    "values": "gemmL1x7x6:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.8764119287881218,
+    "cycles_per_op_wall": 1125.8471572728731,
+    "cycles_per_op_mean": 1113.5975838505176,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     126.31723278377879,
+     65.68276721622121
+    ],
+    "footprint_MB": 68.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 125759.5,
+    "ops_per_minion_per_gemm": 2688,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 3026277.158749483,
+    "seconds_per_gemm": 0.005043795264582472,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 20.172653117395676,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 34.92094767848866,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.10174673226758514,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.006953171831766885,
+     "awake_memory_path": 0.0009260530760407356,
+     "governed_base": 0.0,
+     "resident_op": 0.06635606221489676,
+     "lines_L2": 0.0,
+     "lines_L3": 0.015455268957840239,
+     "lines_fresh": 0.012056176187040515
+    },
+    "switches": {
+     "counted_fin_edges": [
+      801511764393984,
+      1212076278153216
+     ],
+     "estimated_fin_edges": [
+      674984298843715.8,
+      1674370751964378.2,
+      2947515136643435.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.07594458601231552,
+     "die_J_band": [
+      0.06931263993859708,
+      0.08969055608054463
+     ],
+     "fresh_lines_J_apart": 0.012056176187040515,
+     "in_run_leakage_J": [
+      0.005738515699891801,
+      0.006934039804035926
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.02212482389918822,
+      0.031101181024001726
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.22653529954091145,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b28",
+   "listed": {
+    "family": "stride",
+    "arm": "gemmL1x8x6",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "4096",
+    "K": "3072",
+    "ops_per_minion_per_gemm": "3072",
+    "values": "gemmL1x8x6:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 2.217772428426041,
+    "cycles_per_op_wall": 1330.6634570556246,
+    "cycles_per_op_mean": 1316.185417463526,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     108.34974225809725,
+     83.65025774190275
+    ],
+    "footprint_MB": 76.0,
+    "power_of_two_NB": true,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 143712.0,
+    "ops_per_minion_per_gemm": 3072,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 4087798.1400748785,
+    "seconds_per_gemm": 0.006812996900124797,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 17.492570417379994,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 35.330020733248936,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.11917682802882462,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.009392121537626353,
+     "awake_memory_path": 0.001250882798657539,
+     "governed_base": 0.0,
+     "resident_op": 0.07583549967416772,
+     "lines_L2": 0.0,
+     "lines_L3": 0.015150738196046301,
+     "lines_fresh": 0.017547585822326694
+    },
+    "switches": {
+     "counted_fin_edges": [
+      916013445021696,
+      1385230032175104
+     ],
+     "estimated_fin_edges": [
+      752572900214774.5,
+      1877717904233115.2,
+      3319126600940576.5
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.08605354970914302,
+     "die_J_band": [
+      0.07853882705293501,
+      0.10162924220649791
+     ],
+     "fresh_lines_J_apart": 0.017547585822326694,
+     "in_run_leakage_J": [
+      0.006721573100825708,
+      0.008121900830164397
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.025285513027643678,
+      0.0355442068845734
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.28773722301039323,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b29",
+   "listed": {
+    "family": "stride",
+    "arm": "gemmL1x9x6",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "4608",
+    "K": "3072",
+    "ops_per_minion_per_gemm": "3456",
+    "values": "gemmL1x9x6:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.8772992825283135,
+    "cycles_per_op_wall": 1126.379569516988,
+    "cycles_per_op_mean": 1114.1242032808984,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     126.16531478591473,
+     65.83468521408528
+    ],
+    "footprint_MB": 84.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 161664.5,
+    "ops_per_minion_per_gemm": 3456,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 3892767.7922507105,
+    "seconds_per_gemm": 0.006487946320417851,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 20.16569881278761,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 34.92440645640595,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.13083397141108,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.008944019975973268,
+     "awake_memory_path": 0.0011912027217677885,
+     "governed_base": 0.0,
+     "resident_op": 0.08531493713343868,
+     "lines_L2": 0.0,
+     "lines_L3": 0.01984716175271152,
+     "lines_fresh": 0.015536649827188734
+    },
+    "switches": {
+     "counted_fin_edges": [
+      1030515125649408,
+      1558383786196992
+     ],
+     "estimated_fin_edges": [
+      867493663456639.9,
+      2152091718425690.0,
+      3788706369319181.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.09762685993555568,
+     "die_J_band": [
+      0.08910148499527919,
+      0.11529732158389126
+     ],
+     "fresh_lines_J_apart": 0.015536649827188734,
+     "in_run_leakage_J": [
+      0.0073790359875849105,
+      0.0089163351516651
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.028446202156099137,
+      0.03998723274514507
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.2913522881548929,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b30",
+   "listed": {
+    "family": "stride",
+    "arm": "gemmL1x4x12",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "2048",
+    "K": "6144",
+    "ops_per_minion_per_gemm": "3072",
+    "values": "gemmL1x4x12:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 2.4868582455639614,
+    "cycles_per_op_wall": 1492.1149473383769,
+    "cycles_per_op_mean": 1475.8802644296509,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     63.85796532072515,
+     128.14203467927484
+    ],
+    "footprint_MB": 80.0,
+    "power_of_two_NB": true,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 143518.0,
+    "ops_per_minion_per_gemm": 3072,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 4583777.118223493,
+    "seconds_per_gemm": 0.007639628530372489,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 16.17617657643805,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 36.34298284264697,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.12357998008569929,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.010531682416920209,
+     "awake_memory_path": 0.0014026543761675972,
+     "governed_base": 0.0,
+     "resident_op": 0.07583549967416772,
+     "lines_L2": 0.0,
+     "lines_L3": 0.008929373472821595,
+     "lines_fresh": 0.026880770145622162
+    },
+    "switches": {
+     "counted_fin_edges": [
+      916013445021696,
+      1385230032175104
+     ],
+     "estimated_fin_edges": [
+      663876970439816.2,
+      1704473185758979.0,
+      3072255967717507.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.08187909393740654,
+     "die_J_band": [
+      0.07472891030917861,
+      0.09669920994007712
+     ],
+     "fresh_lines_J_apart": 0.026880770145622162,
+     "in_run_leakage_J": [
+      0.006969910876833439,
+      0.008421975642840406
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.025285513027643678,
+      0.0355442068845734
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.3125920729237951,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b31",
+   "listed": {
+    "family": "stride",
+    "arm": "gemmL1x5x10",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "2560",
+    "K": "5120",
+    "ops_per_minion_per_gemm": "3200",
+    "values": "gemmL1x5x10:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 2.0927501219749294,
+    "cycles_per_op_wall": 1255.6500731849576,
+    "cycles_per_op_mean": 1241.9882029524804,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     103.60182313998733,
+     88.39817686001267
+    ],
+    "footprint_MB": 80.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 149534.5,
+    "ops_per_minion_per_gemm": 3200,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 4018080.2341918643,
+    "seconds_per_gemm": 0.006696800390319774,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 18.495917241877834,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 35.438118509876325,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.12386346580472972,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.009231937736233932,
+     "awake_memory_path": 0.001229548836891538,
+     "governed_base": 0.0,
+     "resident_op": 0.07899531216059139,
+     "lines_L2": 0.0,
+     "lines_L3": 0.015090446016859892,
+     "lines_fresh": 0.019316221054152972
+    },
+    "switches": {
+     "counted_fin_edges": [
+      954180671897600,
+      1442947950182400
+     ],
+     "estimated_fin_edges": [
+      762383902281253.2,
+      1913220130721340.8,
+      3395409473459866.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.08852433933156371,
+     "die_J_band": [
+      0.08079385220291867,
+      0.10454724475057675
+     ],
+     "fresh_lines_J_apart": 0.019316221054152972,
+     "in_run_leakage_J": [
+      0.0069858994713867546,
+      0.00844129519459233
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.026339076070462163,
+      0.03702521550476396
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.2895490422775954,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b32",
+   "listed": {
+    "family": "stride",
+    "arm": "gemmL1x8x6",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "4096",
+    "K": "12288",
+    "ops_per_minion_per_gemm": "3072",
+    "values": "gemmL1x8x6:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 2.217772428426041,
+    "cycles_per_op_wall": 1330.6634570556246,
+    "cycles_per_op_mean": 1316.185417463526,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     108.34974225809725,
+     83.65025774190275
+    ],
+    "footprint_MB": 76.0,
+    "power_of_two_NB": true,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 143712.0,
+    "ops_per_minion_per_gemm": 3072,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 4087798.1400748785,
+    "seconds_per_gemm": 0.006812996900124797,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 8.776359473247767,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 15.999448421007175,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.059793309885617936,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.009392121537626353,
+     "awake_memory_path": 0.001250882798657539,
+     "governed_base": 0.0,
+     "resident_op": 0.016451981530961054,
+     "lines_L2": 0.0,
+     "lines_L3": 0.015150738196046301,
+     "lines_fresh": 0.017547585822326694
+    },
+    "switches": {
+     "counted_fin_edges": [
+      99316823752704,
+      143434727817216
+     ],
+     "estimated_fin_edges": [
+      537183886770567.2,
+      1122983952456372.4,
+      1722529166908215.8
+     ],
+     "of_which_int8_arithmetic_central": 417453005759346.75,
+     "die_J_over_idle": 0.03577114653962002,
+     "die_J_band": [
+      0.032647391084460006,
+      0.042245724063291246
+     ],
+     "fresh_lines_J_apart": 0.017547585822326694,
+     "in_run_leakage_J": [
+      0.0033723426775488508,
+      0.004074914068704861
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0027415283634878392,
+      0.0036804527201610214
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.22835370486718654,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b33",
+   "listed": {
+    "family": "stride",
+    "arm": "gemmL1x7x6",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "3584",
+    "K": "12288",
+    "ops_per_minion_per_gemm": "2688",
+    "values": "gemmL1x7x6:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.8764119287881218,
+    "cycles_per_op_wall": 1125.8471572728731,
+    "cycles_per_op_mean": 1113.5975838505176,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     126.31723278377879,
+     65.68276721622121
+    ],
+    "footprint_MB": 68.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 125759.5,
+    "ops_per_minion_per_gemm": 2688,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 3026277.158749483,
+    "seconds_per_gemm": 0.005043795264582472,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 9.870772162755625,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 15.590375366246903,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.0497861538922793,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.006953171831766885,
+     "awake_memory_path": 0.0009260530760407356,
+     "governed_base": 0.0,
+     "resident_op": 0.014395483839590922,
+     "lines_L2": 0.0,
+     "lines_L3": 0.015455268957840239,
+     "lines_fresh": 0.012056176187040515
+    },
+    "switches": {
+     "counted_fin_edges": [
+      86902220783616,
+      125505386840064
+     ],
+     "estimated_fin_edges": [
+      486518912080033.8,
+      1013978544159727.5,
+      1550492381865119.0
+     ],
+     "of_which_int8_arithmetic_central": 365271380039428.44,
+     "die_J_over_idle": 0.03194748323898288,
+     "die_J_band": [
+      0.02915763346618144,
+      0.03772997770523878
+     ],
+     "fresh_lines_J_apart": 0.012056176187040515,
+     "in_run_leakage_J": [
+      0.0028079390795245525,
+      0.003392926387758834
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.002398837318051859,
+      0.0032203961301408937
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.17457472116560557,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b34",
+   "listed": {
+    "family": "subset",
+    "arm": "gemmL3x6x4",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0x3",
+    "shires": "2",
+    "minions": "64",
+    "M": "3072",
+    "N": "3072",
+    "K": "2048",
+    "ops_per_minion_per_gemm": "4608",
+    "values": "gemmL3x6x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "True"
+   },
+   "mask_e207": "0x3",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.7224947775772423,
+    "cycles_per_op_wall": 1033.4968665463455,
+    "cycles_per_op_mean": 1022.2520935176514,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     125.42138840678841,
+     66.57861159321159
+    ],
+    "footprint_MB": 84.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 215813.0,
+    "ops_per_minion_per_gemm": 4608,
+    "minions": 64,
+    "cycles_per_gemm_wall": 4762353.56104556,
+    "seconds_per_gemm": 0.007937255935075932,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 1.537594390708442,
+    "W_affine": {
+     "A_W": 0.269762399969024,
+     "B_W_us": 2.183833982894006,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.012204280203390042,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0006838737187752292,
+     "awake_memory_path": 0.001457299491439234,
+     "governed_base": 0.0,
+     "resident_op": 0.007109578094453222,
+     "lines_L2": 0.0,
+     "lines_L3": 0.001644177843954919,
+     "lines_fresh": 0.001309351054767437
+    },
+    "switches": {
+     "counted_fin_edges": [
+      85876260470784,
+      129865315516416
+     ],
+     "estimated_fin_edges": [
+      91837879604316.23,
+      218617180358558.4,
+      373573287797617.44
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.009225172860815074,
+     "die_J_band": [
+      0.008419574303417776,
+      0.010894929148622603
+     ],
+     "fresh_lines_J_apart": 0.001309351054767437,
+     "in_run_leakage_J": [
+      0.0006883214034711983,
+      0.0008317216958610313
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0023705168463415945,
+      0.0033322693954287563
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.2085799743508058,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b35",
+   "listed": {
+    "family": "subset",
+    "arm": "gemmL3x6x4",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xfff",
+    "shires": "12",
+    "minions": "384",
+    "M": "3072",
+    "N": "3072",
+    "K": "2048",
+    "ops_per_minion_per_gemm": "4608",
+    "values": "gemmL3x6x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xfff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.7901804515810937,
+    "cycles_per_op_wall": 1074.1082709486564,
+    "cycles_per_op_mean": 1048.6691027071363,
+    "rho_wall_over_mean": 1.0242585274762543,
+    "lines_L2_L3_F": [
+     0.0,
+     125.42138840678841,
+     66.57861159321159
+    ],
+    "footprint_MB": 84.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 215813.0,
+    "ops_per_minion_per_gemm": 4608,
+    "minions": 384,
+    "cycles_per_gemm_wall": 4949490.912531408,
+    "seconds_per_gemm": 0.00824915152088568,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 8.019938276821424,
+    "W_affine": {
+     "A_W": 0.7005622408517451,
+     "B_W_us": 13.103003897364037,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.06615768603365073,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.00426447979513801,
+     "awake_memory_path": 0.0015145642794592437,
+     "governed_base": 0.0,
+     "resident_op": 0.04265746856671935,
+     "lines_L2": 0.0,
+     "lines_L3": 0.009865067063729515,
+     "lines_fresh": 0.007856106328604623
+    },
+    "switches": {
+     "counted_fin_edges": [
+      515257562824704,
+      779191893098496
+     ],
+     "estimated_fin_edges": [
+      443546465773409.7,
+      1095779323330031.6,
+      1923488484090689.2
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.0493662825614277,
+     "die_J_band": [
+      0.04505531661904646,
+      0.05830157970504612
+     ],
+     "fresh_lines_J_apart": 0.007856106328604623,
+     "in_run_leakage_J": [
+      0.003731293492297901,
+      0.004508646303193297
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.014223101078049569,
+      0.019993616372572534
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.2702499906401342,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b36",
+   "listed": {
+    "family": "subset",
+    "arm": "gemmL3x6x4",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffff",
+    "shires": "24",
+    "minions": "768",
+    "M": "3072",
+    "N": "3072",
+    "K": "2048",
+    "ops_per_minion_per_gemm": "4608",
+    "values": "gemmL3x6x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.87140326031077,
+    "cycles_per_op_wall": 1122.841956186462,
+    "cycles_per_op_mean": 1110.6250803031278,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     125.42138840678841,
+     66.57861159321159
+    ],
+    "footprint_MB": 84.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 215813.0,
+    "ops_per_minion_per_gemm": 4608,
+    "minions": 768,
+    "cycles_per_gemm_wall": 5174055.734107217,
+    "seconds_per_gemm": 0.008623426223512027,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 15.22092171823062,
+    "W_affine": {
+     "A_W": 1.2175220499110107,
+     "B_W_us": 26.206007794728073,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.13125649549101367,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.00891592954788688,
+     "awake_memory_path": 0.0015832820250198483,
+     "governed_base": 0.0,
+     "resident_op": 0.08531493713343866,
+     "lines_L2": 0.0,
+     "lines_L3": 0.019730134127459022,
+     "lines_fresh": 0.015712212657209238
+    },
+    "switches": {
+     "counted_fin_edges": [
+      1030515125649408,
+      1558383786196992
+     ],
+     "estimated_fin_edges": [
+      870990923683921.5,
+      2159210490720387.2,
+      3799343783042065.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.09783597191685386,
+     "die_J_band": [
+      0.08929233603848873,
+      0.11554428283380441
+     ],
+     "fresh_lines_J_apart": 0.015712212657209238,
+     "in_run_leakage_J": [
+      0.0074028663456931695,
+      0.008945130167712579
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.028446202156099137,
+      0.03998723274514507
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.34460873263983405,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b37",
+   "listed": {
+    "family": "subset",
+    "arm": "gemmL3x6x4",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0x0f0f0f0f",
+    "shires": "16",
+    "minions": "512",
+    "M": "3072",
+    "N": "3072",
+    "K": "2048",
+    "ops_per_minion_per_gemm": "4608",
+    "values": "gemmL3x6x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xf0f0f0f",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.8172547211349415,
+    "cycles_per_op_wall": 1090.3528326809649,
+    "cycles_per_op_mean": 1078.4894487447725,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     125.42138840678841,
+     66.57861159321159
+    ],
+    "footprint_MB": 84.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 215813.0,
+    "ops_per_minion_per_gemm": 4608,
+    "minions": 512,
+    "cycles_per_gemm_wall": 5024345.852993886,
+    "seconds_per_gemm": 0.00837390975498981,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 10.486653796541159,
+    "W_affine": {
+     "A_W": 0.8728821772048336,
+     "B_W_us": 17.47067186315205,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.08781429252405694,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.005771966384025404,
+     "awake_memory_path": 0.0015374701946268977,
+     "governed_base": 0.0,
+     "resident_op": 0.05687662475562579,
+     "lines_L2": 0.0,
+     "lines_L3": 0.013153422751639353,
+     "lines_fresh": 0.010474808438139494
+    },
+    "switches": {
+     "counted_fin_edges": [
+      687010083766272,
+      1038922524131328
+     ],
+     "estimated_fin_edges": [
+      585374114832007.2,
+      1448942852357065.0,
+      2546839394233538.5
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.06548643868409607,
+     "die_J_band": [
+      0.05976776204475846,
+      0.07733948408591745
+     ],
+     "fresh_lines_J_apart": 0.010474808438139494,
+     "in_run_leakage_J": [
+      0.004952726098356811,
+      0.00598454403551448
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.018964134770732756,
+      0.02665815516343005
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.29499324130873017,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b38",
+   "listed": {
+    "family": "subset",
+    "arm": "gemmL3x6x4",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0x3",
+    "shires": "2",
+    "minions": "64",
+    "M": "3072",
+    "N": "3072",
+    "K": "8192",
+    "ops_per_minion_per_gemm": "4608",
+    "values": "gemmL3x6x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "True"
+   },
+   "mask_e207": "0x3",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.7224947775772423,
+    "cycles_per_op_wall": 1033.4968665463455,
+    "cycles_per_op_mean": 1022.2520935176514,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     125.42138840678841,
+     66.57861159321159
+    ],
+    "footprint_MB": 84.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 215813.0,
+    "ops_per_minion_per_gemm": 4608,
+    "minions": 64,
+    "cycles_per_gemm_wall": 4762353.56104556,
+    "seconds_per_gemm": 0.007937255935075932,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 0.8361926882229134,
+    "W_affine": {
+     "A_W": 0.269762399969024,
+     "B_W_us": 0.9756732133788965,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.0066370753774644175,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0006838737187752292,
+     "awake_memory_path": 0.001457299491439234,
+     "governed_base": 0.0,
+     "resident_op": 0.0015423732685275987,
+     "lines_L2": 0.0,
+     "lines_L3": 0.001644177843954919,
+     "lines_fresh": 0.001309351054767437
+    },
+    "switches": {
+     "counted_fin_edges": [
+      9310952226816,
+      13447005732864
+     ],
+     "estimated_fin_edges": [
+      71645159593921.84,
+      147860872379488.75,
+      223892278357083.75
+     ],
+     "of_which_int8_arithmetic_central": 39136219289938.76,
+     "die_J_over_idle": 0.004511197563672295,
+     "die_J_band": [
+      0.004117252181373246,
+      0.005327724322696981
+     ],
+     "fresh_lines_J_apart": 0.001309351054767437,
+     "in_run_leakage_J": [
+      0.0003743310512889931,
+      0.0004523166869742
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.00025701828407698494,
+      0.00034504244251509574
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.20301276952488018,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b39",
+   "listed": {
+    "family": "subset",
+    "arm": "gemmL3x6x4",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffff",
+    "shires": "24",
+    "minions": "768",
+    "M": "3072",
+    "N": "3072",
+    "K": "8192",
+    "ops_per_minion_per_gemm": "4608",
+    "values": "gemmL3x6x4:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.87140326031077,
+    "cycles_per_op_wall": 1122.841956186462,
+    "cycles_per_op_mean": 1110.6250803031278,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     125.42138840678841,
+     66.57861159321159
+    ],
+    "footprint_MB": 84.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 215813.0,
+    "ops_per_minion_per_gemm": 4608,
+    "minions": 768,
+    "cycles_per_gemm_wall": 5174055.734107217,
+    "seconds_per_gemm": 0.008623426223512027,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 7.473831851681092,
+    "W_affine": {
+     "A_W": 1.2175220499110107,
+     "B_W_us": 11.708078560546758,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.06445003757990618,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.00891592954788688,
+     "awake_memory_path": 0.0015832820250198483,
+     "governed_base": 0.0,
+     "resident_op": 0.01850847922233118,
+     "lines_L2": 0.0,
+     "lines_L3": 0.019730134127459022,
+     "lines_fresh": 0.015712212657209238
+    },
+    "switches": {
+     "counted_fin_edges": [
+      111731426721792,
+      161364068794368
+     ],
+     "estimated_fin_edges": [
+      628678283559188.0,
+      1310134794971550.8,
+      2003171669755660.8
+     ],
+     "of_which_int8_arithmetic_central": 469634631479264.94,
+     "die_J_over_idle": 0.0412682683511405,
+     "die_J_band": [
+      0.03766447057395435,
+      0.04873782492269693
+     ],
+     "fresh_lines_J_apart": 0.015712212657209238,
+     "in_run_leakage_J": [
+      0.003634982119506708,
+      0.004392270061070605
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0030842194089238193,
+      0.004140509310181149
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.27780227472872654,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b40",
+   "listed": {
+    "family": "subset",
+    "arm": "gemmL1x2x2",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0x3",
+    "shires": "2",
+    "minions": "64",
+    "M": "1024",
+    "N": "1024",
+    "K": "1024",
+    "ops_per_minion_per_gemm": "256",
+    "values": "gemmL1x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "True"
+   },
+   "mask_e207": "0x3",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.5070290553124068,
+    "cycles_per_op_wall": 904.217433187444,
+    "cycles_per_op_mean": 803.0350205927567,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     175.79111905139828,
+     0.20888094860170092
+    ],
+    "footprint_MB": 12.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 12125.0,
+    "ops_per_minion_per_gemm": 256,
+    "minions": 64,
+    "cycles_per_gemm_wall": 231479.66289598568,
+    "seconds_per_gemm": 0.0003857994381599761,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 1.6228137181353108,
+    "W_affine": {
+     "A_W": 0.25446219731965064,
+     "B_W_us": 2.062145499750119,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.0006260806206949048,
+    "J_over_idle_by_class": {
+     "awake_minions": 3.324046731439219e-05,
+     "awake_memory_path": 6.493090544448201e-05,
+     "governed_base": 0.0,
+     "resident_op": 0.00039497656080295687,
+     "lines_L2": 4.6774572561174806e-06,
+     "lines_L3": 0.00012802701303354886,
+     "lines_fresh": 2.282168434073654e-07
+    },
+    "switches": {
+     "counted_fin_edges": [
+      4770903359488,
+      7214739750912
+     ],
+     "estimated_fin_edges": [
+      5521682968711.207,
+      12949922262784.324,
+      21874763782307.117
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.0005299342962332747,
+     "die_J_band": [
+      0.00048365718999342927,
+      0.0006258524038514975
+     ],
+     "fresh_lines_J_apart": 2.282168434073654e-07,
+     "in_run_leakage_J": [
+      3.531094700719263e-05,
+      4.266739430035775e-05
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.00013169538035231082,
+      0.00018512607752381978
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.01017114671029222,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b41",
+   "listed": {
+    "family": "subset",
+    "arm": "gemmL1x2x2",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xfff",
+    "shires": "12",
+    "minions": "384",
+    "M": "1024",
+    "N": "1024",
+    "K": "1024",
+    "ops_per_minion_per_gemm": "256",
+    "values": "gemmL1x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xfff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4974158714717465,
+    "cycles_per_op_wall": 898.4495228830478,
+    "cycles_per_op_mean": 797.9125425097255,
+    "rho_wall_over_mean": 1.126000000021427,
+    "lines_L2_L3_F": [
+     16.0,
+     175.79111905139828,
+     0.20888094860170092
+    ],
+    "footprint_MB": 12.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 12125.0,
+    "ops_per_minion_per_gemm": 256,
+    "minions": 384,
+    "cycles_per_gemm_wall": 230003.07785806025,
+    "seconds_per_gemm": 0.0003833384630967671,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 8.948078824256568,
+    "W_affine": {
+     "A_W": 0.6852620382023719,
+     "B_W_us": 12.37287299850072,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.0034301427841592395,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.00019817057868757698,
+     "awake_memory_path": 6.451671785547834e-05,
+     "governed_base": 0.0,
+     "resident_op": 0.0023698593648177413,
+     "lines_L2": 2.8064743536704887e-05,
+     "lines_L3": 0.0007681620782012932,
+     "lines_fresh": 1.3693010604441921e-06
+    },
+    "switches": {
+     "counted_fin_edges": [
+      28625420156928,
+      43288438505472
+     ],
+     "estimated_fin_edges": [
+      28167532297359.484,
+      67729979189206.86,
+      116568251895952.28
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.0029032798332758636,
+     "die_J_band": [
+      0.0026497476685462093,
+      0.003428773483098795
+     ],
+     "fresh_lines_J_apart": 1.3693010604441921e-06,
+     "in_run_leakage_J": [
+      0.00019346005302658107,
+      0.00023376423074045213
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0007901722821138649,
+      0.0011107564651429188
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.012914321875747396,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b42",
+   "listed": {
+    "family": "kinds",
+    "arm": "gemmL1x3x2",
+    "fmt": "fp32",
+    "kind": "e37",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "1536",
+    "K": "1024",
+    "ops_per_minion_per_gemm": "384",
+    "values": "gemmL1x3x2:e37:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4791435319852657,
+    "cycles_per_op_wall": 887.4861191911594,
+    "cycles_per_op_mean": 788.1759495480991,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     175.63185002002223,
+     0.368149979977785
+    ],
+    "footprint_MB": 16.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 18141.5,
+    "ops_per_minion_per_gemm": 384,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 340794.6697694053,
+    "seconds_per_gemm": 0.000567991116282342,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 14.202731291640287,
+    "e_res_source": "ledger v2 kind rows ['fp32.small_int'] (aifoundry3 rows x the card/aifoundry3 random ratio where the card has none) x k_res 1.0000",
+    "phi": 0.2728882089872639,
+    "W_over_idle": 13.813971946551783,
+    "W_affine": {
+     "A_W": 1.5468617199678143,
+     "B_W_us": 18.144816747801983,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.007846213346214905,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0007830095440551429,
+     "awake_memory_path": 9.559417100379955e-05,
+     "governed_base": 0.0,
+     "resident_op": 0.00569328561128521,
+     "lines_L2": 3.92160489186571e-05,
+     "lines_L3": 0.0012298088464116179,
+     "lines_fresh": 5.299124540476039e-06
+    },
+    "switches": {
+     "counted_fin_edges": [
+      null,
+      null
+     ],
+     "estimated_fin_edges": [
+      119226558522761.23,
+      239523201899013.2,
+      352706481638542.8
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.006639216106413571,
+     "die_J_band": [
+      0.006059439120304813,
+      0.007840914221674428
+     ],
+     "fresh_lines_J_apart": 5.299124540476039e-06,
+     "in_run_leakage_J": [
+      0.0004425264327265205,
+      0.0005347194395445457
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0,
+      0.0
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable",
+     "counted_note": "no counted netlist row for this kind: the counted part is NOT FORECAST; the estimated part covers the die"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.021898884778491633,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b43",
+   "listed": {
+    "family": "kinds",
+    "arm": "gemmL3x5x5",
+    "fmt": "fp32",
+    "kind": "e37",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "3072",
+    "N": "2560",
+    "K": "2560",
+    "ops_per_minion_per_gemm": "4800",
+    "values": "gemmL3x5x5:e37:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.9613313249480444,
+    "cycles_per_op_wall": 1176.7987949688265,
+    "cycles_per_op_mean": 1163.9948516012132,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     120.89335730381725,
+     71.10664269618273
+    ],
+    "footprint_MB": 85.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 224619.5,
+    "ops_per_minion_per_gemm": 4800,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 5648634.215850367,
+    "seconds_per_gemm": 0.009414390359750611,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 14.202731291640287,
+    "e_res_source": "ledger v2 kind rows ['fp32.small_int'] (aifoundry3 rows x the card/aifoundry3 random ratio where the card has none) x k_res 1.0000",
+    "phi": 0.2728882089872639,
+    "W_over_idle": 11.604379726499925,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 19.696116350706173,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.10924816062804632,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.01297829718076284,
+     "awake_memory_path": 0.0017285049638938906,
+     "governed_base": 0.0,
+     "resident_op": 0.07116607014106512,
+     "lines_L2": 0.0,
+     "lines_L3": 0.010581489082681033,
+     "lines_fresh": 0.012793799259643456
+    },
+    "switches": {
+     "counted_fin_edges": [
+      null,
+      null
+     ],
+     "estimated_fin_edges": [
+      1447935537429647.8,
+      2915605765909656.0,
+      4304565319836106.5
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.0816717708453877,
+     "die_J_band": [
+      0.07453969193848754,
+      0.09645436136840288
+     ],
+     "fresh_lines_J_apart": 0.012793799259643456,
+     "in_run_leakage_J": [
+      0.006161596259421811,
+      0.007445262146801356
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0,
+      0.0
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable",
+     "counted_note": "no counted netlist row for this kind: the counted part is NOT FORECAST; the estimated part covers the die"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.3421696459616396,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "b49",
+   "listed": {
+    "family": "kinds",
+    "arm": "gemmL1x3x2",
+    "fmt": "fp32",
+    "kind": "real:blind4",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "1536",
+    "K": "1024",
+    "ops_per_minion_per_gemm": "384",
+    "values": "gemmL1x3x2:tiles:tools/claims-v3/kinds/blind4/tiles/fp32/fp32.real_pythia_embed_qkv.bin,tools/claims-v3/kinds/blind4/tiles/fp32/fp32.real_qwen_q_down.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4791435319852657,
+    "cycles_per_op_wall": 887.4861191911594,
+    "cycles_per_op_mean": 788.1759495480991,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     175.63185002002223,
+     0.368149979977785
+    ],
+    "footprint_MB": 16.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 18141.5,
+    "ops_per_minion_per_gemm": 384,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 340794.6697694053,
+    "seconds_per_gemm": 0.000567991116282342,
+    "energy": "NOT FORECAST: no resident price source for this kind on this card: energy NOT FORECAST"
+   }
+  },
+  {
+   "id": "b50",
+   "listed": {
+    "family": "kinds",
+    "arm": "gemmL1x3x2",
+    "fmt": "fp16",
+    "kind": "real:blind4",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "1536",
+    "K": "2048",
+    "ops_per_minion_per_gemm": "384",
+    "values": "gemmL1x3x2:tiles:tools/claims-v3/kinds/blind4/tiles/fp16/fp16.real_pythia_embed_qkv.bin,tools/claims-v3/kinds/blind4/tiles/fp16/fp16.real_qwen_ln_down.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4791435319852657,
+    "cycles_per_op_wall": 887.4861191911594,
+    "cycles_per_op_mean": 788.1759495480991,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     175.63185002002223,
+     0.368149979977785
+    ],
+    "footprint_MB": 16.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 18141.5,
+    "ops_per_minion_per_gemm": 384,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 340794.6697694053,
+    "seconds_per_gemm": 0.000567991116282342,
+    "energy": "NOT FORECAST: no resident price source for this kind on this card: energy NOT FORECAST"
+   }
+  },
+  {
+   "id": "b51",
+   "listed": {
+    "family": "kinds",
+    "arm": "gemmL1x3x2",
+    "fmt": "int8",
+    "kind": "real:blind4",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "1536",
+    "K": "4096",
+    "ops_per_minion_per_gemm": "384",
+    "values": "gemmL1x3x2:tiles:tools/claims-v3/kinds/blind4/tiles/int8/int8.real_pythia_embed_mlpout.bin,tools/claims-v3/kinds/blind4/tiles/int8/int8.real_qwen_q_down.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.4791435319852657,
+    "cycles_per_op_wall": 887.4861191911594,
+    "cycles_per_op_mean": 788.1759495480991,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     16.0,
+     175.63185002002223,
+     0.368149979977785
+    ],
+    "footprint_MB": 16.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 18141.5,
+    "ops_per_minion_per_gemm": 384,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 340794.6697694053,
+    "seconds_per_gemm": 0.000567991116282342,
+    "energy": "NOT FORECAST: no resident price source for this kind on this card: energy NOT FORECAST"
+   }
+  },
+  {
+   "id": "b52",
+   "listed": {
+    "family": "kinds",
+    "arm": "gemmL3x5x5",
+    "fmt": "fp32",
+    "kind": "designed:blind3 a_colconst_b_randn",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "3072",
+    "N": "2560",
+    "K": "2560",
+    "ops_per_minion_per_gemm": "4800",
+    "values": "gemmL3x5x5:tiles:tools/claims-v3/kinds/blind3/tiles/fp32/a_colconst_b_randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.9613313249480444,
+    "cycles_per_op_wall": 1176.7987949688265,
+    "cycles_per_op_mean": 1163.9948516012132,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     120.89335730381725,
+     71.10664269618273
+    ],
+    "footprint_MB": 85.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 224619.5,
+    "ops_per_minion_per_gemm": 4800,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 5648634.215850367,
+    "seconds_per_gemm": 0.009414390359750611,
+    "energy": "NOT FORECAST: no resident price source for this kind on this card: energy NOT FORECAST"
+   }
+  },
+  {
+   "id": "n01",
+   "listed": {
+    "family": "int8 one K block",
+    "arm": "gemmL1x3x1",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "1536",
+    "K": "2048",
+    "ops_per_minion_per_gemm": "192",
+    "values": "gemmL1x3x1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.2352710161751985,
+    "cycles_per_op_wall": 741.1626097051192,
+    "cycles_per_op_mean": 658.2261187434451,
+    "rho_wall_over_mean": 1.126,
+    "lines_L2_L3_F": [
+     96.0,
+     95.89250271110123,
+     0.10749728889875954
+    ],
+    "footprint_MB": 11.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 9189.5,
+    "ops_per_minion_per_gemm": 192,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 142303.22106338287,
+    "seconds_per_gemm": 0.0002371720351056381,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 10.765244071934218,
+    "W_affine": {
+     "A_W": 1.4703607067209477,
+     "B_W_us": 11.481700019776945,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.0025532148449495446,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.00032695575995308823,
+     "awake_memory_path": 2.1772681199283265e-05,
+     "governed_base": 0.0,
+     "resident_op": 0.0010282488456850659,
+     "lines_L2": 0.0003367769224404586,
+     "lines_L3": 0.000838051257241789,
+     "lines_fresh": 1.4093784298598164e-06
+    },
+    "switches": {
+     "counted_fin_edges": [
+      6207301484544,
+      8964670488576
+     ],
+     "estimated_fin_edges": [
+      33838301917277.953,
+      70137605925108.38,
+      106619641468073.42
+     ],
+     "of_which_int8_arithmetic_central": 26090812859959.17,
+     "die_J_over_idle": 0.0021607158903638314,
+     "die_J_band": [
+      0.0019720289540337598,
+      0.002551805466519685
+     ],
+     "fresh_lines_J_apart": 1.4093784298598164e-06,
+     "in_run_leakage_J": [
+      0.00014400131725515432,
+      0.00017400159168331147
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.00017134552271798995,
+      0.00023002829501006384
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.008421089511861036,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "n02",
+   "listed": {
+    "family": "int8 one K block",
+    "arm": "gemmL3x5x1",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "3072",
+    "N": "2560",
+    "K": "2048",
+    "ops_per_minion_per_gemm": "960",
+    "values": "gemmL3x5x1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.319923897995447,
+    "cycles_per_op_wall": 791.9543387972683,
+    "cycles_per_op_mean": 783.3376249231142,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     89.6,
+     99.76357304466094,
+     2.6364269553390454
+    ],
+    "footprint_MB": 41.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 45579.5,
+    "ops_per_minion_per_gemm": 960,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 760276.1652453775,
+    "seconds_per_gemm": 0.001267126942075629,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 10.350974981062972,
+    "W_affine": {
+     "A_W": 1.4764807877806971,
+     "B_W_us": 11.7136569683351,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.013115999275255665,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0017468098720780482,
+     "awake_memory_path": 0.00012407871357592221,
+     "governed_base": 0.0,
+     "resident_op": 0.0051412442284253295,
+     "lines_L2": 0.0015716256380554734,
+     "lines_L3": 0.004359412125726706,
+     "lines_fresh": 0.0001728286973941869
+    },
+    "switches": {
+     "counted_fin_edges": [
+      31036507422720,
+      44823352442880
+     ],
+     "estimated_fin_edges": [
+      171747900992552.6,
+      355911463697384.56,
+      540936074562871.25
+     ],
+     "of_which_int8_arithmetic_central": 130454064299795.88,
+     "die_J_over_idle": 0.010959500912668481,
+     "die_J_band": [
+      0.010002450214730663,
+      0.012943170577861478
+     ],
+     "fresh_lines_J_apart": 0.0001728286973941869,
+     "in_run_leakage_J": [
+      0.0007397423591244195,
+      0.0008938553506086735
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0008567276135899498,
+      0.001150141475050319
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.04446599414229323,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "n03",
+   "listed": {
+    "family": "int8 one K block",
+    "arm": "gemmL3x5x1",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "3072",
+    "N": "2560",
+    "K": "512",
+    "ops_per_minion_per_gemm": "960",
+    "values": "gemmL3x5x1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 1.368694368626125,
+    "cycles_per_op_wall": 821.2166211756751,
+    "cycles_per_op_mean": 812.281524407196,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     89.6,
+     99.76357304466094,
+     2.6364269553390454
+    ],
+    "footprint_MB": 41.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 45579.5,
+    "ops_per_minion_per_gemm": 960,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 788367.9563286479,
+    "seconds_per_gemm": 0.0013139465938810798,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 24.158118114701676,
+    "W_affine": {
+     "A_W": 1.4764807877806971,
+     "B_W_us": 31.044229280576854,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.03174247701138908,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.0018113535474315605,
+     "awake_memory_path": 0.00012866335460373976,
+     "governed_base": 0.0,
+     "resident_op": 0.023698593648177408,
+     "lines_L2": 0.001571625638055473,
+     "lines_L3": 0.004359412125726705,
+     "lines_fresh": 0.0001728286973941869
+    },
+    "switches": {
+     "counted_fin_edges": [
+      286254201569280,
+      432884385054720
+     ],
+     "estimated_fin_edges": [
+      240108180572542.4,
+      593877659518812.0,
+      1042982485356001.4
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.026731285617269163,
+     "die_J_band": [
+      0.024396946146827577,
+      0.031569648313994884
+     ],
+     "fresh_lines_J_apart": 0.0001728286973941869,
+     "in_run_leakage_J": [
+      0.0017902757034423437,
+      0.0021632498083261655
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.00790172282113865,
+      0.011107564651429187
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.06425083714952808,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "n04",
+   "listed": {
+    "family": "long K",
+    "arm": "gemmL1x7x16",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "3584",
+    "K": "8192",
+    "ops_per_minion_per_gemm": "7168",
+    "values": "gemmL1x7x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 2.4710656656011443,
+    "cycles_per_op_wall": 1482.6393993606866,
+    "cycles_per_op_mean": 1466.5078134131422,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     53.93603221737254,
+     138.06396778262746
+    ],
+    "footprint_MB": 158.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 334639.5,
+    "ops_per_minion_per_gemm": 7168,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 10627559.214617401,
+    "seconds_per_gemm": 0.017712598691029,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 16.360991422578508,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 36.568879468439775,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.28979567525550076,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.024417871032687326,
+     "awake_memory_path": 0.0032520761930372186,
+     "governed_base": 0.0,
+     "resident_op": 0.17694949923972467,
+     "lines_L2": 0.0,
+     "lines_L3": 0.017597934260537438,
+     "lines_fresh": 0.06757829452951414
+    },
+    "switches": {
+     "counted_fin_edges": [
+      2137364705050624,
+      3232203408408576
+     ],
+     "estimated_fin_edges": [
+      1489986439680439.8,
+      3861026863830144.0,
+      7001956717283350.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.1881603562455433,
+     "die_J_band": [
+      0.17172904229210714,
+      0.22221738072598665
+     ],
+     "fresh_lines_J_apart": 0.06757829452951414,
+     "in_run_leakage_J": [
+      0.016344476084410243,
+      0.019749575268662375
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.058999530397835245,
+      0.08293648273067127
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.7280231800199861,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "n05",
+   "listed": {
+    "family": "long K",
+    "arm": "gemmL1x8x16",
+    "fmt": "fp32",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "1024",
+    "N": "4096",
+    "K": "8192",
+    "ops_per_minion_per_gemm": "8192",
+    "values": "gemmL1x8x16:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 2.595229644455461,
+    "cycles_per_op_wall": 1557.1377866732764,
+    "cycles_per_op_mean": 1540.1956346916681,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     39.34846306927327,
+     152.6515369307267
+    ],
+    "footprint_MB": 176.0,
+    "power_of_two_NB": true,
+    "floor_cycles_measured_tenb": 529.0,
+    "bench_resident_cycles_simulated": 546.0,
+    "sim_steps_per_minion_per_gemm": 382432.0,
+    "ops_per_minion_per_gemm": 8192,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 12756072.74842748,
+    "seconds_per_gemm": 0.021260121247379134,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 23.64783926579478,
+    "e_res_source": "ledger v2 fp32.randn on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 15.780942360025431,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 36.90100049916526,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.3355047479720421,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.029308341921658532,
+     "awake_memory_path": 0.0039034099612217767,
+     "governed_base": 0.0,
+     "resident_op": 0.20222799913111392,
+     "lines_L2": 0.0,
+     "lines_L3": 0.014672442529286615,
+     "lines_fresh": 0.08539255442876119
+    },
+    "switches": {
+     "counted_fin_edges": [
+      2442702520057856,
+      3693946752466944
+     ],
+     "estimated_fin_edges": [
+      1632286512997950.5,
+      4275180412249061.5,
+      7807080611828112.0
+     ],
+     "of_which_int8_arithmetic_central": null,
+     "die_J_over_idle": 0.2117800114676383,
+     "die_J_band": [
+      0.19328608465477654,
+      0.25011219354328085
+     ],
+     "fresh_lines_J_apart": 0.08539255442876119,
+     "in_run_leakage_J": [
+      0.018922467785623173,
+      0.022864648574294665
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.06742803474038314,
+      0.09478455169219573
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.861501528441533,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  },
+  {
+   "id": "n06",
+   "listed": {
+    "family": "long K",
+    "arm": "gemmL2x3x16",
+    "fmt": "int8",
+    "kind": "random",
+    "mask": "0xffffffff",
+    "shires": "32",
+    "minions": "1024",
+    "M": "2048",
+    "N": "1536",
+    "K": "32768",
+    "ops_per_minion_per_gemm": "6144",
+    "values": "gemmL2x3x16:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "scored_in_watts": "False"
+   },
+   "mask_e207": "0xffffffff",
+   "forecast": {
+    "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+    "card": "aifoundry3 card 0",
+    "f_mhz": 600.0,
+    "T_op_us": 2.476101600352302,
+    "cycles_per_op_wall": 1485.6609602113813,
+    "cycles_per_op_mean": 1469.496498725402,
+    "rho_wall_over_mean": 1.011,
+    "lines_L2_L3_F": [
+     0.0,
+     53.35622265199594,
+     138.64377734800408
+    ],
+    "footprint_MB": 124.0,
+    "power_of_two_NB": false,
+    "floor_cycles_measured_tenb": 270.0,
+    "bench_resident_cycles_simulated": 318.0,
+    "sim_steps_per_minion_per_gemm": 286847.0,
+    "ops_per_minion_per_gemm": 6144,
+    "minions": 1024,
+    "cycles_per_gemm_wall": 9127900.939538727,
+    "seconds_per_gemm": 0.015213168232564543,
+    "V": 0.522,
+    "s_V": 1.0194358914882395,
+    "G_W": 0.0,
+    "e_res_nJ": 5.130233419962774,
+    "e_res_source": "ledger v2 int8.full on a3 x k_res 1.0000",
+    "phi": 1.0,
+    "W_over_idle": 8.52936710934946,
+    "W_affine": {
+     "A_W": 1.5621619226171877,
+     "B_W_us": 17.251507912850638,
+     "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock"
+    },
+    "J_over_idle_per_gemm": 0.12975869675183607,
+    "J_over_idle_by_class": {
+     "awake_minions": 0.020972257452514798,
+     "awake_memory_path": 0.0027931746827669517,
+     "governed_base": 0.0,
+     "resident_op": 0.032903963061922115,
+     "lines_L2": 0.0,
+     "lines_L3": 0.014921792035364685,
+     "lines_fresh": 0.058167509519267524
+    },
+    "switches": {
+     "counted_fin_edges": [
+      198633647505408,
+      286869455634432
+     ],
+     "estimated_fin_edges": [
+      844264663818131.6,
+      1795916695137541.0,
+      2802708231369075.5
+     ],
+     "of_which_int8_arithmetic_central": 834906011518693.8,
+     "die_J_over_idle": 0.06061912551445262,
+     "die_J_band": [
+      0.055325492451753125,
+      0.07159118723256855
+     ],
+     "fresh_lines_J_apart": 0.058167509519267524,
+     "in_run_leakage_J": [
+      0.007318390496803553,
+      0.008843055183637627
+     ],
+     "governed_leakage_J": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "counted_netlist_J": [
+      0.0054830567269756785,
+      0.007360905440322043
+     ],
+     "scope": "die only: regulators out (finding 19 coefficient), DRAM devices, PHY and path apart (the fresh lines), leakage out; counted = the tensor unit (fp32 gate level; fp16 RTL x ratio; int8 the vector unit only); not scorable"
+    },
+    "rest_law": {
+     "P_rest_W": 24.741005676735448,
+     "T0_c": 54.4,
+     "J_at_rest_per_gemm_REPORTED": 0.5061477783548468,
+     "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+    }
+   }
+  }
+ ]
+}
