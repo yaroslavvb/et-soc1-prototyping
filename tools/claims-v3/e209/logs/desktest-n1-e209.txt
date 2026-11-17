@@ -1,0 +1,53 @@
+== DESKTEST-N1-E209 (interpreter /usr/bin/python3 3.12.3); the repo it runs from at 75ecdd29; session 1794940244-a2c0-E209; collect_e209_n1.py aad4926bea113877...; collect_e209.py e8195bf31ff031b0...
+   the real record first/fwgate-aifoundry2-c0-20261117-103044.json: 2311 bytes, 111 lines, sha256 a91fcc837457ffb2c447ceeb61800bfec3bde1eeab2a5f85884eb1ced95fe47d (its manifest line a91fcc837457ffb2c447ceeb61800bfec3bde1eeab2a5f85884eb1ced95fe47d)
+   lines of it holding the login, the home or the home root: [34]
+   R1 | THE COPY-BACK'S NAME (KIT.md.dated-note-1.md): RB_OUT/copy-n1/1794940244-a2c0-E209/ (checks in RB_OUT/copy-n1/checks/)
+   R1 | COPY-BACK EXACT: 221 manifest lines OK, 224 files (1794940244-a2c0-E209)
+   R1 | THE CHECKS (E208's data checker, unchanged): ALL PASS: C0_src PASS, C1_clean_end PASS, C2_runs PASS, C3_identity PASS, C4_clock PASS, C5_stops PASS, C6_timeouts PASS, C7_no_leftover PASS, C8_sampler PASS
+   R1 | THE MASK (KIT.md.dated-note-1.md): first/fwgate-aifoundry2-c0-20261117-103044.json line 34, fwgate's ledger path with the box's home written as "~"; the box's bytes sha256 a91fcc837457ffb2c447ceeb61800bfec3bde1eeab2a5f85884eb1ced95fe47d (its MANIFEST.sha256 line lists it), the committed bytes sha256
+   R1 | THE SCRUB: 226 files (the copy and the checks), no login name, home path or box-root path
+   R1 | DATA DIR docs/reports/data/2026-11-17-e209-blind-matmul-aifoundry2 (232 files)
+CASE R1: PASS: exit 0; session/ vs the copy-back: differing files ['first/fwgate-aifoundry2-c0-20261117-103044.json']; the record's differing lines [34]; line 34 now  "ledger": "~/.local/state/fwgate/aifoundry2-c0.jsonl",; raw sha256 a91fcc837457ffb2... = the manifest line: True; committed sha256 2d56a73219f7ba99b08986ef723a46477444feda7b3db7f255eb6e027e09a377; private strings in the data directory: none; SHA256SUMS OK: True; copy/<SID> untouched: True; data directory files: 232
+CASE R2: PASS: exit 16: COLLECT STOPPED: THE SCRUB found 1 file(s) with a private string (['first/fwgate-aifoundry2-c0-20261117-103044.json: the login name']): nothing written in LAB; tell the orchestrator
+CASE EQ: PASS: exit 0; files differing from R1's data directory: ['SHA256SUMS', 'session/MANIFEST.sha256']; MANIFEST lines differing: [20]; SHA256SUMS lines differing: ['session/MANIFEST.sha256']; the checker's outputs differing (its own run time, if any): none
+CASE C1: PASS: exit 10: COLLECT REFUSED: RB_OUT/copy-n1 exists already (one copy-back a name: read why, then give a new --copy-name)
+CASE C2: PASS: exit 10: COLLECT REFUSED: --copy-name 'bad/name': a name 'copy...' of letters, digits, '.', '_' and '-' only
+CASE P2: PASS: exit 0: ["THE MASK (KIT.md.dated-note-1.md): no line to mask (no fwgate read record in first/ holds the box's home in its ledger path)"]; the record committed at its own bytes: True
+CASE F1: PASS: the home in another line of the record too: the stand-in differs from the real session: True; exit 16, nothing written in its lab: True: COLLECT STOPPED: THE SCRUB found 1 file(s) with a private string (['first/fwgate-aifoundry2-c0-20261117-103044.json: the login name']): nothing written in LAB; tell the orchestrator
+CASE F2: PASS: the login alone in fwgate's stderr: the stand-in differs from the real session: True; exit 16, nothing written in its lab: True: COLLECT STOPPED: THE SCRUB found 1 file(s) with a private string (['first/fwgate-aifoundry2-c0-20261117-103044.stderr: the login name']): nothing written in LAB; tell the orchestrator
+CASE F3: PASS: another user's home folder in runner.out: the stand-in differs from the real session: True; exit 16, nothing written in its lab: True: COLLECT STOPPED: THE SCRUB found 1 file(s) with a private string (['runner.out: a home path']): nothing written in LAB; tell the orchestrator
+CASE F4: PASS: the box root's path in runner.out (under the home here, so the login is named first): the stand-in differs from the real session: True; exit 16, nothing written in its lab: True: COLLECT STOPPED: THE SCRUB found 1 file(s) with a private string (['runner.out: the login name']): nothing written in LAB; tell the orchestrator
+CASE F5: PASS: the ledger line with another home: the stand-in differs from the real session: True; exit 16, nothing written in its lab: True: COLLECT STOPPED: THE SCRUB found 1 file(s) with a private string (['first/fwgate-aifoundry2-c0-20261117-103044.json: a home path']): nothing written in LAB; tell the orchestrator
+CASE F6: PASS: the ledger line of another card's ledger: the stand-in differs from the real session: True; exit 16, nothing written in its lab: True: COLLECT STOPPED: THE SCRUB found 1 file(s) with a private string (['first/fwgate-aifoundry2-c0-20261117-103044.json: the login name']): nothing written in LAB; tell the orchestrator
+CASE F7: PASS: the ledger line's text in runner.out (not a record): the stand-in differs from the real session: True; exit 16, nothing written in its lab: True: COLLECT STOPPED: THE SCRUB found 1 file(s) with a private string (['runner.out: the login name']): nothing written in LAB; tell the orchestrator
+CASE F8: PASS: two ledger lines in the record: the stand-in differs from the real session: True; exit 16, nothing written in its lab: True: COLLECT STOPPED: THE MASK: 2 ledger lines in one record (lines [34, 35]), not the one line KIT.md.dated-note-1.md masks: nothing written in LAB; tell the orchestrator
+CASE F9: PASS: the home inside a .gz file of the session: the stand-in differs from the real session: True; exit 16, nothing written in its lab: True: COLLECT STOPPED: THE SCRUB found 1 file(s) with a private string (['desk-extra.jsonl.gz: the login name']): nothing written in LAB; tell the orchestrator
+CASE F10: PASS: the record under another file name: the stand-in differs from the real session: True; exit 16, nothing written in its lab: True: COLLECT STOPPED: THE SCRUB found 1 file(s) with a private string (['first/fwgate-copy.json: the login name']): nothing written in LAB; tell the orchestrator
+CASE M0: PASS: the kit's read: rc 1: first/fwgate-aifoundry2-c0-20261117-103044.json: FAILED | sha256sum: WARNING: 1 computed checksum did NOT match
+CASE M1: PASS: exit 0: MANIFEST CHECK: 221 of 221 manifest lines OK (1 by THE MASK of KIT.md.dated-note-1.md: first/fwgate-aifoundry2-c0-20261117-103044.json line 34 (the box's bytes a91fcc837457ffb2... = its manifest line; committed 2d56a73219f7ba99...))
+CASE M6: PASS: the raw copy-back: exit 0: MANIFEST CHECK: 221 of 221 manifest lines OK (0 by THE MASK of KIT.md.dated-note-1.md)
+CASE M2: PASS: another file changed: exit 10: MANIFEST CHECK FAILED: 1 of 221 manifest lines not OK: ['session.log: differs']
+CASE M3: PASS: the record changed in a second line: exit 10: MANIFEST CHECK FAILED: 1 of 221 manifest lines not OK: ['first/fwgate-aifoundry2-c0-20261117-103044.json: differs, and not by THE MASK of KIT.md.dated-note-1.md alone']
+CASE M4: PASS: '~' read as another home: exit 10: MANIFEST CHECK FAILED: 1 of 221 manifest lines not OK: ['first/fwgate-aifoundry2-c0-20261117-103044.json: differs, and not by THE MASK of KIT.md.dated-note-1.md alone']
+CASE M5: PASS: a listed file missing: exit 10: MANIFEST CHECK FAILED: 1 of 221 manifest lines not OK: ['session.log: missing']
+CASE M7: PASS: the masked form under another file name: exit 10: MANIFEST CHECK FAILED: 1 of 221 manifest lines not OK: ['first/fwgate-copy.json: differs']
+   S1 | == s22_collect_n1_e209 2026-11-17 11:25:51 PST (aifoundry2; s22_collect_e209_n1.sh; DESKTEST)
+   S1 | THE ONE-LAB RULE: the collect span is not required in a desk test
+   S1 | THE COPY-BACK'S NAME (KIT.md.dated-note-1.md): RB_OUT/copy-n1/1794940244-a2c0-E209/ (checks in RB_OUT/copy-n1/checks/)
+   S1 | COPY-BACK EXACT: 221 manifest lines OK, 224 files (1794940244-a2c0-E209)
+   S1 | THE CHECKS (E208's data checker, unchanged): ALL PASS: C0_src PASS, C1_clean_end PASS, C2_runs PASS, C3_identity PASS, C4_clock PASS, C5_stops PASS, C6_timeouts PASS, C7_no_leftover PASS, C8_sampler PASS
+   S1 | THE MASK (KIT.md.dated-note-1.md): first/fwgate-aifoundry2-c0-20261117-103044.json line 34, fwgate's ledger path with the box's home written as "~"; the box's bytes sha256 a91fcc837457ffb2c447ceeb61800bfec3bde1eeab2a5f85884eb1ced95fe47d (its MANIFEST.sha256 line lists it), the committed bytes sha256
+   S1 | THE SCRUB: 226 files (the copy and the checks), no login name, home path or box-root path
+   S1 | DATA DIR docs/reports/data/2026-11-17-e209-blind-matmul-aifoundry2 (232 files)
+   S1 | quiet_e209: THE QUIET DESK FLAG lowered (was card-e209's) (exit 0)
+   S1 | s22_collect_n1_e209: DATA DIR docs/reports/data/2026-11-17-e209-blind-matmul-aifoundry2 written; THE QUIET DESK FLAG lowered after the copy-back; next: the data commit (step 12) (exit 0)
+CASE S1: PASS: exit 0; the stand-in flag lowered: True; files differing from R1's data directory: none
+CASE S2: PASS: exit 10: s22_collect_n1_e209: THE ONE-LAB RULE: card-e209 is not in its collect span (bash $W/onelab.sh collect card-e209 right before step 11) (exit 10)
+CASE S3: PASS: exit 10: s22_collect_n1_e209: THE ONE-LAB RULE: collect-e209 is not in its collect span (bash $W/onelab.sh collect collect-e209 right before step 11) (exit 10)
+CASE S4: PASS: exit 10: THE ONE-LAB RULE: collect-collect-e209 held | COLLECT REFUSED: --copy-name 'bad/name': a name 'copy...' of letters, digits, '.', '_' and '-' only | s22_collect_n1_e209: COLLECT REFUSED: --copy-name 'bad/name': a name 'copy...' of letters, digits, '.', '_' and '-' only (exit 10)
+   the stand-in repository: git init rc 0, add rc 0, commit rc 0
+CASE W1: PASS: exit 14: MANIFEST CHECK: 1 of 1 manifest lines OK (1 by THE MASK of KIT.md.dated-note-1.md: first/fwgate-aifoundry2-c0-20261117-103044.json line 34 (the box's bytes a91fcc837457ffb2... = its manifest line; committed 2d56a73219f7ba99...)) | reduce_mms.py rc 1 | s24_score_n1_e209: the reducer ended rc 1 (RB_OUT/score/reduce.out) (exit 14)
+CASE W2: PASS: exit 10: s24_score_e209: the committed session does not read its manifest OK (exit 10)
+CASE W3: PASS: exit 10: MANIFEST CHECK FAILED: 1 of 1 manifest lines not OK: ['first/fwgate-aifoundry2-c0-20261117-103044.json: differs, and not by THE MASK of KIT.md.dated-note-1.md alone'] | s24_score_n1_e209: the committed session does not read its manifest OK, but for THE MASK of KIT.md.dated-note-1.md (rc 10): MANIFEST CHECK FAILED: 1 of 1 manifest lines no
+CASE Z: PASS: the card lane's RB_OUT unchanged: True; the box root's session unchanged: True; no data path written in the repo it runs from: True
+DESKTEST-N1-E209 32 of 32 PASS
