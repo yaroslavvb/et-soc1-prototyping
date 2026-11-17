@@ -1,0 +1,22 @@
+E209 step 13's label check and readings, self-test (rb/post_e209.py --selftest), 2026-11-17 08:44:30 PST, aifoundry2, /usr/bin/python3 3.12.3; clone HEAD cb14eae3 (fix-e209's amended registration) with the kit's files in the working tree (before the kit's commit)
+PASS L1 labels of step 6n's form naming e01 and its time case: LABELS OK [LABELS OK: 1 point label(s), 1 time-case label(s), each naming a point or a time case of points-e209.json]
+PASS L2 a point label 'e1' (a typo for e01): LABELS REFUSED naming it [LABELS REFUSED: ran_before_points entry 'e1' names no point of points-e209.json]
+PASS L3 a case label spelled 0xFFFFFFFF: LABELS REFUSED naming it [LABELS REFUSED: ran_before_cases entry 'gemmL1x3x2|int8|0xFFFFFFFF' names no time case of points-e209.json]
+PASS L4 empty labels: LABELS OK, nothing to pass [LABELS OK: 0 point label(s), 0 time-case label(s), each naming a point or a time case of points-e209.json]
+PASS L5 a point label given as a string, not a list: LABELS REFUSED [LABELS REFUSED: ran_before_points is not a list]
+PASS L6 a labels file that is not JSON: LABELS REFUSED [LABELS REFUSED: l6.json is not a JSON object (JSONDecodeError)]
+PASS L7 why the check: the frozen scorer given 'e1' echoes it as applied and still scores e01 [{'ran_before_points': ['e1'], 'ran_before_cases': []}]
+PASS D1 E208's anchor runs on this card read as rules_e209.py reads them: 27 runs, W over idle mean 18.355041 W (fix-e209's own count) [27 runs, 18.355041 W]
+PASS D2 day A's five anchors at 18.4 W: offset_W = 18.4 / E208's mean - 1 (stated before the run), op time and clock offsets beside [+0.2449% (stated +0.2449%)]
+PASS D3 at offset 0 and H4's own seed, H4n is the scorer's H4 exactly (cells, counts, verdict, interval): the rows are the scorer's [MM1-v2 BETTER: 14/0/25]
+PASS D4 day A: no point named NO DATA (every point has a time and an energy reading) [{'no_kept_run': [], 'kept_runs_no_time_reading': [], 'time_reading_no_energy_reading': []}]
+PASS D5 every W and J over idle 2% over day A, the anchors at E208's mean x 1.02: offset_W = +2%; H4n's cells are day A's H4 cells at every point, while the scorer's H4 reads the raised day [offset +2.000%; H4 MM1-v2 BETTER (8/2/29); H4n MM1-v2 BETTER (14/0/25); 45 of 45 cells as day A's]
+PASS N1 e02's run with no window view: the scorer names it in no rule; step 13 names it NO DATA (kept runs, no time reading) [{'no_kept_run': [], 'kept_runs_no_time_reading': ['e02'], 'time_reading_no_energy_reading': []}]
+PASS N2 e03 never in the data and e04's only run set aside (another mask): both named NO DATA, no kept run, with the scorer's reason [{'e03': ['no run of it in the data'], 'e04': ['mask 0xffff0000', 'mask 0xffff0000']}]
+PASS N3 e10 capped (its time read, no energy): named, a time reading but no energy reading [{'no_kept_run': [], 'kept_runs_no_time_reading': [], 'time_reading_no_energy_reading': ['e10']}]
+PASS N4 e01 labelled 'ran before': out of the NO DATA lists (the label names it) [{'no_kept_run': [], 'kept_runs_no_time_reading': [], 'time_reading_no_energy_reading': []}]
+PASS N5 anchors with no energy reading (the stand-in's own: no p_mean_w): the day offset not read, H4n NO DATA, said so [NO DATA (no kept anchor run: the day offset is not read)]
+PASS T1 the printed lines: H4's registered verdict, offset_W and H4n on one line [H4 (registered) MM1-v2 BETTER; offset_W +2.000%; H4n (REPORTED, J over idle / (1 + offset_W)) MM1-v2 BETTER (v2 closer 14, v1 closer 0, ties 25; mean d 95% [0.0]
+SELFTEST-POST-E209 18 of 18 PASS
+rc=0
+ended 2026-11-17 08:44:36 PST

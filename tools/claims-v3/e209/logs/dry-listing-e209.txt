@@ -1,0 +1,2585 @@
+E209 runbook (the blind matmul day on aifoundry2 card 0 under its governor), dry listing (nothing below was run), 2026-11-17 08:52:53 PST, aifoundry2.
+Every step runs from the lab clone's top as one plain call from a script file (no bash -c, no background &), with k6's exit codes: 0 done; 10 refused;
+13 past a bound; 14 a call failed; 15 a holder; 16 a gate says stop; 17 call again. The environment every step reads (rb/rb_e209.sh):
+    | # What the card lane sets (each step refuses, 10, without the ones it needs):
+    | #   RB_OUT       one folder for E209's day, outside the repo (window.env, the stamps, the logs, the copy-back, the scores)
+    | #   E209_ROOT    the box root, outside the repo and outside every ee-* folder (the card-lane brief names it)
+    | #   RB_QUIET     the round's quiet-desk flag file for aifoundry2 (outside the repo)
+    | #   RB_LANE      the card lane's name (card-e209), the flag's first word
+    | #   RB_RELEASES  the round's records of the model session's releases, one file or several joined by ':' (W/out/orch/e208-releases.txt
+    | #                and W/out/orch/e212-releases.txt: the rest rule reads every aifoundry2 card 0 line of each)
+    | #   RB_ROUND_OUT the round's lane folders (step 6n's search reads them)
+    | #   RB_SEALED    the round's record of sealed forecasts for E209, if the orchestrator keeps one (step 2 reads it)
+    | #   RB_W         the round's folder holding onelab.sh, hold.sh and book.sh (rb/end_e209.sh calls them)
+    | # Desk tests only: RB_DESKTEST=1 lets RB_FWGATE name a stand-in for fwgate.py, RB_GITHUB a stand-in for GitHub's main,
+    | # RB_HOME_WORK a stand-in for HOME/claude/work, RB_NOW a stand-in clock (epoch seconds) for the window's rules, and RB_DATA_LAB a
+    | # stand-in lab for the collection's data directory; outside a desk test each of them is refused.
+    | # Exit codes (k6's words): 0 done; 10 refused; 13 past a bound; 14 a call failed; 15 a holder; 16 a gate says stop; 17 call again.
+
+################ the part every step sources: bash tools/claims-v3/e209/rb/rb_e209.sh 
+---- tools/claims-v3/e209/rb/rb_e209.sh (sha256 9f9f0585f5d3ad2d; listed, not run)
+   1  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): the part every E209 runbook step sources (bash 4 or later).
+   2  # THE DESK AND THE BOX ARE ONE MACHINE, AND NO STEP USES SSH: E209 runs on aifoundry2's own card 0, orchestrated from aifoundry2
+   3  # itself (E209.md 6), and every step is a local script on aifoundry2: the box root is a folder of the card lane's own (E209_ROOT, the
+   4  # layout of make_box_e209.py), the session is E208's runner, unchanged, started detached by the box root's src/start_e209.sh (E208's
+   5  # start form), and every external call a step makes is bounded (`timeout`, never `-k`; a bounded wait at most 520 s a call, then
+   6  # exit 17: call again). No step sends a SIGKILL, and none arranges one.
+   7  # What the card lane sets (each step refuses, 10, without the ones it needs):
+   8  #   RB_OUT       one folder for E209's day, outside the repo (window.env, the stamps, the logs, the copy-back, the scores)
+   9  #   E209_ROOT    the box root, outside the repo and outside every ee-* folder (the card-lane brief names it)
+  10  #   RB_QUIET     the round's quiet-desk flag file for aifoundry2 (outside the repo)
+  11  #   RB_LANE      the card lane's name (card-e209), the flag's first word
+  12  #   RB_RELEASES  the round's records of the model session's releases, one file or several joined by ':' (W/out/orch/e208-releases.txt
+  13  #                and W/out/orch/e212-releases.txt: the rest rule reads every aifoundry2 card 0 line of each)
+  14  #   RB_ROUND_OUT the round's lane folders (step 6n's search reads them)
+  15  #   RB_SEALED    the round's record of sealed forecasts for E209, if the orchestrator keeps one (step 2 reads it)
+  16  #   RB_W         the round's folder holding onelab.sh, hold.sh and book.sh (rb/end_e209.sh calls them)
+  17  # Desk tests only: RB_DESKTEST=1 lets RB_FWGATE name a stand-in for fwgate.py, RB_GITHUB a stand-in for GitHub's main,
+  18  # RB_HOME_WORK a stand-in for HOME/claude/work, RB_NOW a stand-in clock (epoch seconds) for the window's rules, and RB_DATA_LAB a
+  19  # stand-in lab for the collection's data directory; outside a desk test each of them is refused.
+  20  # Exit codes (k6's words): 0 done; 10 refused; 13 past a bound; 14 a call failed; 15 a holder; 16 a gate says stop; 17 call again.
+  21  # SPDX-License-Identifier: Apache-2.0
+  22  set -u
+  23  RB_E209_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
+  24  RB_REPO=$(cd "$RB_E209_DIR/../../../.." && pwd -P)
+  25  E209_REL=tools/claims-v3/e209
+  26  E209_FIRST_MAX_S=120            # step 9 launches within 2 minutes of step 7's first card command (E197's and E200's bound)
+  27  E209_NEVERRUN_MAX_S=1800        # step 7 refuses unless step 6n ended rc 0 within the last 30 minutes (E207's form)
+  28  E209_BOUND_S=520                # one bounded wait in a call (under the round's 9 minutes)
+  29  DEV_COMM='(_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$)'
+  30  PY=/usr/bin/python3
+  31  
+  32  rb_now() { if [ -n "${RB_NOW:-}" ] && [ "${RB_DESKTEST:-}" = 1 ]; then echo "$RB_NOW"; else date +%s; fi; }
+  33  rb_pst() { TZ=America/Los_Angeles date "$@" '+%F %T %Z'; }
+  34  rb_day() { TZ=America/Los_Angeles date +%F; }
+  35  
+  36  rb_init() {  # rb_init <step name>
+  37    RB_STEP=${1}_e209
+  38    if [ -n "${RB_OUT:-}" ]; then
+  39      mkdir -p "$RB_OUT" 2>/dev/null
+  40      case "$(cd "$RB_OUT" 2>/dev/null && pwd -P)/" in "$RB_REPO/"*) echo "$RB_STEP: RB_OUT is inside the lab repo: refused (exit 10)"; exit 10 ;; esac
+  41    fi
+  42    [ -z "${RB_FWGATE:-}" ] || [ "${RB_DESKTEST:-}" = 1 ] || { echo "$RB_STEP: RB_FWGATE outside a desk test: refused (exit 10)"; exit 10; }
+  43    [ -z "${RB_GITHUB:-}" ] || [ "${RB_DESKTEST:-}" = 1 ] || { echo "$RB_STEP: RB_GITHUB outside a desk test: refused (exit 10)"; exit 10; }
+  44    [ -z "${RB_HOME_WORK:-}" ] || [ "${RB_DESKTEST:-}" = 1 ] || { echo "$RB_STEP: RB_HOME_WORK outside a desk test: refused (exit 10)"; exit 10; }
+  45    [ -z "${RB_NOW:-}" ] || [ "${RB_DESKTEST:-}" = 1 ] || { echo "$RB_STEP: RB_NOW outside a desk test: refused (exit 10)"; exit 10; }
+  46    [ -z "${RB_DATA_LAB:-}" ] || [ "${RB_DESKTEST:-}" = 1 ] || { echo "$RB_STEP: RB_DATA_LAB outside a desk test: refused (exit 10)"; exit 10; }
+  47    echo "== $RB_STEP $(rb_pst) (aifoundry2; $(basename "$0")${RB_DESKTEST:+; DESKTEST})"
+  48    rb_log "start"
+  49  }
+  50  rb_log() { [ -n "${RB_OUT:-}" ] && [ -d "${RB_OUT:-}" ] && echo "$(rb_pst) $RB_STEP $*" >> "$RB_OUT/rb.log"; return 0; }
+  51  rb_die() {   # rb_die <exit> <words>
+  52    local c=$1; shift
+  53    echo "$RB_STEP: $* (exit $c)"
+  54    rb_log "exit $c: $*"
+  55    exit "$c"
+  56  }
+  57  rb_ok() { echo "$RB_STEP: $* (exit 0)"; rb_log "exit 0: $*"; exit 0; }
+  58  rb_need() {  # rb_need VAR...: each set (and the folders existing where they name one)
+  59    local v
+  60    for v in "$@"; do
+  61      [ -n "${!v:-}" ] || rb_die 10 "$v is not set (the card-lane brief says what it names)"
+  62    done
+  63  }
+  64  rb_root() {  # the box root: set, a folder, outside the repo and outside every ee-* folder
+  65    rb_need E209_ROOT
+  66    [ -d "$E209_ROOT" ] || rb_die 10 "E209_ROOT ($E209_ROOT) is not a folder"
+  67    E209_ROOT=$(cd "$E209_ROOT" && pwd -P)
+  68    case "$E209_ROOT/" in "$RB_REPO/"*) rb_die 10 "E209_ROOT is inside the lab repo" ;; */ee-*/*) rb_die 10 "E209_ROOT is inside a model session's ee-* folder" ;; esac
+  69  }
+  70  e209_fwgate() {  # fwgate.py from the box root (synced at its sha256), or a desk test's stand-in
+  71    if [ -n "${RB_FWGATE:-}" ]; then "$RB_FWGATE" "$@"; else timeout 60 "$PY" -I -B "$E209_ROOT/fwgate/fwgate.py" "$@"; fi
+  72  }
+  73  e209_window() {  # window.env written today by step 1 in this RB_OUT; sets E209_G, E209_LAST_START, E209_LAST_END (epochs)
+  74    rb_need RB_OUT
+  75    local f="$RB_OUT/window.env"
+  76    [ -f "$f" ] || rb_die 10 "no window in this RB_OUT (step 1, rb/s02_window_e209.sh, first)"
+  77    # shellcheck disable=SC1090
+  78    . "$f"
+  79    [ "${E209_WINDOW_DAY:-}" = "$(rb_day)" ] || rb_die 10 "the window was written for ${E209_WINDOW_DAY:-?}, not today ($(rb_day)): start the day again from step 0 in a new RB_OUT"
+  80    [ "$(TZ=America/Los_Angeles date -r "$f" +%F)" = "$(rb_day)" ] || rb_die 10 "window.env was not written today"
+  81  }
+  82  e209_quiet_ours() {  # THE QUIET DESK FLAG up and the card lane's
+  83    rb_need RB_QUIET RB_LANE
+  84    [ -f "$RB_QUIET" ] || rb_die 10 "THE QUIET DESK FLAG is not up (rb/quiet_e209.sh raise $RB_LANE, right before the look)"
+  85    local w; w=$(head -n 1 "$RB_QUIET" | cut -d' ' -f1)
+  86    [ "$w" = "$RB_LANE" ] || rb_die 10 "THE QUIET DESK FLAG is another's ('$w'): never overwritten, never removed; wait"
+  87  }
+  88  ours_live() {  # E194's: processes of ours whose OWN script (an interpreter's first non-option argument) matches the pattern, never a
+  89    #            command string's text; dry passes and V3_DRY runs aside. ours_live [pattern]  (default: session_e*.sh and queue_e* scripts)
+  90    local n=0 pid w s first dashc interp want=${1:-}
+  91    for pid in $(pgrep -u "$(id -u)" . 2>/dev/null); do
+  92      s=""; first=1; dashc=0; interp=0
+  93      while IFS= read -r -d '' w; do
+  94        if [ "$first" = 1 ]; then
+  95          first=0
+  96          case "${w##*/}" in bash|sh|dash|python|python3|python3.[0-9]*) interp=1 ;; esac
+  97          continue
+  98        fi
+  99        case "$w" in -c) dashc=1; break ;; -*) continue ;; *) s=$w; break ;; esac
+ 100      done 2>/dev/null < "/proc/$pid/cmdline"
+ 101      [ "$interp" = 1 ] && [ "$dashc" = 0 ] && [ -n "$s" ] || continue
+ 102      if [ -n "$want" ]; then
+ 103        case "${s##*/}" in $want) ;; *) continue ;; esac
+ 104      else
+ 105        case "${s##*/}" in session_e[0-9]*.sh|queue_e[0-9]*) ;; *) continue ;; esac
+ 106      fi
+ 107      case "$(tr '\0' ' ' 2>/dev/null < "/proc/$pid/cmdline")" in *--dry*) continue ;; esac
+ 108      tr '\0' '\n' 2>/dev/null < "/proc/$pid/environ" | grep -q '^V3_DRY=' && continue
+ 109      n=$((n + 1))
+ 110    done
+ 111    echo "$n"
+ 112  }
+ 113  p2_count() {  # THE QUIET DESK FLAG's count: device-named processes of ours (ps comm) and session or queue scripts of ours
+ 114    local a b
+ 115    a=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {n++} END {print n+0}')
+ 116    b=$(ours_live)
+ 117    P2_N=$((a + b))
+ 118    echo "P2 $P2_N ($a device-named process(es) of ours, $b session or queue script(s) of ours)"
+ 119  }
+ 120  e209_rel_args() {  # REL_ARGS=(--releases <file> ...) from RB_RELEASES (one file or several joined by ':'); each must exist
+ 121    rb_need RB_RELEASES
+ 122    local f IFS=:
+ 123    REL_ARGS=()
+ 124    for f in $RB_RELEASES; do
+ 125      [ -n "$f" ] || continue
+ 126      [ -f "$f" ] || rb_die 16 "the release record $f is missing (RB_RELEASES)"
+ 127      REL_ARGS+=(--releases "$f")
+ 128    done
+ 129    [ "${#REL_ARGS[@]}" -gt 0 ] || rb_die 10 "RB_RELEASES names no file"
+ 130  }
+ 131  e209_box_free() {  # no session, build or dry pass of the kit runs in the box root (run/box.lock free)
+ 132    mkdir -p "$E209_ROOT/run"
+ 133    flock -n "$E209_ROOT/run/box.lock" true
+ 134  }
+ 135  e209_session_today() {  # E209 sessions in the box root started today (Pacific): "<sid> <reached the card: yes|no>" lines
+ 136    local d sid t0
+ 137    for d in "$E209_ROOT"/sessions/*-a2c0-E209; do
+ 138      [ -d "$d" ] || continue
+ 139      sid=${d##*/}; t0=${sid%%-*}
+ 140      [ "$(TZ=America/Los_Angeles date -d "@$t0" +%F)" = "$(rb_day)" ] || continue
+ 141      if grep -q ' config start: ' "$d/session.log" 2>/dev/null; then echo "$sid yes"; else echo "$sid no"; fi
+ 142    done
+ 143  }
+
+################ B (the card lane's): 'python3 W/out/orch/queue_state.py aifoundry2 <the round's experiments before E209>' (QUEUE OVER; QUEUE CANCELLED while a claim of the model session stands: SKIPPED), THE DAY (G at 20:29:00 PST or earlier); then 'bash W/book.sh take aifoundry2 <lane>' (exit 0: G = that moment)
+
+################ D+ (the card lane's): 'bash W/onelab.sh desk <lane>' (THE ONE-LAB RULE, right before step 0)
+
+################ 0 (the card lane's): uptime (THE LOAD RULE: at most 8); GitHub main read; E209's anchor lines (the land record); any sealed forecast posted for E209 registered in tools/claims-v3/sealed-e209/ first (the E206 lesson). Any line not as stated: E
+
+################ H (the card lane's): 'bash W/hold.sh add <lane>' (THE QUIET HOLD); git -C <lab clone> status --porcelain --untracked-files=all reads 0 lines. Else E
+
+################ 1 THE WINDOW: bash tools/claims-v3/e209/rb/s02_window_e209.sh <G: the booking's epoch>
+---- tools/claims-v3/e209/rb/s02_window_e209.sh (sha256 9e243b2e7151d9a7; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): runbook step 1, THE WINDOW (E209.md 6): G = the card lane's booking
+   3  # of aifoundry2 on its day; the last start G + 1:30 and the last end G + 3:30, each rounded up to the whole minute, inside G's Pacific
+   4  # day; G at 20:29:00 PST or earlier. It writes RB_OUT/window.env (read by every later step: written today, naming today) and prints the
+   5  # window. Refused (10): no G, a G that is not today, a G later than 20:29:00, a last end outside G's day, an RB_OUT with a window of
+   6  # another day. One RB_OUT a day.
+   7  #   RB_OUT=<the day's folder> bash tools/claims-v3/e209/rb/s02_window_e209.sh <G: epoch seconds of the booking>
+   8  # SPDX-License-Identifier: Apache-2.0
+   9  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  10  rb_init s02_window
+  11  rb_need RB_OUT
+  12  G=${1:-}
+  13  case "$G" in ''|*[!0-9]*) rb_die 10 "usage: s02_window_e209.sh <G epoch>" ;; esac
+  14  NOW=$(rb_now)
+  15  [ "$G" -le "$NOW" ] || rb_die 10 "G ($G) is in the future"
+  16  DAY=$(TZ=America/Los_Angeles date -d "@$G" +%F)
+  17  TODAY=$(TZ=America/Los_Angeles date -d "@$NOW" +%F)
+  18  [ "$DAY" = "$TODAY" ] || rb_die 10 "G is on $DAY, not today ($TODAY)"
+  19  LIM=$(TZ=America/Los_Angeles date -d "$DAY 20:29:00" +%s)
+  20  [ "$G" -le "$LIM" ] || rb_die 10 "G ($(rb_pst -d "@$G")) is later than 20:29:00 PST: no booking that day (THE DAY: wait until 00:00:30 the next day)"
+  21  up() { local t=$1; echo $(( (t + 59) / 60 * 60 )); }
+  22  LS=$(up $((G + 5400)))
+  23  LE=$(up $((G + 12600)))
+  24  [ "$(TZ=America/Los_Angeles date -d "@$LE" +%F)" = "$DAY" ] || rb_die 10 "the last end ($(rb_pst -d "@$LE")) is not inside G's day"
+  25  if [ -f "$RB_OUT/window.env" ]; then
+  26    # shellcheck disable=SC1091
+  27    OLD=$(. "$RB_OUT/window.env"; echo "${E209_WINDOW_DAY:-}:${E209_G:-}")
+  28    [ "$OLD" = "$DAY:$G" ] || rb_die 10 "this RB_OUT holds another window ($OLD): one RB_OUT a day, one G"
+  29  fi
+  30  cat > "$RB_OUT/window.env" <<EOF
+  31  E209_WINDOW_DAY=$DAY
+  32  E209_G=$G
+  33  E209_LAST_START=$LS
+  34  E209_LAST_END=$LE
+  35  EOF
+  36  echo "G $(rb_pst -d "@$G"); last start $(rb_pst -d "@$LS"); last end $(rb_pst -d "@$LE") (G + 1:30 and G + 3:30, rounded up)"
+  37  rb_ok "the window written to RB_OUT/window.env"
+
+################ 2 THE DESK CHECK (outside the kit's list): bash tools/claims-v3/e209/rb/s03_desk_e209.sh 
+---- tools/claims-v3/e209/rb/s03_desk_e209.sh (sha256 3934e8ba6c132657; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum; fix-e209, Q202c: the amended registration's pins, the history check
+   3  # commit by commit, THE ONE-LAB RULE's desk span, the post-scoring self-test's log): runbook step 2, THE DESK CHECK (outside the kit's own
+   4  # list SHA256SUMS-e209-kit, so that it can pin that list's own bytes: E207's and E200's step 2 form; nothing in HEAD pins this file, so the
+   5  # card lane compares its sha256 with the land's anchor before running it: the card-lane brief, step 2). Run in the lab clone LAB on aifoundry2, after
+   6  # step 1, inside THE ONE-LAB RULE's desk span (onelab desk before step 0, undesk right after this step), never inside the lab-git lock. Reads
+   7  # only, but for one thing: when LAB's HEAD is behind GitHub's main, clean, and an ancestor of it, it fast-forwards LAB under the lab-git lock.
+   8  #   RB_OUT=<the day's folder> RB_GITLOCK=<W/locks/lab-git.lock> RB_W=<the round's folder> RB_LANE=<the card lane> \
+   9  #     [RB_SEALED=<the round's sealed-forecast record for E209>] bash tools/claims-v3/e209/rb/s03_desk_e209.sh
+  10  # Checks, in order (any one not as stated: exit 10, nothing else done):
+  11  #   1. the window (step 1 today); 1o. outside a desk test, THE ONE-LAB RULE's desk span: RB_W's onelab.sh shows desk-<RB_LANE> (the card
+  12  #   lane ran onelab desk before step 0; verify-e209's finding 8; in a desk test the span is reported, never required); 2. HEAD = GitHub's main (git ls-remote, the environment-only HTTPS rewrite), after the fast-forward if one is
+  13  #   due; 3. the paths E209 runs from are clean; 4. E209's registration and kit are in HEAD, found by content (the commits that added E209.md and
+  14  #   KIT.md), the registration first; 4h. THE HISTORY CHECK (rb/check_history_e209.py tree: the registration's subtree afaa6053..., additions
+  15  #   only under tools/claims-v3/e209 since it, net and commit by commit, no shadowing module under tools/, the run paths clean); 5. THE LISTS E209 READS at their pinned
+  16  #   counts AND their own pinned sha256 AND every entry OK (no override outside a desk test): E209's registration list, its kit list, MM1-v2's
+  17  #   and MM1-v1's folders as landed, E208's registration list and its kit's src/ list; every other file with "SHA256SUMS" in its name under
+  18  #   tools/claims-v3/e209 is REPORTED (never a gate); 6. the registration's own checks: points, rules, plan, kernel --check PASS and
+  19  #   score_e209.py --forecasts byte for byte forecasts-e209.txt (it refuses, exit 4, if any frozen MM1-v2 or MM1-v1 file moved); 7.
+  20  #   make_box_e209.py check: CHECK PASS (the box root's every file at its sha256: E208's kit, E209's box files, the real tiles, fwgate); 8.
+  21  #   preflight_e209.sh: dmcmd_audit_v2 GO over every file whose commands the session or the runbook can send (no --allow); 8k. the kit's desk-test logs in HEAD, each ending
+  22  #   in its PASS line; 9. THE FREEZE LINE: MM1-v2's commit 3ca4b717 in HEAD, printed with any sealed forecast registered for E209
+  23  #   (tools/claims-v3/sealed-e209/e209-freeze-lines.md); 10. the round's sealed record (RB_SEALED), when it lists a sha256 on a line that is
+  24  #   not a comment, registered in that note at HEAD (else: do not book, tell the orchestrator: the E206 lesson); 11. no E209 datum in any ref
+  25  #   (docs/reports/data/*e209*); 12. HEAD unchanged since check 2.
+  26  # Desk tests only (RB_DESKTEST=1): RB_GITHUB names GitHub's main (no fast-forward then), RB_E209_KITPIN the kit list's pin (a stand-in kit).
+  27  # Writes RB_OUT/step2.txt and ends "STEP2 PASS (HEAD <sha>)". Exit 0 PASS; 10 refused; 17 call again (GitHub or the lab-git lock busy).
+  28  # SPDX-License-Identifier: Apache-2.0
+  29  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  30  rb_init s03_desk
+  31  e209_window
+  32  cd "$RB_REPO" || rb_die 10 "cannot enter the lab clone"
+  33  E=$E209_REL
+  34  # the lists, each <path>:<lines>:<its own sha256>:<where its paths start: top = the lab's top, dir = the list's folder, up = its parent>
+  35  REGPIN=tools/claims-v3/e209/SHA256SUMS-e209-registration:22:c7da26bedcbf49980cc33c2475ffa6058bec679fcf38ee877ab7f35f2837b2ce:top
+  36  KITPIN=tools/claims-v3/e209/SHA256SUMS-e209-kit:0:unset-until-the-kit-commit:top   # set at the kit's commit (the kit lane; fix-e209 re-sets it): its count and its own bytes
+  37  [ -n "${RB_E209_KITPIN:-}" ] && { [ "${RB_DESKTEST:-}" = 1 ] || rb_die 10 "RB_E209_KITPIN outside a desk test: refused"; KITPIN=$RB_E209_KITPIN; }
+  38  # 1o. THE ONE-LAB RULE's desk span (outside a desk test: required; in one: reported)
+  39  if [ "${RB_DESKTEST:-}" = 1 ]; then
+  40    ONELAB_SPAN="not required in a desk test"
+  41  else
+  42    rb_need RB_W RB_LANE
+  43    [ -f "$RB_W/onelab.sh" ] || rb_die 10 "RB_W ($RB_W) holds no onelab.sh"
+  44    bash "$RB_W/onelab.sh" show 2>/dev/null | grep -qx "  desk-$RB_LANE" || rb_die 10 "THE ONE-LAB RULE: $RB_LANE is not in its desk span (bash \$W/onelab.sh desk $RB_LANE before step 0)"
+  45    ONELAB_SPAN="desk-$RB_LANE held"
+  46  fi
+  47  V2PIN=tools/matmul/mm1/v2/SHA256SUMS:114:eafb6558c4eaa053e4e33b8a4d6b2a644175f325df9e9ba56a1b6373b556f2f2:dir
+  48  V1PIN=tools/matmul/mm1/v1/SHA256SUMS:77:f77084ef6342964eafbea14d104ffc4dd324e83ee14cc4241158840a51ae468f:dir
+  49  E8RPIN=tools/claims-v3/e208/SHA256SUMS-e208-registration:57:74e483cfae187c0e2371ab3e3847079095bf650db82755c66ae36d59203696d2:top
+  50  E8SPIN=tools/claims-v3/e208/proposal/src/SRC-SHA256SUMS:48:543e9298d5a1013d348c3f38b9a9d9ae26479326a2393fb100c77e3b16b5a6d9:up
+  51  PINS="$REGPIN $KITPIN $V2PIN $V1PIN $E8RPIN $E8SPIN"
+  52  export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=url.https://github.com/.insteadOf GIT_CONFIG_VALUE_0=git@github.com:
+  53  OUTF="$RB_OUT/step2.txt"
+  54  : > "$OUTF"
+  55  say() { echo "$*"; echo "$*" >> "$OUTF"; }
+  56  # 2. GitHub's main
+  57  if [ -n "${RB_GITHUB:-}" ]; then MAIN=$RB_GITHUB; else MAIN=$(timeout 60 git ls-remote origin main 2>/dev/null | cut -f1); fi
+  58  [ -n "$MAIN" ] || rb_die 17 "GitHub's main could not be read (git ls-remote): call again"
+  59  HEAD=$(git rev-parse HEAD)
+  60  if [ "$HEAD" != "$MAIN" ]; then
+  61    [ -z "$(git status --porcelain --untracked-files=no)" ] || rb_die 10 "LAB's HEAD $HEAD is not GitHub's main $MAIN and LAB has tracked changes: refused"
+  62    [ -n "${RB_GITHUB:-}" ] && rb_die 10 "a desk test's GitHub stand-in differs from HEAD: refused (no fast-forward in a desk test)"
+  63    rb_need RB_GITLOCK
+  64    flock -w 600 "$RB_GITLOCK" timeout 300 git fetch -q origin main || rb_die 17 "the fetch under the lab-git lock did not end: call again"
+  65    git merge-base --is-ancestor HEAD "$MAIN" 2>/dev/null || rb_die 10 "LAB's HEAD is not an ancestor of GitHub's main: refused"
+  66    flock -w 600 "$RB_GITLOCK" git merge -q --ff-only "$MAIN" || rb_die 17 "the fast-forward under the lab-git lock did not end: call again"
+  67    HEAD=$(git rev-parse HEAD)
+  68    [ "$HEAD" = "$MAIN" ] || rb_die 10 "LAB's HEAD $HEAD is still not GitHub's main $MAIN"
+  69    say "LAB fast-forwarded to GitHub's main under the lab-git lock"
+  70  fi
+  71  say "1o. THE ONE-LAB RULE: $ONELAB_SPAN"
+  72  say "2. HEAD $HEAD = GitHub's main"
+  73  # 3. clean
+  74  D=$(git status --porcelain --untracked-files=all -- "$E" tools/claims-v3/e208 tools/claims-v3/fwgate tools/matmul/mm1 tools/claims-v3/e136 \
+  75    tools/claims-v3/kinds tools/claims-v3/dmcmd_audit_v2.py tools/claims-v3/dmcmd_table_v2.json)
+  76  [ -z "$D" ] || rb_die 10 "the paths E209 runs from are not clean: $(echo "$D" | head -n 3 | tr '\n' ' ')"
+  77  say "3. the paths clean"
+  78  # 4. the registration and the kit, by content
+  79  REG=$(git log --diff-filter=A --format=%H -- "$E/E209.md" | tail -n 1)
+  80  KIT=$(git log --diff-filter=A --format=%H -- "$E/KIT.md" | tail -n 1)
+  81  [ -n "$REG" ] && [ -n "$KIT" ] || rb_die 10 "E209's registration or kit is not in HEAD (registration '${REG:-none}', kit '${KIT:-none}')"
+  82  git merge-base --is-ancestor "$REG" "$KIT" || rb_die 10 "the kit's commit does not descend from the registration's"
+  83  say "4. the registration ${REG:0:12} ($(git log -1 --format='%cd' --date=iso "$REG")), the kit ${KIT:0:12} ($(git log -1 --format='%cd' --date=iso "$KIT")), both in HEAD"
+  84  H=$("$PY" -I -B "$E/rb/check_history_e209.py" tree --reg "$REG" 2>&1 | tail -n 1)
+  85  case "$H" in "HISTORY OK"*) ;; *) rb_die 10 "$H" ;; esac
+  86  say "4h. $H"
+  87  # 5. the lists, pinned
+  88  for spec in $PINS; do
+  89    IFS=: read -r l pin hpin form <<EOF2
+  90  $spec
+  91  EOF2
+  92    [ -f "$l" ] || rb_die 10 "no $l"
+  93    case "$form" in top) cdir=. ;; dir) cdir=$(dirname "$l") ;; up) cdir=$(dirname "$(dirname "$l")") ;; *) rb_die 10 "a pin form '$form'" ;; esac
+  94    m=$(grep -c . "$l"); h=$(sha256sum "$l" | cut -d' ' -f1)
+  95    n=$( (cd "$cdir" && sha256sum -c "$RB_REPO/$l" 2>/dev/null) | grep -c ': OK$')
+  96    why=""; [ "$h" = "$hpin" ] || why="; its own bytes ${h:0:16}, not the pin ${hpin:0:16}"
+  97    [ "$n" -eq "$m" ] && [ "$m" = "$pin" ] && [ -z "$why" ] || rb_die 10 "$(basename "$l"): $n OK of $m lines; pinned $pin$why"
+  98    say "5. $l: $n of $m OK, its own sha256 ${h:0:16} = the pin"
+  99  done
+ 100  unk=""
+ 101  for f in $(git ls-files -- "$E" | grep SHA256SUMS); do
+ 102    case " $PINS " in
+ 103      *" $f:"*) ;;
+ 104      *) if [ "$f" = "$E/box/SRC-SHA256SUMS-e209" ]; then unk="$unk $f(the box root's src/ list: check 7 re-makes it)"
+ 105         else unk="$unk $f($( (sha256sum -c "$f" 2>/dev/null) | grep -c ': OK$') OK of $(grep -c . "$f"))"; fi ;;
+ 106    esac
+ 107  done
+ 108  say "5. lists step 2 does not pin (REPORTED, never a gate):${unk:- none}"
+ 109  # 6. the registration's own checks
+ 110  for c in "points_e209.py --check" "rules_e209.py --check" "plan_e209.py --check" "desk/kernel_e209.py --check"; do
+ 111    # shellcheck disable=SC2086
+ 112    r=$(OMP_NUM_THREADS=1 timeout 900 nice -n 10 "$PY" -I -B $E/$c 2>&1 | tail -n 1)
+ 113    case "$r" in *PASS*) ;; *) rb_die 10 "$c: '$r'" ;; esac
+ 114    say "6. $c: $r"
+ 115  done
+ 116  OMP_NUM_THREADS=1 timeout 900 nice -n 10 "$PY" -I -B "$E/score_e209.py" --forecasts > "$RB_OUT/forecasts-now.txt" 2>&1
+ 117  rc=$?
+ 118  [ "$rc" -eq 0 ] && cmp -s "$RB_OUT/forecasts-now.txt" "$E/forecasts-e209.txt" || rb_die 10 "score_e209.py --forecasts (rc $rc) is not forecasts-e209.txt byte for byte (a frozen file moved?)"
+ 119  say "6. score_e209.py --forecasts: byte for byte forecasts-e209.txt ($(tail -n 1 "$RB_OUT/forecasts-now.txt" | cut -c1-120))"
+ 120  # 7. the box root's harness
+ 121  r=$("$PY" -I -B "$E/make_box_e209.py" check 2>&1 | tail -n 1)
+ 122  [ "$r" = "CHECK PASS" ] || rb_die 10 "make_box_e209.py check: $r"
+ 123  say "7. make_box_e209.py check: CHECK PASS ($(grep -c '"dest"' "$E/harness-e209.json") files)"
+ 124  # 8. the device-command audit
+ 125  AUD=$(timeout 300 bash "$E/preflight_e209.sh" 2>&1)
+ 126  echo "$AUD" > "$RB_OUT/dmcmd-audit-v2.txt"
+ 127  echo "$AUD" | grep -q '^dmcmd_audit: GO' || rb_die 10 "dmcmd_audit_v2 is not GO (RB_OUT/dmcmd-audit-v2.txt)"
+ 128  say "8. dmcmd_audit_v2: $(echo "$AUD" | grep '^dmcmd_audit:' | head -n 1)"
+ 129  # 8k. the kit's desk-test logs
+ 130  bad=""
+ 131  for spec in "realpath-e209.txt:DESKTEST-REALPATH-E209 [0-9]+ of [0-9]+ PASS" "selftest-rb-e209.txt:SELFTEST-RB-E209 [0-9]+ of [0-9]+ PASS" \
+ 132              "realbytes-e209.txt:REALBYTES-E209 [0-9]+ of [0-9]+ PASS" "desktest-build-e209.txt:DESKTEST-BUILD-E209 PASS" \
+ 133              "drypass-e209.txt:DRY PASS a2c0 E209" "dryaudit-e209.txt:DRY-AUDIT-E209 [0-9]+ of [0-9]+ COVERED" \
+ 134              "dry-listing-e209.txt:dry listing: [0-9]+ steps listed, 0 run, 0 box calls" "dmcmd-audit-e209.txt:dmcmd_audit: GO" \
+ 135              "selftest-post-e209.txt:SELFTEST-POST-E209 [0-9]+ of [0-9]+ PASS"; do
+ 136    f=$E/logs/${spec%%:*}; want=${spec#*:}
+ 137    if [ ! -f "$f" ]; then bad="$bad ${spec%%:*}(missing)"; elif ! grep -qE "^$want" "$f"; then bad="$bad ${spec%%:*}(no '$want')"; fi
+ 138  done
+ 139  [ -z "$bad" ] || rb_die 10 "the kit's desk-test logs:$bad"
+ 140  say "8k. the kit's desk-test logs: each in HEAD with its PASS line"
+ 141  # 9. the freeze line
+ 142  git merge-base --is-ancestor 3ca4b71799793ef35ce0811390b6b44dacb2d323 HEAD || rb_die 10 "MM1-v2's freeze commit 3ca4b717 is not in HEAD"
+ 143  SN=tools/claims-v3/sealed-e209/e209-freeze-lines.md
+ 144  say "9. THE FREEZE LINE: MM1-v2 3ca4b717 (pushed 01:44:48 PST Tue 17 Nov 2026), tools/matmul/mm1/v2/out/mm1_v2_e209.csv $(sha256sum tools/matmul/mm1/v2/out/mm1_v2_e209.csv | cut -c1-16); sealed forecasts registered for E209: $( [ -f "$SN" ] && grep -oE '\b[0-9a-f]{64}\b' "$SN" | sort -u | tr '\n' ' ' || echo none)"
+ 145  # 10. the round's sealed record
+ 146  if [ -n "${RB_SEALED:-}" ] && [ -f "$RB_SEALED" ]; then
+ 147    for h in $(grep -v '^[[:space:]]*#' "$RB_SEALED" | grep -oE '\b[0-9a-f]{64}\b' | sort -u); do
+ 148      [ -f "$SN" ] && grep -q "$h" "$SN" || rb_die 10 "the round's sealed record lists $h, which $SN at HEAD does not register: do not book; tell the orchestrator"
+ 149    done
+ 150    say "10. the round's sealed record: every sha256 it lists on a line that is not a comment is registered at HEAD"
+ 151  else
+ 152    say "10. the round's sealed record: none kept (RB_SEALED ${RB_SEALED:+absent at $RB_SEALED}${RB_SEALED:-not set})"
+ 153  fi
+ 154  # 11. no E209 datum
+ 155  X=$(git log --all --format=%H -- 'docs/reports/data/*e209*' | head -n 3)
+ 156  [ -z "$X" ] || rb_die 10 "an E209 data path exists in a ref ($X): E209 has run already"
+ 157  say "11. no E209 datum in any ref"
+ 158  [ "$(git rev-parse HEAD)" = "$HEAD" ] || rb_die 10 "HEAD moved during the check"
+ 159  say "12. HEAD unchanged"
+ 160  say "STEP2 PASS (HEAD $HEAD)"
+ 161  rb_ok "STEP2 PASS"
+
+################ 2' its history check: bash tools/claims-v3/e209/rb/check_history_e209.py tree
+---- tools/claims-v3/e209/rb/check_history_e209.py (sha256 217d30cbf185b79b; listed, not run)
+   1  #!/usr/bin/env python3
+   2  """E209's history check (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum; fix-e209, Q202c: the per-commit check and the amended
+   3  registration's subtree), E207's check_history_e207.py (landed in 117885d9; E206's
+   4  and E190's rules) for E209's paths, run by step 2 (rb/s03_desk_e209.sh) at the desk (/usr/bin/python3 -I -B; Python's own modules only):
+   5  
+   6      /usr/bin/python3 -I -B tools/claims-v3/e209/rb/check_history_e209.py tree [--reg <commit>]
+   7  
+   8    1. the registration commit is found by its CONTENT (the commit that added tools/claims-v3/e209/E209.md; it lands after this file is written,
+   9       so no hash is pinned for it) and its tools/claims-v3/e209 subtree reads afaa6053... (reg-e209's registration with fix-e209's amendment A1:
+  10       fix-e209's local commit cb14eae3, the folder tree its land dir names; reg-e209's own was 95479783...); HEAD descends from it;
+  11    2. ADDITIONS ONLY under tools/claims-v3/e209 since the registration, in two ways: (a) between the registration and HEAD every path git
+  12       reports is added (A), none modified, deleted, renamed or changed in type (the registration's 23 files stay as committed); (b) COMMIT BY
+  13       COMMIT (fix-e209, verify-e209's finding 4): every commit after the registration that touches tools/claims-v3/e209 only adds files there
+  14       (git log --full-history --name-status --no-renames), and no merge commit since it touches the folder - so a later commit that modifies a
+  15       kit file, step 2 itself (rb/s03_desk_e209.sh, outside the kit's list) among them, fails here although (a), a net diff, reads it as an
+  16       addition. A dated note or amendment is a new file. (b) runs only from an unmodified step 2: a step 2 changed to skip this check is caught
+  17       by comparing its sha256 with the land's anchor before running it (the card-lane brief, step 2);
+  18    3. NO SHADOWING ADDITION since the registration anywhere under tools/: a new module file (<name>.py, or an extension module) or package
+  19       (<name>/__init__.py) whose name is a standard-library module's would be imported in its place by a kit or registration script that puts
+  20       its own folder first on sys.path (sys.stdlib_module_names on Python 3.10 or later);
+  21    4. nothing modified or untracked under the paths the box or the desk runs for E209 (git status --porcelain): E209's folder, MM1-v2's and
+  22       MM1-v1's folders (the frozen forecasts and predictors the scorer pins), E208's folder (its registered kit: the runner, the reducer, the
+  23       doubles, the tiles), rgm136's sources (E136), the reboot gate (fwgate and its records), the tiles (kinds), any sealed-forecast note for
+  24       E209, the device-command checker v2 and its table, and E208's data directory whose checker the collection runs.
+  25  Prints "HISTORY OK: ..." (exit 0) or "HISTORY FAIL: ..." (exit 1). SPDX-License-Identifier: Apache-2.0
+  26  """
+  27  import os
+  28  import subprocess
+  29  import sys
+  30  
+  31  HERE = os.path.dirname(os.path.abspath(__file__))
+  32  REPO = os.path.normpath(os.path.join(HERE, "..", "..", "..", ".."))
+  33  REG_SUBTREE = "afaa6053e912724227097ff88383f8e440b3e052"   # fix-e209: tools/claims-v3/e209 in its local commit cb14eae3 (reg-e209's 95479783 with amendment A1)
+  34  E = "tools/claims-v3/e209"
+  35  RUN_PATHS = [E, "tools/matmul/mm1/v2", "tools/matmul/mm1/v1", "tools/claims-v3/e208", "tools/claims-v3/e136", "tools/claims-v3/fwgate",
+  36               "tools/claims-v3/kinds", "tools/claims-v3/sealed-e209", "tools/claims-v3/dmcmd_audit_v2.py", "tools/claims-v3/dmcmd_table_v2.json",
+  37               "docs/reports/data/2026-11-16-e208-mmsweep-a2c0-S1"]
+  38  FALLBACK = {"argparse", "ast", "copy", "datetime", "fcntl", "gzip", "hashlib", "json", "math", "os", "pwd", "random", "re", "shutil",
+  39              "signal", "socket", "statistics", "struct", "subprocess", "sys", "threading", "time", "zoneinfo", "collections", "functools",
+  40              "itertools", "io", "pathlib", "string", "types", "typing", "warnings", "glob", "tempfile", "textwrap", "csv", "enum", "abc",
+  41              "traceback", "bisect", "decimal", "runpy", "fractions", "operator", "heapq", "array", "base64", "binascii", "zlib"}
+  42  
+  43  
+  44  def git(*a):
+  45      r = subprocess.run(["git", "-C", REPO] + list(a), capture_output=True, text=True)
+  46      return r.returncode, r.stdout
+  47  
+  48  
+  49  def main(argv):
+  50      if not argv or argv[0] != "tree":
+  51          print(__doc__)
+  52          return 2
+  53      bad = []
+  54      if "--reg" in argv:
+  55          reg = argv[argv.index("--reg") + 1]
+  56      else:
+  57          rc, out = git("log", "--diff-filter=A", "--format=%H", "--", E + "/E209.md")
+  58          reg = out.split()[-1] if out.split() else ""
+  59      if not reg:
+  60          print("HISTORY FAIL: no registration commit (no commit added tools/claims-v3/e209/E209.md)")
+  61          return 1
+  62      rc, _ = git("merge-base", "--is-ancestor", reg, "HEAD")
+  63      if rc != 0:
+  64          bad.append(f"HEAD does not descend from the registration {reg[:12]}")
+  65      rc, st = git("rev-parse", f"{reg}:{E}")
+  66      if st.strip() != REG_SUBTREE:
+  67          bad.append(f"the registration's {E} subtree reads {st.strip()[:12] or 'nothing'}, not {REG_SUBTREE[:12]}")
+  68      rc, out = git("diff", "--name-status", "--no-renames", reg, "HEAD", "--", E)
+  69      changed = [ln for ln in out.splitlines() if ln and not ln.startswith("A\t")]
+  70      added = [ln for ln in out.splitlines() if ln.startswith("A\t")]
+  71      if changed:
+  72          bad.append("not an addition under " + E + ": " + "; ".join(changed[:6]))
+  73      rc, out = git("log", "--full-history", "--no-renames", "--name-status", "--format=COMMIT %H", f"{reg}..HEAD", "--", E)
+  74      percommit, cur, ncommits = [], "", 0
+  75      for ln in out.splitlines():
+  76          if ln.startswith("COMMIT "):
+  77              cur = ln.split()[1]
+  78              ncommits += 1
+  79          elif ln.strip() and not ln.startswith("A\t"):
+  80              percommit.append(f"{cur[:12]} {ln.replace(chr(9), ' ')}")
+  81      if rc != 0:
+  82          bad.append(f"git log of the commits since the registration failed (rc {rc})")
+  83      if percommit:
+  84          bad.append("not an addition in a commit since the registration (commit by commit): " + "; ".join(percommit[:6]))
+  85      rc, out = git("log", "--merges", "--format=%H", f"{reg}..HEAD", "--", E)
+  86      if out.strip():
+  87          bad.append("a merge commit since the registration touches " + E + ": " + ", ".join(x[:12] for x in out.split()[:3]))
+  88      names = getattr(sys, "stdlib_module_names", None) or FALLBACK
+  89      rc, out = git("diff", "--name-only", "--diff-filter=A", reg, "HEAD", "--", "tools")
+  90      shadow = []
+  91      for p in out.splitlines():
+  92          base = os.path.basename(p)
+  93          stem = None
+  94          if base.endswith(".py"):
+  95              stem = base[:-3]
+  96          elif ".cpython-" in base or base.endswith(".so"):
+  97              stem = base.split(".")[0]
+  98          if base == "__init__.py":
+  99              stem = os.path.basename(os.path.dirname(p))
+ 100          if stem and stem in names:
+ 101              shadow.append(p)
+ 102      if shadow:
+ 103          bad.append("a shadowing addition (a standard-library module's name): " + ", ".join(shadow[:6]))
+ 104      rc, out = git("status", "--porcelain", "--untracked-files=all", "--", *RUN_PATHS)
+ 105      if out.strip():
+ 106          bad.append(f"{len(out.splitlines())} path(s) modified or untracked under E209's run paths ({out.splitlines()[0][:80]})")
+ 107      if bad:
+ 108          print("HISTORY FAIL: " + " | ".join(bad))
+ 109          return 1
+ 110      print(f"HISTORY OK: HEAD descends from the registration {reg[:12]} (subtree {REG_SUBTREE[:8]}); {len(added)} additions and nothing else "
+ 111            f"under {E} since it, and commit by commit ({ncommits} commit(s) touching it, each adding only; no merge); no shadowing addition "
+ 112            f"under tools/ ({'sys.stdlib_module_names' if hasattr(sys, 'stdlib_module_names') else 'the fixed list'}); E209's run paths clean")
+ 113      return 0
+ 114  
+ 115  
+ 116  if __name__ == "__main__":
+ 117      sys.exit(main(sys.argv[1:]))
+
+################ D- (the card lane's): 'bash W/onelab.sh undesk <lane>' (right after step 2; on every stop path inside D+..D-: E with undesk)
+
+################ Q THE QUIET DESK FLAG (raise, then count --wait): bash tools/claims-v3/e209/rb/quiet_e209.sh raise <lane>; then: count --wait
+---- tools/claims-v3/e209/rb/quiet_e209.sh (sha256 7efd81deabcea3a1; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): THE QUIET DESK FLAG (E209.md 6; E194's and E200's form): the round's
+   3  # file RB_QUIET (W/locks/quiet-desk-aifoundry2), one line '<lane> <time>', stands while a card lane of ours uses aifoundry2's own card;
+   4  # while it stands no lane starts on aifoundry2 a process whose comm matches _host$, ^ettelem$, ^dev_mngt_servi, ^et-powertop$,
+   5  # ^mmbench_launch or ^sys_emu$, nor a script named session_eNNN*.sh or queue_eNNN* (desk tests wait). The card lane raises it right before
+   6  # the look (step 4) and lowers it after the copy-back (step 11), and on every stop path in between (rb/end_e209.sh). It never overwrites
+   7  # or removes another lane's flag.
+   8  #   RB_QUIET=<flag file> bash tools/claims-v3/e209/rb/quiet_e209.sh raise <lane>     0 up (ours, or already ours); 10 another's flag stands
+   9  #   RB_QUIET=<flag file> bash tools/claims-v3/e209/rb/quiet_e209.sh lower <lane>     0 down (or already down); 10 another's flag (left)
+  10  #   RB_QUIET=<flag file> bash tools/claims-v3/e209/rb/quiet_e209.sh check <lane>     0 up and ours; 10 otherwise
+  11  #   bash tools/claims-v3/e209/rb/quiet_e209.sh count [--wait]                         THE P2 COUNT: 0 when no device-named process of ours
+  12  #                                                                                     and no session or queue script of ours runs; else 17
+  13  #                                                                                     (--wait: re-read every 10 s for up to 520 s first)
+  14  # SPDX-License-Identifier: Apache-2.0
+  15  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  16  rb_init quiet
+  17  op=${1:-}; lane=${2:-}
+  18  case "$op" in
+  19    raise|lower|check)
+  20      rb_need RB_QUIET
+  21      [ -n "$lane" ] || rb_die 10 "usage: quiet_e209.sh $op <lane>"
+  22      case "$lane" in *[!A-Za-z0-9._-]*) rb_die 10 "a lane name of letters, digits, '.', '_' and '-' only" ;; esac ;;
+  23    count) ;;
+  24    *) rb_die 10 "usage: quiet_e209.sh raise|lower|check <lane> | count [--wait]" ;;
+  25  esac
+  26  owner() { head -n 1 "$RB_QUIET" 2>/dev/null | cut -d' ' -f1; }
+  27  case "$op" in
+  28    raise)
+  29      if [ -e "$RB_QUIET" ]; then
+  30        [ "$(owner)" = "$lane" ] && rb_ok "THE QUIET DESK FLAG is already ours: $(head -n 1 "$RB_QUIET")"
+  31        rb_die 10 "THE QUIET DESK FLAG stands for another: '$(head -n 1 "$RB_QUIET")' (never overwritten): wait in bounded chunks"
+  32      fi
+  33      mkdir -p "$(dirname "$RB_QUIET")"
+  34      ( set -o noclobber; echo "$lane $(rb_pst)" > "$RB_QUIET" ) 2>/dev/null || rb_die 10 "THE QUIET DESK FLAG appeared meanwhile: '$(head -n 1 "$RB_QUIET" 2>/dev/null)'"
+  35      rb_log "raised: $(head -n 1 "$RB_QUIET")"
+  36      rb_ok "THE QUIET DESK FLAG raised: $(head -n 1 "$RB_QUIET")" ;;
+  37    lower)
+  38      [ -e "$RB_QUIET" ] || rb_ok "THE QUIET DESK FLAG is down already"
+  39      [ "$(owner)" = "$lane" ] || rb_die 10 "THE QUIET DESK FLAG is another's ('$(head -n 1 "$RB_QUIET")'): left as it is"
+  40      rm -f -- "$RB_QUIET"
+  41      rb_log "lowered"
+  42      rb_ok "THE QUIET DESK FLAG lowered (was $lane's)" ;;
+  43    check)
+  44      [ -e "$RB_QUIET" ] && [ "$(owner)" = "$lane" ] && rb_ok "THE QUIET DESK FLAG is up and ours: $(head -n 1 "$RB_QUIET")"
+  45      rb_die 10 "THE QUIET DESK FLAG is $( [ -e "$RB_QUIET" ] && echo "another's ('$(head -n 1 "$RB_QUIET")')" || echo "not up")" ;;
+  46    count)
+  47      end=$(( $(rb_now) + E209_BOUND_S ))
+  48      while :; do
+  49        p2_count
+  50        [ "$P2_N" -eq 0 ] && rb_ok "THE P2 COUNT is 0"
+  51        [ "${2:-}" = --wait ] && [ "$(rb_now)" -lt "$end" ] || rb_die 17 "THE P2 COUNT is $P2_N: call again (never kill one)"
+  52        sleep 10
+  53      done ;;
+  54  esac
+
+################ 3: the post: none, by the owner's standing waiver (his words, Sun 15 Nov 2026 10:22:36 PST: "don't worry about discord post, just use the machines, nobody is using them")
+
+################ 4 THE LOOK: bash tools/claims-v3/e209/rb/s05_look_e209.sh [--wait]
+---- tools/claims-v3/e209/rb/s05_look_e209.sh (sha256 3a3d15add091bd23; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): runbook step 4, THE LOOK, right after THE QUIET DESK FLAG is raised
+   3  # (it refuses, 10, unless the flag is up and the card lane's). Reads only; opens no device: the reboot gate's look at the desk (fwgate.py
+   4  # look: no device), et-who and et-who --check (counts by card, never a login), the device processes and CI jobs (counts), THE P2 COUNT,
+   5  # the box root's lock, the card's lock file, the load. Writes RB_OUT/look.txt.
+   6  #   RB_OUT=... E209_ROOT=... RB_QUIET=... RB_LANE=... bash tools/claims-v3/e209/rb/s05_look_e209.sh [--wait]
+   7  # Exits: 0 FREE (and the reboot gate's look: CONTINUITY or NEEDS-READ, said); 15 a holder or a device process (--wait: re-read every
+   8  # 20 s for up to 520 s first; then call again, at most 30 minutes in all, else no card that day); 16 the reboot gate's look reads STOPPED
+   9  # or NO-RECORD (no card command on this boot: tell the orchestrator); 17 THE P2 COUNT is not 0 or a session of the kit runs (call again).
+  10  # SPDX-License-Identifier: Apache-2.0
+  11  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  12  rb_init s05_look
+  13  e209_window
+  14  e209_quiet_ours
+  15  rb_root
+  16  OUTF="$RB_OUT/look.txt"
+  17  end=$(( $(rb_now) + E209_BOUND_S ))
+  18  while :; do
+  19    : > "$OUTF"
+  20    say() { echo "$*"; echo "$*" >> "$OUTF"; }
+  21    say "look $(rb_pst); uptime: $(uptime)"
+  22    FW=$(e209_fwgate look --box aifoundry2 --card 0 2>&1); FWRC=$?
+  23    say "the reboot gate's look (fwgate.py look, no device): rc $FWRC: $(echo "$FW" | tail -n 1)"
+  24    [ "$FWRC" -eq 16 ] && rb_die 16 "the reboot gate's look: $(echo "$FW" | tail -n 1): no card command on this boot"
+  25    [ "$FWRC" -eq 0 ] || [ "$FWRC" -eq 17 ] || rb_die 16 "the reboot gate's look ended rc $FWRC"
+  26    ME=$(id -un)
+  27    EW=$(timeout 20 et-who 2>/dev/null); EWRC=$?
+  28    timeout 20 et-who --check > /dev/null 2>&1; CHK=$?
+  29    OURS=$(echo "$EW" | awk -v me="$ME" '($1 ~ /^\/dev\/et/ || $1 ~ /^lock:/) && $2 == me {n++} END {print n+0}')
+  30    OTH=$(echo "$EW" | awk -v me="$ME" '($1 ~ /^\/dev\/et/ || $1 ~ /^lock:/) && $2 != me {n++} END {print n+0}')
+  31    say "et-who rc $EWRC: holder lines ours $OURS, others' $OTH; et-who --check rc $CHK (0 free, 1 held, 2 failed)"
+  32    DEV=$(ps -eo uid=,comm= | awk -v u="$(id -u)" -v re="$DEV_COMM" '$2 ~ re { if ($1 == u) o++; else x++ } END { printf "%d %d", o + 0, x + 0 }')
+  33    CI=$(ps -eo comm= | grep -c '^Runner\.Worker$')
+  34    say "device processes: ours ${DEV% *}, others' ${DEV#* }; CI jobs $CI"
+  35    p2_count >> "$OUTF"; tail -n 1 "$OUTF"
+  36    L=/run/lock/etsoc-shire0.lock
+  37    if [ -f "$L" ] && [ ! -L "$L" ]; then say "the card's lock $L: present"; else rb_die 16 "the card's lock $L is missing or a link"; fi
+  38    BOXFREE=yes; e209_box_free || BOXFREE=no
+  39    say "the box root's lock run/box.lock free: $BOXFREE"
+  40    [ "$BOXFREE" = yes ] || rb_die 17 "a session, a build or a dry pass of the kit runs in the box root: call again"
+  41    [ "$P2_N" -eq 0 ] || rb_die 17 "THE P2 COUNT is $P2_N: call again (never kill one)"
+  42    if [ "$OTH" -eq 0 ] && [ "$OURS" -eq 0 ] && [ "$CHK" -eq 0 ] && [ "${DEV#* }" -eq 0 ] && [ "${DEV% *}" -eq 0 ] && [ "$CI" -eq 0 ]; then
+  43      say "FREE"
+  44      rb_ok "FREE; the reboot gate: $( [ "$FWRC" -eq 0 ] && echo CONTINUITY || echo NEEDS-READ)"
+  45    fi
+  46    [ "${1:-}" = --wait ] && [ "$(rb_now)" -lt "$end" ] || rb_die 15 "the card is not free (holder lines ours $OURS, others' $OTH; et-who --check $CHK; device processes ${DEV% *}/${DEV#* }; CI $CI): call again"
+  47    sleep 20
+  48  done
+
+################ 5 THE SYNC: bash tools/claims-v3/e209/rb/s07_sync_e209.sh 
+---- tools/claims-v3/e209/rb/s07_sync_e209.sh (sha256 2d67eff293087a11; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): runbook step 5, THE SYNC: every file of the box root from this lab
+   3  # clone at HEAD (step 2 checked it) at its sha256 (make_box_e209.py sync <root>: E208's kit unchanged, E209's box files and list, the real
+   4  # tiles, fwgate and its records), read back after the copy. Refused (10) unless THE QUIET DESK FLAG is up and the card lane's; refused
+   5  # by the sync itself (3 -> 10) while a session, a build or a dry pass of the kit runs in the box root.
+   6  #   RB_OUT=... E209_ROOT=... RB_QUIET=... RB_LANE=... bash tools/claims-v3/e209/rb/s07_sync_e209.sh
+   7  # Exits: 0 SYNCED; 10 refused; 14 a file not at its sha256 after the copy (run it again; never by hand).
+   8  # SPDX-License-Identifier: Apache-2.0
+   9  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  10  rb_init s07_sync
+  11  e209_window
+  12  e209_quiet_ours
+  13  rb_root
+  14  OUT=$(timeout 300 "$PY" -I -B "$RB_REPO/$E209_REL/make_box_e209.py" sync "$E209_ROOT" 2>&1); rc=$?
+  15  echo "$OUT" | tee "$RB_OUT/sync.txt"
+  16  case "$rc" in 0) rb_ok "$(echo "$OUT" | tail -n 1 | cut -c1-160)" ;; 3) rb_die 10 "the sync refused" ;; *) rb_die 14 "the sync ended rc $rc" ;; esac
+
+################ 5' the box root's harness (make_box_e209.py sync <root>): bash tools/claims-v3/e209/make_box_e209.py sync <E209_ROOT>
+---- tools/claims-v3/e209/make_box_e209.py (sha256 5df3f07c72ab872e; listed, not run)
+   1  #!/usr/bin/env python3
+   2  """E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): E209's BOX ROOT - what runs on aifoundry2, from where, at which
+   3  bytes. Python's own modules only.
+   4  
+   5      /usr/bin/python3 -I -B tools/claims-v3/e209/make_box_e209.py make     writes box/a2c0-E209.json, box/SRC-SHA256SUMS-e209 and
+   6                                                                             harness-e209.json beside this file (the desk, once)
+   7      /usr/bin/python3 -I -B tools/claims-v3/e209/make_box_e209.py check    re-makes all three in memory, compares them byte for byte with
+   8                                                                             the committed files and checks every source: CHECK PASS
+   9      /usr/bin/python3 -I -B tools/claims-v3/e209/make_box_e209.py sync <root>   copies the harness's files from this checkout into the
+  10                                                                             box root (step 5), then reads every one back at its sha256
+  11  
+  12  THE BOX ROOT is E208's kit layout (tools/claims-v3/e208/proposal/src/README.md, "the kit's root"), in a folder of the card lane's own
+  13  (the card-lane brief names it; never the model session's folders, never inside the lab clone):
+  14    src/                          E208's registered kit, every file UNCHANGED at its committed sha256 (run_mms.py, mms_common.py,
+  15                                  mms_ident.py, fake_card_mms.py, guard_ettelem.sh, build_mms.sh, preflight_mms.sh, check_mms.py,
+  16                                  status_mms.sh, stop_mms.sh, reduce_mms.py, the rgm136 and ettelem sources, the device-command
+  17                                  table, the tiles, ...), PLUS E209's four box files: src/sched/a2c0-E209.json, src/session_e209.sh,
+  18                                  src/start_e209.sh, src/dry_e209.sh, and E209's src/SRC-SHA256SUMS (the list E208's check_mms.py
+  19                                  --box reads: exactly what its --make writes for this src/);
+  20    tools/claims-v3/kinds/real2/tiles/<fmt>/<name>.bin   E206's real tiles at the paths E209's registered schedule names, relative to
+  21                                  the root (the runner's working folder), each at points-e209.json's tiles_sha256;
+  22    fwgate/fwgate.py, fwgate/records/*.json             the lab's reboot gate, unchanged (its records beside it, as it reads them);
+  23    build/, run/, sessions/, dry/, first/               written on the box (the build, the box lock and STOP files, the session, the
+  24                                  dry passes, step 7's folders).
+  25  THE SCHEDULE: src/sched/a2c0-E209.json is the registered sched-e209.json with ONE key changed, "kit": "1116-mmsweep", the word E208's
+  26  runner's schedule reader (mms_common.load_sched, unchanged) requires; every run, the order, the forms, the timing, the process and the
+  27  smoke are the registration's bytes (checked here as JSON equal but for that key). E208's runner, mms_common.py and the reducer stay
+  28  byte for byte E208's (the registration pins the reducer with its mms_common.py).
+  29  SPDX-License-Identifier: Apache-2.0
+  30  """
+  31  import fcntl
+  32  import hashlib
+  33  import json
+  34  import os
+  35  import shutil
+  36  import subprocess
+  37  import sys
+  38  import time
+  39  
+  40  HERE = os.path.dirname(os.path.abspath(__file__))
+  41  REPO = os.path.normpath(os.path.join(HERE, "..", "..", ".."))
+  42  E = "tools/claims-v3/e209"
+  43  E208 = "tools/claims-v3/e208/proposal/src"
+  44  FWG = "tools/claims-v3/fwgate"
+  45  BOXF = {"src/session_e209.sh": f"{E}/box/session_e209.sh", "src/start_e209.sh": f"{E}/box/start_e209.sh",
+  46          "src/dry_e209.sh": f"{E}/box/dry_e209.sh", "src/sched/a2c0-E209.json": f"{E}/box/a2c0-E209.json"}
+  47  GEN = {"box/a2c0-E209.json": None, "box/SRC-SHA256SUMS-e209": None, "harness-e209.json": None}
+  48  # the registration's own pins (SHA256SUMS-e209-registration): the schedule and the points this tool reads
+  49  REG_PINS = {f"{E}/sched-e209.json": "ec8713a7a69ddf5ee503f4efe6fd77bda3f63845aada69ac167fb9a2df0ec620",
+  50              f"{E}/points-e209.json": "cfdda741bcc8cbd8555ff21809f2897fae0f734b66727b108795cd138fb07261"}
+  51  # E208's registered kit list (its SRC-SHA256SUMS, as committed in the lab) and the two files E209's registration pins in it
+  52  E208_SUMS_SHA = "543e9298d5a1013d"          # the prefix E208's data checks recorded (C0); the full file is read and hashed below
+  53  E208_PINS = {f"{E208}/reduce_mms.py": "b9e32618020d28a590a615f97e5655c1ea458a6a757bf5658f2517a87fc3e0a5",
+  54               f"{E208}/mms_common.py": "c3fc7883544ad73c3e455f7e950b62b9b155fd2ed972cee5e3524d74a378569c"}
+  55  FWG_PIN = "4d529a5764a97373f451544821f0432ce31d6afaecad0f1e254d18d76e736b95"     # fwgate.py, as E200's reads recorded it
+  56  KIT_WORD = "1116-mmsweep"
+  57  
+  58  
+  59  def sha(p):
+  60      h = hashlib.sha256()
+  61      with open(p, "rb") as f:
+  62          for b in iter(lambda: f.read(1 << 20), b""):
+  63              h.update(b)
+  64      return h.hexdigest()
+  65  
+  66  
+  67  def shab(b):
+  68      return hashlib.sha256(b).hexdigest()
+  69  
+  70  
+  71  def rp(r):
+  72      return os.path.join(REPO, r)
+  73  
+  74  
+  75  def e208_files():
+  76      """E208's src/ files as its SRC-SHA256SUMS lists them (rel 'src/...') -> (repo path, sha256), each checked."""
+  77      out, bad = {}, []
+  78      sums = rp(f"{E208}/SRC-SHA256SUMS")
+  79      if not sha(sums).startswith(E208_SUMS_SHA):
+  80          bad.append(f"{E208}/SRC-SHA256SUMS is not the registered list (sha256 {sha(sums)[:16]}, want {E208_SUMS_SHA})")
+  81      for ln in open(sums):
+  82          h, r = ln.rstrip("\n").split("  ", 1)
+  83          src = f"{E208}/{r[len('src/'):]}"
+  84          got = sha(rp(src)) if os.path.isfile(rp(src)) else "missing"
+  85          if got != h:
+  86              bad.append(f"{src}: {got[:16]}, want {h[:16]}")
+  87          out[r] = (src, h)
+  88      listed = set(out)
+  89      for dp, dn, fn in os.walk(rp(E208)):
+  90          dn[:] = [d for d in dn if d != "__pycache__"]
+  91          for n in fn:
+  92              r = "src/" + os.path.relpath(os.path.join(dp, n), rp(E208))
+  93              if r != "src/SRC-SHA256SUMS" and not n.endswith(".pyc") and r not in listed:
+  94                  bad.append(f"{E208}/{r[4:]}: in E208's src/ but not in its list")
+  95      for p, want in E208_PINS.items():
+  96          if sha(rp(p)) != want:
+  97              bad.append(f"{p}: not the registration's pin {want[:16]}")
+  98      return out, bad
+  99  
+ 100  
+ 101  def make_sched():
+ 102      s = json.load(open(rp(f"{E}/sched-e209.json")))
+ 103      d = dict(s)
+ 104      d["kit"] = KIT_WORD
+ 105      return json.dumps(d, indent=1, sort_keys=True) + "\n", s
+ 106  
+ 107  
+ 108  def make_all():
+ 109      """-> ({gen name: bytes}, [problems])"""
+ 110      bad = []
+ 111      for p, want in REG_PINS.items():
+ 112          if sha(rp(p)) != want:
+ 113              bad.append(f"{p}: sha256 {sha(rp(p))[:16]}, not the registration's {want[:16]}")
+ 114      e208, b2 = e208_files()
+ 115      bad += b2
+ 116      sched_txt, s = make_sched()
+ 117      s2 = json.loads(sched_txt)
+ 118      if {k: v for k, v in s2.items() if k != "kit"} != {k: v for k, v in s.items() if k != "kit"} or s2["kit"] != KIT_WORD:
+ 119          bad.append("the box schedule is not the registered one but for its kit word")
+ 120      # the box's src/: E208's files plus E209's four
+ 121      src = {r: h for r, (_, h) in e208.items()}
+ 122      for r, f in BOXF.items():
+ 123          if r in src:
+ 124              bad.append(f"{r}: E209's box file would replace E208's")
+ 125          src[r] = shab(sched_txt.encode()) if r == "src/sched/a2c0-E209.json" else sha(rp(f))
+ 126      sums_txt = "".join(f"{h}  {r}\n" for r, h in sorted(src.items()))
+ 127      # the tiles: every --values file of the schedule (and the smoke) at points-e209.json's tiles_sha256
+ 128      pts = json.load(open(rp(f"{E}/points-e209.json")))
+ 129      tiles = pts["tiles_sha256"]
+ 130      used = set()
+ 131      for r in s["runs"] + s["smoke"]:
+ 132          if r.get("values"):
+ 133              for f in r["values"].split(":", 2)[2].split(","):
+ 134                  used.add(f)
+ 135      for f in sorted(used):
+ 136          if f not in tiles:
+ 137              bad.append(f"tile {f}: named by the schedule, not in points-e209.json's tiles_sha256")
+ 138          elif f.startswith("src/"):
+ 139              if e208.get(f, (None, None))[1] != tiles[f]:
+ 140                  bad.append(f"tile {f}: E208's kit copy is not points-e209.json's {tiles[f][:16]}")
+ 141          elif not os.path.isfile(rp(f)) or sha(rp(f)) != tiles[f]:
+ 142              bad.append(f"tile {f}: the lab's copy is not points-e209.json's {tiles[f][:16]}")
+ 143      rows = []
+ 144      for r, (from_, h) in sorted(e208.items()):
+ 145          rows.append({"dest": r, "from": from_, "sha256": h, "what": "E208's registered kit, unchanged"})
+ 146      for r, f in sorted(BOXF.items()):
+ 147          rows.append({"dest": r, "from": f, "sha256": src[r], "what": "E209's box file"})
+ 148      rows.append({"dest": "src/SRC-SHA256SUMS", "from": f"{E}/box/SRC-SHA256SUMS-e209", "sha256": shab(sums_txt.encode()),
+ 149                   "what": "E209's src/ list (E208's check_mms.py --box reads it)"})
+ 150      for f in sorted(x for x in used if not x.startswith("src/")):
+ 151          rows.append({"dest": f, "from": f, "sha256": tiles[f], "what": "E206's real tile, at the path E209's schedule names"})
+ 152      if sha(rp(f"{FWG}/fwgate.py")) != FWG_PIN:
+ 153          bad.append(f"{FWG}/fwgate.py: not {FWG_PIN[:16]}")
+ 154      rows.append({"dest": "fwgate/fwgate.py", "from": f"{FWG}/fwgate.py", "sha256": FWG_PIN, "what": "the lab's reboot gate, unchanged"})
+ 155      for n in sorted(os.listdir(rp(f"{FWG}/records"))):
+ 156          if n.endswith(".json"):
+ 157              rows.append({"dest": f"fwgate/records/{n}", "from": f"{FWG}/records/{n}", "sha256": sha(rp(f"{FWG}/records/{n}")),
+ 158                           "what": "fwgate's committed firmware records (it reads them beside itself)"})
+ 159      harness = {"experiment": "E209", "what": "every file of E209's box root, from this checkout, at its sha256 (make_box_e209.py sync)",
+ 160                 "box": "aifoundry2", "card": "a2c0", "schedule": "src/sched/a2c0-E209.json",
+ 161                 "schedule_from": {"registered": f"{E}/sched-e209.json", "sha256": REG_PINS[f"{E}/sched-e209.json"],
+ 162                                   "changed": {"kit": [s["kit"], KIT_WORD]}},
+ 163                 "e208_src_list": {"file": f"{E208}/SRC-SHA256SUMS", "sha256": sha(rp(f"{E208}/SRC-SHA256SUMS")), "files": len(e208)},
+ 164                 "n_files": len(rows), "files": rows}
+ 165      gen = {"box/a2c0-E209.json": sched_txt.encode(), "box/SRC-SHA256SUMS-e209": sums_txt.encode(),
+ 166             "harness-e209.json": (json.dumps(harness, indent=1, sort_keys=True) + "\n").encode()}
+ 167      return gen, bad
+ 168  
+ 169  
+ 170  def cmd_make():
+ 171      gen, bad = make_all()
+ 172      if bad:
+ 173          print("MAKE REFUSED: " + "; ".join(bad))
+ 174          return 1
+ 175      for n, b in gen.items():
+ 176          with open(os.path.join(HERE, n), "wb") as f:
+ 177              f.write(b)
+ 178          print(f"wrote {E}/{n} ({len(b)} bytes, sha256 {shab(b)})")
+ 179      return 0
+ 180  
+ 181  
+ 182  def cmd_check():
+ 183      gen, bad = make_all()
+ 184      for n, b in gen.items():
+ 185          p = os.path.join(HERE, n)
+ 186          if not os.path.exists(p) or open(p, "rb").read() != b:
+ 187              bad.append(f"{E}/{n}: differs from its re-make")
+ 188          else:
+ 189              print(f"{E}/{n}: equal to its re-make (sha256 {shab(b)[:16]})")
+ 190      h = json.loads(gen["harness-e209.json"])
+ 191      for row in h["files"]:
+ 192          got = sha(rp(row["from"])) if os.path.isfile(rp(row["from"])) else "missing"
+ 193          if got != row["sha256"]:
+ 194              bad.append(f"{row['from']}: {got[:16]}, want {row['sha256'][:16]}")
+ 195      print(f"harness: {h['n_files']} files (E208's {h['e208_src_list']['files']}, E209's box files 4 and its list, the real tiles, fwgate)")
+ 196      print("CHECK PASS" if not bad else "CHECK FAIL: " + "; ".join(bad))
+ 197      return 0 if not bad else 1
+ 198  
+ 199  
+ 200  def cmd_sync(root):
+ 201      root = os.path.abspath(root)
+ 202      repo_real = os.path.realpath(REPO)
+ 203      if os.path.realpath(root) == repo_real or os.path.realpath(root).startswith(repo_real + os.sep):
+ 204          print("SYNC REFUSED: the box root is inside the lab checkout")
+ 205          return 3
+ 206      if os.path.basename(root).startswith("ee-"):
+ 207          print("SYNC REFUSED: a folder named ee-* is the model session's")
+ 208          return 3
+ 209      h = json.load(open(os.path.join(HERE, "harness-e209.json")))
+ 210      os.makedirs(os.path.join(root, "run"), exist_ok=True)
+ 211      lk = open(os.path.join(root, "run", "box.lock"), "a+")
+ 212      try:
+ 213          fcntl.flock(lk.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+ 214      except OSError:
+ 215          print("SYNC REFUSED: run/box.lock is held (a session, a build or a dry pass of the kit runs in this root)")
+ 216          return 3
+ 217      bad = []
+ 218      for row in h["files"]:
+ 219          src = rp(row["from"])
+ 220          if not os.path.isfile(src) or sha(src) != row["sha256"]:
+ 221              bad.append(f"{row['from']}: not at its sha256 in this checkout")
+ 222      if bad:
+ 223          print("SYNC REFUSED: " + "; ".join(bad))
+ 224          return 3
+ 225      want = {row["dest"] for row in h["files"]}
+ 226      n_new = n_same = 0
+ 227      for row in h["files"]:
+ 228          dst = os.path.join(root, row["dest"])
+ 229          os.makedirs(os.path.dirname(dst), exist_ok=True)
+ 230          if os.path.isfile(dst) and not os.path.islink(dst) and sha(dst) == row["sha256"]:
+ 231              n_same += 1
+ 232              continue
+ 233          tmp = dst + ".sync-tmp"
+ 234          shutil.copyfile(rp(row["from"]), tmp)
+ 235          os.chmod(tmp, 0o644)
+ 236          os.replace(tmp, dst)
+ 237          n_new += 1
+ 238      pruned = []
+ 239      for top in ("src", "fwgate", "tools"):
+ 240          for dp, dn, fn in os.walk(os.path.join(root, top)):
+ 241              dn[:] = [d for d in dn if d != "__pycache__"]
+ 242              for n in fn:
+ 243                  p = os.path.join(dp, n)
+ 244                  r = os.path.relpath(p, root)
+ 245                  if r not in want and not os.path.islink(p) and os.path.isfile(p):
+ 246                      os.remove(p)
+ 247                      pruned.append(r)
+ 248      for row in h["files"]:
+ 249          dst = os.path.join(root, row["dest"])
+ 250          got = sha(dst) if os.path.isfile(dst) and not os.path.islink(dst) else "missing"
+ 251          if got != row["sha256"]:
+ 252              bad.append(f"{row['dest']}: {got[:16]} after the copy, want {row['sha256'][:16]}")
+ 253      try:
+ 254          head = subprocess.run(["git", "-C", REPO, "rev-parse", "HEAD"], capture_output=True, text=True, timeout=30).stdout.strip()
+ 255      except (OSError, subprocess.TimeoutExpired):
+ 256          head = None
+ 257      rec = {"experiment": "E209", "synced": time.strftime("%Y-%m-%d %H:%M:%S %Z"), "from_head": head,
+ 258             "harness_sha256": sha(os.path.join(HERE, "harness-e209.json")), "files": len(want), "copied": n_new, "already": n_same,
+ 259             "pruned": pruned, "verdict": "SYNCED" if not bad else "SYNC FAILED", "problems": bad}
+ 260      with open(os.path.join(root, "SYNC-e209.json"), "w") as f:
+ 261          json.dump(rec, f, indent=1, sort_keys=True)
+ 262      print(f"{rec['verdict']}: {len(want)} files at the harness's sha256 ({n_new} copied, {n_same} already there, {len(pruned)} pruned "
+ 263            f"{pruned[:6]}) from HEAD {head}" + (f"; {'; '.join(bad)}" if bad else ""))
+ 264      return 0 if not bad else 14
+ 265  
+ 266  
+ 267  def main(argv):
+ 268      if argv[:1] == ["make"]:
+ 269          return cmd_make()
+ 270      if argv[:1] == ["check"]:
+ 271          return cmd_check()
+ 272      if argv[:1] == ["sync"] and len(argv) == 2:
+ 273          return cmd_sync(argv[1])
+ 274      print(__doc__)
+ 275      return 2
+ 276  
+ 277  
+ 278  if __name__ == "__main__":
+ 279      sys.exit(main(sys.argv[1:]))
+
+################ 6 THE BUILD: bash tools/claims-v3/e209/rb/s08_build_e209.sh start; then: wait (while 17)
+---- tools/claims-v3/e209/rb/s08_build_e209.sh (sha256 13a02343befdc196; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): runbook step 6, THE BUILD: E208's src/build_mms.sh, unchanged, from
+   3  # the box root, detached under a plain `timeout 900` (never -k; it opens no device): rgm136 and the lab's ettelem against this box's
+   4  # /opt/et, nice 10, 2 jobs; THE KERNEL BY ITS BYTES (E136's pin aace138c..., a gate); the host's four refusals before it opens a device;
+   5  # build/BUILD-mms.json (the runner refuses any other record, or one not written today on this box). The host's sha256 depends on the box
+   6  # root's path (the host keeps its kernel's default path), so the gate is the kernel's bytes and the record of the day, as in E208.
+   7  #   RB_OUT=... E209_ROOT=... RB_QUIET=... RB_LANE=... bash tools/claims-v3/e209/rb/s08_build_e209.sh start     then
+   8  #   RB_OUT=... E209_ROOT=... bash tools/claims-v3/e209/rb/s08_build_e209.sh wait     (while 17)
+   9  # Exits: start 0 started, 10 refused (no flag, a build already started twice today, the box root's lock held); wait 0 MMS-BUILT (the
+  10  # kernel at its pin), 16 MMS-BUILD-FAILED or REFUSED (read RB_OUT/build.out: no card that day unless the reason is fixed in a new build
+  11  # within the limit), 17 still building (call again), 13 past 900 s.
+  12  # SPDX-License-Identifier: Apache-2.0
+  13  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  14  rb_init s08_build
+  15  e209_window
+  16  rb_root
+  17  case "${1:-}" in
+  18    start)
+  19      e209_quiet_ours
+  20      n=$(ls "$RB_OUT"/build-start-* 2>/dev/null | wc -l)
+  21      [ "$n" -lt 2 ] || rb_die 10 "two builds started today already (RB_OUT/build-start-*): no third"
+  22      e209_box_free || rb_die 10 "the box root's lock is held (a session, a build or a dry pass of the kit)"
+  23      t=$(rb_now); echo "$t" > "$RB_OUT/build-start-$t"
+  24      ( cd "$E209_ROOT" && setsid nohup timeout 900 bash src/build_mms.sh > "$RB_OUT/build.out" 2>&1 < /dev/null & )
+  25      sleep 2
+  26      rb_ok "the build started (RB_OUT/build.out)" ;;
+  27    wait)
+  28      [ -f "$RB_OUT/build.out" ] || rb_die 10 "no build started in this RB_OUT"
+  29      end=$(( $(rb_now) + E209_BOUND_S ))
+  30      while :; do
+  31        if grep -q '^MMS-BUILT rc=0' "$RB_OUT/build.out"; then
+  32          grep -E '^(KERNEL|HOST|READER|HOSTCHECK)' "$RB_OUT/build.out"
+  33          K=$(sha256sum "$E209_ROOT/build/rgm/kernel/sparsity.elf" | cut -c1-64)
+  34          [ "$K" = aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 ] || rb_die 16 "the kernel ELF is $K, not E136's pin"
+  35          rb_ok "MMS-BUILT: the kernel at E136's pin; the record of today $(grep -o '"day": "[^"]*"' "$E209_ROOT/build/BUILD-mms.json")"
+  36        fi
+  37        grep -qE '^MMS-BUILD-(FAILED|REFUSED)' "$RB_OUT/build.out" && rb_die 16 "$(grep -E '^MMS-BUILD-(FAILED|REFUSED)' "$RB_OUT/build.out" | tail -n 1)"
+  38        st=$(ls "$RB_OUT"/build-start-* | sort | tail -n 1); st=${st##*-}
+  39        if [ $(( $(rb_now) - st )) -gt 900 ]; then rb_die 13 "past 900 s without its last line (read RB_OUT/build.out)"; fi
+  40        [ "$(rb_now)" -lt "$end" ] || rb_die 17 "still building: call again"
+  41        sleep 10
+  42      done ;;
+  43    *) rb_die 10 "usage: s08_build_e209.sh start|wait" ;;
+  44  esac
+
+################ 8 THE DRY PASS: bash tools/claims-v3/e209/rb/s10_dry_e209.sh start; then: wait (while 17)
+---- tools/claims-v3/e209/rb/s10_dry_e209.sh (sha256 214102636f6da32a; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): runbook step 8, THE DRY PASS: the box root's src/dry_e209.sh (E208's
+   3  # runner in its --dry mode with E208's doubles: no device node opened, no card lock taken; scale 0.02), detached: E209's 62 runs in the
+   4  # registered order, every device call printed (dry/<T0>-a2c0-E209/device-calls.txt); DRY PASS when every run started, every process
+   5  # rc 0 with its check exact or approx, the order kept and the manifest written.
+   6  #   RB_OUT=... E209_ROOT=... RB_QUIET=... RB_LANE=... bash tools/claims-v3/e209/rb/s10_dry_e209.sh start      then
+   7  #   RB_OUT=... E209_ROOT=... bash tools/claims-v3/e209/rb/s10_dry_e209.sh wait      (while 17)
+   8  # Exits: start 0 started, 10 refused; wait 0 DRY PASS, 16 DRY FAIL or DRY REFUSED (read RB_OUT/dry.out), 17 still running, 13 past 900 s.
+   9  # SPDX-License-Identifier: Apache-2.0
+  10  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  11  rb_init s10_dry
+  12  e209_window
+  13  rb_root
+  14  case "${1:-}" in
+  15    start)
+  16      e209_quiet_ours
+  17      [ -f "$E209_ROOT/build/BUILD-mms.json" ] || rb_die 10 "no build record: step 6 first"
+  18      e209_box_free || rb_die 10 "the box root's lock is held"
+  19      t=$(rb_now); echo "$t" > "$RB_OUT/dry-start-$t"
+  20      ( cd "$E209_ROOT" && setsid nohup timeout 900 bash src/dry_e209.sh 0.02 > "$RB_OUT/dry.out" 2>&1 < /dev/null & )
+  21      sleep 2
+  22      rb_ok "the dry pass started (RB_OUT/dry.out)" ;;
+  23    wait)
+  24      [ -f "$RB_OUT/dry.out" ] || rb_die 10 "no dry pass started in this RB_OUT"
+  25      end=$(( $(rb_now) + E209_BOUND_S ))
+  26      while :; do
+  27        grep -q '^DRY PASS ' "$RB_OUT/dry.out" && { tail -n 3 "$RB_OUT/dry.out"; rb_ok "DRY PASS"; }
+  28        grep -qE '^DRY (FAIL|REFUSED)' "$RB_OUT/dry.out" && rb_die 16 "$(grep -E '^DRY (FAIL|REFUSED)' "$RB_OUT/dry.out" | tail -n 1)"
+  29        st=$(ls "$RB_OUT"/dry-start-* | sort | tail -n 1); st=${st##*-}
+  30        if [ $(( $(rb_now) - st )) -gt 900 ]; then rb_die 13 "past 900 s without its last line (read RB_OUT/dry.out)"; fi
+  31        [ "$(rb_now)" -lt "$end" ] || rb_die 17 "the dry pass runs still: call again"
+  32        sleep 5
+  33      done ;;
+  34    *) rb_die 10 "usage: s10_dry_e209.sh start|wait" ;;
+  35  esac
+
+################ 8' the box root's dry pass: bash tools/claims-v3/e209/box/dry_e209.sh 0.02 (run by step 8 from the box root)
+---- tools/claims-v3/e209/box/dry_e209.sh (sha256 b0f21be2bc636b12; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): the dry pass of E209's whole session with E208's doubles
+   3  # (src/fake_card_mms.py), every device call printed and kept in device-calls.txt, no device node opened, no card lock taken (a
+   4  # stand-in lock in the dry folder), time scaled. E208's src/dry_mms.sh (unchanged beside it in the box's src/) for E209's one
+   5  # session: the card a2c0 and the schedule src/sched/a2c0-E209.json; everything else as there (E208's runner, unchanged, in its
+   6  # --dry mode; the refusals while the box lock is held, a card of this box is held or measured, or a CI job runs).
+   7  #   bash <root>/src/dry_e209.sh [scale]    (default scale 0.02: E209's half-hour session in about two minutes)
+   8  # Writes dry/<T0>-a2c0-E209/ in the box root; prints the session's last lines, the count of device calls and DRY PASS when the
+   9  # session ran its whole schedule (every run started, every process rc 0 with its check exact or approx, the null runs with none),
+  10  # ran E209's 62 runs in the registered order with E209's point ids, and wrote its manifest. Exit 0 DRY PASS; 1 DRY FAIL; 3 refused.
+  11  # SPDX-License-Identifier: Apache-2.0
+  12  set -u
+  13  cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 2
+  14  SCALE=${1:-0.02}
+  15  case "$SCALE" in ''|*[!0-9.]*) echo "usage: dry_e209.sh [scale]"; exit 2 ;; esac
+  16  [ -f src/sched/a2c0-E209.json ] || { echo "no schedule src/sched/a2c0-E209.json"; exit 2; }
+  17  quiet_box() {
+  18    local chk=9 devn cin
+  19    if command -v et-who > /dev/null 2>&1; then timeout 20 et-who --check > /dev/null 2>&1; chk=$?; fi
+  20    devn=$(ps -eo comm= | grep -Ec '(_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$)')
+  21    cin=$(ps -eo comm= | grep -c '^Runner\.Worker$')
+  22    if [ "$chk" -ne 0 ] || [ "$devn" -ne 0 ] || [ "$cin" -ne 0 ]; then
+  23      echo "a card of this box is held or measured, or a CI job runs (et-who --check rc $chk: 0 free, 1 held, 2 failed, 9 no et-who; device processes $devn; CI jobs $cin)"
+  24      return 1
+  25    fi
+  26    return 0
+  27  }
+  28  mkdir -p run
+  29  exec 9>>run/box.lock    # held (fd 9) until this script ends
+  30  if ! flock -n 9; then echo "DRY REFUSED: run/box.lock is held (a session, a build or a dry pass of this kit runs on this box)"; exit 3; fi
+  31  WHY=$(quiet_box) || { echo "DRY REFUSED: $WHY"; exit 3; }
+  32  T0=$(date +%s)
+  33  OUT=dry/$T0-a2c0-E209
+  34  mkdir -p "$OUT"
+  35  nice -n 10 /usr/bin/python3 -B src/run_mms.py session --dry --scale "$SCALE" --card a2c0 --sched src/sched/a2c0-E209.json \
+  36    --t0 "$T0" --out "$OUT" > "$OUT/runner.out" 2>&1 < /dev/null
+  37  RC=$?
+  38  tail -n 4 "$OUT/session.log"
+  39  /usr/bin/python3 -I -B - "$OUT" "$RC" <<'PY'
+  40  import json, os, sys
+  41  out, rc = sys.argv[1], int(sys.argv[2])
+  42  q = json.load(open(os.path.join(out, "queue.json")))
+  43  sched = json.load(open(os.path.join("src", "sched", "a2c0-E209.json")))
+  44  calls = open(os.path.join(out, "device-calls.txt")).read().splitlines()
+  45  ran = [x for x in q["queue"] if x.get("ran")]
+  46  bad = [x for x in q["queue"] if not x.get("ran") or (x.get("form") != "null" and (not x.get("rcs") or any(r != 0 for r in x["rcs"])
+  47         or any(c not in ("exact", "approx") for c in x.get("checks") or [None])))]
+  48  order = [(x["i"], x["arm"]) for x in q["queue"]] == [(r["i"], r["arm"]) for r in sched["runs"]]
+  49  ids = sorted({r["arm"] for r in sched["runs"] if r["role"] == "arm"})
+  50  print(f"device calls {len(calls)} (config {sum(1 for c in calls if c.endswith(' config'))}, sampler "
+  51        f"{sum(1 for c in calls if ' sample ' in c)}, host {sum(1 for c in calls if 'sparsity_host' in c)}); runs ran {len(ran)} of "
+  52        f"{len(sched['runs'])} ({sum(1 for x in ran if x.get('form') == 'null')} null); the registered order {'kept' if order else 'NOT kept'}; "
+  53        f"{len(ids)} point ids ({ids[0]}-{ids[-1]}); card-minutes (unscaled) {q.get('card_min')}; stop {q.get('stop')}")
+  54  ok = rc == 0 and not bad and order and len(ran) == len(sched["runs"]) and os.path.exists(os.path.join(out, "MANIFEST.sha256"))
+  55  print(("DRY PASS " if ok else "DRY FAIL ") + f"a2c0 E209 (runner rc {rc}; {len(bad)} runs not clean)")
+  56  sys.exit(0 if ok else 1)
+  57  PY
+
+################ 6n THE NEVER-RUN SEARCH, REPEATED (the last desk step before the first card command): bash tools/claims-v3/e209/rb/s06n_neverrun_e209.sh 
+---- tools/claims-v3/e209/rb/s06n_neverrun_e209.sh (sha256 34dc3518c4b66b42; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): runbook step 6n, THE NEVER-RUN SEARCH REPEATED, the last desk step
+   3  # before step 7's first card command (E209.md sections 4 and 7; E207's step 6n form): the registration's scanner and report, unchanged,
+   4  # from copies (desk/neverrun_card_e209.py says how), over the lab clone at HEAD, the round's lane folders (RB_ROUND_OUT) and HOME/claude/work
+   5  # (the model session's ee-* folders NOT READ), then every counted record dated against MM1-v2's freeze (01:44:45 PST Tue 17 Nov 2026).
+   6  # REPORTED, never a gate: a point found run before the freeze goes into the card lane's dated note before the data commit, and its label
+   7  # into RB_OUT/ranbefore-e209.json, which step 13 passes to the frozen scorer (--labels) when it names a point.
+   8  #   RB_OUT=... RB_ROUND_OUT=<the round's OUT> bash tools/claims-v3/e209/rb/s06n_neverrun_e209.sh
+   9  # Writes RB_OUT/neverrun-<time>/ (the scan, the registration's report, ranbefore-e209.json, the words), copies ranbefore-e209.json to
+  10  # RB_OUT/ranbefore-e209.json and the NEVER-RUN line to RB_OUT/e209-neverrun.txt (step 7 refuses unless it is under 30 minutes old).
+  11  # Exits: 0 done (its words last); 10 refused; 14 the scan or the report failed (run it again).
+  12  # SPDX-License-Identifier: Apache-2.0
+  13  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  14  rb_init s06n_neverrun
+  15  e209_window
+  16  rb_need RB_ROUND_OUT
+  17  [ -d "$RB_ROUND_OUT" ] || rb_die 10 "RB_ROUND_OUT ($RB_ROUND_OUT) is not a folder"
+  18  case "$(cd "$RB_ROUND_OUT" && pwd -P)/" in "$RB_REPO/"*) rb_die 10 "RB_ROUND_OUT is inside the lab repo" ;; esac
+  19  HW=${RB_HOME_WORK:-$(getent passwd "$(id -u)" | cut -d: -f6)/claude/work}
+  20  N="$RB_OUT/neverrun-$(date +%Y%m%dT%H%M%S)"
+  21  mkdir -p "$N"
+  22  nice -n 10 ionice -c 3 timeout 1800 "$PY" -I -B "$RB_REPO/$E209_REL/desk/neverrun_card_e209.py" "$N" --lab "$RB_REPO" --out-root "$RB_ROUND_OUT" \
+  23    --work "$HW" > "$N/run.txt" 2>&1
+  24  rc=$?
+  25  cat "$N/run.txt"
+  26  [ "$rc" -eq 0 ] || rb_die 14 "the search ended rc $rc (run the step again)"
+  27  L=$(tail -n 1 "$N/run.txt")
+  28  case "$L" in NEVER-RUN*) ;; *) rb_die 14 "no NEVER-RUN line" ;; esac
+  29  cp "$N/ranbefore-e209.json" "$RB_OUT/ranbefore-e209.json"
+  30  echo "$(rb_now) $L" > "$RB_OUT/e209-neverrun.txt"
+  31  rb_ok "$L"
+
+################ 6n' its scanner (the registration's, from copies): bash tools/claims-v3/e209/desk/neverrun_card_e209.py <RB_OUT/neverrun-...> --lab <lab clone> --out-root <RB_ROUND_OUT> --work <HOME/claude/work>
+---- tools/claims-v3/e209/desk/neverrun_card_e209.py (sha256 08be2951c13a3adb; listed, not run)
+   1  #!/usr/bin/env python3
+   2  """E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): THE NEVER-RUN SEARCH REPEATED right before the card day's first card
+   3  command (runbook step 6n, rb/s06n_neverrun_e209.sh; E209.md sections 4 and 7: "The card lane repeats this search right before its first card
+   4  command ... a point whose case ran on this card in a record dated before MM1-v2's freeze line is labelled 'ran before' in a dated note before
+   5  the data commit ... one dated after the freeze is REPORTED"). Standard library only; reads only, but for its own folder DIR.
+   6  
+   7      /usr/bin/python3 -I -B tools/claims-v3/e209/desk/neverrun_card_e209.py DIR --lab LAB --out-root OUT --work HOMEWORK
+   8  
+   9  WHAT IT RUNS, UNCHANGED: the registration's scanner and report (desk/neverrun_e209.py, with points-e209.json), from COPIES in DIR/reg/ (each
+  10  checked against SHA256SUMS-e209-registration first: that script writes its report beside itself, and the committed report must never be
+  11  overwritten): `scan --lab LAB --out-root OUT --work HOMEWORK --json DIR/found.json`, then `report DIR/found.json [--e207-points ...]`. The
+  12  registration's classes stand (COUNTED, OTHER CARD, DESK ONLY, SUBTRACTED; NOT READ: the model session's ee-* folders and scratch clones).
+  13  THE DATING (E207's rule with MM1-v2's freeze, 01:44:45 PST Tue 17 Nov 2026, in place of MM1-v1's): every COUNTED record of an E209 shape is
+  14  dated from (1) a session's start epoch in its path (sessions/<T0>-..., T<T0>-...), else (2) in the lab, the commit time of the commit that
+  15  added its data directory, else (3) the file's last write. A shape with a COUNTED record dated BEFORE the freeze makes every E209 point of that
+  16  shape RAN BEFORE (conservative: any format, data kind or mask; the card lane may narrow it to the point's case in its dated note by reading the
+  17  record, never widen it); a shape whose COUNTED records are all AFTER the freeze is REPORTED and its points stay in every rule (MM1-v2 never saw
+  18  them). OTHER CARD and DESK ONLY are REPORTED by the registration's report only.
+  19  THE OUTPUT: DIR/found.json, DIR/reg/desk/neverrun-e209.json and .txt (the registration's form), DIR/ranbefore-e209.json (the scorer's --labels
+  20  form: ran_before_points, ran_before_cases, with the dating beside), DIR/neverrun-e209-card.txt, and the last line
+  21    "NEVER-RUN <n> of 45 points, <m> of 29 shapes[; RAN BEFORE: <ids>][; AFTER THE FREEZE (REPORTED, kept): <ids>]".
+  22  Every path it prints is in the public form (LAB, OUT, HOMEWORK). Exit 0 the search done (whatever it found: REPORTED, never a gate); 14 a
+  23  scan or the report failed; 10 a copied file not at its registered sha256.
+  24  SPDX-License-Identifier: Apache-2.0
+  25  """
+  26  import datetime
+  27  import hashlib
+  28  import json
+  29  import os
+  30  import re
+  31  import shutil
+  32  import subprocess
+  33  import sys
+  34  
+  35  HERE = os.path.dirname(os.path.abspath(__file__))
+  36  E = os.path.normpath(os.path.join(HERE, ".."))
+  37  REPO = os.path.normpath(os.path.join(E, "..", "..", ".."))
+  38  try:
+  39      from zoneinfo import ZoneInfo
+  40      TZ = ZoneInfo("America/Los_Angeles")
+  41  except Exception:  # noqa: BLE001
+  42      TZ = None
+  43  FREEZE = datetime.datetime(2026, 11, 17, 1, 44, 45, tzinfo=TZ).timestamp()      # MM1-v2's commit 3ca4b717, committer time
+  44  T0_RE = re.compile(r"(?:^|/)(?:sessions/|T)(\d{10})(?:-|/|$)")
+  45  
+  46  
+  47  def sha(p):
+  48      return hashlib.sha256(open(p, "rb").read()).hexdigest()
+  49  
+  50  
+  51  def pub(s, roots):
+  52      for name, p in roots:
+  53          if p:
+  54              s = s.replace(p.rstrip("/") + "/", f"{name}/").replace(p.rstrip("/"), name)
+  55      return s
+  56  
+  57  
+  58  def main(argv):
+  59      if len(argv) < 1:
+  60          print(__doc__)
+  61          return 2
+  62      d = os.path.abspath(argv[0])
+  63      kv = dict(zip(argv[1::2], argv[2::2]))
+  64      lab, out, work = kv.get("--lab"), kv.get("--out-root"), kv.get("--work")
+  65      if not (lab and out and work):
+  66          print(__doc__)
+  67          return 2
+  68      roots = [("LAB", os.path.abspath(lab)), ("OUT", os.path.abspath(out)), ("HOMEWORK", os.path.abspath(work))]
+  69      sums = {}
+  70      for ln in open(os.path.join(E, "SHA256SUMS-e209-registration")):
+  71          h, p = ln.rstrip("\n").split("  ", 1)
+  72          sums[p] = h
+  73      os.makedirs(os.path.join(d, "reg", "desk"), exist_ok=True)
+  74      for rel in ("desk/neverrun_e209.py", "points-e209.json"):
+  75          src = os.path.join(E, rel)
+  76          want = sums.get(f"tools/claims-v3/e209/{rel}")
+  77          if not want or sha(src) != want:
+  78              print(f"REFUSED: tools/claims-v3/e209/{rel} is not at its registered sha256")
+  79              return 10
+  80          shutil.copyfile(src, os.path.join(d, "reg", rel))
+  81      nr = os.path.join(d, "reg", "desk", "neverrun_e209.py")
+  82      found = os.path.join(d, "found.json")
+  83      r = subprocess.run(["/usr/bin/python3", "-I", "-B", nr, "scan", "--lab", lab, "--out-root", out, "--work", work, "--json", found],
+  84                         capture_output=True, text=True)
+  85      print(pub(r.stdout.strip(), roots))
+  86      if r.returncode != 0 or not os.path.exists(found):
+  87          print(pub(r.stderr.strip()[-2000:], roots))
+  88          print("NEVER-RUN FAILED: the scan did not end (run the step again)")
+  89          return 14
+  90      args = ["/usr/bin/python3", "-I", "-B", nr, "report", found]
+  91      e207 = os.path.join(lab, "tools", "claims-v3", "e207", "points-e207.json")
+  92      if os.path.exists(e207):
+  93          args += ["--e207-points", e207]
+  94      r = subprocess.run(args, capture_output=True, text=True)
+  95      open(os.path.join(d, "report.txt"), "w").write(pub(r.stdout, roots))
+  96      if r.returncode != 0:
+  97          print(pub(r.stderr.strip()[-2000:], roots))
+  98          print("NEVER-RUN FAILED: the report did not end (run the step again)")
+  99          return 14
+ 100      rep = json.load(open(os.path.join(d, "reg", "desk", "neverrun-e209.json")))
+ 101      F = json.load(open(found))
+ 102      sys.path.insert(0, os.path.dirname(nr))
+ 103      import neverrun_e209 as NR  # noqa: E402  (the copy at its registered sha256: its classify())
+ 104      pts = json.load(open(os.path.join(d, "reg", "points-e209.json")))["points"]
+ 105      by_shape = {}
+ 106      for h in F["hits"]:
+ 107          cls, card = NR.classify(h["root"], h["path"])
+ 108          if cls != "COUNTED":
+ 109              continue
+ 110          base = {"lab": lab, "out": out, "work": work}[h["root"]]
+ 111          full = os.path.join(base, h["path"])
+ 112          m = T0_RE.search(h["path"])
+ 113          if m:
+ 114              t, how = float(m.group(1)), "a session's start epoch in its path"
+ 115          else:
+ 116              t, how = None, None
+ 117              if h["root"] == "lab" and h["path"].startswith("docs/reports/data/"):
+ 118                  dd = "/".join(h["path"].split("/")[:4])
+ 119                  c = subprocess.run(["git", "-C", lab, "log", "--diff-filter=A", "--format=%ct", "--", dd], capture_output=True, text=True)
+ 120                  ts = [int(x) for x in c.stdout.split()]
+ 121                  if ts:
+ 122                      t, how = float(min(ts)), "the commit that added its data directory"
+ 123              if t is None:
+ 124                  try:
+ 125                      t, how = os.path.getmtime(full), "the file's last write"
+ 126                  except OSError:
+ 127                      t, how = 0.0, "unreadable: counted as before"
+ 128          for s in h["shapes"]:
+ 129              by_shape.setdefault(s, []).append({"path": f"<{h['root']}>/{h['path']}", "epoch": t, "dated_by": how,
+ 130                                                 "before_freeze": t <= FREEZE})
+ 131      ran_before, after = [], []
+ 132      for p in pts:
+ 133          recs = by_shape.get(p["arm"], [])
+ 134          if any(x["before_freeze"] for x in recs):
+ 135              ran_before.append(p["id"])
+ 136          elif recs:
+ 137              after.append(p["id"])
+ 138      never = rep.get("never_ran_on_this_card")
+ 139      words = (f"NEVER-RUN {never} of {rep.get('of')} points, {rep.get('shapes_never_on_this_card')} of {rep.get('n_shapes')} shapes"
+ 140               + (f"; RAN BEFORE: {', '.join(ran_before)}" if ran_before else "")
+ 141               + (f"; AFTER THE FREEZE (REPORTED, kept): {', '.join(after)}" if after else ""))
+ 142      lab_out = {"experiment": "E209", "what": "the card lane's never-run search, repeated (neverrun_card_e209.py): the scorer's --labels form",
+ 143                 "freeze": {"what": "MM1-v2's commit 3ca4b717, committer time", "epoch": FREEZE, "pst": "2026-11-17 01:44:45 PST"},
+ 144                 "ran_before_points": ran_before, "ran_before_cases": [], "after_freeze_REPORTED": after,
+ 145                 "counted_records_by_shape": by_shape, "words": words, "scan": {k: F[k] for k in F if k != "hits"}}
+ 146      json.dump(json.loads(pub(json.dumps(lab_out), roots)), open(os.path.join(d, "ranbefore-e209.json"), "w"), indent=1, sort_keys=True)
+ 147      txt = pub(r.stdout, roots) + words + "\n"
+ 148      open(os.path.join(d, "neverrun-e209-card.txt"), "w").write(txt)
+ 149      sys.stdout.write(txt)
+ 150      return 0
+ 151  
+ 152  
+ 153  if __name__ == "__main__":
+ 154      sys.exit(main(sys.argv[1:]))
+
+################ 7 and 9 back to back, ONLY ONCE THE REST HAS OPENED (40 minutes after the last session on aifoundry2 card 0 ended, whoever ran it) and within 30 minutes of 6n
+
+################ 7 THE READS (the rest rule, the reboot gate, the stamp): bash tools/claims-v3/e209/rb/s09_reads_e209.sh 
+---- tools/claims-v3/e209/rb/s09_reads_e209.sh (sha256 1ae66d531e25c873; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): runbook step 7, THE READS (this file is s09, E200's name for step 7):
+   3  # THE REST RULE first, then THE REBOOT GATE (the lab's fwgate; E200.md 8's form on this card), then the stamp of the first card command;
+   4  # step 9 launches within 120 s of the stamp. NOTHING reaches the card before every refusal below has passed and the rest has opened.
+   5  #   RB_OUT=... E209_ROOT=... RB_QUIET=... RB_LANE=... RB_RELEASES=<the round's release record> bash tools/claims-v3/e209/rb/s09_reads_e209.sh
+   6  # Refusals before anything reaches the card (10 unless said): the window's last start passed; THE QUIET DESK FLAG not up or not the card
+   7  # lane's; today's build record (BUILT on aifoundry2, the kernel at E136's pin) or today's DRY PASS missing; a session, build or dry pass of
+   8  # the kit running, or THE P2 COUNT not 0 (17); step 6n's NEVER-RUN line missing or over 30 minutes old; an E209 session of today that
+   9  # reached the card already (one session a day: a second is the orchestrator's call); THE REST RULE not open (17: call again at the time it
+  10  # prints; 16 if a source is unreadable); the card not free by et-who (15, after up to three re-reads 2 s apart while every holder line is a
+  11  # reader of ours on /dev/et0_mgmt: our live collector's 4 ms read).
+  12  # Then: fwgate.py look (no device). CONTINUITY: nothing is sent here; step 7's folder first/<FIRST> gets look.txt, and the session's config
+  13  # read (step 9) is the day's first card command. NEEDS-READ: the stamp FIRST is written, then after a settle of up to 6 s for our live
+  14  # collector's reader (lab-monitor), fwgate.py read, ONE call (dev_mngt_service -m DM_CMD_GET_MODULE_FIRMWARE_REVISIONS, a READ: the owner's
+  15  # rulings of 15:07:01 and 15:09:49 PST Sun 15 Nov 2026) under the card's lock with et-who free, its record into first/<FIRST>: EQUAL goes
+  16  # on; DIFFERENT or UNREADABLE is 16 (no session on this boot: fwgate's ledger keeps the stop; never retried, never cleared by an agent);
+  17  # held or a busy lock is 17 (nothing sent: the stamp is dropped; call again). Last, fwgate.py guard over first/<FIRST>: identity ok, else 16.
+  18  # A second call within 120 s of its stamp keeps the stamp and its folder and sends nothing; an older stamp is set aside and a new read made
+  19  # (an EQUAL read stops nothing; fwgate reads once more into a new folder).
+  20  # Writes RB_OUT/e209-first.txt: "FIRST=<epoch> FIRSTDIR=first/<epoch> FWGATE=read|continuity". Exits: 0 done; 10, 15, 16, 17 as above.
+  21  # SPDX-License-Identifier: Apache-2.0
+  22  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  23  rb_init s09_reads
+  24  e209_window
+  25  NOW=$(rb_now)
+  26  [ "$NOW" -le "$E209_LAST_START" ] || rb_die 10 "past the last start ($(rb_pst -d "@$E209_LAST_START")): no session today"
+  27  e209_quiet_ours
+  28  rb_root
+  29  e209_rel_args
+  30  R=$("$PY" -I -B - "$E209_ROOT/build/BUILD-mms.json" "$(rb_day)" <<'PY'
+  31  import json, sys
+  32  try:
+  33      r = json.load(open(sys.argv[1]))
+  34  except (OSError, ValueError):
+  35      print("none"); sys.exit(0)
+  36  ok = (r.get("day"), r.get("verdict"), r.get("box"), r.get("kernel_sha256")) == (sys.argv[2], "BUILT", "aifoundry2",
+  37       "aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0")
+  38  print("ok" if ok else f"{r.get('day')} {r.get('verdict')} {r.get('box')} {str(r.get('kernel_sha256'))[:16]}")
+  39  PY
+  40  )
+  41  [ "$R" = ok ] || rb_die 10 "today's build record is not BUILT on aifoundry2 with the kernel at E136's pin ($R): step 6 first"
+  42  grep -q '^DRY PASS ' "$RB_OUT/dry.out" 2>/dev/null && [ "$(TZ=America/Los_Angeles date -r "$RB_OUT/dry.out" +%F)" = "$(rb_day)" ] || rb_die 10 "no DRY PASS today in this RB_OUT: step 8 first"
+  43  e209_box_free || rb_die 17 "a session, a build or a dry pass of the kit runs in the box root: call again"
+  44  [ "$(ours_live session_e209.sh)" = 0 ] || rb_die 17 "a session_e209.sh of ours runs: call again"
+  45  p2_count; [ "$P2_N" -eq 0 ] || rb_die 17 "THE P2 COUNT is $P2_N: call again (never kill one)"
+  46  [ -f "$RB_OUT/e209-neverrun.txt" ] || rb_die 10 "no step 6n in this RB_OUT: run rb/s06n_neverrun_e209.sh first"
+  47  T6=$(cut -d' ' -f1 "$RB_OUT/e209-neverrun.txt")
+  48  [ $((NOW - T6)) -le "$E209_NEVERRUN_MAX_S" ] || rb_die 10 "step 6n ended $((NOW - T6)) s ago, more than $E209_NEVERRUN_MAX_S s: run it again"
+  49  echo "step 6n: $(cut -d' ' -f2- "$RB_OUT/e209-neverrun.txt")"
+  50  TODAY=$(e209_session_today)
+  51  echo "$TODAY" | grep -q ' yes$' && rb_die 10 "an E209 session of today reached the card already ($(echo "$TODAY" | grep ' yes$' | head -n 1)): one session a day; a second is the orchestrator's call"
+  52  TREES=()
+  53  BT="$(getent passwd "$(id -u)" | cut -d: -f6)/claude/et-soc1-prototyping/build"
+  54  [ -n "${RB_DESKTEST:-}" ] || { [ -d "$BT" ] && TREES=(--tree "$BT"); }
+  55  "$PY" -I -B "$RB_REPO/$E209_REL/rb/rest_rule_e209.py" --lab "$RB_REPO" --root "$E209_ROOT" "${REL_ARGS[@]}" "${TREES[@]}" > "$RB_OUT/rest.txt" 2>&1
+  56  rc=$?
+  57  cat "$RB_OUT/rest.txt"
+  58  case "$rc" in 0) ;; 17) rb_die 17 "$(tail -n 1 "$RB_OUT/rest.txt")" ;; *) rb_die 16 "$(tail -n 1 "$RB_OUT/rest.txt")" ;; esac
+  59  ME=$(id -un)
+  60  for k in 1 2 3 4; do
+  61    EW=$(timeout 20 et-who 2>/dev/null)
+  62    timeout 20 et-who --check > /dev/null 2>&1; CHK=$?
+  63    NH=$(echo "$EW" | awk '($1 ~ /^\/dev\/et/ || $1 ~ /^lock:/) {n++} END {print n+0}')
+  64    NR=$(echo "$EW" | awk -v me="$ME" '$1 == "/dev/et0_mgmt" && $2 == me {n++} END {print n+0}')
+  65    echo "the free check, read $k: et-who --check rc $CHK; $NH holder line(s), $NR of them a reader of ours on /dev/et0_mgmt"
+  66    [ "$CHK" -eq 0 ] && [ "$NH" -eq 0 ] && break
+  67    [ "$k" -lt 4 ] && [ "$NH" -gt 0 ] && [ "$NH" = "$NR" ] || rb_die 15 "the card is not free (et-who --check rc $CHK; $NH holder lines, $NR of them a reader of ours on /dev/et0_mgmt; read $k)"
+  68    sleep 2
+  69  done
+  70  # the stamp and the reboot gate
+  71  if [ -f "$RB_OUT/e209-first.txt" ]; then
+  72    # shellcheck disable=SC1091
+  73    . "$RB_OUT/e209-first.txt"
+  74    if [ $((NOW - FIRST)) -le "$E209_FIRST_MAX_S" ] && [ -d "$E209_ROOT/$FIRSTDIR" ]; then
+  75      rb_ok "the stamp kept ($FIRSTDIR, $((NOW - FIRST)) s old, FWGATE=$FWGATE): nothing sent"
+  76    fi
+  77    mv "$RB_OUT/e209-first.txt" "$RB_OUT/e209-first.txt.stale-$FIRST"
+  78    echo "an earlier stamp ($FIRST, $((NOW - FIRST)) s old) set aside: step 9 never launched on it"
+  79  fi
+  80  FW=$(e209_fwgate look --box aifoundry2 --card 0 2>&1); FWRC=$?
+  81  echo "fwgate look: rc $FWRC: $(echo "$FW" | tail -n 1)"
+  82  FIRST=$(rb_now)
+  83  FD7=first/$FIRST
+  84  mkdir -p "$E209_ROOT/$FD7"
+  85  case "$FWRC" in
+  86    0)
+  87      echo "$FW" | tail -n 1 > "$E209_ROOT/$FD7/look.txt"
+  88      MODE=continuity ;;
+  89    17)
+  90      echo "FIRST=$FIRST FIRSTDIR=$FD7 FWGATE=read-pending" > "$RB_OUT/e209-first-pending.txt"
+  91      for k in $(seq 1 30); do pgrep -u "$(id -u)" -x lab-monitor > /dev/null || break; sleep 0.2; done
+  92      RD=$(e209_fwgate read --box aifoundry2 --card 0 --out "$E209_ROOT/$FD7" 2>&1); RDRC=$?
+  93      echo "$RD" > "$RB_OUT/fwgate-read-$FIRST.txt"
+  94      echo "fwgate read: rc $RDRC: $(echo "$RD" | tail -n 1)"
+  95      rm -f "$RB_OUT/e209-first-pending.txt"
+  96      case "$RDRC" in
+  97        0) MODE=read ;;
+  98        17) rmdir "$E209_ROOT/$FD7" 2>/dev/null; rb_die 17 "fwgate read: $(echo "$RD" | tail -n 1): nothing sent; call again" ;;
+  99        *) rb_die 16 "THE REBOOT GATE: $(echo "$RD" | tail -n 1): no session on this boot (fwgate's ledger keeps the stop; tell the orchestrator)" ;;
+ 100      esac ;;
+ 101    *) rmdir "$E209_ROOT/$FD7" 2>/dev/null; rb_die 16 "THE REBOOT GATE's look: $(echo "$FW" | tail -n 1)" ;;
+ 102  esac
+ 103  GD=$(e209_fwgate guard --box aifoundry2 --card 0 --extra "$E209_ROOT/$FD7" 2>&1); GRC=$?
+ 104  echo "fwgate guard: rc $GRC: $(echo "$GD" | tail -n 1)"
+ 105  [ "$GRC" -eq 0 ] || rb_die 16 "IDENTITY-STOP: $(echo "$GD" | tail -n 1): nothing launched"
+ 106  echo "FIRST=$FIRST FIRSTDIR=$FD7 FWGATE=$MODE" > "$RB_OUT/e209-first.txt"
+ 107  rb_ok "the first card command stamped $(rb_pst -d "@$FIRST") ($MODE; $FD7): step 9 within $E209_FIRST_MAX_S s"
+
+################ 7' the rest rule: bash tools/claims-v3/e209/rb/rest_rule_e209.py --lab <lab clone> --root <E209_ROOT> --releases <e208-releases.txt> --releases <e212-releases.txt> [--tree ...]
+---- tools/claims-v3/e209/rb/rest_rule_e209.py (sha256 942dabb5f9008971; listed, not run)
+   1  #!/usr/bin/env python3
+   2  """E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): THE REST RULE (E209.md 6): the first card command at least 40 minutes
+   3  after the last session on aifoundry2 card 0 ended, whoever ran it. Standard library only; reads only; opens no device.
+   4  
+   5      /usr/bin/python3 -I -B tools/claims-v3/e209/rb/rest_rule_e209.py --lab LAB --root E209_ROOT [--releases RECORD ...] [--tree DIR ...]
+   6          [--now EPOCH] [--rest-s 2400]
+   7      prints every session end found (source, what, when), the latest, and the last line
+   8          REST OPEN since <time> (the last end <time>, <source>)                       exit 0
+   9          REST NOT OPEN until <time> (the last end <time>, <source>): call again        exit 17
+  10          REST UNREADABLE: <why>                                                        exit 16 (a source that cannot be read stops)
+  11  
+  12  WHERE A SESSION END IS READ (each a session of this card; the latest counts):
+  13    1. the lab's committed data (LAB/docs/reports/data/<dir>, each folder dated yesterday or today whose name names aifoundry2 or a2c0):
+  14       every queue.json's t_close_ms (E208's runner form, E209's), and every line holding 'session end' in a .log or .txt file whose line
+  15       starts with its time 'YYYY-MM-DD HH:MM:SS' (E190's, E194's, E200's forms; a time zone word PST or PDT after it);
+  16    2. the round's records of the model session's releases (--releases, repeated: W/out/orch/e208-releases.txt, e212-releases.txt):
+  17       every line naming 'aifoundry2 card 0', its post's day and its 'ended [cleanly] HH:MM:SS' (a session the lab has not committed yet);
+  18    3. E209's own box root (--root): every sessions/<T0>-a2c0-E209 folder, its queue.json's t_close_ms, or, for a session with none (cut,
+  19       or still running), the latest write of any file in it (a running session's end is now: the rule then waits);
+  20    4. any other tree of ours on this box given by --tree (read-only: queue.json t_close_ms and 'session end' log lines written in the last
+  21       48 hours; E200's and E194's box-tree folders, if the card lane names them).
+  22  A dry pass (dry/ folders, a queue.json saying dry) is never a session on the card. The model session's own folders (ee-*) are never read:
+  23  its released sessions come through 1 and 2.
+  24  A session whose queue.json says it never reached the card (E208's runner writes t_first_ms null when it ended at a gate before its first
+  25  card command: the box lock, the box check, the card's lock, a holder) is not a session on the card, wherever it is read: it is listed and
+  26  not counted (no card command, no load; the runbook's 'one session a day' counts only sessions that reached the card, so a second session
+  27  the same day follows one that never did). Its own 'session end' log line is not counted either. The box root is never read again by 1 or 4.
+  28  SPDX-License-Identifier: Apache-2.0
+  29  """
+  30  import argparse
+  31  import datetime
+  32  import json
+  33  import os
+  34  import re
+  35  import sys
+  36  import time
+  37  
+  38  try:
+  39      from zoneinfo import ZoneInfo
+  40      TZ = ZoneInfo("America/Los_Angeles")
+  41  except Exception:  # noqa: BLE001
+  42      TZ = None
+  43  LINE_T = re.compile(r"^(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)(?:\.\d+)? (PST|PDT)\b")
+  44  REL_DAY = re.compile(r"\b(\d{4}-\d\d-\d\d) (\d\d:\d\d:\d\d) PST\b")
+  45  REL_END = re.compile(r"\bended (?:cleanly )?(\d\d:\d\d:\d\d)\b")
+  46  
+  47  
+  48  def pst(epoch):
+  49      return datetime.datetime.fromtimestamp(epoch, TZ).strftime("%Y-%m-%d %H:%M:%S %Z") if epoch else "never"
+  50  
+  51  
+  52  def epoch_of(day_time):
+  53      return datetime.datetime.strptime(day_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=TZ).timestamp()
+  54  
+  55  
+  56  NEVER = []      # (path, why) of sessions found that never reached the card or are dry passes: listed, never counted
+  57  
+  58  
+  59  def queue_state(p):
+  60      """-> ("dry" | "never" | "end" | "none", t_close in seconds or None)"""
+  61      try:
+  62          q = json.load(open(p))
+  63      except (OSError, ValueError) as e:
+  64          raise RuntimeError(f"{p}: unreadable ({type(e).__name__})")
+  65      if q.get("dry"):
+  66          return "dry", None
+  67      if "t_first_ms" in q and q.get("t_first_ms") is None:
+  68          return "never", None
+  69      t = q.get("t_close_ms")
+  70      return ("end", t / 1000.0) if isinstance(t, (int, float)) else ("none", None)
+  71  
+  72  
+  73  def from_queue(p):
+  74      st, t = queue_state(p)
+  75      return t if st == "end" else None
+  76  
+  77  
+  78  def from_logs(top, since=None, skip=None):
+  79      out = []
+  80      for dp, dn, fn in os.walk(top):
+  81          if skip and (os.path.realpath(dp) + os.sep).startswith(skip + os.sep):
+  82              dn[:] = []
+  83              continue
+  84          dn[:] = [d for d in dn if d not in ("dry", "__pycache__") and not d.startswith("ee-")]
+  85          if "queue.json" in fn:
+  86              st, _ = queue_state(os.path.join(dp, "queue.json"))
+  87              if st in ("dry", "never"):
+  88                  NEVER.append((dp, "a dry pass" if st == "dry" else "never reached the card (t_first_ms null)"))
+  89                  dn[:] = []
+  90                  continue
+  91          for n in fn:
+  92              p = os.path.join(dp, n)
+  93              if n == "queue.json":
+  94                  t = from_queue(p)
+  95                  if t:
+  96                      out.append((t, p, "queue.json t_close_ms"))
+  97              elif n.endswith((".log", ".txt")) and os.path.getsize(p) < 50 * 2 ** 20:
+  98                  if since and os.path.getmtime(p) < since:
+  99                      continue
+ 100                  try:
+ 101                      for ln in open(p, errors="replace"):
+ 102                          if "session end" in ln:
+ 103                              m = LINE_T.match(ln)
+ 104                              if m:
+ 105                                  out.append((epoch_of(m.group(1)), p, "a 'session end' line"))
+ 106                  except OSError as e:
+ 107                      raise RuntimeError(f"{p}: unreadable ({type(e).__name__})")
+ 108      return out
+ 109  
+ 110  
+ 111  def main(argv):
+ 112      ap = argparse.ArgumentParser()
+ 113      ap.add_argument("--lab", required=True)
+ 114      ap.add_argument("--root", required=True)
+ 115      ap.add_argument("--releases", action="append", default=[], help="a release record; several by repeating it")
+ 116      ap.add_argument("--tree", action="append", default=[])
+ 117      ap.add_argument("--now", type=float)
+ 118      ap.add_argument("--rest-s", type=float, default=2400.0)
+ 119      a = ap.parse_args(argv)
+ 120      now = a.now or time.time()
+ 121      found = []
+ 122      try:
+ 123          d0 = datetime.datetime.fromtimestamp(now, TZ).date()
+ 124          days = {str(d0), str(d0 - datetime.timedelta(days=1))}
+ 125          data = os.path.join(a.lab, "docs", "reports", "data")
+ 126          for d in sorted(os.listdir(data)):
+ 127              if d[:10] in days and ("aifoundry2" in d or "a2c0" in d) and os.path.isdir(os.path.join(data, d)):
+ 128                  found += [(t, f"LAB/docs/reports/data/{os.path.relpath(p, data)}", w)
+ 129                            for t, p, w in from_logs(os.path.join(data, d), skip=os.path.realpath(a.root))]
+ 130          skip = os.path.realpath(a.root)
+ 131          for rel in a.releases:
+ 132              if not os.path.exists(rel):
+ 133                  raise RuntimeError(f"the release record {rel} is missing")
+ 134              for ln in open(rel):
+ 135                  if ln.startswith("#") or "aifoundry2 card 0" not in ln:
+ 136                      continue
+ 137                  m, e = REL_DAY.search(ln), REL_END.search(ln)
+ 138                  if not (m and e):
+ 139                      raise RuntimeError(f"a release line without its day or end: {ln.strip()[:100]}")
+ 140                  t_post = epoch_of(f"{m.group(1)} {m.group(2)}")
+ 141                  t_end = epoch_of(f"{m.group(1)} {e.group(1)}")
+ 142                  if t_end > t_post:
+ 143                      t_end -= 86400
+ 144                  found.append((t_end, f"the release record: {ln.split()[0]} {ln.split()[4] if len(ln.split()) > 4 else ''}".strip(),
+ 145                                "'ended HH:MM:SS' of a release post"))
+ 146          sd = os.path.join(a.root, "sessions")
+ 147          for n in sorted(os.listdir(sd)) if os.path.isdir(sd) else []:
+ 148              p = os.path.join(sd, n)
+ 149              if not (os.path.isdir(p) and n.endswith("-a2c0-E209")):
+ 150                  continue
+ 151              q = os.path.join(p, "queue.json")
+ 152              st, t = queue_state(q) if os.path.exists(q) else ("none", None)
+ 153              if st in ("dry", "never"):
+ 154                  NEVER.append((f"E209_ROOT/sessions/{n}", "a dry pass" if st == "dry" else "never reached the card (t_first_ms null)"))
+ 155              elif t:
+ 156                  found.append((t, f"E209_ROOT/sessions/{n}", "queue.json t_close_ms"))
+ 157              else:
+ 158                  latest = max([os.path.getmtime(os.path.join(dp, f)) for dp, _, fs in os.walk(p) for f in fs] + [os.path.getmtime(p)])
+ 159                  running = not os.path.exists(os.path.join(p, "MANIFEST.sha256")) and not os.path.exists(os.path.join(p, "runner.rc"))
+ 160                  found.append((max(latest, now) if running else latest, f"E209_ROOT/sessions/{n}",
+ 161                                "no queue.json: " + ("still running (its end is now)" if running else "a cut session, at its latest write")))
+ 162          for tr in a.tree:
+ 163              if os.path.isdir(tr):
+ 164                  found += [(t, f"tree {os.path.basename(os.path.normpath(tr))}/{os.path.relpath(p, tr)}", w)
+ 165                            for t, p, w in from_logs(tr, since=now - 172800, skip=skip)]
+ 166      except (OSError, RuntimeError) as e:
+ 167          print(f"REST UNREADABLE: {e}")
+ 168          return 16
+ 169      for src, why in NEVER[-6:]:
+ 170          print(f"  not counted: {src} ({why})")
+ 171      for t, src, w in sorted(found)[-8:]:
+ 172          print(f"  {pst(t)}  {src}  ({w})")
+ 173      if not found:
+ 174          print("REST OPEN since always (no session of aifoundry2 card 0 found in the sources above)")
+ 175          return 0
+ 176      t, src, w = max(found)
+ 177      opens = t + a.rest_s
+ 178      if now >= opens:
+ 179          print(f"REST OPEN since {pst(opens)} (the last end {pst(t)}, {src})")
+ 180          return 0
+ 181      print(f"REST NOT OPEN until {pst(opens)} (the last end {pst(t)}, {src}): call again")
+ 182      return 17
+ 183  
+ 184  
+ 185  if __name__ == "__main__":
+ 186      sys.exit(main(sys.argv[1:]))
+
+################ 9 THE SESSION (within 120 s of step 7's stamp): bash tools/claims-v3/e209/rb/s11_session_e209.sh 
+---- tools/claims-v3/e209/rb/s11_session_e209.sh (sha256 33e560bd16b35b4a; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): runbook step 9, THE SESSION (this file is s11, E200's name for step
+   3  # 9): E209's one session on aifoundry2 card 0, E208's runner unchanged, started detached by the box root's src/start_e209.sh.
+   4  #   RB_OUT=... E209_ROOT=... RB_QUIET=... RB_LANE=... RB_RELEASES=... bash tools/claims-v3/e209/rb/s11_session_e209.sh
+   5  # Refusals (10 unless said; nothing started): the window's last start passed; THE QUIET DESK FLAG not up or not the card lane's; no stamp
+   6  # from step 7 (RB_OUT/e209-first.txt) or one over 120 s old (step 7 again); THE REST RULE not open (17); fwgate.py guard over step 7's
+   7  # folder not "identity ... ok" (16, IDENTITY-STOP); a session, a build or a dry pass of the kit running, or THE P2 COUNT not 0 (17); an
+   8  # E209 session of today that reached the card already; then start_e209.sh's own refusals (3 -> 10: its words).
+   9  # On STARTED: RB_OUT/e209-session.txt "SID=<T0>-a2c0-E209". Exits: 0 started; 10, 16, 17 as above.
+  10  # SPDX-License-Identifier: Apache-2.0
+  11  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  12  rb_init s11_session
+  13  e209_window
+  14  NOW=$(rb_now)
+  15  [ "$NOW" -le "$E209_LAST_START" ] || rb_die 10 "past the last start ($(rb_pst -d "@$E209_LAST_START")): no session today"
+  16  e209_quiet_ours
+  17  rb_root
+  18  e209_rel_args
+  19  [ -f "$RB_OUT/e209-first.txt" ] || rb_die 10 "no stamp from step 7 in this RB_OUT"
+  20  # shellcheck disable=SC1091
+  21  . "$RB_OUT/e209-first.txt"
+  22  [ $((NOW - FIRST)) -le "$E209_FIRST_MAX_S" ] || rb_die 10 "the first card command was $((NOW - FIRST)) s ago, more than $E209_FIRST_MAX_S s: step 7 again"
+  23  [ -d "$E209_ROOT/$FIRSTDIR" ] || rb_die 10 "step 7's folder $FIRSTDIR is missing"
+  24  "$PY" -I -B "$RB_REPO/$E209_REL/rb/rest_rule_e209.py" --lab "$RB_REPO" --root "$E209_ROOT" "${REL_ARGS[@]}" > "$RB_OUT/rest-9.txt" 2>&1
+  25  rc=$?
+  26  tail -n 1 "$RB_OUT/rest-9.txt"
+  27  case "$rc" in 0) ;; 17) rb_die 17 "$(tail -n 1 "$RB_OUT/rest-9.txt")" ;; *) rb_die 16 "$(tail -n 1 "$RB_OUT/rest-9.txt")" ;; esac
+  28  GD=$(e209_fwgate guard --box aifoundry2 --card 0 --extra "$E209_ROOT/$FIRSTDIR" 2>&1); GRC=$?
+  29  echo "fwgate guard: rc $GRC: $(echo "$GD" | tail -n 1)"
+  30  [ "$GRC" -eq 0 ] || rb_die 16 "IDENTITY-STOP: $(echo "$GD" | tail -n 1): nothing launched"
+  31  e209_box_free || rb_die 17 "a session, a build or a dry pass of the kit runs in the box root: call again"
+  32  p2_count; [ "$P2_N" -eq 0 ] || rb_die 17 "THE P2 COUNT is $P2_N: call again (never kill one)"
+  33  TODAY=$(e209_session_today)
+  34  echo "$TODAY" | grep -q ' yes$' && rb_die 10 "an E209 session of today reached the card already: one session a day"
+  35  OUT=$(cd "$E209_ROOT" && env -u ET_DEVICES -u V3_DEVICE -u MMS_BOX_LOCK_FD E209_QUIET_FILE="$RB_QUIET" E209_QUIET_LANE="$RB_LANE" \
+  36    timeout 120 bash src/start_e209.sh "$E209_LAST_END" "$FIRST" 2>&1); rc=$?
+  37  echo "$OUT" | tee "$RB_OUT/start.txt"
+  38  [ "$rc" -eq 0 ] || rb_die 10 "start_e209.sh refused (rc $rc): $(echo "$OUT" | grep -m1 REFUSED)"
+  39  SID=$(echo "$OUT" | grep -oE '^STARTED( DESKTEST)? [0-9]+-a2c0-E209' | awk '{print $NF}')
+  40  [ -n "$SID" ] || rb_die 14 "no STARTED line from start_e209.sh"
+  41  echo "SID=$SID" > "$RB_OUT/e209-session.txt"
+  42  rb_ok "STARTED $SID (wait with rb/s20_wait_e209.sh)"
+
+################ 9' the box root's start: bash tools/claims-v3/e209/box/start_e209.sh <last end epoch> <first card command epoch> (run by step 9 from the box root)
+---- tools/claims-v3/e209/box/start_e209.sh (sha256 bb9dab005ea766e3; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): start E209's session detached on aifoundry2 and return at once.
+   3  # E208's src/start_mms.sh (tools/claims-v3/e208/proposal/src/start_mms.sh, unchanged beside it in the box's src/) for E209's one
+   4  # session, with three refusals more (THE REBOOT GATE's folder, THE FIRST CARD COMMAND's age, the quiet desk flag's owner): runbook
+   5  # step 9 (rb/s11_session_e209.sh) calls it from the box root, right after fwgate's own guard over step 7's folder.
+   6  #   [E209_QUIET_FILE=<the round's quiet-desk flag> E209_QUIET_LANE=<lane>] \
+   7  #     bash <root>/src/start_e209.sh <last end: epoch seconds> <step 7's first card command: epoch seconds>
+   8  # Refusals (exit 3, the reason printed; nothing started, no device opened):
+   9  #   - this host is not aifoundry2; the schedule src/sched/a2c0-E209.json is missing;
+  10  #   - the last end is more than 4 hours away or less than 10 minutes away (E208's);
+  11  #   - THE FIRST CARD COMMAND (step 7's stamp, <first>) is in the future or more than E209_FIRST_MAX_S (120) seconds back;
+  12  #   - THE REBOOT GATE's folder first/<first> (step 7 wrote it) is missing, or holds neither one fwgate read record of THIS boot,
+  13  #     written today, verdict EQUAL, desk_test false (fwgate.py read's record: a second layer under fwgate's own guard, which step 9
+  14  #     ran just before this call), nor fwgate's CONTINUITY line (look.txt, written by step 7 when fwgate's look read CONTINUITY and
+  15  #     nothing was sent); a record of a desk test is taken only with E209_DESKTEST=1, and then the start line and the session folder
+  16  #     say DESKTEST (the collection refuses such a session outside a desk test);
+  17  #   - E209_QUIET_FILE is given and does not exist, or its first word is not E209_QUIET_LANE (THE QUIET DESK FLAG is the card lane's);
+  18  #   - the box lock run/box.lock is held (a session, a build or a dry pass of the kit), no build record, the harness differs (E208's);
+  19  #   - sessions/<T0>-a2c0-E209 exists already (one session a second).
+  20  # Then: step 7's folder is copied into the session's first/ (committed with the data), a stale run/STOP is moved aside, run/current-a2c0
+  21  # names the session, and session_e209.sh is started with setsid nohup, fd 9 (the box lock) and MMS_BOX_LOCK_FD=9: the runner holds
+  22  # that same lock from its first act to its end. Exit 0 started; 2 usage; 3 refused.
+  23  # SPDX-License-Identifier: Apache-2.0
+  24  set -u
+  25  cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 2
+  26  END=${1:-}; FIRST=${2:-}
+  27  case "$END" in ''|*[!0-9]*) echo "usage: start_e209.sh <last end epoch> <first card command epoch>"; exit 2 ;; esac
+  28  case "$FIRST" in ''|*[!0-9]*) echo "usage: start_e209.sh <last end epoch> <first card command epoch>"; exit 2 ;; esac
+  29  MAXF=${E209_FIRST_MAX_S:-120}
+  30  BOX=$(hostname | cut -d. -f1)
+  31  [ "$BOX" = aifoundry2 ] || { echo "REFUSED: this is $BOX, E209's card is on aifoundry2"; exit 3; }
+  32  [ -f src/sched/a2c0-E209.json ] || { echo "REFUSED: no schedule src/sched/a2c0-E209.json (run the sync, step 5)"; exit 3; }
+  33  NOW=$(date +%s)
+  34  [ "$END" -lt $((NOW + 4 * 3600)) ] || { echo "REFUSED: the last end ($END) is more than 4 hours away"; exit 3; }
+  35  [ "$END" -gt $((NOW + 600)) ] || { echo "REFUSED: the last end ($END) is less than 10 minutes away"; exit 3; }
+  36  [ "$FIRST" -le "$NOW" ] || { echo "REFUSED: the first card command ($FIRST) is in the future"; exit 3; }
+  37  [ $((NOW - FIRST)) -le "$MAXF" ] || { echo "REFUSED: the first card command was $((NOW - FIRST)) s ago, more than $MAXF s (step 7 again, on a new folder)"; exit 3; }
+  38  FD7=first/$FIRST
+  39  [ -d "$FD7" ] || { echo "REFUSED: no step 7 folder $FD7 (the reboot gate's read or look)"; exit 3; }
+  40  G=$(/usr/bin/python3 -I -B - "$FD7" "${E209_DESKTEST:-}" <<'PY'
+  41  import datetime, glob, json, os, sys
+  42  d, desk = sys.argv[1], sys.argv[2] == "1"
+  43  bt = int([ln.split()[1] for ln in open("/proc/stat") if ln.startswith("btime ")][0])
+  44  bid = open("/proc/sys/kernel/random/boot_id").read().strip()
+  45  try:
+  46      from zoneinfo import ZoneInfo
+  47      tz = ZoneInfo("America/Los_Angeles")
+  48  except Exception:  # noqa: BLE001
+  49      tz = None
+  50  today = datetime.datetime.now(tz).date()
+  51  recs, bad, deskrec = [], [], False
+  52  for p in sorted(glob.glob(os.path.join(d, "fwgate-*.json"))):
+  53      try:
+  54          r = json.load(open(p))
+  55      except (OSError, ValueError):
+  56          bad.append(f"{os.path.basename(p)} unreadable")
+  57          continue
+  58      if r.get("schema") != "fwgate-read/1" or r.get("box") != "aifoundry2" or r.get("card") != 0:
+  59          bad.append(f"{os.path.basename(p)} not a fwgate read of aifoundry2 card 0")
+  60          continue
+  61      t = r.get("read_epoch")
+  62      why = []
+  63      if r.get("verdict") != "EQUAL":
+  64          why.append(f"verdict {r.get('verdict')}")
+  65      if r.get("boot_epoch") != bt or r.get("boot_id") != bid or not isinstance(t, (int, float)) or t <= bt:
+  66          why.append("not this boot")
+  67      elif datetime.datetime.fromtimestamp(t, tz).date() != today:
+  68          why.append("not today")
+  69      if r.get("desk_test") is not False:
+  70          if desk:
+  71              deskrec = True
+  72          else:
+  73              why.append("a desk test's record")
+  74      (bad if why else recs).append(f"{os.path.basename(p)}" + (f" ({'; '.join(why)})" if why else ""))
+  75  look = os.path.join(d, "look.txt")
+  76  cont = os.path.exists(look) and open(look).read().startswith("CONTINUITY:")
+  77  if bad:
+  78      print("NO " + "; ".join(bad))
+  79  elif recs:
+  80      print(("DESKTEST " if deskrec else "") + "READ " + ", ".join(recs))
+  81  elif cont:
+  82      print("CONTINUITY look.txt")
+  83  else:
+  84      print("NO neither an EQUAL read of this boot nor fwgate's CONTINUITY line")
+  85  PY
+  86  )
+  87  case "$G" in READ*|CONTINUITY*|"DESKTEST READ"*) ;; *) echo "REFUSED: step 7's folder $FD7: ${G:-unreadable}"; exit 3 ;; esac
+  88  DESK=""; case "$G" in DESKTEST*) DESK=" DESKTEST" ;; esac
+  89  if [ -n "${E209_QUIET_FILE:-}" ]; then
+  90    [ -f "$E209_QUIET_FILE" ] || { echo "REFUSED: THE QUIET DESK FLAG ($E209_QUIET_FILE) is not up"; exit 3; }
+  91    QL=$(head -n 1 "$E209_QUIET_FILE" | cut -d' ' -f1)
+  92    [ -n "${E209_QUIET_LANE:-}" ] && [ "$QL" = "${E209_QUIET_LANE:-}" ] || { echo "REFUSED: THE QUIET DESK FLAG is not this lane's (it reads '$QL')"; exit 3; }
+  93  fi
+  94  mkdir -p run sessions
+  95  exec 9>>run/box.lock    # held from here; handed to the session below
+  96  if ! flock -n 9; then echo "REFUSED: run/box.lock is held (a session, a build or a dry pass of this kit runs on this box)"; exit 3; fi
+  97  [ -f build/BUILD-mms.json ] || { echo "REFUSED: no build record: run the build (step 6) first"; exit 3; }
+  98  /usr/bin/python3 -B src/check_mms.py --box > "run/harness-$NOW.txt" 2>&1 || { echo "REFUSED: the harness differs (run/harness-$NOW.txt)"; exit 3; }
+  99  T0=$NOW
+ 100  SID=$T0-a2c0-E209
+ 101  mkdir "sessions/$SID" 2> /dev/null || { echo "REFUSED: sessions/$SID exists already (one session a second)"; exit 3; }
+ 102  cp -p -r "$FD7" "sessions/$SID/first" || { echo "REFUSED: step 7's folder could not be copied into the session"; rmdir "sessions/$SID" 2>/dev/null; exit 3; }
+ 103  [ -n "$DESK" ] && echo "DESKTEST: a desk test's reboot-gate record (E209_DESKTEST=1); this session is never collected as data" > "sessions/$SID/DESKTEST"
+ 104  if [ -e run/STOP ]; then mv run/STOP "run/STOP.cleared-$NOW" && echo "a stale run/STOP (no session running) moved to run/STOP.cleared-$NOW"; fi
+ 105  echo "$SID" > run/current-a2c0
+ 106  setsid nohup env MMS_BOX_LOCK_FD=9 E209_T0="$T0" E209_DEADLINE="$END" bash src/session_e209.sh \
+ 107    > "sessions/$SID.start.out" 2>&1 < /dev/null &
+ 108  sleep 3
+ 109  echo "STARTED$DESK $SID (T0 $T0 = $(TZ=America/Los_Angeles date -d "@$T0" '+%F %T %Z'); last end $(TZ=America/Los_Angeles date -d "@$END" '+%T %Z'); first card command $((NOW - FIRST)) s before; the reboot gate: $G)"
+ 110  [ -f "sessions/$SID/session.log" ] && tail -n 5 "sessions/$SID/session.log"
+ 111  exit 0
+
+################ 9'' the session wrapper: bash tools/claims-v3/e209/box/session_e209.sh (started detached by start_e209.sh)
+---- tools/claims-v3/e209/box/session_e209.sh (sha256 b43753766091ecee; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): E209's one session on aifoundry2 card 0, the wrapper
+   3  # src/start_e209.sh starts detached (setsid nohup). E208's src/session_mms.sh (tools/claims-v3/e208/proposal/src/session_mms.sh,
+   4  # unchanged beside it in the box's src/) for E209's one session: the card a2c0 and the schedule src/sched/a2c0-E209.json (E209's
+   5  # registered order, sched-e209.json, in the kit-name form E208's runner reads: make_box_e209.py) in place of its cards and
+   6  # sessions S1-S3. It runs src/run_mms.py, E208's registered runner, UNCHANGED, in sessions/<T0>-a2c0-E209, from the box root; the
+   7  # runner checks the box, the build, the harness and the device-command audit before it opens anything, and writes
+   8  # MANIFEST.sha256 last; this wrapper then writes runner.rc (with runner.out, the two files outside the manifest). From
+   9  # start_e209.sh it inherits fd 9, the box root's lock run/box.lock that the start took before its own checks, and
+  10  # MMS_BOX_LOCK_FD=9: the runner holds that same lock from its first act, and the lock is free again once both have ended.
+  11  #   E209_T0=<epoch> E209_DEADLINE=<epoch> [MMS_BOX_LOCK_FD=9] bash src/session_e209.sh
+  12  # SPDX-License-Identifier: Apache-2.0
+  13  set -u
+  14  cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 2
+  15  T0=${E209_T0:?E209_T0 is the start epoch}
+  16  case "$T0" in ''|*[!0-9]*) echo "E209_T0 must be an epoch" >&2; exit 2 ;; esac
+  17  OUT=sessions/$T0-a2c0-E209
+  18  mkdir -p "$OUT"
+  19  /usr/bin/python3 -B src/run_mms.py session --card a2c0 --sched src/sched/a2c0-E209.json --t0 "$T0" --out "$OUT" \
+  20    --deadline-epoch "${E209_DEADLINE:-0}" > "$OUT/runner.out" 2>&1 < /dev/null
+  21  echo "$?" > "$OUT/runner.rc"
+
+################ inside the session (E208's registered runner src/run_mms.py, UNCHANGED, on its real path; its own docstring, lines 1-60, below)
+    | #!/usr/bin/env python3
+    | """1116-mmsweep: one card's session on its box, from a schedule (E190's runner form: tools/claims-v3/e190/run_e190_v2.py in
+    | the public lab repo, adapted to a schedule of arms, three cards and this kit's folder). Python's own modules only.
+    | 
+    |     python3 -B src/run_mms.py session --card a2c0|a1c1|a1c0 --sched src/sched/<card>-<S>.json --t0 T0 --out sessions/<sid>
+    |         [--deadline-epoch E]                                           a real session (started detached by src/start_mms.sh)
+    |     python3 -B src/run_mms.py session --dry --scale 0.02 --card ... --sched ... --t0 T0 --out <dir>
+    |         [--only N] [--trip-arm ID --trip-w W] [--config-fail] [--wrong-card] [--wrong-config] [--stop-after N]
+    |         [--host-hang ARM] [--sampler-stall N] [--host-fail-after N] [--config-hang start|end] [--holder-after N]
+    |         [--closing-holder]                                              the doubles, no device; every device call printed
+    | 
+    | What a session does, from the kit's root (~/claude/work/ee-1116-mmsweep on the box; every path it writes is relative to it):
+    |   1. the box lock run/box.lock, its first act (flock -n, held to the end): src/start_mms.sh takes it before its own checks and
+    |      hands it to the session (MMS_BOX_LOCK_FD: the same open file, so the lock is never free between the start's checks and the
+    |      session's end); src/build_mms.sh and src/dry_mms.sh hold it while they run: never two sessions of this kit on one box (so
+    |      never two of ours on aifoundry1), and no session beside the kit's build or dry pass;
+    |   2. the box and the build: the hostname is the card's box; build/BUILD-mms.json written today by src/build_mms.sh on this box
+    |      (BUILT; on aifoundry1 the host and /opt/et's device layer carry ET_DEVICES); the kernel ELF at E136's pin, the host and the
+    |      reader at the sha256 the build recorded, every src/ file at src/SRC-SHA256SUMS (src/check_mms.py --box), the device-command
+    |      audit GO (src/preflight_mms.sh --audit-only); else no device is opened; the kit's STOP file run/STOP and the session's STOP
+    |      absent;
+    |   3. the card's lock (/run/lock/etsoc-shire<N>.lock: root's, opened read-only, never created; flock -n, held for the whole
+    |      session: its one sampler holds the card's mgmt node throughout; one retry after 15 s), then 3 s, then the holders: et-who
+    |      (counts by card; another login on the card, aifoundry2 any card; any line of ours) and ps (a CI job; another device process
+    |      of ours; on aifoundry2 another user's device process): one retry after 5 s; else no device opened;
+    |   4. THE FIRST CARD COMMAND: `ettelem config` through src/guard_ettelem.sh under `timeout 10` (one re-run after 5 s if it fails:
+    |      another reader may have had the node); it must be the config the card's plan rests on, and THE IDENTITY GATE:
+    |      its stderr names the card's mgmt node and physical device ID (aifoundry1: minion_mv below 510 on card 1, at or above on
+    |      card 0); the card time counts from it. A start read that fails either gate ends the session with NO closing read. A
+    |      config read still running at its bound (30 s; at the closing 12-30 s) gets SIGTERM to its `timeout` wrapper and 30 s more
+    |      (never SIGKILL): anything of it still alive then is a LEFTOVER (below), and the session makes no other read of the node;
+    |   5. ONE sampler for the session (`ettelem sample --every-ms 100` through the guard), every line to telemetry.jsonl and to THE
+    |      STOP LINES as it arrives (mms_common.Stops: the card's board line on 3 samples in a row; the die at 80 C; a risen latch);
+    |      a trip touches the hosts' stop file at once (a running host ends at its next ~0.5 s launch boundary), nothing further
+    |      starts; SIGTERM only, ever; a sampler that is not live is restarted only once it has stopped: a sampler of ours that will
+    |      not stop on SIGTERM is never joined by a second one (the session ends; a leftover, below);
+    |   6. THE STOP-PATH TEST: each line with a test threshold every live sample crosses must trip within 5 s, touch its own file and
+    |      refuse a start; THE IDENTITY READ (et-who and the sampler's own open files: the card's mgmt node, nothing of ours off it);
+    |   7. the opening rest: 60 s at rest (the session's rest die and board; the cards of aifoundry1 form their gate from it);
+    |   8. THE SMOKE: one 2 s process a type (fp32 zeros, fp16 ones, int8 rnd at 1 x 1 x 4): rc 0, every launch ok, the check of C
+    |      exact or approx, cycles an op inside 200-4,000, the host on the card (stderr or held nodes) and the board 2 W over the rest;
+    |   9. the runs, in the schedule's order (anchors first, between blocks and last): each run waits for the die gate (at most
+    |      180 s, a live sample), reads ps and et-who (before every run, on every card: E190's runner form), then its form: `burst`
+    |      10 s at rest, ONE process `timeout 10 sparsity_host ... --seconds 6
+    |      --budget 7.5`, 5 s at rest; `sus3` 20 s at rest, three such processes back to back, 20 s at rest; `null` 20 s at rest, a
+    |      6.5 s window with no process, 20 s at rest (no device opened). No run starts once the card time passes the schedule's rule,
+    |      or if its planned length would pass the cap less the closing or the window's last end; a started run is cut only by a
+    |      stop. Two failed processes in a row (rc not 0, or the check of C not ok) stop the session;
+    |  10. `timeout 10` sends a host SIGTERM at 10 s; a host still alive 30 s after it started gets the runner's SIGTERM to its
+    |      `timeout` wrapper (which ignores it once it has sent its own; never SIGKILL); alive 30 s later it is
+    |      a LEFTOVER: the session ends at once, makes no closing read, and holds the card's lock until no device process of ours is
+    |      left (at most 10 minutes), recording it in queue.json and status.json;
+    |  11. the closing (bounded by the cap from the first card command, E190's form): the sampler stopped (SIGTERM only); et-who and
+    |      ps read once more, the sampler stopped; the closing config read (not after an identity trip, a stop for another holder, a
+    |      failed start read or a leftover, and not when that last read shows a holder of another login on the card, a line of ours
+    |      other than the session's own card lock, or a device process), "session end", the locks released, queue.json,
+    |      MANIFEST.sha256 last.
+    | No child process of the runner is ever sent SIGKILL: every bounded wait (the config reads, et-who, the box check, the hosts)
+    | ends with SIGTERM and a grace, and what outlives it is left and recorded.
+    | Every device command is a READ: the host opens the ops node only; `ettelem config` and `ettelem sample` through the guard,
+
+################ 10 THE WAIT (while 17): bash tools/claims-v3/e209/rb/s20_wait_e209.sh 
+---- tools/claims-v3/e209/rb/s20_wait_e209.sh (sha256 c2ace789f5341c5e; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): runbook step 10, THE WAIT: the session found by its REAL script name
+   3  # as its own script (ours_live 'session_e209.sh': an interpreter's first non-option argument, never a command string's text) and read by
+   4  # E208's src/status_mms.sh (unchanged: ENDED 0 with MANIFEST.sha256, RUNNING 17, GONE 14). Reads only; kills nothing, ever: a LEFTOVER (a
+   5  # device process of ours that outlived its TERM) is reported at once and left for the lab admin.
+   6  #   RB_OUT=... E209_ROOT=... bash tools/claims-v3/e209/rb/s20_wait_e209.sh       (bounded: at most 520 s a call; while 17, call again)
+   7  # Exits: 0 ENDED, runner rc 0 (the summary printed); 16 ENDED with runner rc 16 (a gate refused before any run: nothing measured, or the
+   8  # smoke gate) or with a LEFTOVER (tell the orchestrator; never kill -9), or GONE (no runner, no manifest: read session.log); 17 still
+   9  # running (call again); 10 no session in this RB_OUT.
+  10  # SPDX-License-Identifier: Apache-2.0
+  11  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  12  rb_init s20_wait
+  13  rb_root
+  14  [ -f "$RB_OUT/e209-session.txt" ] || rb_die 10 "no session started in this RB_OUT (step 9)"
+  15  # shellcheck disable=SC1091
+  16  . "$RB_OUT/e209-session.txt"
+  17  D="$E209_ROOT/sessions/$SID"
+  18  [ -d "$D" ] || rb_die 10 "no session folder $SID in the box root"
+  19  end=$(( $(rb_now) + E209_BOUND_S ))
+  20  while :; do
+  21    N=$(ours_live session_e209.sh)
+  22    ST=$(cd "$E209_ROOT" && timeout 60 bash src/status_mms.sh a2c0 "$SID" 2>&1); SRC=$?
+  23    if [ "$SRC" -eq 0 ]; then
+  24      echo "$ST" | tail -n 12
+  25      RC=$(cat "$D/runner.rc" 2>/dev/null || echo '?')
+  26      if grep -q 'LEFTOVER' "$D/session.log" 2>/dev/null || grep -q '"leftover": {' "$D/queue.json" 2>/dev/null; then
+  27        rb_die 16 "ENDED with a LEFTOVER ($(grep -m1 'LEFTOVER' "$D/session.log")): tell the orchestrator; kill nothing"
+  28      fi
+  29      [ "$RC" = 0 ] && rb_ok "ENDED: runner rc 0; $(tail -n 1 "$D/session.log" | cut -c1-160)"
+  30      rb_die 16 "ENDED: runner rc $RC ($(grep -m1 -E 'gate|STOP|failed|refused' "$D/session.log" | cut -c1-160))"
+  31    fi
+  32    if [ "$SRC" -eq 14 ]; then
+  33      echo "$ST" | tail -n 6
+  34      rb_die 16 "GONE: no runner and no manifest (session_e209.sh scripts of ours alive: $N): read $SID/session.log"
+  35    fi
+  36    [ "$SRC" -eq 17 ] || rb_die 14 "status_mms.sh ended rc $SRC: $(echo "$ST" | tail -n 1)"
+  37    if grep -q 'LEFTOVER' "$D/session.log" 2>/dev/null; then
+  38      echo "$(grep 'LEFTOVER' "$D/session.log" | tail -n 1)"
+  39      echo "a LEFTOVER is recorded: the session holds the card's lock until no device process of ours is left (at most 10 minutes); kill nothing"
+  40    fi
+  41    echo "RUNNING ($(rb_pst)): session_e209.sh scripts of ours by their own name: $N; $(echo "$ST" | sed -n 2,3p | tr '\n' ' ' | cut -c1-200)"
+  42    [ "$(rb_now)" -lt "$end" ] || rb_die 17 "the session runs: call again"
+  43    sleep 15
+  44  done
+
+################ 4' the look after the session: bash rb/s05_look_e209.sh (FREE: nothing of ours holds the card)
+
+################ C+ (the card lane's): 'bash W/onelab.sh collect <lane>' (right before step 11; at least 10 minutes before the last end)
+
+################ 11 THE COLLECTION (then the flag lowered): bash tools/claims-v3/e209/rb/s22_collect_e209.sh 
+---- tools/claims-v3/e209/rb/s22_collect_e209.sh (sha256 f047b7587bb3c5a8; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum; fix-e209: the collect span): runbook step 11, THE COLLECTION, inside
+   3  # THE ONE-LAB RULE's collect span (onelab collect right before this step; uncollect right after the data commit's push, and on every stop path): collect_e209.py (THE
+   4  # BOX-TREE GATE, COPY-BACK EXACT, E208's data checker unchanged, THE SCRUB, the data directory in LAB with its README and SHA256SUMS),
+   5  # then THE QUIET DESK FLAG lowered (the copy-back is done: nothing more reads the box root's session). Nothing is committed here: step 12
+   6  # is the card lane's data commit (commit_lab.sh with LAB_QUIET_HOLD_OWNER, THE QUIET HOLD standing). Outside a desk test it refuses (10)
+   7  # unless RB_W's onelab.sh shows the lane's collect span (fix-e209, Q202c, verify-e209's finding 8; in a desk test the span is reported).
+   8  #   RB_OUT=... E209_ROOT=... RB_QUIET=... RB_LANE=... RB_W=... bash tools/claims-v3/e209/rb/s22_collect_e209.sh
+   9  # Exits: 0 the data directory written and the flag lowered (its path last); 10 refused (the gate: the session not ended, a desk test's
+  10  # session, the data directory there already); 14 the copy-back not exact (run it again into a new RB_OUT/copy name only after reading
+  11  # why); 16 the scrub found a private string (nothing written in LAB; the flag stays up until rb/end_e209.sh lowers it: tell the
+  12  # orchestrator).
+  13  # SPDX-License-Identifier: Apache-2.0
+  14  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  15  rb_init s22_collect
+  16  e209_quiet_ours
+  17  rb_root
+  18  [ -f "$RB_OUT/e209-session.txt" ] || rb_die 10 "no session started in this RB_OUT (step 9)"
+  19  # shellcheck disable=SC1091
+  20  . "$RB_OUT/e209-session.txt"
+  21  if [ "${RB_DESKTEST:-}" = 1 ]; then
+  22    echo "THE ONE-LAB RULE: the collect span is not required in a desk test"
+  23  else
+  24    rb_need RB_W
+  25    [ -f "$RB_W/onelab.sh" ] || rb_die 10 "RB_W ($RB_W) holds no onelab.sh"
+  26    bash "$RB_W/onelab.sh" show 2>/dev/null | grep -qx "  collect-$RB_LANE" || rb_die 10 "THE ONE-LAB RULE: $RB_LANE is not in its collect span (bash \$W/onelab.sh collect $RB_LANE right before step 11)"
+  27    echo "THE ONE-LAB RULE: collect-$RB_LANE held"
+  28  fi
+  29  OUT=$(nice -n 10 timeout 900 "$PY" -I -B "$RB_REPO/$E209_REL/collect_e209.py" --root "$E209_ROOT" --sid "$SID" --rb-out "$RB_OUT" \
+  30    --lab "${RB_DATA_LAB:-$RB_REPO}" ${RB_DESKTEST:+--desktest} 2>&1); rc=$?
+  31  echo "$OUT" | tee "$RB_OUT/collect.txt"
+  32  case "$rc" in
+  33    0) ;;
+  34    10) rb_die 10 "$(echo "$OUT" | tail -n 1)" ;;
+  35    16) rb_die 16 "$(echo "$OUT" | tail -n 1)" ;;
+  36    *) rb_die 14 "$(echo "$OUT" | tail -n 1)" ;;
+  37  esac
+  38  DD=$(echo "$OUT" | grep '^DATA DIR ' | awk '{print $3}')
+  39  echo "DD=$DD" > "$RB_OUT/e209-datadir.txt"
+  40  bash "$RB_E209_DIR/quiet_e209.sh" lower "$RB_LANE" | tail -n 1
+  41  rb_ok "DATA DIR $DD written; THE QUIET DESK FLAG lowered after the copy-back; next: the data commit (step 12)"
+
+################ 11' the collector: bash tools/claims-v3/e209/collect_e209.py --root <E209_ROOT> --sid <SID> --rb-out <RB_OUT> --lab <lab clone>
+---- tools/claims-v3/e209/collect_e209.py (sha256 e8195bf31ff031b0; listed, not run)
+   1  #!/usr/bin/env python3
+   2  """E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): THE COLLECTION of E209's session (runbook step 11,
+   3  rb/s22_collect_e209.sh). Python's own modules only; it changes nothing it reads.
+   4  
+   5      /usr/bin/python3 -I -B tools/claims-v3/e209/collect_e209.py --root E209_ROOT --sid SID --rb-out RB_OUT --lab LAB [--desktest]
+   6  
+   7    1. THE BOX-TREE GATE: the session is E209_ROOT/sessions/<SID> (SID = <T0>-a2c0-E209), a real folder under the box root's sessions/ (no link
+   8       anywhere in it), ended (MANIFEST.sha256 and runner.rc present); a desk test's session (its DESKTEST file, or a DESKTEST start line) is
+   9       refused unless --desktest;
+  10    2. COPY-BACK EXACT: one byte copy into RB_OUT/copy/<SID>/ (file by file, times kept), then every MANIFEST.sha256 line read OK in the copy
+  11       and every file of the copy in the manifest but runner.rc and runner.out (the runner's two files outside it);
+  12    3. THE CHECKS: E208's data lane's own checker, unchanged (LAB/docs/reports/data/2026-11-16-e208-mmsweep-a2c0-S1/check_session_e208.py,
+  13       at its sha256 below): C0 the source (the schedule against the box root's src/SRC-SHA256SUMS; the harness line), C1 a clean end, C2 the
+  14       runs against the schedule, C3 the identity, C4 the clock in every sample, C5 the stops replayed on every sample, C6 the timeouts and no
+  15       kill word, C7 no leftover, C8 the sampler. Their verdicts are REPORTED, never a gate (a cut or stopped session FAILs C1 or C2 honestly);
+  16    4. THE SCRUB: no byte of the copy holds the login name, a home folder's path or the box root's own path (the runner writes paths relative to
+  17       the box root); a hit stops the collection (exit 16) before anything is written in LAB;
+  18    5. THE DATA DIRECTORY LAB/docs/reports/data/<day>-e209-blind-matmul-aifoundry2/ (refused if it exists): session/ (the copy, byte for byte),
+  19       checks-e209.json and checks-e209.txt (step 3), build-record-aifoundry2.json (the box root's build/BUILD-mms.json, byte for byte),
+  20       neverrun-e209-card.txt and ranbefore-e209.json (step 6n's), facts-e209.json, README.md (DATA-README-FORM-e209.md's form, its facts
+  21       filled from the records), SHA256SUMS (every file but itself, paths relative to the directory).
+  22  Prints the data directory's path relative to LAB last: "DATA DIR docs/reports/data/<...> (<n> files)". Exits: 0 written; 10 refused (the
+  23  gate); 14 the copy-back not exact; 16 the scrub found a private string (nothing written in LAB).
+  24  SPDX-License-Identifier: Apache-2.0
+  25  """
+  26  import argparse
+  27  import datetime
+  28  import hashlib
+  29  import json
+  30  import os
+  31  import pwd
+  32  import re
+  33  import shutil
+  34  import subprocess
+  35  import sys
+  36  
+  37  HERE = os.path.dirname(os.path.abspath(__file__))
+  38  CHECKER = "docs/reports/data/2026-11-16-e208-mmsweep-a2c0-S1/check_session_e208.py"
+  39  CHECKER_SHA = None      # read from that data directory's SHA256SUMS (the committed list), below
+  40  try:
+  41      from zoneinfo import ZoneInfo
+  42      TZ = ZoneInfo("America/Los_Angeles")
+  43  except Exception:  # noqa: BLE001
+  44      TZ = None
+  45  
+  46  
+  47  def sha(p):
+  48      h = hashlib.sha256()
+  49      with open(p, "rb") as f:
+  50          for b in iter(lambda: f.read(1 << 20), b""):
+  51              h.update(b)
+  52      return h.hexdigest()
+  53  
+  54  
+  55  def pst(ms_or_s, ms=True):
+  56      if ms_or_s is None:
+  57          return None
+  58      t = ms_or_s / 1000.0 if ms else ms_or_s
+  59      return datetime.datetime.fromtimestamp(t, TZ).strftime("%Y-%m-%d %H:%M:%S %Z")
+  60  
+  61  
+  62  def die(code, words):
+  63      print(f"COLLECT REFUSED: {words}" if code == 10 else f"COLLECT STOPPED: {words}")
+  64      sys.exit(code)
+  65  
+  66  
+  67  def main(argv):
+  68      ap = argparse.ArgumentParser()
+  69      ap.add_argument("--root", required=True)
+  70      ap.add_argument("--sid", required=True)
+  71      ap.add_argument("--rb-out", required=True)
+  72      ap.add_argument("--lab", required=True)
+  73      ap.add_argument("--desktest", action="store_true")
+  74      a = ap.parse_args(argv)
+  75      root = os.path.realpath(a.root)
+  76      if not re.fullmatch(r"\d{10}-a2c0-E209", a.sid):
+  77          die(10, f"'{a.sid}' is not an E209 session id")
+  78      sd = os.path.join(root, "sessions", a.sid)
+  79      if os.path.islink(sd) or not os.path.isdir(sd) or os.path.realpath(sd) != os.path.join(root, "sessions", a.sid):
+  80          die(10, f"THE BOX-TREE GATE: {a.sid} is not a real folder under the box root's sessions/")
+  81      for dp, dn, fn in os.walk(sd):
+  82          for n in dn + fn:
+  83              if os.path.islink(os.path.join(dp, n)):
+  84                  die(10, f"THE BOX-TREE GATE: a link inside the session ({os.path.relpath(os.path.join(dp, n), sd)})")
+  85      if not (os.path.exists(os.path.join(sd, "MANIFEST.sha256")) and os.path.exists(os.path.join(sd, "runner.rc"))):
+  86          die(10, "the session has not ended (no MANIFEST.sha256 or runner.rc): step 10 first")
+  87      so = os.path.join(root, "sessions", a.sid + ".start.out")
+  88      desk = os.path.exists(os.path.join(sd, "DESKTEST")) or (os.path.exists(so) and "STARTED DESKTEST" in open(so, errors="replace").read())
+  89      if desk and not a.desktest:
+  90          die(10, "a desk test's session (DESKTEST): never collected as data")
+  91      # 2. the copy-back
+  92      cp = os.path.join(a.rb_out, "copy", a.sid)
+  93      if os.path.exists(cp):
+  94          die(10, f"RB_OUT/copy/{a.sid} exists already (one copy-back)")
+  95      shutil.copytree(sd, cp, symlinks=True)
+  96      man = {}
+  97      for ln in open(os.path.join(cp, "MANIFEST.sha256")):
+  98          h, r = ln.rstrip("\n").split("  ", 1)
+  99          man[r] = h
+ 100      bad = [r for r, h in man.items() if not os.path.isfile(os.path.join(cp, r)) or sha(os.path.join(cp, r)) != h]
+ 101      files = sorted(os.path.relpath(os.path.join(dp, n), cp) for dp, _, fn in os.walk(cp) for n in fn)
+ 102      extra = [r for r in files if r not in man and r not in ("MANIFEST.sha256", "runner.rc", "runner.out")]
+ 103      if bad or extra:
+ 104          die(14, f"COPY-BACK NOT EXACT: {len(bad)} manifest lines not OK {bad[:4]}, {len(extra)} files outside it {extra[:4]}")
+ 105      print(f"COPY-BACK EXACT: {len(man)} manifest lines OK, {len(files)} files ({a.sid})")
+ 106      # 3. the checks, E208's data lane's checker unchanged
+ 107      lab = os.path.realpath(a.lab)
+ 108      sums = {}
+ 109      for ln in open(os.path.join(lab, os.path.dirname(CHECKER), "SHA256SUMS")):
+ 110          h, r = ln.rstrip("\n").split("  ", 1)
+ 111          sums[r] = h
+ 112      ck = os.path.join(lab, CHECKER)
+ 113      if sums.get(os.path.basename(CHECKER)) != sha(ck):
+ 114          die(10, f"{CHECKER} is not at its data directory's SHA256SUMS")
+ 115      ckdir = os.path.join(a.rb_out, "checks")
+ 116      os.makedirs(ckdir, exist_ok=True)
+ 117      r = subprocess.run(["/usr/bin/python3", "-I", "-B", ck, cp, "a2c0", os.path.join(root, "src"), "--out", os.path.join(ckdir, "checks-e209.json"),
+ 118                          "--txt", os.path.join(ckdir, "checks-e209.txt")], capture_output=True, text=True)
+ 119      if r.returncode not in (0, 1) or not os.path.exists(os.path.join(ckdir, "checks-e209.json")):
+ 120          die(14, f"the checker ended rc {r.returncode}: {r.stderr.strip()[-400:]}")
+ 121      cj = json.load(open(os.path.join(ckdir, "checks-e209.json")))
+ 122      # the checker's form (data-e208's): {"what", "session", "card", "checks": {"C0_src": {"verdict": ...}, ...}, "verdict": "ALL PASS" | ...}
+ 123      checks = cj.get("checks") if isinstance(cj, dict) and isinstance(cj.get("checks"), dict) else {}
+ 124      verdicts = {k: v.get("verdict") for k, v in checks.items() if isinstance(v, dict)}
+ 125      if not verdicts:
+ 126          die(14, "the checker's output names no check (checks-e209.json has no 'checks' table)")
+ 127      overall = cj.get("verdict")
+ 128      print(f"THE CHECKS (E208's data checker, unchanged): {overall}: " + ", ".join(f"{k} {v}" for k, v in verdicts.items()))
+ 129      # 4. the scrub
+ 130      me = pwd.getpwuid(os.getuid())
+ 131      pats = [me.pw_name.encode(), me.pw_dir.encode(), root.encode(), b"/home/"]
+ 132      hits = []
+ 133      scrub = [(rel, os.path.join(cp, rel)) for rel in files] + [(f"checks/{n}", os.path.join(ckdir, n)) for n in ("checks-e209.json", "checks-e209.txt")]
+ 134      for rel, path in scrub:
+ 135          b = open(path, "rb").read()
+ 136          if rel.endswith(".gz"):
+ 137              import gzip
+ 138              try:
+ 139                  b = gzip.decompress(b)
+ 140              except OSError:
+ 141                  pass
+ 142          for p in pats:
+ 143              if p and p in b:
+ 144                  hits.append(f"{rel}: {'the login name' if p == pats[0] else 'a home path' if p in (pats[1], pats[3]) else 'the box root path'}")
+ 145                  break
+ 146      if hits:
+ 147          die(16, f"THE SCRUB found {len(hits)} file(s) with a private string ({hits[:5]}): nothing written in LAB; tell the orchestrator")
+ 148      print(f"THE SCRUB: {len(scrub)} files (the copy and the checks), no login name, home path or box-root path")
+ 149      # 5. the data directory
+ 150      q = json.load(open(os.path.join(cp, "queue.json")))
+ 151      st = json.load(open(os.path.join(cp, "status.json"))) if os.path.exists(os.path.join(cp, "status.json")) else {}
+ 152      t0 = int(a.sid.split("-")[0])
+ 153      day = datetime.datetime.fromtimestamp(t0, TZ).strftime("%Y-%m-%d")
+ 154      rel_dd = f"docs/reports/data/{day}-e209-blind-matmul-aifoundry2"
+ 155      dd = os.path.join(lab, rel_dd)
+ 156      if os.path.exists(dd):
+ 157          die(10, f"{rel_dd} exists already")
+ 158      os.makedirs(dd)
+ 159      shutil.copytree(cp, os.path.join(dd, "session"))
+ 160      shutil.copyfile(os.path.join(ckdir, "checks-e209.json"), os.path.join(dd, "checks-e209.json"))
+ 161      shutil.copyfile(os.path.join(ckdir, "checks-e209.txt"), os.path.join(dd, "checks-e209.txt"))
+ 162      shutil.copyfile(os.path.join(root, "build", "BUILD-mms.json"), os.path.join(dd, "build-record-aifoundry2.json"))
+ 163      for n in ("ranbefore-e209.json",):
+ 164          if os.path.exists(os.path.join(a.rb_out, n)):
+ 165              shutil.copyfile(os.path.join(a.rb_out, n), os.path.join(dd, n))
+ 166      nr = sorted(x for x in os.listdir(a.rb_out) if x.startswith("neverrun-") and os.path.isdir(os.path.join(a.rb_out, x)))
+ 167      if nr and os.path.exists(os.path.join(a.rb_out, nr[-1], "neverrun-e209-card.txt")):
+ 168          shutil.copyfile(os.path.join(a.rb_out, nr[-1], "neverrun-e209-card.txt"), os.path.join(dd, "neverrun-e209-card.txt"))
+ 169      win = {}
+ 170      if os.path.exists(os.path.join(a.rb_out, "window.env")):
+ 171          for ln in open(os.path.join(a.rb_out, "window.env")):
+ 172              k, _, v = ln.strip().partition("=")
+ 173              win[k] = v
+ 174      first = {}
+ 175      if os.path.exists(os.path.join(a.rb_out, "e209-first.txt")):
+ 176          first = dict(x.split("=", 1) for x in open(os.path.join(a.rb_out, "e209-first.txt")).read().split())
+ 177      log = open(os.path.join(cp, "session.log"), errors="replace").read().splitlines()
+ 178      runs = q.get("queue") or []
+ 179      facts = {"experiment": "E209", "session": a.sid, "card": "aifoundry2 card 0", "t0_epoch": t0, "t0": pst(t0, ms=False),
+ 180               "first_card_command_session": pst(q.get("t_first_ms")), "close": pst(q.get("t_close_ms")), "card_min": q.get("card_min"),
+ 181               "runs_planned": 62, "runs_in_queue": len(runs), "runs_ran": q.get("n_ran"), "stop": q.get("stop"), "leftover": q.get("leftover"),
+ 182               "rest_die_c": q.get("rest_die_c"), "rest_board_w": q.get("rest_board_w"), "runner_rc": open(os.path.join(cp, "runner.rc")).read().strip(),
+ 183               "window": {k: (pst(int(v), ms=False) if v.isdigit() else v) for k, v in win.items()},
+ 184               "reboot_gate": {"stamp": pst(int(first["FIRST"]), ms=False) if first.get("FIRST", "").isdigit() else None,
+ 185                               "mode": first.get("FWGATE"), "folder": "session/first/"},
+ 186               "checks": verdicts, "log_first": log[0][:300] if log else None, "log_last": log[-1][:300] if log else None,
+ 187               "not_run": [{"i": x.get("i"), "arm": x.get("arm"), "why": x.get("why")} for x in runs if not x.get("ran")],
+ 188               "desktest": desk}
+ 189      facts["checks_overall"] = overall
+ 190      for k in ("C4_clock", "C5_stops"):
+ 191          if isinstance(checks.get(k), dict):
+ 192              facts[k] = {kk: vv for kk, vv in checks[k].items() if kk != "verdict"}
+ 193      json.dump(facts, open(os.path.join(dd, "facts-e209.json"), "w"), indent=1, sort_keys=True)
+ 194      form = open(os.path.join(HERE, "DATA-README-FORM-e209.md")).read()
+ 195      fill = {"SESSION": a.sid, "DAY": day, "T0": facts["t0"], "FIRST": str(facts["reboot_gate"]["stamp"]), "FWGATE": str(first.get("FWGATE")),
+ 196              "CLOSE": str(facts["close"]), "CARDMIN": str(facts["card_min"]), "RAN": str(facts["runs_ran"]), "STOP": str(facts["stop"]),
+ 197              "G": str(facts["window"].get("E209_G")), "LASTSTART": str(facts["window"].get("E209_LAST_START")),
+ 198              "LASTEND": str(facts["window"].get("E209_LAST_END")), "RUNNERRC": facts["runner_rc"],
+ 199              "CHECKS": f"{overall}: " + ", ".join(f"{k} {v}" for k, v in verdicts.items()),
+ 200              "NOTRUN": "; ".join(f"{x['i']} {x['arm']} ({x['why']})" for x in facts["not_run"]) or "none",
+ 201              "NEVERRUN": open(os.path.join(dd, "neverrun-e209-card.txt")).read().strip().splitlines()[-1] if os.path.exists(os.path.join(dd, "neverrun-e209-card.txt")) else "NOT RUN"}
+ 202      for k, v in fill.items():
+ 203          form = form.replace("{{" + k + "}}", v)
+ 204      open(os.path.join(dd, "README.md"), "w").write(form)
+ 205      rows = []
+ 206      for dp, dn, fn in os.walk(dd):
+ 207          dn.sort()
+ 208          for n in sorted(fn):
+ 209              p = os.path.join(dp, n)
+ 210              r_ = os.path.relpath(p, dd)
+ 211              if r_ != "SHA256SUMS":
+ 212                  rows.append(f"{sha(p)}  {r_}")
+ 213      open(os.path.join(dd, "SHA256SUMS"), "w").write("\n".join(sorted(rows, key=lambda x: x.split("  ", 1)[1])) + "\n")
+ 214      print(f"DATA DIR {rel_dd} ({len(rows) + 1} files)")
+ 215      return 0
+ 216  
+ 217  
+ 218  if __name__ == "__main__":
+ 219      sys.exit(main(sys.argv[1:]))
+
+################ Q- (in step 11 after the copy-back; on every stop path after Q): bash rb/quiet_e209.sh lower <lane>
+
+################ 12 (the card lane's): the README's dated notes (DATA-README-FORM-e209.md's form), the public-text scan; LAB_QUIET_HOLD_OWNER=<lane> bash W/commit_lab.sh "<subject>" "<body>" <the data directory> (on exit 5 or 6 again)
+
+################ C- (the card lane's): 'bash W/onelab.sh uncollect <lane>' (right after the data commit's push; on every stop path inside C+..C-)
+
+################ 13 THE REDUCTION AND THE FROZEN SCORER (after the data commit): bash tools/claims-v3/e209/rb/s24_score_e209.sh 
+---- tools/claims-v3/e209/rb/s24_score_e209.sh (sha256 56542a98a6c5e0a5; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): runbook step 13, THE REDUCTION AND THE FROZEN SCORER, AFTER THE DATA
+   3  # COMMIT (E209.md section 7): E208's registered reducer, unchanged (tools/claims-v3/e208/proposal/src/reduce_mms.py b9e32618... with its
+   4  # mms_common.py c3fc7883..., run from the lab clone at its committed path), on the COMMITTED session folder (checked first against
+   5  # the copy-back's manifest), then score_e209.py, frozen, on its output, with step 6n's labels when they name a point (--labels). Outputs in
+   6  # RB_OUT/score/ only; nothing is committed here (a later lane commits them, byte for byte, with their printed lines).
+   7  # fix-e209 (Q202c, before any E209 datum; E209.md amendment A1, verify-e209's findings 3, 5 and 6): before the scorer, rb/post_e209.py
+   8  # labels refuses (10) a labels file with an entry that names no point or time case of points-e209.json (the frozen scorer would echo it as
+   9  # applied and go on scoring the point); after it, rb/post_e209.py after writes RB_OUT/score/post-e209.json and post.out, REPORTED only:
+  10  # the points left out of every rule unnamed (NO DATA: no kept run; kept runs but no time reading; a time reading but no energy reading),
+  11  # reading (f)'s day offset against E208's 27 anchor runs on this card, and H4n on H4's line.
+  12  #   RB_OUT=... bash tools/claims-v3/e209/rb/s24_score_e209.sh
+  13  # Exits: 0 scored (the scorer's words and the readings printed); 10 refused (no data commit of this day's directory in HEAD, the committed
+  14  # session not the copy-back's, or a label naming nothing); 14 the reducer, the scorer or the readings failed (rc and output in RB_OUT/score/).
+  15  # SPDX-License-Identifier: Apache-2.0
+  16  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  17  rb_init s24_score
+  18  rb_need RB_OUT
+  19  [ -f "$RB_OUT/e209-datadir.txt" ] || rb_die 10 "no data directory in this RB_OUT (step 11)"
+  20  # shellcheck disable=SC1091
+  21  . "$RB_OUT/e209-datadir.txt"
+  22  cd "$RB_REPO" || rb_die 10 "cannot enter the lab clone"
+  23  C=$(git log --diff-filter=A --format=%H -- "$DD/SHA256SUMS" | tail -n 1)
+  24  [ -n "$C" ] || rb_die 10 "the data directory $DD is not committed in HEAD (step 12 first)"
+  25  [ -z "$(git status --porcelain -- "$DD")" ] || rb_die 10 "the data directory differs from its commit"
+  26  ( cd "$DD/session" && sha256sum -c --quiet MANIFEST.sha256 ) || rb_die 10 "the committed session does not read its manifest OK"
+  27  R8=tools/claims-v3/e208/proposal/src
+  28  [ "$(sha256sum $R8/reduce_mms.py | cut -c1-64)" = b9e32618020d28a590a615f97e5655c1ea458a6a757bf5658f2517a87fc3e0a5 ] || rb_die 10 "reduce_mms.py is not the registered one"
+  29  [ "$(sha256sum $R8/mms_common.py | cut -c1-64)" = c3fc7883544ad73c3e455f7e950b62b9b155fd2ed972cee5e3524d74a378569c ] || rb_die 10 "mms_common.py is not the registered one"
+  30  S="$RB_OUT/score"; mkdir -p "$S"
+  31  echo "the data commit ${C:0:12} ($(git log -1 --format=%cd --date=iso "$C")); HEAD $(git rev-parse --short HEAD)"
+  32  nice -n 10 timeout 900 "$PY" -I -B "$R8/reduce_mms.py" "$DD/session" --out "$S/data-e209.json" --txt "$S/reduce-e209.txt" > "$S/reduce.out" 2>&1
+  33  rc=$?; echo "reduce_mms.py rc $rc"
+  34  [ "$rc" -eq 0 ] || rb_die 14 "the reducer ended rc $rc (RB_OUT/score/reduce.out)"
+  35  LAB=()
+  36  if [ -f "$RB_OUT/ranbefore-e209.json" ]; then
+  37    LW=$("$PY" -I -B "$E209_REL/rb/post_e209.py" labels "$RB_OUT/ranbefore-e209.json" 2>&1); lrc=$?
+  38    echo "$LW"
+  39    [ "$lrc" -eq 0 ] || rb_die 10 "the labels file: $(echo "$LW" | tail -n 1) (correct the dated note and RB_OUT/ranbefore-e209.json, never the scorer)"
+  40  fi
+  41  if [ -f "$RB_OUT/ranbefore-e209.json" ] && "$PY" -I -B -c 'import json,sys; sys.exit(0 if json.load(open(sys.argv[1])).get("ran_before_points") or json.load(open(sys.argv[1])).get("ran_before_cases") else 1)' "$RB_OUT/ranbefore-e209.json"; then
+  42    LAB=(--labels "$RB_OUT/ranbefore-e209.json")
+  43    echo "the labels of step 6n are passed: $(grep -o '"ran_before_points": \[[^]]*\]' "$RB_OUT/ranbefore-e209.json")"
+  44  fi
+  45  OMP_NUM_THREADS=1 nice -n 10 timeout 1800 "$PY" -I -B "$E209_REL/score_e209.py" "$S/data-e209.json" --out "$S/scored-e209.json" "${LAB[@]}" > "$S/score.out" 2>&1
+  46  rc=$?; echo "score_e209.py rc $rc"
+  47  cat "$S/score.out"
+  48  [ "$rc" -eq 0 ] || rb_die 14 "the scorer ended rc $rc (RB_OUT/score/score.out)"
+  49  nice -n 10 timeout 900 "$PY" -I -B "$E209_REL/rb/post_e209.py" after "$S/data-e209.json" "$S/scored-e209.json" --out "$S/post-e209.json" > "$S/post.out" 2>&1
+  50  rc=$?; echo "post_e209.py after rc $rc"
+  51  cat "$S/post.out"
+  52  [ "$rc" -eq 0 ] || rb_die 14 "the readings beside the scorer ended rc $rc (RB_OUT/score/post.out)"
+  53  rb_ok "scored: RB_OUT/score/scored-e209.json, score.out, post-e209.json and post.out (read their words: NO DATA named, the day offset, H4n beside H4; do not commit them here)"
+
+################ 13' its label check before the scorer and its readings after it (E209.md A1): bash tools/claims-v3/e209/rb/post_e209.py labels <RB_OUT/ranbefore-e209.json> | after <data> <scored> --out <post>
+---- tools/claims-v3/e209/rb/post_e209.py (sha256 8985d505bc693ff9; listed, not run)
+   1  #!/usr/bin/env python3
+   2  """E209 (Q202c, lane fix-e209, Tue 17 Nov 2026, before any E209 datum): step 13's check and readings beside the frozen scorer (E209.md,
+   3  amendment A1; verify-e209's findings 3, 5 and 6), never a verdict. Python's own modules; it imports the frozen scorer score_e209.py for its
+   4  h2h() and, in the self-test only, its own stand-in days.
+   5  
+   6      /usr/bin/python3 -I -B tools/claims-v3/e209/rb/post_e209.py labels RANBEFORE.json
+   7      /usr/bin/python3 -I -B tools/claims-v3/e209/rb/post_e209.py after DATA.json SCORED.json --out POST.json
+   8      /usr/bin/python3 -I -B tools/claims-v3/e209/rb/post_e209.py --selftest OUT.json
+   9  
+  10  labels (A1 item 3): every entry of "ran_before_points" names a point of points-e209.json and every entry of "ran_before_cases" a time case
+  11    of it: "LABELS OK" (exit 0); otherwise "LABELS REFUSED: ..." naming each entry that names nothing (exit 10), because the frozen scorer
+  12    echoes such a label as applied and goes on scoring the point. The file's other keys (step 6n's dating) are not read.
+  13  after (A1 items 1 and 2), every figure REPORTED:
+  14    NO DATA, NAMED: each point of points-e209.json that the frozen scorer leaves out of rules without naming it, unless labelled: no kept run
+  15    (it did not run, or every run was set aside: the scorer's flags say why), kept runs but no time reading (no primary view: the governor held
+  16    700 MHz, or 600-700 MHz, through the window), and a time reading but no energy reading (capped or thin: out of E1-E4, H4 and H6);
+  17    THE DAY OFFSET (reading f): the mean of the day's kept anchor runs (role anchor; the primary view's dP_w and p_mean_w present, the run not
+  18    capped, the view not thin) over the mean of E208's 27 anchor runs on this card read the same way, less 1, in W over idle, op time and the
+  19    kernel clock; E208's runs from the three files rules-e209.json pins (MM1-v2's vendored a2c0-S1 and a2c0-S2, the a2c0-S1r data commit);
+  20    H4n: H4 re-read with every measured J over idle (and W, at a watts point) divided by (1 + offset_W), with H4's ties, test and interval
+  21    (score_e209.h2h, seed "E209|bootstrap|H4n"), printed on one line with H4's registered verdict; the cycle offsets beside H1-H3.
+  22  --selftest: the frozen scorer's own stand-in day A and variants of it (scored by score_e209.score, the predictors loaded as the scorer
+  23    loads them), label files of step 6n's form, and E208's committed anchors; every answer stated before the run; "SELFTEST-POST-E209 <n> of
+  24    <m> PASS" last.
+  25  Refuses (exit 4) unless points-e209.json, rules-e209.json, score_e209.py and E208's three anchor files are at their pinned sha256.
+  26  SPDX-License-Identifier: Apache-2.0
+  27  """
+  28  import copy
+  29  import hashlib
+  30  import json
+  31  import math
+  32  import os
+  33  import statistics
+  34  import sys
+  35  
+  36  HERE = os.path.dirname(os.path.abspath(__file__))
+  37  E = os.path.normpath(os.path.join(HERE, ".."))
+  38  REPO = os.path.normpath(os.path.join(E, "..", "..", ".."))
+  39  SCORER_SHA = "e522919a5d399312e8e357e8aab22fc2c07e96f3e9f02e2ea2f3bd1a50e2e513"
+  40  POINTS_SHA = "cfdda741bcc8cbd8555ff21809f2897fae0f734b66727b108795cd138fb07261"
+  41  RULES_SHA = "0d7dfa791573cf00505143a0188dff7ad5e2ce6f95447c66fef89e9d5b8a62bb"
+  42  V2 = "tools/matmul/mm1/v2"
+  43  E208_ANCHOR_FILES = {"a2c0-S1": f"{V2}/inputs/e208/a2c0-S1__data-e208-a2c0-S1.json",
+  44                       "a2c0-S2": f"{V2}/inputs/e208/a2c0-S2__data-e208-a2c0-S2.json",
+  45                       "a2c0-S1r": "docs/reports/data/2026-11-17-e208-mmsweep-a2c0-S1r/data-e208-a2c0-S1r.json"}
+  46  E208_REF_REPORTED = {"n": 27, "dP_w": 18.355041}      # fix-e209's own count (scripts/e208_anchor_ref.py, written apart): the self-test's answer
+  47  
+  48  
+  49  def sha(p):
+  50      return hashlib.sha256(open(p, "rb").read()).hexdigest()
+  51  
+  52  
+  53  def pins():
+  54      bad = []
+  55      for rel, want in ((os.path.join(E, "points-e209.json"), POINTS_SHA), (os.path.join(E, "rules-e209.json"), RULES_SHA),
+  56                        (os.path.join(E, "score_e209.py"), SCORER_SHA)):
+  57          if sha(rel) != want:
+  58              bad.append(os.path.basename(rel))
+  59      R = json.load(open(os.path.join(E, "rules-e209.json")))
+  60      for rel in E208_ANCHOR_FILES.values():
+  61          if R["inputs_sha256"].get(rel) is None or sha(os.path.join(REPO, rel)) != R["inputs_sha256"][rel]:
+  62              bad.append(rel)
+  63      if bad:
+  64          print(f"refused: not at the pinned sha256: {bad} (exit 4)")
+  65          sys.exit(4)
+  66      return R
+  67  
+  68  
+  69  def scorer():
+  70      if E not in sys.path:
+  71          sys.path.insert(0, E)
+  72      import score_e209 as S  # noqa: E402  (the frozen scorer, pinned above; nothing of it runs at import)
+  73      return S
+  74  
+  75  
+  76  def points():
+  77      P = json.load(open(os.path.join(E, "points-e209.json")))
+  78      return P, [p["id"] for p in P["points"]], {p["id"]: p for p in P["points"]}
+  79  
+  80  
+  81  # ------------------------------------------------------------------ labels
+  82  def check_labels(path):
+  83      """-> (ok, words)"""
+  84      P, ids, _ = points()
+  85      cases = set(P["time_cases"])
+  86      try:
+  87          L = json.load(open(path))
+  88      except Exception as e:  # noqa: BLE001
+  89          return False, f"LABELS REFUSED: {os.path.basename(path)} is not a JSON object ({type(e).__name__})"
+  90      if not isinstance(L, dict):
+  91          return False, "LABELS REFUSED: the labels file is not a JSON object"
+  92      bad = []
+  93      for key, known in (("ran_before_points", set(ids)), ("ran_before_cases", cases)):
+  94          v = L.get(key) or []
+  95          if not isinstance(v, list):
+  96              bad.append(f"{key} is not a list")
+  97              continue
+  98          for x in v:
+  99              if not isinstance(x, str) or x not in known:
+ 100                  bad.append(f"{key} entry {x!r} names no {'point' if key == 'ran_before_points' else 'time case'} of points-e209.json")
+ 101      if bad:
+ 102          return False, "LABELS REFUSED: " + "; ".join(bad)
+ 103      n_p, n_c = len(L.get("ran_before_points") or []), len(L.get("ran_before_cases") or [])
+ 104      return True, f"LABELS OK: {n_p} point label(s), {n_c} time-case label(s), each naming a point or a time case of points-e209.json"
+ 105  
+ 106  
+ 107  # ------------------------------------------------------------------ after the scorer
+ 108  def kept_anchor(r):
+ 109      v = (r.get("views") or {}).get(r.get("primary_view")) or {}
+ 110      if r.get("role") == "anchor" and v.get("dP_w") is not None and v.get("p_mean_w") and not r.get("capped") and not v.get("thin"):
+ 111          return (float(v["dP_w"]), v.get("T_op_us"), v.get("kclock_mhz"))
+ 112      return None
+ 113  
+ 114  
+ 115  def e208_anchors():
+ 116      out = []
+ 117      for rel in E208_ANCHOR_FILES.values():
+ 118          for r in json.load(open(os.path.join(REPO, rel)))["runs"]:
+ 119              a = kept_anchor(r)
+ 120              if a:
+ 121                  out.append(a)
+ 122      return out
+ 123  
+ 124  
+ 125  def day_offset(datas):
+ 126      day = [a for D in datas for r in (D.get("runs") or []) for a in [kept_anchor(r)] if a]
+ 127      ref = e208_anchors()
+ 128      o = {"day_anchor_runs_kept": len(day), "e208_anchor_runs": len(ref)}
+ 129      for k, name in ((0, "W_over_idle"), (1, "T_op_us"), (2, "kclock_mhz")):
+ 130          dv = [x[k] for x in day if x[k] is not None]
+ 131          rv = [x[k] for x in ref if x[k] is not None]
+ 132          o[name] = {"day_mean": statistics.mean(dv) if dv else None, "e208_mean": statistics.mean(rv) if rv else None,
+ 133                     "offset": (statistics.mean(dv) / statistics.mean(rv) - 1.0) if (dv and rv) else None,
+ 134                     "day_runs": dv}
+ 135      return o
+ 136  
+ 137  
+ 138  def h4n(S, R, P, scored, off, seed="E209|bootstrap|H4n"):
+ 139      """H4 re-read on J over idle (W at a watts point) divided by (1 + off): the scorer's rows_energy for H4, then its h2h"""
+ 140      rows = []
+ 141      for pid, x in scored.get("points", {}).items():
+ 142          if x.get("n_energy", 0) == 0:
+ 143              continue
+ 144          fam = P[pid]["family"]
+ 145          v2s, v1 = x.get("v2_e"), x.get("v1_e")
+ 146          ot = ((v1 or {}).get("J_given"), (v1 or {}).get("W_given")) if v1 else None
+ 147          if not v2s or not ot or ot[0] is None:
+ 148              rows.append({"id": pid, "d": None, "watts": x["watts"], "family": fam})
+ 149              continue
+ 150          if x["watts"]:
+ 151              mW = x["meas"]["W"] / (1.0 + off)
+ 152              rows.append({"id": pid, "d": abs(mW - ot[1]) - abs(mW - v2s["W_given"]), "watts": True, "family": fam})
+ 153          else:
+ 154              m = x["meas"]["J_over"] / (1.0 + off)
+ 155              a, b = S.ln_ratio(m, v2s["J_given"]), S.ln_ratio(m, ot[0])
+ 156              rows.append({"id": pid, "d": (abs(b) - abs(a)) if (a is not None and b is not None) else None, "watts": False, "family": fam})
+ 157      H = R["head_to_head"]
+ 158      return S.h2h(rows, H["tie_ln"]["joules"], H["tie_w"], "MM1-v1", "H4n", H["min_untied"], H["alpha"], H["rules"]["H4"]["decision"], seed)
+ 159  
+ 160  
+ 161  def after(datas, scored, S=None, R=None):
+ 162      R = R or pins()
+ 163      S = S or scorer()
+ 164      P, ids, PP = points()
+ 165      F = scored.get("points", {})
+ 166      lab = set((scored.get("labels_applied") or {}).get("ran_before_points") or [])
+ 167      flags = scored.get("flags", {})
+ 168      nd = {"no_kept_run": [{"id": p, "why": (flags.get(p) or {}).get("set_aside") or ["no run of it in the data"]} for p in ids
+ 169                            if p not in F and p not in lab],
+ 170            "kept_runs_no_time_reading": [p for p in ids if p in F and F[p].get("n_time", 0) == 0],
+ 171            "time_reading_no_energy_reading": [p for p in ids if p in F and F[p].get("n_time", 0) > 0 and F[p].get("n_energy", 0) == 0]}
+ 172      off = day_offset(datas)
+ 173      ow = off["W_over_idle"]["offset"]
+ 174      hh = scored.get("head_to_head", {})
+ 175      out = {"experiment": "E209", "what": "step 13's readings beside the frozen scorer (E209.md A1): REPORTED, never verdicts",
+ 176             "labels_applied": scored.get("labels_applied"), "no_data_named": nd, "day_offset_reading_f": off,
+ 177             "H1_H3_registered": {h: (hh.get(h) or {}).get("verdict") for h in ("H1", "H2", "H3")},
+ 178             "H4_registered": (hh.get("H4") or {}).get("verdict")}
+ 179      out["H4n_REPORTED"] = h4n(S, R, PP, scored, ow) if ow is not None else {"verdict": "NO DATA (no kept anchor run: the day offset is not read)"}
+ 180      return out
+ 181  
+ 182  
+ 183  def after_text(o):
+ 184      nd, off = o["no_data_named"], o["day_offset_reading_f"]
+ 185      pct = lambda x: "n/a" if x is None else f"{x * 100:+.3f}%"  # noqa: E731
+ 186      lines = ["E209 step 13 readings beside the frozen scorer (E209.md A1; REPORTED, never verdicts)",
+ 187               "NO DATA, named: no kept run: " + (", ".join(f"{x['id']} ({'; '.join(x['why'])})" for x in nd["no_kept_run"]) or "none")
+ 188               + "; kept runs but no time reading (no window view): " + (", ".join(nd["kept_runs_no_time_reading"]) or "none")
+ 189               + "; a time reading but no energy reading: " + (", ".join(nd["time_reading_no_energy_reading"]) or "none"),
+ 190               f"THE DAY OFFSET (reading f; {off['day_anchor_runs_kept']} kept anchor runs of the day against E208's {off['e208_anchor_runs']}): "
+ 191               f"W over idle {pct(off['W_over_idle']['offset'])}, op time {pct(off['T_op_us']['offset'])}, clock {pct(off['kclock_mhz']['offset'])}",
+ 192               f"H4 (registered) {o['H4_registered']}; offset_W {pct(off['W_over_idle']['offset'])}; H4n (REPORTED, J over idle / (1 + offset_W)) "
+ 193               f"{o['H4n_REPORTED'].get('verdict')}"
+ 194               + (f" (v2 closer {o['H4n_REPORTED']['v2_closer']}, v1 closer {o['H4n_REPORTED']['other_closer']}, ties {o['H4n_REPORTED']['ties']}; "
+ 195                  f"mean d 95% {[round(v, 5) for v in o['H4n_REPORTED']['bootstrap_mean_d']['mean_95']]})"
+ 196                  if o["H4n_REPORTED"].get("bootstrap_mean_d") else ""),
+ 197               f"H1-H3 (registered) {o['H1_H3_registered']}; beside them the op-time offset {pct(off['T_op_us']['offset'])} and the clock offset "
+ 198               f"{pct(off['kclock_mhz']['offset'])}"]
+ 199      return "\n".join(lines) + "\n"
+ 200  
+ 201  
+ 202  # ------------------------------------------------------------------ self-test
+ 203  def selftest(outp):
+ 204      import tempfile
+ 205      R = pins()
+ 206      S = scorer()
+ 207      P, ids, PP = points()
+ 208      rows, res = [], {}
+ 209  
+ 210      def row(words, ok, detail=""):
+ 211          rows.append(bool(ok))
+ 212          print(f"{'PASS' if ok else 'FAIL'} {words}" + (f" [{detail}]" if detail != "" else ""), flush=True)
+ 213          res[words.split(" ")[0]] = {"ok": bool(ok), "detail": str(detail)[:300]}
+ 214  
+ 215      tmp = tempfile.mkdtemp(prefix="post-e209-")
+ 216  
+ 217      def lab(obj, name):
+ 218          p = os.path.join(tmp, name)
+ 219          open(p, "w").write(obj if isinstance(obj, str) else json.dumps(obj))
+ 220          return check_labels(p)
+ 221      ok, w = lab({"ran_before_points": ["e01"], "ran_before_cases": ["gemmL1x3x2|int8|0xffffffff"], "after_freeze_REPORTED": [],
+ 222                   "searched_REPORTED": "step 6n's dating"}, "l1.json")
+ 223      row("L1 labels of step 6n's form naming e01 and its time case: LABELS OK", ok and w.startswith("LABELS OK"), w)
+ 224      ok, w = lab({"ran_before_points": ["e1"], "ran_before_cases": []}, "l2.json")
+ 225      row("L2 a point label 'e1' (a typo for e01): LABELS REFUSED naming it", not ok and "'e1'" in w, w)
+ 226      ok, w = lab({"ran_before_points": [], "ran_before_cases": ["gemmL1x3x2|int8|0xFFFFFFFF"]}, "l3.json")
+ 227      row("L3 a case label spelled 0xFFFFFFFF: LABELS REFUSED naming it", not ok and "0xFFFFFFFF" in w, w)
+ 228      ok, w = lab({"ran_before_points": [], "ran_before_cases": []}, "l4.json")
+ 229      row("L4 empty labels: LABELS OK, nothing to pass", ok and "0 point label(s), 0 time-case label(s)" in w, w)
+ 230      ok, w = lab({"ran_before_points": "e01"}, "l5.json")
+ 231      row("L5 a point label given as a string, not a list: LABELS REFUSED", not ok and "not a list" in w, w)
+ 232      ok, w = lab("{not json", "l6.json")
+ 233      row("L6 a labels file that is not JSON: LABELS REFUSED", not ok and "not a JSON object" in w, w)
+ 234      # the frozen scorer's own day A, scored as the scorer scores it (the predictors loaded as it loads them)
+ 235      FZ = S.load_frozen()
+ 236      A = S.standin_data(FZ, "A")
+ 237      got = S.score(copy.deepcopy(A), FZ, {"ran_before_points": ["e1"], "ran_before_cases": []})
+ 238      row("L7 why the check: the frozen scorer given 'e1' echoes it as applied and still scores e01",
+ 239          got["labels_applied"]["ran_before_points"] == ["e1"] and "e01" in got["points"], got["labels_applied"])
+ 240      # day A with energy-read anchors (p_mean_w added: the stand-in's anchors carry dP_w 18.4 W, T_op 2.18 us, 799.1 MHz)
+ 241      A2 = copy.deepcopy(A)
+ 242      for r in A2[0]["runs"]:
+ 243          if r.get("role") == "anchor":
+ 244              r["views"]["win"]["p_mean_w"] = 41.6
+ 245      sA = S.score(copy.deepcopy(A2), FZ)
+ 246      ref = e208_anchors()
+ 247      rw = statistics.mean(x[0] for x in ref)
+ 248      row("D1 E208's anchor runs on this card read as rules_e209.py reads them: 27 runs, W over idle mean 18.355041 W (fix-e209's own count)",
+ 249          len(ref) == E208_REF_REPORTED["n"] and abs(rw - E208_REF_REPORTED["dP_w"]) < 5e-7, f"{len(ref)} runs, {rw:.6f} W")
+ 250      o = after(A2, sA, S, R)
+ 251      want = 18.4 / rw - 1.0
+ 252      got_o = o["day_offset_reading_f"]["W_over_idle"]["offset"]
+ 253      row("D2 day A's five anchors at 18.4 W: offset_W = 18.4 / E208's mean - 1 (stated before the run), op time and clock offsets beside",
+ 254          o["day_offset_reading_f"]["day_anchor_runs_kept"] == 5 and got_o is not None and abs(got_o - want) < 1e-12
+ 255          and o["day_offset_reading_f"]["T_op_us"]["offset"] is not None, f"{got_o * 100:+.4f}% (stated {want * 100:+.4f}%)")
+ 256      seed_h4 = h4n(S, R, PP, sA, 0.0, seed="E209|bootstrap|H4")
+ 257      h4 = sA["head_to_head"]["H4"]
+ 258      row("D3 at offset 0 and H4's own seed, H4n is the scorer's H4 exactly (cells, counts, verdict, interval): the rows are the scorer's",
+ 259          seed_h4["cells"] == h4["cells"] and seed_h4["verdict"] == h4["verdict"] and seed_h4["bootstrap_mean_d"] == h4["bootstrap_mean_d"]
+ 260          and (seed_h4["v2_closer"], seed_h4["other_closer"], seed_h4["ties"]) == (h4["v2_closer"], h4["other_closer"], h4["ties"]),
+ 261          f"{h4['verdict']}: {h4['v2_closer']}/{h4['other_closer']}/{h4['ties']}")
+ 262      row("D4 day A: no point named NO DATA (every point has a time and an energy reading)",
+ 263          o["no_data_named"] == {"no_kept_run": [], "kept_runs_no_time_reading": [], "time_reading_no_energy_reading": []}, o["no_data_named"])
+ 264      # the day's level moved: every measured W and J over idle of day A times 1.02, and the anchors at E208's mean times 1.02: the scorer's
+ 265      # H4 then reads the measurement 2% high; H4n takes the 2% back out and reads day A's own H4 cells
+ 266      A3 = copy.deepcopy(A2)
+ 267      for r in A3[0]["runs"]:
+ 268          v = r["views"].get(r.get("primary_view")) or {}
+ 269          if r.get("role") == "anchor":
+ 270              v["dP_w"] = rw * 1.02
+ 271          elif r.get("role") == "arm" and v.get("dP_w") is not None:
+ 272              for k in ("dP_w", "J_pass_over"):
+ 273                  v[k] = v[k] * 1.02
+ 274              v["p_mean_w"] = v["p_mean_w"] + v["dP_w"] / 1.02 * 0.02
+ 275              v["J_pass_with"] = v["p_mean_w"] * v["t_pass_s"]
+ 276      s3 = S.score(copy.deepcopy(A3), FZ)
+ 277      o3 = after(A3, s3, S, R)
+ 278      w3 = o3["day_offset_reading_f"]["W_over_idle"]["offset"]
+ 279      n3 = o3["H4n_REPORTED"]
+ 280      same = sum(1 for k, v in n3["cells"].items() if h4["cells"].get(k) == v)
+ 281      row("D5 every W and J over idle 2% over day A, the anchors at E208's mean x 1.02: offset_W = +2%; H4n's cells are day A's H4 cells at "
+ 282          "every point, while the scorer's H4 reads the raised day", abs(w3 - 0.02) < 1e-12 and same == len(h4["cells"])
+ 283          and n3["verdict"] == h4["verdict"], f"offset {w3 * 100:+.3f}%; H4 {s3['head_to_head']['H4']['verdict']} "
+ 284          f"({s3['head_to_head']['H4']['v2_closer']}/{s3['head_to_head']['H4']['other_closer']}/{s3['head_to_head']['H4']['ties']}); "
+ 285          f"H4n {n3['verdict']} ({n3['v2_closer']}/{n3['other_closer']}/{n3['ties']}); {same} of {len(h4['cells'])} cells as day A's")
+ 286      # a point whose only kept run has no window view (held at 700 MHz): verify-e209's attack S3
+ 287      A4 = copy.deepcopy(A2)
+ 288      for r in A4[0]["runs"]:
+ 289          if r.get("arm") == "e02":
+ 290              r["views"] = {"burst": r["views"].get("burst", {"kclock_mhz": 700.0})}
+ 291              r["frac_800_after_step"] = 0.0
+ 292              r["capped"] = True
+ 293      s4 = S.score(copy.deepcopy(A4), FZ)
+ 294      o4 = after(A4, s4, S, R)
+ 295      in_rules = any("e02" in (s4["rules"][k].get("cells") or {}) for k in s4["rules"]) or \
+ 296          any(tc for tc, c in s4["cases"].items() if "e02" in c["members"])
+ 297      row("N1 e02's run with no window view: the scorer names it in no rule; step 13 names it NO DATA (kept runs, no time reading)",
+ 298          not in_rules and o4["no_data_named"]["kept_runs_no_time_reading"] == ["e02"], o4["no_data_named"])
+ 299      A5 = copy.deepcopy(A2)
+ 300      A5[0]["runs"] = [r for r in A5[0]["runs"] if r.get("arm") != "e03"]
+ 301      for r in A5[0]["runs"]:
+ 302          if r.get("arm") == "e04":
+ 303              r["shires"] = "0xffff0000"
+ 304      s5 = S.score(copy.deepcopy(A5), FZ)
+ 305      o5 = after(A5, s5, S, R)
+ 306      nk = {x["id"]: x["why"] for x in o5["no_data_named"]["no_kept_run"]}
+ 307      row("N2 e03 never in the data and e04's only run set aside (another mask): both named NO DATA, no kept run, with the scorer's reason",
+ 308          sorted(nk) == ["e03", "e04"] and any("mask" in w for w in nk["e04"]), nk)
+ 309      A6 = copy.deepcopy(A2)
+ 310      for r in A6[0]["runs"]:
+ 311          if r.get("arm") == "e10":
+ 312              r["capped"] = True
+ 313      s6 = S.score(copy.deepcopy(A6), FZ)
+ 314      o6 = after(A6, s6, S, R)
+ 315      row("N3 e10 capped (its time read, no energy): named, a time reading but no energy reading",
+ 316          o6["no_data_named"]["time_reading_no_energy_reading"] == ["e10"], o6["no_data_named"])
+ 317      sQ = S.score(copy.deepcopy(A2), FZ, {"ran_before_points": ["e01"], "ran_before_cases": []})
+ 318      oQ = after(A2, sQ, S, R)
+ 319      row("N4 e01 labelled 'ran before': out of the NO DATA lists (the label names it)", all("e01" not in str(v) for v in oQ["no_data_named"].values()),
+ 320          oQ["no_data_named"])
+ 321      A7 = copy.deepcopy(A)
+ 322      s7 = S.score(copy.deepcopy(A7), FZ)
+ 323      o7 = after(A7, s7, S, R)
+ 324      row("N5 anchors with no energy reading (the stand-in's own: no p_mean_w): the day offset not read, H4n NO DATA, said so",
+ 325          o7["day_offset_reading_f"]["W_over_idle"]["offset"] is None and o7["H4n_REPORTED"]["verdict"].startswith("NO DATA"), o7["H4n_REPORTED"]["verdict"])
+ 326      txt = after_text(o3)
+ 327      row("T1 the printed lines: H4's registered verdict, offset_W and H4n on one line", any(ln.startswith("H4 (registered)") and "offset_W" in ln
+ 328          and "H4n" in ln for ln in txt.splitlines()), txt.splitlines()[3][:160])
+ 329      res["_summary"] = f"SELFTEST-POST-E209 {sum(rows)} of {len(rows)} {'PASS' if all(rows) else 'FAIL'}"
+ 330      json.dump(res, open(outp, "w"), indent=1, sort_keys=True)
+ 331      print(res["_summary"])
+ 332      return 0 if all(rows) else 1
+ 333  
+ 334  
+ 335  def main(argv):
+ 336      if argv[:1] == ["labels"] and len(argv) == 2:
+ 337          pins()
+ 338          ok, w = check_labels(argv[1])
+ 339          print(w)
+ 340          return 0 if ok else 10
+ 341      if argv[:1] == ["after"] and len(argv) == 5 and argv[3] == "--out":
+ 342          R = pins()
+ 343          o = after([json.load(open(argv[1]))], json.load(open(argv[2])), scorer(), R)
+ 344          json.dump(o, open(argv[4], "w"), indent=1, sort_keys=True)
+ 345          sys.stdout.write(after_text(o))
+ 346          return 0
+ 347      if argv[:1] == ["--selftest"] and len(argv) == 2:
+ 348          return selftest(argv[1])
+ 349      print(__doc__)
+ 350      return 2
+ 351  
+ 352  
+ 353  if __name__ == "__main__":
+ 354      sys.exit(main(sys.argv[1:]))
+
+################ E THE END OF EVERY PATH: bash tools/claims-v3/e209/rb/end_e209.sh 
+---- tools/claims-v3/e209/rb/end_e209.sh (sha256 c1534417d8af0a67; listed, not run)
+   1  #!/usr/bin/env bash
+   2  # E209 (Q202, lane kit-e209, Tue 17 Nov 2026, before any E209 datum): E, THE END OF EVERY PATH (the card-lane brief's last row): whatever
+   3  # step stopped, undo what is ours and only what is ours, each by its own tool, and say what was done:
+   4  #   THE QUIET DESK FLAG lowered if it is the card lane's (rb/quiet_e209.sh lower: never another's);
+   5  #   THE ONE-LAB RULE: onelab.sh undesk <lane> if a desk span of ours stands, onelab.sh uncollect <lane> if a collect span of ours stands;
+   6  #   THE QUIET HOLD: hold.sh remove <lane> if a line of ours is in it (after the data commit, or on a stop path before it);
+   7  #   the booking: book.sh release aifoundry2 <lane> if the booking is ours.
+   8  # A session still running in the box root is NOT stopped here (rb/end_e209.sh never touches a session: step 10 waits for it, and a stop is
+   9  # E208's stop_mms.sh, which only touches STOP files); with one running it refuses (17) and does nothing, so nothing is released under it.
+  10  # A LEFTOVER keeps everything (fix-e209, Q202c, before any E209 datum; verify-e209's finding 7): E208's runner releases the card's lock at
+  11  # its 600 s bound even while a device process of ours is still alive, so E also refuses (17), releasing nothing, while any process of ours
+  12  # whose comm is device-named is alive (THE P2 COUNT's pattern), or while a session of the box root records an unresolved leftover
+  13  # (queue.json "leftover" with "resolved" not true): the quiet desk flag, the hold line and the booking stay; the lane writes it up and
+  14  # escalates (the brief, section 3), and the orchestrator clears them once the leftover is resolved. Nothing is ever killed.
+  15  #   RB_W=<the round's folder with onelab.sh, hold.sh, book.sh> RB_QUIET=... RB_LANE=... [E209_ROOT=...] bash tools/claims-v3/e209/rb/end_e209.sh
+  16  # Exits: 0 done (each action and its result printed); 10 refused (RB_W, RB_QUIET or RB_LANE missing); 17 a session of ours runs, a
+  17  # device-named process of ours is alive, or a leftover is unresolved (nothing released).
+  18  # SPDX-License-Identifier: Apache-2.0
+  19  . "$(dirname "${BASH_SOURCE[0]}")/rb_e209.sh"
+  20  rb_init end
+  21  rb_need RB_W RB_QUIET RB_LANE
+  22  [ -f "$RB_W/onelab.sh" ] && [ -f "$RB_W/hold.sh" ] && [ -f "$RB_W/book.sh" ] || rb_die 10 "RB_W does not hold onelab.sh, hold.sh and book.sh"
+  23  if [ -n "${E209_ROOT:-}" ] && [ -d "${E209_ROOT:-}" ]; then
+  24    e209_box_free_end() { mkdir -p "$E209_ROOT/run"; flock -n "$E209_ROOT/run/box.lock" true; }
+  25    e209_box_free_end || rb_die 17 "a session, a build or a dry pass of the kit runs in the box root: nothing released under it (step 10 waits)"
+  26  fi
+  27  [ "$(ours_live session_e209.sh)" = 0 ] || rb_die 17 "a session_e209.sh of ours runs: nothing released under it (step 10 waits)"
+  28  ND=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {n++} END {print n+0}')
+  29  [ "$ND" = 0 ] || rb_die 17 "$ND device-named process(es) of ours alive (a LEFTOVER?): the quiet desk flag, the hold line and the booking stay; nothing released (kill nothing; write it up and escalate)"
+  30  if [ -n "${E209_ROOT:-}" ] && [ -d "${E209_ROOT:-}/sessions" ]; then
+  31    for q in "$E209_ROOT"/sessions/*/queue.json; do
+  32      [ -f "$q" ] || continue
+  33      LO=$("$PY" -I -B -c 'import json, sys
+  34  try:
+  35      d = json.load(open(sys.argv[1]))
+  36  except Exception:
+  37      print("UNREADABLE"); sys.exit(0)
+  38  lo = d.get("leftover")
+  39  print("UNRESOLVED" if (lo and not (isinstance(lo, dict) and lo.get("resolved") is True)) else "OK")' "$q")
+  40      [ "$LO" = OK ] || rb_die 17 "the session $(basename "$(dirname "$q")") records a leftover $LO in queue.json: the quiet desk flag, the hold line and the booking stay; nothing released (kill nothing; write it up and escalate)"
+  41    done
+  42  fi
+  43  did=()
+  44  if [ -f "$RB_QUIET" ] && [ "$(head -n 1 "$RB_QUIET" | cut -d' ' -f1)" = "$RB_LANE" ]; then
+  45    bash "$RB_E209_DIR/quiet_e209.sh" lower "$RB_LANE" > /dev/null && did+=("the quiet desk flag lowered")
+  46  else did+=("the quiet desk flag: not ours or down (left)"); fi
+  47  OL=$(bash "$RB_W/onelab.sh" show 2>/dev/null)
+  48  if echo "$OL" | grep -qx "  desk-$RB_LANE"; then bash "$RB_W/onelab.sh" undesk "$RB_LANE" > /dev/null && did+=("onelab undesk"); fi
+  49  if echo "$OL" | grep -qx "  collect-$RB_LANE"; then bash "$RB_W/onelab.sh" uncollect "$RB_LANE" > /dev/null && did+=("onelab uncollect"); fi
+  50  HL=$(bash "$RB_W/hold.sh" list 2>/dev/null | tail -n 1)
+  51  case " ${HL#HOLD: } " in *" $RB_LANE "*) bash "$RB_W/hold.sh" remove "$RB_LANE" > /dev/null && did+=("the hold line removed") ;; esac
+  52  BK=$(bash "$RB_W/book.sh" show 2>/dev/null | grep '^aifoundry2: ' | awk '{print $2}')
+  53  [ "$BK" = "$RB_LANE" ] && bash "$RB_W/book.sh" release aifoundry2 "$RB_LANE" > /dev/null && did+=("the booking released")
+  54  IFS=";"; rb_ok "E: ${did[*]}"
+
+dry listing: 24 steps listed, 0 run, 0 box calls

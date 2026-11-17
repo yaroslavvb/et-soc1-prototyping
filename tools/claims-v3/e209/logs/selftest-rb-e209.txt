@@ -1,0 +1,78 @@
+E209 runbook desk test, 2026-11-17 08:44:43 PST, aifoundry2, /usr/bin/python3 3.12.3, bubblewrap 0.9.0; clone HEAD cb14eae3 (fix-e209's amended registration) with the kit's files in the working tree (before the kit's commit)
+E209 RUNBOOK DESK TEST 2026-11-17 08:44:43 PST
+PASS W1 step 1: G a minute ago: window.env written, last start G + 1:30 and last end G + 3:30 rounded up [s02_window_e209: the window written to RB_OUT/window.env (exit 0)]
+PASS W2 a second G in the same RB_OUT: refused (one RB_OUT a day, one G)
+PASS W3 a G in the future: refused
+PASS W4 G at 20:30:00 (the clock at 21:00 by RB_NOW): refused, no booking that day
+PASS W5 G at 20:29:00: taken, the last end 23:59:00 inside the day [G 2026-11-17 20:29:00 PST; last start 2026-11-17 21:59:00 PST; last end 2026-11-17 23:59:00 PST (G + 1:30 and G + 3:30, ]
+PASS W6 RB_NOW outside a desk test: refused
+PASS Q1 raise: the flag up, one line '<lane> <time>'
+PASS Q2 raise again: already ours (0), the line unchanged
+PASS Q3 check: up and ours
+PASS Q4 lower: removed
+PASS Q5 lower again: down already (0)
+PASS Q6 another's flag: raise refused (10), lower refused (10), its line left as it was
+PASS Q7 check with another's flag: 10
+PASS Q8 THE P2 COUNT with nothing of ours running: 0 [P2 0 (0 device-named process(es) of ours, 0 session or queue script(s) of ours)]
+PASS Q9 a device-named process of ours (comm ..._host): the count 1, exit 17
+PASS Q10 a session_e209.sh script of ours counts by its own script name; a command string naming it does not [P2 1 (0 device-named process(es) of ours, 1 session or queue script(s) of ours)]
+PASS R1 a committed session of this card ended 30 minutes ago: REST NOT OPEN (17)
+PASS R2 ended 50 minutes ago: REST OPEN (0)
+PASS R3 a model-session release line ended 10 minutes ago (not committed yet): REST NOT OPEN
+PASS R4 a release line that cannot be read: REST UNREADABLE (16)
+PASS R5 an E209 session of the box root still running (no queue.json, no runner.rc): REST NOT OPEN (its end is now)
+PASS R6 a cut E209 session (runner.rc, no queue.json), its latest write 45 minutes ago: REST OPEN
+PASS R7 a dry session's queue.json is never a session on the card
+PASS R8 the lab's own committed data at this checkout's HEAD (E208's three sessions on this card among them): read, its latest end named [REST OPEN since 2026-11-17 08:39:44 PST (the last end 2026-11-17 07:59:44 PST, E209_ROOT/sessions/1794933824-a2c0-E209)]
+PASS R9 a box-root session that never reached the card (queue.json t_first_ms null) ended a minute ago: listed, not counted: REST OPEN [REST OPEN since 2026-11-17 08:39:44 PST (the last end 2026-11-17 07:59:44 PST, E209_ROOT/sessions/1794933824-a2c0-E209)]
+PASS R10 the same session read again through --tree: the box root is skipped there, nothing counted twice: REST OPEN [REST OPEN since 2026-11-17 08:39:44 PST (the last end 2026-11-17 07:59:44 PST, E209_ROOT/sessions/1794933824-a2c0-E209)]
+PASS R11 two release records (E208's and E212's): an aifoundry2 card 0 session in the second ended 10 minutes ago: REST NOT OPEN (17) [REST NOT OPEN until 2026-11-17 09:14:44 PST (the last end 2026-11-17 08:34:44 PST, the release record: a2c0-S1 #11.99): call again]
+PASS G1 step 7: the rest open, fwgate's look NEEDS-READ, ONE read (the stand-in CLI called once) EQUAL into step 7's folder, the guard ok [s09_reads_e209: the first card command stamped 2026-11-17 08:44:45 PST (read; first/1794933885): step 9 within 120 s (exit 0)]
+PASS G2 step 7 again within 120 s: the stamp kept, nothing sent (still one CLI call)
+PASS G3 step 9 with that stamp: the rest and fwgate's guard pass (start_e209.sh then refuses in this bare root: no src/) [s11_session_e209: start_e209.sh refused (rc 127):  (exit 10)]
+PASS G4 a boot after the read (the box rebooted between step 7 and step 9): step 9's guard IDENTITY-STOP (16), nothing launched
+PASS G5 the record missing from step 7's folder: step 9's guard IDENTITY-STOP (16)
+PASS G6 a record of a read that did not end EQUAL in step 7's folder: step 9's guard IDENTITY-STOP (16)
+PASS G7 step 9 more than 120 s after the stamp: refused (10), step 7 again
+PASS G8 a DIFFERENT answer: step 7 stops (16), no stamp; a later step 7 on this boot reads STOPPED (16) and sends nothing more [s09_reads_e209: THE REBOOT GATE: IDENTITY-STOP: DIFFERENT: aifoundry2 card 0 at 2026-11-17 08:44:45 PST against E72's read of 2026-10-27 14:]
+PASS G9 CONTINUITY (a boot before the newest committed record): nothing sent, look.txt in step 7's folder, the guard ok
+PASS G10 STEP 7 BEFORE THE REST: refused (17) before any card command: no fwgate call, no step 7 folder
+PASS G11 step 7 without step 6n, or with a 6n over 30 minutes old: refused (10), nothing sent
+PASS G12 step 7 past the window's last start: refused (10)
+PASS G13 an E209 session of today that reached the card already: step 7 refused (one session a day)
+PASS G14 step 7 without THE QUIET DESK FLAG: refused (10)
+step 2's scratch repository: a shared sparse clone of the lab clone (the kit's files untracked in the lab clone: a stand-in kit commit on its HEAD cb14eae3d509 (stand-in logs), the pin 46 files); HEAD 80af714da6ff
+PASS P1 step 2 on the scratch repository: HEAD = GitHub's main, the paths clean, the registration and the kit by content, HISTORY OK, the six lists at their pinned counts and bytes, the registration's checks and forecasts byte for byte, make_box CHECK PASS, dmcmd_audit_v2 GO, the logs, the freeze line, no datum: STEP2 PASS [s03_desk_e209: STEP2 PASS (exit 0)]
+PASS P2 step 2 with no window in its RB_OUT: refused (10)
+PASS P3 GitHub's main (a stand-in) differs from HEAD: refused (10), no fast-forward in a desk test
+PASS P4 the kit list's own bytes not its pin: refused (10) [s03_desk_e209: SHA256SUMS-e209-kit: 46 OK of 46 lines; pinned 46; its own bytes 3c469063bde6fa04, not the pin 0000000000000000 (exit 10)]
+PASS P5 the kit list's line count not its pin: refused (10) [s03_desk_e209: SHA256SUMS-e209-kit: 46 OK of 46 lines; pinned 47 (exit 10)]
+PASS P6 a kit pin override outside a desk test: refused (10) before anything else
+PASS P7 MM1-v2's list changed in the working tree: refused (10), the paths not clean
+PASS P8 the registration's list changed in a commit: HISTORY FAIL (not an addition): refused (10) [s03_desk_e209: HISTORY FAIL: not an addition under tools/claims-v3/e209: M	tools/claims-v3/e209/SHA256SUMS-e209-registration | not an addition in a co]
+PASS P9 a module named like a standard-library module added under tools/: HISTORY FAIL (shadowing): refused (10) [s03_desk_e209: HISTORY FAIL: a shadowing addition (a standard-library module's name): tools/claims-v3/e209/json.py (exit 10)]
+PASS P10 the round's sealed record lists a sha256 the sealed-e209 note does not register: refused (10): do not book [s03_desk_e209: the round's sealed record lists abababababababababababababababababababababababababababababababab, which tools/claims-v3/sealed-e209/e20]
+PASS P11 the same seal registered in tools/claims-v3/sealed-e209/e209-freeze-lines.md: STEP2 PASS, the freeze line naming it [s03_desk_e209: STEP2 PASS (exit 0)]
+PASS P12 the record's line marked as a comment: STEP2 PASS (nothing listed to register)
+PASS P13 an E209 data path in a ref (a side branch): refused (10): E209 has run already [s03_desk_e209: an E209 data path exists in a ref (b2bee07e03045f7ee36a5bfaba9b1f7f8c076876): E209 has run already (exit 10)]
+PASS P15 step 2 itself changed in a later commit: HISTORY FAIL commit by commit (not an addition in a commit): refused (10) [s03_desk_e209: HISTORY FAIL: not an addition in a commit since the registration (commit by commit): 45933915b0e7 M tools/claims-v3/e209/rb/s03_desk_e2]
+PASS P16 outside a desk test with no one-lab desk span: refused (10) before GitHub is read [s03_desk_e209: THE ONE-LAB RULE: card-e209 is not in its desk span (bash $W/onelab.sh desk card-e209 before step 0) (exit 10)]
+PASS P14 a kit whose DRY audit log has no PASS line: refused (10) at the logs [s03_desk_e209: the kit's desk-test logs: dryaudit-e209.txt(no 'DRY-AUDIT-E209 [0-9]+ of [0-9]+ COVERED') (exit 10)]
+PASS S1 step 9: the rest, the guard (its stand-in), THE P2 COUNT 0, then start_e209.sh: STARTED DESKTEST, the session id written [s11_session_e209: STARTED 1794933934-a2c0-E209 (wait with rb/s20_wait_e209.sh) (exit 0)]
+PASS S2 step 10: the session found RUNNING by its real script name (session_e209.sh: 1), then ENDED: runner rc 16 (the card's lock held: no device opened), exit 16 [s20_wait_e209: ENDED: runner rc 16 () (exit 16)]
+PASS S3b step 11 outside a desk test with no one-lab collect span: refused (10), nothing copied (fix-e209, verify-e209's finding 8) [s22_collect_e209: THE ONE-LAB RULE: card-e209 is not in its collect span (bash $W/onelab.sh collect card-e209 right before step 11) (exit 10)]
+PASS S3 step 11 outside a desk test, in its collect span: a desk test's session is refused (10), nothing copied
+PASS S4 a second step 9 the same day after a session that never reached the card: STARTED [s11_session_e209: STARTED 1794933959-a2c0-E209 (wait with rb/s20_wait_e209.sh) (exit 0)]
+PASS S5 step 10 on a session the operator's STOP ended after A1: ENDED, runner rc 0 [s20_wait_e209: ENDED: runner rc 0; 2026-11-17 08:47:49 PST session end (T0 1794933959; 1 runs ran; 1.78 card-minutes) (exit 0)]
+PASS S6 THE SCRUB: a home path planted in runner.out (outside the manifest): the collection stops (16) before anything is written in the lab
+PASS S7 step 11 in a desk test: COPY-BACK EXACT, E208's checker C0-C8, THE SCRUB clean, the data directory with session/, checks, README (no placeholder left) and SHA256SUMS (every line OK); THE QUIET DESK FLAG lowered after the copy-back [s22_collect_e209: DATA DIR docs/reports/data/2026-11-17-e209-blind-matmul-aifoundry2 written; THE QUIET DESK FLAG lowered after the copy-back; next: the data co]
+PASS E1 a stop path after the collect span began: the flag lowered, onelab uncollect, the hold line removed (another lane's kept), the booking released [end_e209: E: the quiet desk flag lowered;onelab uncollect;the hold line removed;the booking released (exit 0)]
+PASS E2 a stop path inside the desk span (steps 0-2): onelab undesk and the booking released; no flag of ours to lower [end_e209: E: the quiet desk flag: not ours or down (left);onelab undesk;the booking released (exit 0)]
+PASS E3 another's quiet flag at the end: left as it was
+PASS E4 with a session_e209.sh of ours running: E refuses (17) and releases nothing (the booking kept)
+PASS E5 a device-named process of ours alive (comm ..._host: a leftover): E refuses (17), the flag, the hold line and the booking kept [end_e209: 1 device-named process(es) of ours alive (a LEFTOVER?): the quiet desk flag, the hold line and the booking stay; nothing released (kill nothing; write it up and escalate) (exit 17)]
+PASS E6 a box-root session whose queue.json records an unresolved leftover (none alive now): E refuses (17), everything kept [end_e209: the session 1794934085-a2c0-E209 records a leftover UNRESOLVED in queue.json: the quiet desk flag, the hold line and the booking stay; nothing released (kill nothing; write it up and escalat]
+PASS E7 the same leftover recorded resolved: E releases (the flag lowered, the hold line removed, the booking released) [end_e209: E: the quiet desk flag lowered;the hold line removed;the booking released (exit 0)]
+SELFTEST-RB-E209 72 of 72 PASS
+rc=0
+ended 2026-11-17 08:48:05 PST

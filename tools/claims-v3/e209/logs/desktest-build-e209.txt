@@ -1,0 +1,43 @@
+E209 build desk test, 2026-11-17 08:44:25 PST, aifoundry2, /usr/bin/python3 3.12.3; clone HEAD cb14eae3 (fix-e209's amended registration) with the kit's files in the working tree (before the kit's commit)
+uptime:  08:44:25 up 3 days, 15:50,  2 users,  load average: 0.96, 0.63, 0.93
+== sync
+SYNCED: 72 files at the harness's sha256 (72 copied, 0 already there, 0 pruned []) from HEAD cb14eae3d5094ab1faca0ad8ca965f41d0d979d6
+== build (E208's src/build_mms.sh, unchanged, from the box root)
+== 1116-mmsweep build on aifoundry2, 2026-11-17 08:44:25 PST
+HARNESS OK: 12 files at src/SRC-SHA256SUMS's sha256 (the two build sources)
+COMPILER kernel: riscv64-unknown-elf-gcc () 15.1.0; host: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+KERNEL aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 (pin aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0); .text 61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763
+HOST d1a7bdb2af2e47a185ba7565e09103772c2379adb372c11a11c77363634bf832
+READER d1dea7a7ce23236e855de0f8626a34171739ec393f3ec454d49a524c22e2ba4b
+HOSTCHECK unknown-option: rc 2: ok
+HOSTCHECK zero-shires: rc 2: ok
+HOSTCHECK no-kernel: rc 1: ok
+HOSTCHECK unknown-test: rc 2: ok
+ETDEVICES host no; reader yes; /opt/et/lib/libdeviceLayer.a no; both CMakeCache deviceLayer_DIR from /opt/et yes
+MMS-BUILT rc=0
+build rc 0 in 4 s
+== the record
+{
+ "box": "aifoundry2",
+ "day": "2026-11-17",
+ "verdict": "BUILT",
+ "kernel_sha256": "aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0",
+ "kernel_text_sha256": "61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763",
+ "host_sha256": "d1a7bdb2af2e47a185ba7565e09103772c2379adb372c11a11c77363634bf832",
+ "ettelem_sha256": "d1dea7a7ce23236e855de0f8626a34171739ec393f3ec454d49a524c22e2ba4b",
+ "host_checks": [
+  "unknown-option:ok",
+  "zero-shires:ok",
+  "no-kernel:ok",
+  "unknown-test:ok"
+ ],
+ "compilers": {
+  "kernel": "riscv64-unknown-elf-gcc () 15.1.0",
+  "host": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+ },
+ "et_devices": "not a gate on aifoundry2 (one card): host no, reader yes, libdeviceLayer.a no, CMakeCache yes"
+}
+kernel aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 (pin EQUAL); host d1a7bdb2af2e47a185ba7565e09103772c2379adb372c11a11c77363634bf832; reader d1dea7a7ce23236e855de0f8626a34171739ec393f3ec454d49a524c22e2ba4b; the host's refusals ['unknown-option:ok', 'zero-shires:ok', 'no-kernel:ok', 'unknown-test:ok']
+DESKTEST-BUILD-E209 PASS
+rc=0
+ended 2026-11-17 08:44:30 PST
