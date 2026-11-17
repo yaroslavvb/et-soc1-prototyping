@@ -1,0 +1,255 @@
+diff --git a/e136/rgm136/README.md b/e211/rgm211/README.md
+index 461165db..5f785204 100644
+--- a/e136/rgm136/README.md
++++ b/e211/rgm211/README.md
+@@ -1,3 +1,7 @@
++# rgm211: E211's second kernel - a copy of `tools/claims-v3/e136/rgm136` with its C-block walk swapped
++
++Made by `tools/claims-v3/e211/make_rgm211.py` from rgm136 as committed (rgm136 itself is never edited; `../rgm211.diff` is the whole difference). Two arms beside rgm136's `gemmL<MB>x<NB>x<KB>`: `gemmLn<MB>x<NB>x<KB>` walks the C blocks nb outer, mb inner (`SP_GEMM_NB_OUTER`, `run_gemm_large_nm`, which writes the walk tag `SP_WALK_TAG_NM` to every hart's `aux` after its timed section), and `gemmLnc<MB>x<NB>x<KB>` is gemmL with every minion loading for itself (coop 0, rgm136's own compiled branch; E211 runs it on rgm136's ELF). The host checks the walk tag on every large-GEMM launch (a gemmLn launch needs the tag on every hart, a gemmL or gemmLnc launch 0) and refuses a malformed arm, type, per-shire count, gen or tile file before it opens the device. Nothing else differs from rgm136. E211's registration (`../E211.md`) gives the build commands and the identities.
++
+ # rgm136: E136's copy of `tools/claims-v3/e107/rgm107`, with a large GEMM
+ 
+ `rgm107` is E107's kernel and host (E105's `rgm105`, E101's `rgm`: gp-sdk's generated `libautogen/matmul_f32_1024_512_512` ported op for op, one block of
+diff --git a/e136/rgm136/host/main.cpp b/e211/rgm211/host/main.cpp
+index 88abbc86..0e2d4f8c 100644
+--- a/e136/rgm136/host/main.cpp
++++ b/e211/rgm211/host/main.cpp
+@@ -648,6 +648,8 @@ int testFma(const Options& o, Session& dev) {
+ //          gemmc<B>    E105: gemm with B packed by column, gemmv<B> with the vendor's strides (A and C at a pitch of 2,048 B, B at 2,112 B), gemmh<B> by column with 16 k tiles; the tile contents are gemm's
+ //          <gemm arm><B>r<R>s  E107: any gemm arm may end in r<R>, R passes over each block before the walk moves on (R = 1 is the arm as E105 ran it),
+ //                      and in s, every block's C stored into the first block's C (2 MB of C whatever B is); e.g. gemmc16r4, gemmc8s, gemmc16r4s
++//          gemmLn<MB>x<NB>x<KB>, gemmLnc<MB>x<NB>x<KB>  E211 (rgm211): gemmL with the C blocks walked nb outer, mb inner (SP_GEMM_NB_OUTER), and
++//                      gemmL with every minion loading for itself (coop 0); the check is gemmL's; every large-GEMM launch's walk tag is checked
+ //          gemmL<MB>x<NB>x<KB>  E136 (rgm136): a large GEMM, C (MB x NB blocks) = A (MB x KB blocks) x B (KB x NB blocks), every block gemmc's
+ //                      (B packed by column), each C tile accumulated over all KB x 32 ops before its one TensorStore; e.g. gemmL4x8x8 (4,096 x 4,096 x
+ //                      4,096 elements in fp32, K doubled in fp16 and again in int8; A, B and C 64 MB each) and gemmL2x2x2 (2,048 x 1,024 x 1,024; 20 MB)
+@@ -668,6 +670,7 @@ struct ArmSpec {
+   uint64_t reps = 1;    // E107: passes over each block before the walk moves on
+   bool cshared = false; // E107: every block's C in the first block's C
+   bool large = false;   // E136: SP_GEMM_LARGE
++  bool nbOuter = false; // E211: SP_GEMM_NB_OUTER (gemmLn: the C blocks nb outer, mb inner)
+   uint64_t mb = 0, nb = 0, kb = 0;
+ };
+ 
+@@ -709,10 +712,13 @@ ArmSpec parseArm(const std::string& v) {
+   else if (s.arm.rfind("gemmc", 0) == 0) { s.gemm = s.coop = true; s.layout = SP_LAYOUT_BYCOL; gemmTail("gemmc"); }
+   else if (s.arm.rfind("gemmv", 0) == 0) { s.gemm = s.coop = true; s.layout = SP_LAYOUT_VENDOR; gemmTail("gemmv"); }
+   else if (s.arm.rfind("gemmh", 0) == 0) { s.gemm = s.coop = true; s.layout = SP_LAYOUT_HALFK; gemmTail("gemmh"); }
+-  else if (s.arm.rfind("gemmL", 0) == 0) {   // E136: gemmL<MB>x<NB>x<KB>, nothing after it
++  else if (s.arm.rfind("gemmL", 0) == 0) {   // E136: gemmL<MB>x<NB>x<KB>, nothing after it; E211: gemmLn (nb outer), gemmLnc (no cooperation)
+     s.gemm = s.coop = s.large = true;
+     s.layout = SP_LAYOUT_BYCOL;
+-    const char* p = s.arm.c_str() + 5;
++    size_t skip = 5;
++    if (s.arm.rfind("gemmLnc", 0) == 0) { s.coop = false; skip = 7; }       // E211: every minion loads for itself, rgm136's walk
++    else if (s.arm.rfind("gemmLn", 0) == 0) { s.nbOuter = true; skip = 6; }  // E211: the nb-outer walk, cooperative loads
++    const char* p = s.arm.c_str() + skip;
+     char* e = nullptr;
+     s.mb = std::strtoull(p, &e, 10);
+     if (*e != 'x') throw std::runtime_error("--values: want gemmL<MB>x<NB>x<KB>: " + s.arm);
+@@ -891,6 +897,23 @@ std::vector<uint8_t> layoutB(const std::vector<uint8_t>& B, const ArmSpec& s) {
+   return out;
+ }
+ 
++// E211 (rgm211): every refusal testArm makes on its arguments alone, made in main() before Session opens the device and creates the
++// runtime (whose creation sends an abort on every queue of every card it enumerates). testArm parses the same arm again.
++void validateArm(const Options& o) {
++  (void)typeOf(o.type);
++  const ArmSpec s = parseArm(o.values);
++  if (s.gemm && o.perShire != 32) throw std::runtime_error("gemm needs --per-shire 32: every minion of a coop group must take part");
++  if (s.tenb && s.gen != "tiles") throw std::runtime_error("tenb runs one tile: gen must be tiles");
++  if (s.gen != "tiles" && s.gen != "randn" && s.gen != "sparse50" && s.gen != "sparse25" && s.gen != "e37")
++    throw std::runtime_error("--values: unknown gen " + s.gen);
++  for (const auto& p : s.files) {
++    std::ifstream f(p, std::ios::binary);
++    std::vector<char> buf(2 * SP_TILE_BYTES);
++    f.read(buf.data(), std::streamsize(buf.size()));
++    if (!f) throw std::runtime_error("cannot read 2 x 1024 bytes of tiles from " + p);
++  }
++}
++
+ int testArm(const Options& o, Session& dev) {
+   const uint64_t type = typeOf(o.type);
+   const ArmSpec s = parseArm(o.values);
+@@ -950,6 +973,7 @@ int testArm(const Options& o, Session& dev) {
+     opsPerPass = s.n * s.reps * 2 * (s.layout == SP_LAYOUT_HALFK ? SP_GEMM_KT / 2 : SP_GEMM_KT);
+     if (s.large) {                                                // E136
+       a.layout |= SP_GEMM_LARGE;
++      if (s.nbOuter) a.layout |= SP_GEMM_NB_OUTER;                // E211
+       a.src = s.mb;
+       a.src_bytes = s.nb;
+       a.ntiles = s.kb;
+@@ -959,6 +983,8 @@ int testArm(const Options& o, Session& dev) {
+   }
+   a.out = a.out ? a.out : dev.put("unused", nullptr, 64);
+   int bad = 0;
++  int walkBad = 0;   // E211: launches whose walk tag was not the arm's (gemmLn: SP_WALK_TAG_NM on every hart; gemmL, gemmLnc: 0)
++  const char* walkName = !s.large ? "none" : s.nbOuter ? "nm" : "mn";
+   uint64_t lastIters = 0;
+   double lastCpo = 0;
+   auto one = [&](uint64_t iters, int launchNo) -> double {
+@@ -966,7 +992,16 @@ int testArm(const Options& o, Session& dev) {
+     const auto L = dev.launch(a);
+     const Summary sm = summarize(L, harts);
+     const uint64_t ops = iters * opsPerPass;
+-    const bool ok = L.ok && sm.bad == 0 && sm.tensorErrors == 0;
++    uint64_t tagged = 0, zeroed = 0;   // E211: the walk tag on every reporting hart
++    for (uint64_t h : harts) {
++      const auto& r = L.res[h];
++      if (r.magic != SP_MAGIC || r.hart != h) continue;
++      tagged += r.aux == SP_WALK_TAG_NM;
++      zeroed += r.aux == 0;
++    }
++    const bool walkOk = !s.large || (sm.reported > 0 && (s.nbOuter ? tagged == sm.reported : zeroed == sm.reported));
++    walkBad += !walkOk;
++    const bool ok = L.ok && sm.bad == 0 && sm.tensorErrors == 0 && walkOk;
+     bad += !ok;
+     lastIters = iters;
+     const double cpoNow = sm.cmean / double(ops);
+@@ -974,11 +1009,11 @@ int testArm(const Options& o, Session& dev) {
+     std::printf("SPARSITY {\"test\":\"fma\",\"arm\":\"%s\",\"gen\":\"%s\",\"type\":\"%s\",\"pattern\":\"none\",\"values\":\"%s\",\"b_stream\":%d,"
+                 "\"minions\":%zu,\"shire_mask\":\"0x%llx\",\"iters\":%llu,\"passes\":%llu,\"launch\":%d,\"cycles_max\":%llu,"
+                 "\"cycles_mean\":%.1f,\"cycles_per_op\":%.3f,\"wall_s\":%.6f,\"t_start_ms\":%lld,\"t_end_ms\":%lld,"
+-                "\"ghz\":%.4f,\"tensor_errors\":%llu,\"result\":\"unchecked\",\"ok\":%s}\n",
++                "\"ghz\":%.4f,\"tensor_errors\":%llu,\"walk\":\"%s\",\"walk_tagged\":%llu,\"walk_ok\":%s,\"result\":\"unchecked\",\"ok\":%s}\n",
+                 s.arm.c_str(), s.gen.c_str(), o.type.c_str(), o.values.c_str(), int(s.tenb), harts.size(),
+                 (unsigned long long)o.shireMask, (unsigned long long)ops, (unsigned long long)iters, launchNo, (unsigned long long)sm.cmax,
+                 sm.cmean, cpoNow, L.wallS, L.t0Ms, L.t1Ms, L.ghz,
+-                (unsigned long long)sm.tensorErrors, ok ? "true" : "false");
++                (unsigned long long)sm.tensorErrors, walkName, (unsigned long long)tagged, walkOk ? "true" : "false", ok ? "true" : "false");
+     std::fflush(stdout);
+     return L.wallS;
+   };
+@@ -1048,13 +1083,13 @@ int testArm(const Options& o, Session& dev) {
+     }
+   }
+   const char* verdict = n.within < n.words ? "wrong" : n.exact == n.words ? "exact" : "approx";
+-  const bool ok = n.within == n.words;
++  const bool ok = n.within == n.words && walkBad == 0;   // E211: and no launch's walk tag was wrong
+   bad += !ok;
+   const long long tc1 = epochMs();
+   std::printf("SPARSITY {\"test\":\"check\",\"arm\":\"%s\",\"gen\":\"%s\",\"type\":\"%s\",\"minions\":%zu,\"iters\":0,\"launch\":-2,\"cycles_per_op\":%.3f,\"wall_s\":0,"
+-              "\"t_start_ms\":%lld,\"t_end_ms\":%lld,\"ghz\":0,\"words\":%llu,\"exact\":%llu,\"within\":%llu,\"result\":\"%s\",\"ok\":%s}\n",
++              "\"t_start_ms\":%lld,\"t_end_ms\":%lld,\"ghz\":0,\"words\":%llu,\"exact\":%llu,\"within\":%llu,\"walk\":\"%s\",\"walk_launches_bad\":%d,\"result\":\"%s\",\"ok\":%s}\n",
+               s.arm.c_str(), s.gen.c_str(), o.type.c_str(), harts.size(), lastCpo, tc0, tc1, (unsigned long long)n.words,
+-              (unsigned long long)n.exact, (unsigned long long)n.within, verdict, ok ? "true" : "false");
++              (unsigned long long)n.exact, (unsigned long long)n.within, walkName, walkBad, verdict, ok ? "true" : "false");
+   std::fflush(stdout);
+   return bad ? 1 : 0;
+ }
+@@ -1444,6 +1479,7 @@ int main(int argc, char** argv) {
+       std::fprintf(stderr, "--test must be fma, tload, gemv, diverge or spin\n");
+       return 2;
+     }
++    if (o.test == "fma" && isArmValues(o.values)) validateArm(o);   // E211: before the device opens
+     Session dev(o, elf);
+     if (o.test == "fma" && isArmValues(o.values)) return testArm(o, dev);
+     if (o.test == "fma") return testFma(o, dev);
+diff --git a/e136/rgm136/kernel/sparsity.c b/e211/rgm211/kernel/sparsity.c
+index b3aa06ea..71cc343b 100644
+--- a/e136/rgm136/kernel/sparsity.c
++++ b/e211/rgm211/kernel/sparsity.c
+@@ -336,6 +336,67 @@ static void run_gemm_large(const struct SpArgs* a, uint64_t shire, uint64_t mini
+     o->count = op;
+ }
+ 
++/* E211 (rgm211): SP_GEMM_LARGE | SP_GEMM_NB_OUTER. run_gemm_large's text with its two outer loops swapped: the minion walks the C
++   blocks nb outer, mb inner, so a column tile's B panel is met in consecutive C blocks (again at every mb) and a row tile's A panel once
++   per C block, again only at the next nb: the far operand is A, not B. Everything else is run_gemm_large's, and after the timed section
++   it writes the walk tag SP_WALK_TAG_NM to aux. */
++static void run_gemm_large_nm(const struct SpArgs* a, uint64_t shire, uint64_t minion, struct Out* o)
++{
++    const uint64_t m = minion & 31, type = a->type, coop = a->coop, iters = a->iters;
++    const uint64_t MB = a->src, NB = a->src_bytes, KB = a->ntiles, kt = SP_GEMM_KT;
++    const uint64_t dim0 = m & 7, dim1 = (m >> 3) & 3, s0 = shire & 3, s1 = (shire >> 2) & 7;
++    const uint64_t row0 = s1 * 8 + dim1 * 2, col = s0 * 8 + dim0;
++    const uint64_t coop_a = (0xFFull << 8) | ((1ull << dim1) << 16);              /* id 0, the 8 minions of this neighbourhood */
++    const uint64_t coop_b = (dim0 + 1) | ((1ull << dim0) << 8) | (0xFull << 16);  /* id 1+position, this position in the 4 neighbourhoods */
++    const uint64_t last_extra = type == SP_INT8 ? (1ull << 23) : 0;
++    const uint64_t base = fma_word(type, 16, 0, 1, 0, 0);
++    uint64_t op = 0, pending = 0;
++    const uint64_t t0 = cycles();
++    for (uint64_t it = 0; it < iters; ++it) {
++        for (uint64_t nb = 0; nb < NB; ++nb) {
++            for (uint64_t mb = 0; mb < MB; ++mb) {
++                const uint64_t cb = a->c_pool + (mb * NB + nb) * SP_GEMM_C_BLOCK;
++                for (uint64_t r = 0; r < 2; ++r) {
++                    const uint64_t row = row0 + r;
++                    for (uint64_t kb = 0; kb < KB; ++kb) {
++                        const uint64_t ab = a->a_pool + (mb * KB + kb) * SP_GEMM_A_BLOCK, bb = a->b_pool + (kb * NB + nb) * SP_GEMM_B_BLOCK;
++                        for (uint64_t k = 0; k < kt; ++k) {
++                            const uint64_t aline = (op & 1) * 16;
++                            const uint64_t aaddr = ab + (row * SP_GEMM_KT + k) * SP_TILE_BYTES;
++                            const uint64_t baddr = bb + (col * SP_GEMM_KT + k) * SP_TILE_BYTES;
++                            if (coop) {
++                                t_coop(coop_a);
++                                t_load_coop(aline, aaddr, 16, 0, 0, 64);
++                                t_coop(coop_b);
++                                t_load_coop(0, baddr, 16, 1, 1, 64);
++                            } else {
++                                t_load(aline, aaddr, 16, 0, 0, 0);
++                                t_load(0, baddr, 16, 1, 0, 1);
++                            }
++                            if (pending) {
++                                t_store(pending, 64);
++                                pending = 0;
++                            }
++                            t_wait(0);
++                            const uint64_t first = (kb == 0 && k == 0) ? 1 : 0, last = (kb + 1 == KB && k + 1 == kt) ? last_extra : 0;
++                            t_fma(base | (aline << 4) | first | last);
++                            ++op;
++                        }
++                    }
++                    pending = cb + (row * SP_GEMM_NT + col) * SP_TILE_BYTES;
++                }
++            }
++        }
++    }
++    t_store(pending, 64);
++    t_wait(7);
++    t_wait(8);
++    __asm__ __volatile__("fence\n" : : : "memory");
++    o->cycles = cycles() - t0;
++    o->count = op;
++    o->aux = SP_WALK_TAG_NM;   /* E211: the walk tag, after the timed section; the host checks it on every hart */
++}
++
+ /* ---------------------------------------------------------------- SP_FMA */
+ 
+ static void run_fma(const struct SpArgs* a, uint64_t minion, struct Out* o)
+@@ -765,7 +826,9 @@ int64_t entry_point(const struct SpArgs* args)
+         run_stream(args, minion, &o);
+         break;
+     case SP_GEMM:
+-        if (args->layout & SP_GEMM_LARGE) {   /* E136 */
++        if ((args->layout & SP_GEMM_LARGE) && (args->layout & SP_GEMM_NB_OUTER)) {   /* E211 */
++            run_gemm_large_nm(args, shire, minion, &o);
++        } else if (args->layout & SP_GEMM_LARGE) {   /* E136 */
+             run_gemm_large(args, shire, minion, &o);
+         } else {
+             run_gemm(args, shire, minion, &o);
+diff --git a/e136/rgm136/sparsity_args.h b/e211/rgm211/sparsity_args.h
+index 00f26d32..63691df7 100644
+--- a/e136/rgm136/sparsity_args.h
++++ b/e211/rgm211/sparsity_args.h
+@@ -116,6 +116,11 @@ struct SpArgs {
+ // ops, in one accumulation before its TensorStore: C is written once. Blocks are packed: A block (mb, kb) at a_pool + (mb KB + kb) A_BLOCK, B block
+ // (kb, nb) at b_pool + (kb NB + nb) B_BLOCK, C block (mb, nb) at c_pool + (mb NB + nb) C_BLOCK. MB = SpArgs.src, NB = SpArgs.src_bytes, KB = SpArgs.ntiles.
+ #define SP_GEMM_LARGE 0x200u
++// E211 (rgm211): with SP_GEMM_LARGE, walk the C blocks nb outer and mb inner (run_gemm_large_nm). Everything inside a C block is
++// run_gemm_large's: the same partition, cooperative loads and groups, op order, accumulation bits and TensorStore.
++#define SP_GEMM_NB_OUTER 0x400u
++// E211: run_gemm_large_nm writes this tag to every participating hart's aux after its timed section; run_gemm_large leaves 0.
++#define SP_WALK_TAG_NM 0x453231314E4D574Bull
+ #define SP_GEMM_A_PITCH 2048u
+ #define SP_GEMM_B_PITCH 2112u
+ #define SP_GEMM_C_PITCH 2048u
+@@ -129,7 +134,7 @@ struct SpArgs {
+ struct SpResult {
+   uint64_t cycles;   // hpmcounter3 cycles of the timed section
+   uint64_t count;    // ops / loads / layers / useful lane-iterations
+-  uint64_t aux;      // SP_DIVERGE: vector (or scalar) loop iterations executed; SP_GEMV: slices computed
++  uint64_t aux;      // SP_DIVERGE: vector (or scalar) loop iterations executed; SP_GEMV: slices computed; E211 gemmLn: SP_WALK_TAG_NM
+   uint64_t aux2;     // SP_GEMV: W^T lines loaded; SP_DIVERGE: refill events (high 32 bits: chunks taken)
+   uint64_t t_entry;  // hpmcounter3 at kernel entry and exit, for the clock estimate
+   uint64_t t_exit;

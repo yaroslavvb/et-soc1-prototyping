@@ -1,0 +1,159 @@
+{
+ "A1": {
+  "applies_to": [
+   "W1",
+   "W2",
+   "H1",
+   "H2",
+   "H3"
+  ],
+  "consistency_ln": 0.005,
+  "label_applied": "A1: T4 failed with both controls on one side and within consistency_ln: scored on the control-corrected ratios",
+  "label_not_a_model_test": "the controls did not pass: not a model test",
+  "max_abs_c_ln": 0.03,
+  "what": "AMENDMENT A1, THE CONTROL-CORRECTED READING (Tue 17 Nov 2026, Q204's lane fix-e211, before any E211 datum; verify-e211's finding 1: x01 and x02 compare two compiled loops, rgm136's gemmL loop at 36 instructions an op with 2 stack loads on its path from the wait to the loads and rgm211's nb-outer loop at 31 with none, so T4 can fail on that code-path offset alone). T4 itself is unchanged. A1 APPLIES when T4 reads FAIL, both controls have a measured wall ratio, their ln ratios a (x01) and b (x02) lie on the same side of 0 (a b > 0), |a - b| <= consistency_ln and |c_hat| <= max_abs_c_ln, c_hat = (a + b) / 2. Then W1, W2, H1, H2 and H3 are scored on the control-corrected ratios (each W pair's measured wall ratio over exp(c_hat)) and labelled so, and the same five scored on the raw ratios are REPORTED beside. When A1 does not apply, they read as registered: on the raw ratios, labelled 'the controls did not pass: not a model test' whenever T4 is not PASS; the control-corrected verdicts are then REPORTED beside (both controls measured), never verdicts. Nothing else changes: R0, S6, T1-T3, E1-E4, H4-H6, SR, CT, CE, every band, tolerance and forecast as registered at 00:14 PST.",
+  "why_these_numbers": "consistency_ln 0.005: the head-to-head ratio tie, half the controls' 1% layout bound: the two controls sit at 1,027 and 1,449 MM1 wall cycles an op, so an offset of a fixed size in ln reads alike at both, and one of a fixed number of cycles an op still agrees to 0.005 while it is under about 1.7% at x01 (power-a1-e211.json); max_abs_c_ln 0.03: twice the desk estimate's largest offset (verify-e211: about -0.4% to -1.5% at x01) and the top of the verifier's option (b) range; a larger common offset is not read as a code path"
+ },
+ "C": {
+  "CE": {
+   "tol_ln": 0.05,
+   "what": "the J over idle ratio within tol of C1's at both shapes: PASS both, FAIL either, NO DATA"
+  },
+  "CT": {
+   "tol_ln": 0.02,
+   "what": "the wall-cycles ratio within tol of C1's (E101's measured rate ratio) at both shapes: PASS both, FAIL either, NO DATA"
+  },
+  "reported": "C1 against C0 (the null: ratio 1) and against C2 (the draft rule) per shape: which is closer, in time and in J; the counter's mean ratio against C1's (E101's counter ratio); the wall over the mean (the cooperation term's rho rule) against C1's",
+  "what": "FAMILY C (gemmLnc / its twin, from the C block's own runs: gemmLnc, twin, gemmLnc at each of c01, c02)"
+ },
+ "H": {
+  "alpha": 0.05,
+  "d": "d = |ln(measured / second)| - |ln(measured / first)|; first closer where d > tie, second closer where d < -tie, a tie otherwise (ties dropped)",
+  "min_untied": 6,
+  "reported": "percentile bootstrap 95% intervals of the mean and median d (10,000 resamples, random.Random('E211|bootstrap|<rule>')); MM1 against F1 and F2 on J over idle (given and forecast); F1, F2, NC each against its own ratio",
+  "rules": {
+   "H1": {
+    "first": "MM1",
+    "items": "10 W pairs",
+    "second": "F1",
+    "what": "the wall-cycles ratio per W pair, MM1 against F1"
+   },
+   "H2": {
+    "first": "MM1",
+    "items": "10 W pairs",
+    "second": "NC",
+    "what": "the wall-cycles ratio per W pair, MM1 against the chip-lines null NC"
+   },
+   "H3": {
+    "first": "MM1",
+    "items": "10 W pairs",
+    "second": "N0",
+    "what": "the wall-cycles ratio per W pair, MM1 against the no-walk null N0 (ratio 1)"
+   },
+   "H4": {
+    "first": "MM1",
+    "items": "12 gemmLn points",
+    "second": "F1",
+    "what": "the wall cycles an op at rgm211's points, MM1 against F1"
+   },
+   "H5": {
+    "first": "MM1",
+    "items": "12 gemmLn points",
+    "second": "NC",
+    "what": "the wall cycles an op at rgm211's points, MM1 against NC"
+   },
+   "H6": {
+    "first": "MM1",
+    "items": "12 gemmLn points",
+    "second": "MM1-S",
+    "what": "J over idle given the measured seconds at rgm211's points: MM1 (its fresh lines priced per shire-line, as fitted) against MM1-S (A's fresh lines priced twice: per DRAM line): which pricing of A's fresh lines the card follows; at a point with no fresh A line the two are equal and tie"
+   },
+   "H7": {
+    "first": "MM1-v2",
+    "items": "none",
+    "second": "MM1",
+    "what": "MM1-v2 against MM1-v1: NOT REGISTERED (MM1-v2 had not landed when the forecasts froze; E211.md section 0)"
+   }
+  },
+  "tie_ln_abs_cycles": 0.001,
+  "tie_ln_cycles": 0.005,
+  "tie_ln_joules": 0.005,
+  "tie_w": 0.05
+ },
+ "R0": {
+  "smoke_band": [
+   0.5,
+   2.5
+  ],
+  "what": "every check of C exact or approx (the smoke's and every run's); every rgm211-host process (gemmLn, gemmLnc) prints walk_ok true on every counted launch with walk nm (gemmLn) or mn (gemmLnc) and its check line walk_launches_bad 0; every process's identity gate (ident_e211.py, by its arm family) reads GATE OK; the smoke's cycles an op (the counter's mean) 50-250% of MM1's forecast at s01, s02, s03. A FAIL labels every other verdict (the scorer attaches the label to every other rule since Amendment A1's clause 2, Tue 17 Nov 2026, before any datum)."
+ },
+ "S6": {
+  "mhz": [
+   590.0,
+   610.0
+  ],
+  "what": "every counted launch's kernel clock (cycles_max / wall) and every counted sample's clock in 590-610 MHz, per point"
+ },
+ "SR": {
+  "what": "THE STRIDE CARRYOVER, a reading registered now (no verdict on MM1): s = ln(rho(w04, 2x8x4) / rho(w05, 2x9x4)) measured, against the four registered readings' s (the literal carryover: MM1-v1's stride terms in both walks, by NB and B's halves - MM1's forecast; no stride term; zeta on both halves' B; the stride terms on rgm136's walk only); the closest reading is named. 2x9x4 has no stride term in any reading."
+ },
+ "T4": {
+  "tol_ln": 0.01,
+  "what": "THE CONTROLS: |ln(the measured wall ratio)| <= tol at x01 (1x5x5) and x02 (3x1x8), where both walks are one op stream; a FAIL says the build, the flag or the two ELFs' layouts move the time: family W's verdicts are then labelled 'the controls failed: not a model test'"
+ },
+ "W1": {
+  "min_n": 8,
+  "pass_share": 0.9,
+  "reported": "each other model's own count inside the same tolerance (F1, NC, N0), and the counter's-mean ratio, the seconds ratio and the J over idle ratio beside MM1's",
+  "tol_ln": 0.05,
+  "what": "THE QUESTION, per W pair (10 pairs: w01-w10): |ln(rho_measured / rho_MM1)| <= tol, rho = the wall cycles an op of gemmLn over gemmL, each from the pair's own W-block runs (A B or A B B A, adjacent)"
+ },
+ "W2": {
+  "apply_ln": 0.03,
+  "decide_ln": 0.01,
+  "min_decided": 6,
+  "what": "THE DIRECTION, at each W pair whose MM1 ratio is at least apply_ln from 1 in ln (w02-w10): the measured ratio decides when |ln rho_measured| >= decide_ln (the controls' 1% layout bound) and holds when on MM1's side of 1. PASS if no decided pair misses and at least min_decided pairs decide; FAIL if any decided pair misses; NOT DECIDED otherwise"
+ },
+ "absolute": {
+  "band_w": 0.215,
+  "bands": {
+   "E1": 0.15,
+   "E2": 0.16,
+   "E3": 0.05,
+   "E4": 0.13,
+   "T1": 0.13,
+   "T2": 0.16,
+   "T3": 0.13
+  },
+  "low_w": 3.0,
+  "min_n": 10,
+  "pass_share": 0.9,
+  "quantities": {
+   "E1": "J over idle given the measured seconds: MM1's affine W = A + B / t_op at the measured t_op, times t_gemm",
+   "E2": "J over idle with the seconds forecast: MM1's frozen J over idle",
+   "E3": "J with the card at rest given the measured seconds and rest: p_rest t + E1's J",
+   "E4": "J with the card at rest with the seconds forecast: p_rest t_forecast + E2's J",
+   "T1": "cycles an op, the wall (cycles_gemm / ops a minion a GEMM: the slowest minion)",
+   "T2": "cycles an op, the counter's mean (the host's cycles_per_op)",
+   "T3": "seconds a GEMM (t_gemm)"
+  },
+  "twins": "the same rules on the 12 twins (gemmL) are REPORTED, never verdicts: E206's twins are in MM1-v1's fit; E207's ran first",
+  "what": "MM1's forecasts of rgm211's 12 points (gemmLn: w01n-w10n, x01n, x02n), per point (each point its own case): |measured / MM1 - 1| <= the band; at a point whose W over idle is forecast under 3 W, E1 and E2 read |W measured - W forecast| <= band_w (none of E211's points is: forecast-e211.json scored_in_watts false everywhere)",
+  "why_these_bands": "E207's (rules-e207.json): 2 x max(MM1-v1's E206-held-out rms, its LOEO rms), rounded up; the second kernel is held to MM1's own held-out record on its own kernel"
+ },
+ "experiment": "E211",
+ "readings_reported": [
+  "the timing simulation against the card (his question): every point's measured cycles a GEMM over the simulator's step count (MM1's column: rgm136's gemmL step law, 46.625 an op + 24.25 a C-tile row + 92 a launch, at EVERY point, so at the gemmLn and gemmLnc points it is not the count of that point's ELF and walk; labelled so by Amendment A1's clause 3), beside it the measured wall cycles an op over the kit's sys_emu steps an op for the point's own ELF and walk (2x2x1, mask 0x1: gemmL on rgm136's ELF 47.742, gemmLn on rgm211's 32.762, gemmLnc on rgm136's 40.566; a small shape's count, not a law), and its counter's mean over the tensor unit's floor (529 / 270 measured; 546 / 318 the simulated bench)",
+  "MM1-v1's closed form against the map at the twins (the map's tie, live)",
+  "the operand split kA and the A-alone fresh stream time read from rgm211's A-fresh pairs (post hoc, for a later model)",
+  "MM1-v1's rest law against the measured rest",
+  "the day's replicate spread (pairs run twice) against E206's floors",
+  "MM1's switch estimates beside every point (nothing measures them)"
+ ],
+ "request": "Q204",
+ "verdict_words": {
+  "h2h": "decided by the exact two-sided sign test at alpha on the untied items: <first> BETTER / <second> BETTER / NOT DECIDED; TOO FEW under min_untied; NO DATA with none",
+  "rate": "PASS if at least pass_share of the scored items pass; FAIL otherwise; TOO FEW under min_n; NO DATA with none"
+ },
+ "what": "E211's registered rules (E211.md section 7); every number here fixed before any E211 datum"
+}

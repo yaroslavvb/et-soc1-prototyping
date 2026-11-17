@@ -1,0 +1,15 @@
+E211 card plan (registered; desk)
+card: aifoundry3 card 0 (/dev/et0_*; the card's lock /run/lock/etsoc-shire0.lock); one session of ours on aifoundry3 at a time
+clock: 600 MHz pinned (a boot-time TDP of 0 latches the governor), nothing set
+line 65.0 W; stops: board > 70 W on 3 samples in a row, die >= 70 C; a stop touches the host's --stop-file (the host ends at its next launch boundary), never a kill; no run sends or arranges a SIGKILL to a device process; every device process under a plain timeout 10, never -k; a host hung past its TERM is reported and left (THE HUNG MARKER: stop, keep the booking, report to the owner, no session that day; no reset, no PCIe recovery, no driver reload, no power cycle)
+die gate: min(60, the session's rest die + 4) C, at most 300 s, else that run is NO DATA
+run form: E206's: the die gate, 10 s at rest (p_rest = the median of its last 5 s), one host process --seconds 6 --budget 7.5 under a plain timeout 10 (never -k), a 4 s tail
+smoke: 30 s at rest (the session's rest reading; the die gates from it); one checked short process each of s01 (gemmL2x2x2, rgm136), s02 (gemmLn2x2x2, rgm211) and s03 (gemmLnc2x2x2, rgm211's host on rgm136's ELF): each rc 0, every launch ok, the check of C exact or approx, walk_ok true on every launch (s02 nm, s03 mn), its cycles an op 50-250% of MM1's counter-mean forecast, the board 2 W or more over the rest; then the stop-path test on live samples (no launch)
+order: points-e211.json order: the smoke; family X; family W; family C (family C after family W, critic-kernel2 fix 4)
+predicted peaks (planning): families X and W 52.8 W (w01m); family C (C1) 58.5 W (c01c), C2's draft rule 63.8 W (c01c, REPORTED); smoke (C1) 58.6 W, (C2) 64.0 W; F1 at most 46.7 W (s02); points over the line: none
+card time: 20.4 card-minutes planned (the smoke (90 s) + 38 runs at E206 arm A's measured 21.96 s a run on this card + 300 s of the session's reads and gates); no run starts once the card time (the first device access to now) passes 30 minutes; at 35 the session ends after the run in progress (a started run is cut only by a stop); the smoke, family X and family W (35 processes): family C is NO DATA if the session ends before it
+rest: the first card command at least 40 minutes after our previous session on aifoundry3 ended
+window: G = the card lane's booking on its day; last start G + 1:30, last end G + 3:30, each rounded up to the whole minute, inside the Pacific day; G at 20:29:00 PST or earlier
+queue: aifoundry3, after E207 (Q199) and E210 (Q202) there; E211 books no card, on any box, before E207's data commit (its twins 2x3x2, 3x3x4 and 6x6x6 fp32 are E207 blind points)
+post: waived (his words, Sun 15 Nov 2026 10:22:36 PST); package counter: not read
+reads only: dmcmd_audit_v2 GO with every send site READ before the first device access; no statistics reset, no set of any kind (TDP, threshold, clock, voltage), no reset, no power cycle, no firmware change; et-who, who, uptime and ps read before the session; the card's lock held for the session; the ops node's creation abort harmless on a card held alone
