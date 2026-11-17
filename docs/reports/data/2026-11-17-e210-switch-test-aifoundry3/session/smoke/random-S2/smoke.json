@@ -1,0 +1,81 @@
+{
+ "name": "proc",
+ "argv": [
+  "~/aifoundry/build/e210rgm/host/sparsity_host",
+  "--test",
+  "fma",
+  "--type",
+  "fp32",
+  "--pattern",
+  "none",
+  "--values",
+  "gemmL1x1x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+  "--shires",
+  "0xffffffff",
+  "--per-shire",
+  "32",
+  "--seconds",
+  "2",
+  "--budget",
+  "3.5",
+  "--seed",
+  "1",
+  "--kernel",
+  "~/aifoundry/build/e210rgm/kernel/sparsity.elf",
+  "--stop-file",
+  "~/aifoundry/build/e210/T1794942678-A/STOP"
+ ],
+ "rc": 0,
+ "hung": false,
+ "t0_ms": 1794942745441,
+ "t1_ms": 1794942748365,
+ "n_launch": 7,
+ "runtime_other_cards": [],
+ "launches_ok": true,
+ "check": "approx",
+ "check_ok": true,
+ "checks": [
+  "approx"
+ ],
+ "check_cycles_per_op": 831.773,
+ "stopped_by_file": false,
+ "k1": false,
+ "records": {
+  "runtime_lines": 0,
+  "unparsed": 0,
+  "mismatched": 0,
+  "other": 0
+ },
+ "launch_window_ms": [
+  1794942745681,
+  1794942748277
+ ],
+ "ident": {
+  "stderr_targets": [
+   "/dev/et0_ops"
+  ],
+  "stderr_ids": [
+   0
+  ],
+  "nodes_held": [
+   "/dev/et0_ops"
+  ],
+  "wrong": [],
+  "right": true,
+  "polls": 31,
+  "tripped": null
+ },
+ "case": "random@S2",
+ "cycles_ref": 831.723,
+ "cycles_ref_is": "E206's measured cycles an op at the shape (p034; E210.md 6)",
+ "cycles_ratio": 1.0000601161684841,
+ "identity_ok": true,
+ "board_rise": {
+  "ok": true,
+  "rise_w": 24.63,
+  "samples": 26,
+  "rest_w": 22.94,
+  "min_w": 2.0
+ },
+ "good": true
+}
