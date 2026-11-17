@@ -1,0 +1,172 @@
+{
+ "energy": {
+  "form": "pmem1",
+  "governed_base_w": {
+   "600.0": 25.456,
+   "700.0": 28.243,
+   "800.0": 33.61
+  },
+  "theta": {
+   "Pmem|aifoundry1 card 1": 0.27792881599054686,
+   "Pmem|aifoundry2 card 0": 0.27792881599054686,
+   "Pmem|aifoundry3 card 0": 0.27792881599054686,
+   "Pmin|aifoundry1 card 1": 3.2572468421754066,
+   "Pmin|aifoundry2 card 0": 1.9558946937952928,
+   "Pmin|aifoundry3 card 0": 1.438852600141482,
+   "b2": 50.51312475968984,
+   "b3": 201.46928150471575,
+   "b3|aifoundry3 card 0": 0.0,
+   "bF": 754.7374710343121,
+   "d2": 499.5697950665482,
+   "d3": 1063.5492953419287,
+   "d3|aifoundry3 card 0": 0.0,
+   "dF": 1282.0580626025417,
+   "g": 0.8095105048514292
+  },
+  "units": "b, d: pJ a line a shire-op; Pmin: W at 1,024 minions; Pmem: W at u = 1; g: share of B(f) - B(600)"
+ },
+ "model": "MM1-v1",
+ "numpy": "1.26.4",
+ "python": "3.12.3",
+ "rest_law": {
+  "T0_forecast_c": 54.4,
+  "T0_how": "E206 arm A's median die at a run's start (52.5-55.0 C); the law's error on E206's 119 points at each run's own die: +0.054 W mean, 0.077 W rms",
+  "aifoundry3_quad": {
+   "a": 0.005899869459451479,
+   "b": -0.33346324533196703,
+   "c": 25.421568539272126
+  },
+  "what": "ledger v2's frozen idle law per card at a forecast die (REPORTED; the scored J at rest uses the run's measured rest)"
+ },
+ "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+ "switch_constants": {
+  "counted_pJ_fp32_random": [
+   1.925,
+   2.706
+  ],
+  "fin_edges_fp32_random": [
+   71092.0,
+   107508.0
+  ],
+  "gov_leak_share": [
+   0.55,
+   0.65,
+   0.8
+  ],
+  "k_leak_w_per_c": 0.47,
+  "k_rise_c_per_w": [
+   0.12,
+   0.145
+  ],
+  "kappa_die": [
+   2.2e+16,
+   3.97e+16,
+   4.86e+16
+  ],
+  "reg_loss_band": [
+   0.0,
+   0.294
+  ],
+  "reg_loss_coeff": {
+   "aifoundry1 card 1": 0.102,
+   "aifoundry2 card 0": 0.188,
+   "aifoundry3 card 0": 0.181
+  }
+ },
+ "time": {
+  "c1_law": {
+   "fp16": [
+    527.48,
+    0.0176
+   ],
+   "fp32": [
+    527.48,
+    0.0176
+   ],
+   "int8": [
+    283.03,
+    0.0146
+   ]
+  },
+  "floor_cycles": {
+   "fp16": 529.0,
+   "fp32": 529.0,
+   "int8": 270.0
+  },
+  "form": "v1_r1conf_dramr0_t2us",
+  "halves": true,
+  "imbalance_mean": {
+   "eta_m": 0.21366131750175743,
+   "fitted_on": [
+    {
+     "id": "p096",
+     "mask": "0xf",
+     "wall_over_mean": 1.2132
+    },
+    {
+     "id": "p097",
+     "mask": "0xf",
+     "wall_over_mean": 1.2141
+    },
+    {
+     "id": "p098",
+     "mask": "0xff",
+     "wall_over_mean": 1.0692
+    },
+    {
+     "id": "p099",
+     "mask": "0xff",
+     "wall_over_mean": 1.0833
+    }
+   ],
+   "gamma": 2.540196550325052,
+   "how": "post hoc, four E206 points (gemmL4x8x4 at 0xf and 0xff, fp32 and int8); moves the counter mean only"
+  },
+  "masked_map": false,
+  "rho_wall_over_mean": {
+   "c4s": 1.143,
+   "c8s": 1.143,
+   "inside": 1.126,
+   "one_block": 1.006,
+   "past": 1.011,
+   "stream": 1.001
+  },
+  "rule": "r1",
+  "theta": {
+   "F2": 0.0,
+   "T2": 0.6141673054022474,
+   "c3": 324.4472867837193,
+   "cF": 401.6761005803057,
+   "chi": 0.19998677821579713,
+   "eta": 5.224954034831812e-15,
+   "kA": 1.067449341724731,
+   "m3": 0.8217959007470041,
+   "mF": 1.6604710692952682,
+   "pi3": 0.0,
+   "piF": 0.0,
+   "piF0": 0.16932372356546266,
+   "s": 7.14067538376277,
+   "x50": 43.590983012377656,
+   "zeta": 0.6793226764528113
+  },
+  "units": "c3, cF: cycles; m3, mF, T2: us; x50, s: MB; zeta, piF0, chi, eta, kA: dimensionless"
+ },
+ "v0_frozen_time_theta": {
+  "F2": 0.0,
+  "T2": 0.0,
+  "c3": 446.49332,
+  "cF": 219.50012,
+  "chi": 0.0,
+  "eta": 0.0,
+  "kA": 0.83979,
+  "m3": 0.812,
+  "mF": 2.35874,
+  "pi3": 0.0,
+  "piF": 0.0,
+  "piF0": 0.0,
+  "s": 8.745,
+  "x50": 50.722,
+  "zeta": 1.0
+ },
+ "what": "the matmul model as frozen for the blind matmul day (desk fits, post hoc as an act)"
+}
