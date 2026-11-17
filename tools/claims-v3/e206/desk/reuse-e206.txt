@@ -1,0 +1,58 @@
+E206 (Q198) desk: the lines a shire-op of every E206 GEMM - how many of an op's 192 operand lines miss the shire's L2, and of those how many the
+L3 still holds (n_L3) and how many are fresh (n_fresh) - by E136's desk model UNCHANGED (tools/claims-v3/e136/desk/reuse_e136.py, imported:
+l2_model, l3_model), plus one new function for the shire subsets. No card. Standard library only.
+tie g2k: L2 and L3 equal reuse_e136.json: True; the subset function at the full mask equals l3_model: True
+tie g4k: L2 and L3 equal reuse_e136.json: True; the subset function at the full mask equals l3_model: True
+tie E190 fp32 gemmL8x16x16: lines equal reuse_e190.json: True
+tie E190 fp16 gemmL8x16x8: lines equal reuse_e190.json: True
+tie E190 int8 gemmL8x16x4: lines equal reuse_e190.json: True; subset function at the full mask == l3_model: True
+gemmL1x1x1@0xffffffff: L2 steady missing 0.0 of 192.0 (first pass 128.0); 32MB A 1.0000 B 1.0000 -> L3 0.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 0.000 fresh 0.000; 24MB A 1.0000 B 1.0000 -> L3 0.000 fresh 0.000; subset function at the full mask == l3_model: True
+gemmL1x1x2@0xffffffff: L2 steady missing 160.0 of 192.0 (first pass 176.0); 32MB A 1.0000 B 1.0000 -> L3 160.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 160.000 fresh 0.000; 24MB A 1.0000 B 1.0000 -> L3 160.000 fresh 0.000
+gemmL1x1x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000; 24MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000
+gemmL1x1x8@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000; 24MB A 0.0000 B 1.0000 -> L3 128.000 fresh 64.000
+gemmL1x1x16@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 28MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 24MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000
+gemmL1x1x32@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 28MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 24MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000
+gemmL1x2x1@0xffffffff: L2 steady missing 96.0 of 192.0 (first pass 112.0); 32MB A 1.0000 B 1.0000 -> L3 96.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 96.000 fresh 0.000; 24MB A 1.0000 B 1.0000 -> L3 96.000 fresh 0.000
+gemmL1x2x2@0xffffffff: L2 steady missing 176.0 of 192.0 (first pass 176.0); 32MB A 1.0000 B 1.0000 -> L3 176.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 176.000 fresh 0.000; 24MB A 1.0000 B 1.0000 -> L3 176.000 fresh 0.000
+gemmL1x4x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000; 28MB A 1.0000 B 0.5000 -> L3 128.000 fresh 64.000; 24MB A 1.0000 B 0.5000 -> L3 128.000 fresh 64.000
+gemmL1x15x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 1.0000 B 0.5000 -> L3 128.000 fresh 64.000; 28MB A 1.0000 B 0.5000 -> L3 128.000 fresh 64.000; 24MB A 1.0000 B 0.5000 -> L3 128.000 fresh 64.000
+gemmL1x16x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 1.0000 B 0.5000 -> L3 128.000 fresh 64.000; 28MB A 1.0000 B 0.5000 -> L3 128.000 fresh 64.000; 24MB A 1.0000 B 0.5000 -> L3 128.000 fresh 64.000
+gemmL1x16x16@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 28MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 24MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000
+gemmL2x1x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000; 24MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000
+gemmL2x2x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000; 28MB A 0.5000 B 1.0000 -> L3 160.000 fresh 32.000; 24MB A 0.5000 B 1.0000 -> L3 160.000 fresh 32.000
+gemmL2x4x1@0xffffffff: L2 steady missing 104.0 of 192.0 (first pass 104.0); 32MB A 1.0000 B 1.0000 -> L3 104.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 104.000 fresh 0.000; 24MB A 1.0000 B 1.0000 -> L3 104.000 fresh 0.000
+gemmL2x4x2@0xffffffff: L2 steady missing 176.0 of 192.0 (first pass 176.0); 32MB A 1.0000 B 1.0000 -> L3 176.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 176.000 fresh 0.000; 24MB A 0.7500 B 1.0000 -> L3 160.000 fresh 16.000
+gemmL2x4x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.7500 B 0.5635 -> L3 120.128 fresh 71.872; 28MB A 0.7500 B 0.5000 -> L3 112.000 fresh 80.000; 24MB A 0.7500 B 0.5000 -> L3 112.000 fresh 80.000
+gemmL2x4x8@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.5640 B 0.5000 -> L3 100.096 fresh 91.904; 28MB A 0.1890 B 0.5000 -> L3 76.096 fresh 115.904; 24MB A 0.0000 B 0.5000 -> L3 64.000 fresh 128.000
+gemmL2x4x16@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 28MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 24MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000
+gemmL2x8x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; 28MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; 24MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000
+gemmL2x16x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.9375 B 0.5000 -> L3 124.000 fresh 68.000; 28MB A 0.9375 B 0.5000 -> L3 124.000 fresh 68.000; 24MB A 0.9375 B 0.5000 -> L3 124.000 fresh 68.000
+gemmL3x5x7@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.8000 B 0.5000 -> L3 115.200 fresh 76.800; 28MB A 0.5732 B 0.5000 -> L3 100.685 fresh 91.315; 24MB A 0.1161 B 0.5000 -> L3 71.430 fresh 120.570
+gemmL3x6x3@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.8333 B 0.5000 -> L3 117.331 fresh 74.669; 28MB A 0.8333 B 0.5000 -> L3 117.331 fresh 74.669; 24MB A 0.8333 B 0.5000 -> L3 117.331 fresh 74.669
+gemmL3x6x6@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.8333 B 0.5000 -> L3 117.331 fresh 74.669; 28MB A 0.8333 B 0.5000 -> L3 117.331 fresh 74.669; 24MB A 0.5577 B 0.5000 -> L3 99.693 fresh 92.307
+gemmL4x4x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.7500 B 0.5635 -> L3 120.128 fresh 71.872; 28MB A 0.7500 B 0.5000 -> L3 112.000 fresh 80.000; 24MB A 0.7500 B 0.5000 -> L3 112.000 fresh 80.000
+gemmL4x8x2@0xffffffff: L2 steady missing 176.0 of 192.0 (first pass 176.0); 32MB A 0.8750 B 0.5000 -> L3 104.000 fresh 72.000; 28MB A 0.8750 B 0.5000 -> L3 104.000 fresh 72.000; 24MB A 0.8750 B 0.5000 -> L3 104.000 fresh 72.000
+gemmL4x8x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; 28MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; 24MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; subset function at the full mask == l3_model: True
+gemmL4x8x8@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.6580 B 0.5000 -> L3 106.112 fresh 85.888; 28MB A 0.2205 B 0.5000 -> L3 78.112 fresh 113.888; 24MB A 0.0000 B 0.5000 -> L3 64.000 fresh 128.000
+gemmL6x12x3@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.9167 B 0.5000 -> L3 122.669 fresh 69.331; 28MB A 0.9167 B 0.5000 -> L3 122.669 fresh 69.331; 24MB A 0.9167 B 0.5000 -> L3 122.669 fresh 69.331
+gemmL6x12x6@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.9167 B 0.5000 -> L3 122.669 fresh 69.331; 28MB A 0.9167 B 0.5000 -> L3 122.669 fresh 69.331; 24MB A 0.6135 B 0.5000 -> L3 103.264 fresh 88.736
+gemmL6x12x12@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.0000 B 0.5000 -> L3 64.000 fresh 128.000; 28MB A 0.0000 B 0.5000 -> L3 64.000 fresh 128.000; 24MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000
+gemmL8x1x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.0000 B 1.0000 -> L3 128.000 fresh 64.000; 28MB A 0.0000 B 1.0000 -> L3 128.000 fresh 64.000; 24MB A 0.0000 B 1.0000 -> L3 128.000 fresh 64.000
+reuse_e206: 159.7 s
+gemmL8x1x16@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 28MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 24MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000
+gemmL8x4x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.7500 B 0.5635 -> L3 120.128 fresh 71.872; 28MB A 0.7500 B 0.5000 -> L3 112.000 fresh 80.000; 24MB A 0.7500 B 0.5000 -> L3 112.000 fresh 80.000
+gemmL8x16x1@0xffffffff: L2 steady missing 98.0 of 192.0 (first pass 98.0); 32MB A 0.9375 B 0.5000 -> L3 30.000 fresh 68.000; 28MB A 0.9375 B 0.5000 -> L3 30.000 fresh 68.000; 24MB A 0.9375 B 0.5000 -> L3 30.000 fresh 68.000
+gemmL8x16x4@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.9375 B 0.5000 -> L3 124.000 fresh 68.000; 28MB A 0.9375 B 0.5000 -> L3 124.000 fresh 68.000; 24MB A 0.9375 B 0.5000 -> L3 124.000 fresh 68.000
+gemmL8x16x8@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.7050 B 0.5000 -> L3 109.120 fresh 82.880; 28MB A 0.2362 B 0.5000 -> L3 79.117 fresh 112.883; 24MB A 0.0000 B 0.5000 -> L3 64.000 fresh 128.000
+gemmL8x16x16@0xffffffff: L2 steady missing 192.0 of 192.0 (first pass 192.0); 32MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 28MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000; 24MB A 0.0000 B 0.0000 -> L3 0.000 fresh 192.000
+gemmL1x1x1@0x1 (1 shires): L2 as the full shape 0.0; 32MB A 1.0000 B 1.0000 -> L3 0.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 0.000 fresh 0.000; 24MB A 1.0000 B 1.0000 -> L3 0.000 fresh 0.000
+gemmL1x1x1@0xff (8 shires): L2 as the full shape 0.0; 32MB A 1.0000 B 1.0000 -> L3 0.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 0.000 fresh 0.000; 24MB A 1.0000 B 1.0000 -> L3 0.000 fresh 0.000
+gemmL4x8x4@0x1 (1 shires): L2 as the full shape 192.0; 32MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000; 28MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000; 24MB A 1.0000 B 1.0000 -> L3 192.000 fresh 0.000
+gemmL4x8x4@0xf (4 shires): L2 as the full shape 192.0; 32MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; 28MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; 24MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000
+gemmL4x8x4@0xff (8 shires): L2 as the full shape 192.0; 32MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; 28MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; 24MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000
+gemmL4x8x4@0xffff (16 shires): L2 as the full shape 192.0; 32MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; 28MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000; 24MB A 0.8750 B 0.5000 -> L3 120.000 fresh 72.000
+gemmL4x8x4@0x11111111 (8 shires): L2 as the full shape 192.0; 32MB A 0.8750 B 1.0000 -> L3 184.000 fresh 8.000; 28MB A 0.8750 B 1.0000 -> L3 184.000 fresh 8.000; 24MB A 0.8750 B 0.6250 -> L3 136.000 fresh 56.000
+gemmc1: lines (L3, fresh) = (0, 0): none missing (one block repeated: 0 missing lines an op in the steady state)
+gemmc8s: lines (L3, fresh) = (128, 0): 128 L3-served (E107 R4: c8s's 26 MB, C included, served by the L3)
+gemmc16s: lines (L3, fresh) = (0, 128): 128 fresh (each block's first touch, by construction)
+45 shapes (38 full-chip, 7 subsets); every tie PASS
