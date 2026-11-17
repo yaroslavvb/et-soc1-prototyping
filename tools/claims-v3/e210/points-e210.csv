@@ -1,0 +1,23 @@
+case,kind,shape,arm,M,N,K,format,role,blocks_planned,law,values
+random@S1,random,S1,gemmL1x1x1,1024,512,512,fp32,reference,0,"normal(0, 1), every element drawn by the host (gen randn, seed 1; pair 0 = randn.bin)",gemmL1x1x1:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin
+zeros@S1,zeros,S1,gemmL1x1x1,1024,512,512,fp32,control,2,every word +0.0 (zeros.bin),gemmL1x1x1:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin
+ones@S1,ones,S1,gemmL1x1x1,1024,512,512,fp32,control,2,every word 1.0 (ones.bin),gemmL1x1x1:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin
+sparse50@S1,sparse50,S1,gemmL1x1x1,1024,512,512,fp32,control,2,"normal(0, 1) with half the elements +0.0, drawn by the host (gen sparse50, seed 1; pair 0 = sparse50.bin)",gemmL1x1x1:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin
+negzero@S1,negzero,S1,gemmL1x1x1,1024,512,512,fp32,test,3,"every word 0x80000000 (-0.0): every lane valid (the gate tests the all-zero word), nothing moves",gemmL1x1x1:tiles:tools/claims-v3/e210/tiles/fp32/negzero/negzero_00.bin
+signs@S1,signs,S1,gemmL1x1x1,1024,512,512,fp32,test,3,0x3F800000 with a random sign bit (+-1.0),gemmL1x1x1:tiles:<61 files>
+lowmant8@S1,lowmant8,S1,gemmL1x1x1,1024,512,512,fp32,test,3,0x3F800000 OR 8 random bits in mantissa bits 0-7,gemmL1x1x1:tiles:<61 files>
+highmant8@S1,highmant8,S1,gemmL1x1x1,1024,512,512,fp32,test,3,0x3F800000 OR 8 random bits in mantissa bits 15-22,gemmL1x1x1:tiles:<61 files>
+bhalfeq@S1,bhalfeq,S1,gemmL1x1x1,1024,512,512,fp32,test,3,A random normal; each B row 8 random normal words at columns l and l+8 (B[k][l+8] = B[k][l]),gemmL1x1x1:tiles:<61 files>
+badjeq@S1,badjeq,S1,gemmL1x1x1,1024,512,512,fp32,test,3,"bhalfeq's law with B's equal pairs in adjacent columns (2m, 2m+1)",gemmL1x1x1:tiles:<61 files>
+hd4@S1,hd4,S1,gemmL1x1x1,1024,512,512,fp32,test,3,"A: each column a random normal word, each next row = the previous xor 4 distinct random mantissa bits; B[k][l] random normal, B[k][l+8] = B[k][l] xor 4 random mantissa bits",gemmL1x1x1:tiles:<61 files>
+arow50@S1,arow50,S1,gemmL1x1x1,1024,512,512,fp32,reported,3,"A's odd rows +0.0, every other A word and every B word random normal",gemmL1x1x1:tiles:<61 files>
+random@S2,random,S2,gemmL1x1x4,1024,512,2048,fp32,reference,0,"normal(0, 1), every element drawn by the host (gen randn, seed 1; pair 0 = randn.bin)",gemmL1x1x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin
+zeros@S2,zeros,S2,gemmL1x1x4,1024,512,2048,fp32,control,2,every word +0.0 (zeros.bin),gemmL1x1x4:tiles:tools/claims-v3/kinds/tiles/fp32/zeros.bin
+ones@S2,ones,S2,gemmL1x1x4,1024,512,2048,fp32,control,2,every word 1.0 (ones.bin),gemmL1x1x4:tiles:tools/claims-v3/kinds/tiles/fp32/ones.bin
+sparse50@S2,sparse50,S2,gemmL1x1x4,1024,512,2048,fp32,control,2,"normal(0, 1) with half the elements +0.0, drawn by the host (gen sparse50, seed 1; pair 0 = sparse50.bin)",gemmL1x1x4:sparse50:tools/claims-v3/kinds/tiles/fp32/sparse50.bin
+negzero@S2,negzero,S2,gemmL1x1x4,1024,512,2048,fp32,test,3,"every word 0x80000000 (-0.0): every lane valid (the gate tests the all-zero word), nothing moves",gemmL1x1x4:tiles:tools/claims-v3/e210/tiles/fp32/negzero/negzero_00.bin
+lowmant8@S2,lowmant8,S2,gemmL1x1x4,1024,512,2048,fp32,test,3,0x3F800000 OR 8 random bits in mantissa bits 0-7,gemmL1x1x4:tiles:<61 files>
+highmant8@S2,highmant8,S2,gemmL1x1x4,1024,512,2048,fp32,test,3,0x3F800000 OR 8 random bits in mantissa bits 15-22,gemmL1x1x4:tiles:<61 files>
+bhalfeq@S2,bhalfeq,S2,gemmL1x1x4,1024,512,2048,fp32,test,3,A random normal; each B row 8 random normal words at columns l and l+8 (B[k][l+8] = B[k][l]),gemmL1x1x4:tiles:<61 files>
+hd4@S2,hd4,S2,gemmL1x1x4,1024,512,2048,fp32,test,3,"A: each column a random normal word, each next row = the previous xor 4 distinct random mantissa bits; B[k][l] random normal, B[k][l+8] = B[k][l] xor 4 random mantissa bits",gemmL1x1x4:tiles:<61 files>
+maxalte@S2,maxalte,S2,gemmL1x1x4,1024,512,2048,fp32,test,3,"A: each column a, a xor F, a, ... down the rows; B[k][l+8] = B[k][l] xor F; F = 0x83FFFFFF; a, B[k][l] random normal with exponent field 8-247",gemmL1x1x4:tiles:<61 files>

@@ -1,0 +1,382 @@
+{
+ "cases": [
+  {
+   "case": "A measured = R1 exactly",
+   "got": {
+    "B5": "PASS",
+    "H1": "R1 BETTER",
+    "H1p": "R1 BETTER",
+    "H2": "R1 BETTER",
+    "H2p": "R1 BETTER",
+    "H3": "R1 BETTER",
+    "H3p": "R1 BETTER",
+    "H4": "UNDECIDED",
+    "H4p": "UNDECIDED",
+    "Q:signs@S1": "OK",
+    "R0": "PASS",
+    "R0missing": 0,
+    "T:hd4@S1": true,
+    "scored:hd4@S1": true
+   },
+   "ok": true,
+   "want": {
+    "B5": "PASS",
+    "H1": "R1 BETTER",
+    "H1p": "R1 BETTER",
+    "H2": "R1 BETTER",
+    "H2p": "R1 BETTER",
+    "H3": "R1 BETTER",
+    "H3p": "R1 BETTER",
+    "H4": "UNDECIDED",
+    "H4p": "UNDECIDED",
+    "Q:signs@S1": "OK",
+    "R0": "PASS",
+    "R0missing": 0,
+    "T:hd4@S1": true,
+    "scored:hd4@S1": true
+   }
+  },
+  {
+   "case": "B measured = R3L",
+   "got": {
+    "B5": "FAIL",
+    "H3": "R3L BETTER",
+    "H3p": "R3L BETTER"
+   },
+   "ok": true,
+   "want": {
+    "B5": "FAIL",
+    "H3": "R3L BETTER",
+    "H3p": "R3L BETTER"
+   }
+  },
+  {
+   "case": "C measured = the null R4",
+   "got": {
+    "B5": "FAIL",
+    "H1": "R4 BETTER",
+    "H1p": "R4 BETTER"
+   },
+   "ok": true,
+   "want": {
+    "B5": "FAIL",
+    "H1": "R4 BETTER",
+    "H1p": "R4 BETTER"
+   }
+  },
+  {
+   "case": "D1 measured = R1 + 0.04 D (inside the band)",
+   "got": {
+    "B5": "PASS"
+   },
+   "ok": true,
+   "want": {
+    "B5": "PASS"
+   }
+  },
+  {
+   "case": "D2 measured = R1 + 0.06 D (outside the band)",
+   "got": {
+    "B5": "FAIL"
+   },
+   "ok": true,
+   "want": {
+    "B5": "FAIL"
+   }
+  },
+  {
+   "case": "E measured = raw R3",
+   "got": {
+    "B5": "FAIL",
+    "H2": "R3 BETTER"
+   },
+   "ok": true,
+   "want": {
+    "B5": "FAIL",
+    "H2": "R3 BETTER"
+   }
+  },
+  {
+   "case": "F hd4@S1 0.2% slower in cycles",
+   "got": {
+    "B5": "PASS",
+    "T:hd4@S1": false,
+    "scored:hd4@S1": false
+   },
+   "ok": true,
+   "want": {
+    "B5": "PASS",
+    "T:hd4@S1": false,
+    "scored:hd4@S1": false
+   }
+  },
+  {
+   "case": "G one check of C wrong",
+   "got": {
+    "R0": "FAIL"
+   },
+   "ok": true,
+   "want": {
+    "R0": "FAIL"
+   }
+  },
+  {
+   "case": "H signs@S1 runs at 700 MHz",
+   "got": {
+    "Q:signs@S1": "NO DATA"
+   },
+   "ok": true,
+   "want": {
+    "Q:signs@S1": "NO DATA"
+   }
+  },
+  {
+   "case": "I lowmant8@S1 one complete block",
+   "got": {
+    "Q:lowmant8@S1": "NO DATA"
+   },
+   "ok": true,
+   "want": {
+    "Q:lowmant8@S1": "NO DATA"
+   }
+  },
+  {
+   "case": "J S2 never ran",
+   "got": {
+    "B5": "PASS",
+    "Q:maxalte@S2": "NO DATA"
+   },
+   "ok": true,
+   "want": {
+    "B5": "PASS",
+    "Q:maxalte@S2": "NO DATA"
+   }
+  },
+  {
+   "case": "K one hd4@S2 block 3 W off",
+   "got": {
+    "B5case:hd4@S2": true
+   },
+   "ok": true,
+   "want": {
+    "B5case:hd4@S2": true
+   }
+  },
+  {
+   "case": "M measured halfway between R1 and the null",
+   "got": {
+    "H1": "UNDECIDED",
+    "H1p": "UNDECIDED"
+   },
+   "ok": true,
+   "want": {
+    "H1": "UNDECIDED",
+    "H1p": "UNDECIDED"
+   }
+  },
+  {
+   "case": "Y1 a pattern run with no telemetry sample inside its counted launches (no clock keys, no work power)",
+   "got": {
+    "B5": "PASS",
+    "R0": "PASS",
+    "nblocks:lowmant8@S1": 2
+   },
+   "ok": true,
+   "want": {
+    "B5": "PASS",
+    "R0": "PASS",
+    "nblocks:lowmant8@S1": 2
+   }
+  },
+  {
+   "case": "Y2 the same with mhz_min and mhz_max written as None (the first freeze crashed here)",
+   "got": {
+    "nblocks:lowmant8@S1": 2
+   },
+   "ok": true,
+   "want": {
+    "nblocks:lowmant8@S1": 2
+   }
+  },
+  {
+   "case": "Y3 a random run with no telemetry sample inside its counted launches (its two blocks set aside; the drift report without it)",
+   "got": {
+    "R0": "PASS",
+    "drift:random@S1": 35,
+    "nblocks:bhalfeq@S1": 2,
+    "nblocks:sparse50@S1": 1
+   },
+   "ok": true,
+   "want": {
+    "R0": "PASS",
+    "drift:random@S1": 35,
+    "nblocks:bhalfeq@S1": 2,
+    "nblocks:sparse50@S1": 1
+   }
+  },
+  {
+   "case": "Y4 a non-finite board power in one pattern run",
+   "got": {
+    "nblocks:hd4@S2": 2
+   },
+   "ok": true,
+   "want": {
+    "nblocks:hd4@S2": 2
+   }
+  },
+  {
+   "case": "Y5 a run whose host printed no check of C (R0 reads it apart; its block set aside by Q)",
+   "got": {
+    "R0": "PASS",
+    "R0missing": 1,
+    "nblocks:signs@S1": 2
+   },
+   "ok": true,
+   "want": {
+    "R0": "PASS",
+    "R0missing": 1,
+    "nblocks:signs@S1": 2
+   }
+  },
+  {
+   "case": "Y6 the probe crashed (no check) and the smoke read exact",
+   "got": {
+    "R0": "PASS",
+    "R0missing": 1
+   },
+   "ok": true,
+   "want": {
+    "R0": "PASS",
+    "R0missing": 1
+   }
+  },
+  {
+   "case": "Y7 an empty data file (no check read)",
+   "got": {
+    "B5": "NO DATA",
+    "R0": "NO DATA"
+   },
+   "ok": true,
+   "want": {
+    "B5": "NO DATA",
+    "R0": "NO DATA"
+   }
+  },
+  {
+   "case": "Y8 a smoke process with a wrong check",
+   "got": {
+    "R0": "FAIL"
+   },
+   "ok": true,
+   "want": {
+    "R0": "FAIL"
+   }
+  },
+  {
+   "case": "V1 stand-in table, R2 on every test case; measured = R1",
+   "got": {
+    "H4": "R1 BETTER"
+   },
+   "ok": true,
+   "want": {
+    "H4": "R1 BETTER"
+   }
+  },
+  {
+   "case": "V2 stand-in table, R2 on every test case; measured = that R2",
+   "got": {
+    "H4": "R2 BETTER"
+   },
+   "ok": true,
+   "want": {
+    "H4": "R2 BETTER"
+   }
+  },
+  {
+   "case": "L the scorer on a copy whose forecast file has one byte more",
+   "got": {
+    "refusal_exit": 4
+   },
+   "ok": true,
+   "want": {
+    "refusal_exit": 4
+   }
+  }
+ ],
+ "python": "3.12.3",
+ "verdict": "PASS",
+ "verdicts_seen_per_rule": {
+  "B5": [
+   "FAIL",
+   "NO DATA",
+   "PASS"
+  ],
+  "B5case": [
+   "True"
+  ],
+  "H1": [
+   "R1 BETTER",
+   "R4 BETTER",
+   "UNDECIDED"
+  ],
+  "H1p": [
+   "R1 BETTER",
+   "R4 BETTER",
+   "UNDECIDED"
+  ],
+  "H2": [
+   "R1 BETTER",
+   "R3 BETTER"
+  ],
+  "H2p": [
+   "R1 BETTER"
+  ],
+  "H3": [
+   "R1 BETTER",
+   "R3L BETTER"
+  ],
+  "H3p": [
+   "R1 BETTER",
+   "R3L BETTER"
+  ],
+  "H4": [
+   "R1 BETTER",
+   "R2 BETTER",
+   "UNDECIDED"
+  ],
+  "H4p": [
+   "UNDECIDED"
+  ],
+  "Q": [
+   "NO DATA",
+   "OK"
+  ],
+  "R0": [
+   "FAIL",
+   "NO DATA",
+   "PASS"
+  ],
+  "R0missing": [
+   "0",
+   "1"
+  ],
+  "T": [
+   "False",
+   "True"
+  ],
+  "drift": [
+   "35"
+  ],
+  "nblocks": [
+   "1",
+   "2"
+  ],
+  "refusal_exit": [
+   "4"
+  ],
+  "scored": [
+   "False",
+   "True"
+  ]
+ }
+}

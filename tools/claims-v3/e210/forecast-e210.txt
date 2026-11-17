@@ -1,0 +1,49 @@
+E210 frozen forecasts: dJ = J(case) - J(random), J over idle a GEMM, aifoundry3 card 0 at 600 MHz (in W over random and as a fraction of D)
+
+S1: D 29.780 W = 1.71480 mJ a GEMM (E206 measured); t_gemm 5.758217e-05 s; f_ones 0.3088 (E208 card 1); MM1-v1 line share of D 0.1205; kappa 1.6733e+16 switches a J (b 5.9762e-17); lambda 0.5475; peak random 59.54 W
+   committed zeros     measured  -29.780 W (E206 p080); R1 +0.2415 D; R1g +0.0000 D; R3 -0.2291 D; R3L +0.2742 D; R1pure +0.2717 D
+   committed real      measured   -0.477 W (E206 p110); R1 -0.0122 D (fit); R1g -0.0122 D; R3 +0.0209 D; R3L +0.0172 D; R1pure -0.0123 D
+   committed sparse50  measured  -18.653 W (E206 p116); R1 +0.1184 D; R1g -0.0549 D; R3 +0.3651 D; R3L +0.4622 D; R1pure +0.1029 D
+   committed ones      measured  -20.584 W (transferred from E208 card 1); R1 +0.0005 D (fit); R1g +0.0005 D; R3 -0.5032 D; R3L +0.0001 D; R1pure +0.0005 D
+S2: D 20.533 W = 7.98210 mJ a GEMM (E206 measured); t_gemm 3.887538e-04 s; f_ones 0.3193 (E208 card 1); MM1-v1 line share of D 0.2262; kappa 1.6367e+16 switches a J (b 6.1099e-17); lambda 0.5545; peak random 50.40 W
+   committed zeros     measured  -20.533 W (E206 p082); R1 +0.2266 D; R1g +0.0000 D; R3 -0.1703 D; R3L +0.2557 D; R1pure +0.2819 D
+   committed ones      measured  -13.976 W (transferred from E208 card 1); R1 +0.0000 D (fit); R1g +0.0000 D; R3 -0.4260 D; R3L +0.0000 D; R1pure +0.0000 D
+
+case               role      R1 W     R3 W    R3L W     R2 W     R4 W (nearest)       R1pure   R1g    | fractions of D: R1, R3L, R4 | plan peak
+zeros@S1           control       n/f      n/f      n/f      n/f  -29.780 (zeros   )  -21.689  -29.780 |  n/f   n/f  -1.000 | 59.54 W
+ones@S1            control   -20.569  -35.569  -20.580      n/f  -20.584 (ones    )  -20.569  -20.569 | -0.691 -0.691 -0.691 | 59.54 W
+sparse50@S1        control       n/f      n/f      n/f      n/f  -18.653 (sparse50)  -15.589  -20.289 |  n/f   n/f  -0.626 | 59.54 W
+negzero@S1         test      -21.513  -36.455  -21.466      n/f  -20.584 (ones    )  -20.635  -21.513 | -0.722 -0.721 -0.691 | 59.54 W
+signs@S1           test      -16.732  -35.038  -20.242      n/f  -20.584 (ones    )  -16.334  -16.732 | -0.562 -0.680 -0.691 | 59.54 W
+lowmant8@S1        test      -13.584  -31.761  -18.114      n/f  -20.584 (ones    )  -13.600  -13.584 | -0.456 -0.608 -0.691 | 59.54 W
+highmant8@S1       test      -11.935  -13.531   -8.132      n/f  -20.584 (ones    )  -11.730  -11.935 | -0.401 -0.273 -0.691 | 59.54 W
+bhalfeq@S1         test       -8.721  -21.398  -11.715   +0.003   +0.000 (random  )   -9.900   -8.721 | -0.293 -0.393 +0.000 | 59.54 W
+badjeq@S1          test       -0.019   -0.089   -0.051   -0.004   +0.000 (random  )   -0.016   -0.019 | -0.001 -0.002 +0.000 | 59.54 W
+hd4@S1             test       -4.946  -21.725  -11.977   -0.181   +0.000 (random  )   -5.407   -4.946 | -0.166 -0.402 +0.000 | 59.54 W
+arow50@S1          reported      n/f      n/f      n/f      n/f   -0.477 (real    )   -9.957  -12.076 |  n/f   n/f  -0.016 | 59.54 W
+zeros@S2           control       n/f      n/f      n/f      n/f  -20.533 (zeros   )  -14.744  -20.533 |  n/f   n/f  -1.000 | 50.40 W
+ones@S2            control   -13.976  -22.724  -13.976      n/f  -13.976 (ones    )  -13.976  -13.976 | -0.681 -0.681 -0.681 | 50.40 W
+sparse50@S2        control       n/f      n/f      n/f      n/f   +0.000 (random  )  -10.141  -12.847 |  n/f   n/f  +0.000 | 50.40 W
+negzero@S2         test      -15.131  -23.844  -15.096      n/f  -13.976 (ones    )  -14.021  -15.131 | -0.737 -0.735 -0.681 | 50.40 W
+lowmant8@S2        test       -9.164  -19.903  -11.937      n/f  -13.976 (ones    )   -9.168   -9.164 | -0.446 -0.581 -0.681 | 50.40 W
+highmant8@S2       test       -8.243   -9.108   -5.951      n/f  -13.976 (ones    )   -7.987   -8.243 | -0.401 -0.290 -0.681 | 50.40 W
+bhalfeq@S2         test       -5.193  -12.685   -7.032   +0.004   +0.000 (random  )   -6.671   -5.193 | -0.253 -0.342 +0.000 | 50.40 W
+hd4@S2             test       -3.061  -12.986   -7.302   -0.229   +0.000 (random  )   -3.635   -3.061 | -0.149 -0.356 +0.000 | 50.40 W
+maxalte@S2         test       +1.850  +18.867  +10.589      n/f   +0.000 (random  )   +2.005   +1.850 | +0.090 +0.516 +0.000 | 62.05 W
+
+plan S1: the hottest case bhalfeq@S1 at 59.54 W against the 65 W line
+plan S2: the hottest case maxalte@S2 at 62.05 W against the 65 W line
+
+power (desk; 3 blocks a test case; truth on one route; the exact two-sided sign test at 0.05 over decided cases):
+  central|R1_vs_R4             cases 13: P(R1 BETTER | truth R1) 1.000; P(other BETTER | truth other) 1.000
+  central|R1_vs_R3             cases 13: P(R1 BETTER | truth R1) 1.000; P(other BETTER | truth other) 1.000
+  central|R1_vs_R3L            cases 13: P(R1 BETTER | truth R1) 1.000; P(other BETTER | truth other) 1.000
+  central|R1_vs_R2             cases  5: P(R1 BETTER | truth R1) 0.000; P(other BETTER | truth other) 0.000
+  optimistic|R1_vs_R4          cases 13: P(R1 BETTER | truth R1) 1.000; P(other BETTER | truth other) 1.000
+  optimistic|R1_vs_R3          cases 13: P(R1 BETTER | truth R1) 1.000; P(other BETTER | truth other) 1.000
+  optimistic|R1_vs_R3L         cases 13: P(R1 BETTER | truth R1) 1.000; P(other BETTER | truth other) 1.000
+  optimistic|R1_vs_R2          cases  5: P(R1 BETTER | truth R1) 0.000; P(other BETTER | truth other) 0.000
+  conservative|R1_vs_R4        cases 13: P(R1 BETTER | truth R1) 1.000; P(other BETTER | truth other) 1.000
+  conservative|R1_vs_R3        cases 13: P(R1 BETTER | truth R1) 1.000; P(other BETTER | truth other) 1.000
+  conservative|R1_vs_R3L       cases 13: P(R1 BETTER | truth R1) 1.000; P(other BETTER | truth other) 1.000
+  conservative|R1_vs_R2        cases  5: P(R1 BETTER | truth R1) 0.000; P(other BETTER | truth other) 0.000

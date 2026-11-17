@@ -1,0 +1,26 @@
+E210 scorer self-test on stand-ins: PASS
+  ok  A measured = R1 exactly: R0 PASS, B5 PASS, H1 R1 BETTER, H2 R1 BETTER, H3 R1 BETTER, H4 UNDECIDED, T:hd4@S1 True, scored:hd4@S1 True, Q:signs@S1 OK, R0missing 0, H1p R1 BETTER, H2p R1 BETTER, H3p R1 BETTER, H4p UNDECIDED
+  ok  B measured = R3L: B5 FAIL, H3 R3L BETTER, H3p R3L BETTER
+  ok  C measured = the null R4: B5 FAIL, H1 R4 BETTER, H1p R4 BETTER
+  ok  D1 measured = R1 + 0.04 D (inside the band): B5 PASS
+  ok  D2 measured = R1 + 0.06 D (outside the band): B5 FAIL
+  ok  E measured = raw R3: B5 FAIL, H2 R3 BETTER
+  ok  F hd4@S1 0.2% slower in cycles: T:hd4@S1 False, scored:hd4@S1 False, B5 PASS
+  ok  G one check of C wrong: R0 FAIL
+  ok  H signs@S1 runs at 700 MHz: Q:signs@S1 NO DATA
+  ok  I lowmant8@S1 one complete block: Q:lowmant8@S1 NO DATA
+  ok  J S2 never ran: B5 PASS, Q:maxalte@S2 NO DATA
+  ok  K one hd4@S2 block 3 W off: B5case:hd4@S2 True
+  ok  M measured halfway between R1 and the null: H1 UNDECIDED, H1p UNDECIDED
+  ok  Y1 a pattern run with no telemetry sample inside its counted launches (no clock keys, no work power): nblocks:lowmant8@S1 2, R0 PASS, B5 PASS
+  ok  Y2 the same with mhz_min and mhz_max written as None (the first freeze crashed here): nblocks:lowmant8@S1 2
+  ok  Y3 a random run with no telemetry sample inside its counted launches (its two blocks set aside; the drift report without it): nblocks:sparse50@S1 1, nblocks:bhalfeq@S1 2, drift:random@S1 35, R0 PASS
+  ok  Y4 a non-finite board power in one pattern run: nblocks:hd4@S2 2
+  ok  Y5 a run whose host printed no check of C (R0 reads it apart; its block set aside by Q): R0 PASS, R0missing 1, nblocks:signs@S1 2
+  ok  Y6 the probe crashed (no check) and the smoke read exact: R0 PASS, R0missing 1
+  ok  Y7 an empty data file (no check read): R0 NO DATA, B5 NO DATA
+  ok  Y8 a smoke process with a wrong check: R0 FAIL
+  ok  V1 stand-in table, R2 on every test case; measured = R1: H4 R1 BETTER
+  ok  V2 stand-in table, R2 on every test case; measured = that R2: H4 R2 BETTER
+  ok  L the scorer on a copy whose forecast file has one byte more: refusal_exit 4
+verdicts seen per rule: B5 FAIL/NO DATA/PASS; B5case True; H1 R1 BETTER/R4 BETTER/UNDECIDED; H1p R1 BETTER/R4 BETTER/UNDECIDED; H2 R1 BETTER/R3 BETTER; H2p R1 BETTER; H3 R1 BETTER/R3L BETTER; H3p R1 BETTER/R3L BETTER; H4 R1 BETTER/R2 BETTER/UNDECIDED; H4p UNDECIDED; Q NO DATA/OK; R0 FAIL/NO DATA/PASS; R0missing 0/1; T False/True; drift 35; nblocks 1/2; refusal_exit 4; scored False/True
