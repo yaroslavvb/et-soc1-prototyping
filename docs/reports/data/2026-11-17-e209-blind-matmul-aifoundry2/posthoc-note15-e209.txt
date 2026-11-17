@@ -1,0 +1,117 @@
+E209, dated note 15 (POST HOC): readings computed after the frozen scorer from its own output, by E209.md section 7's definitions; REPORTED, never verdicts
+inputs (sha256 checked): the scorer's output JSON 3e53bb3e587b; its input JSON 90bc84ab5244; points-e209.json cfdda741bcc8; rules-e209.json 0d7dfa791573; mm1_v2_e209.csv fdd018ca9ceb; f1f2_e209.csv 65a98e018687; python 3.12.3
+data commit of the session: ea3fa3ce; the frozen scorer: score_e209.py e522919a (its output above, read, never re-run here)
+
+A. BESIDE EVERY HEAD-TO-HEAD. Registered (E209.md section 7): "REPORTED beside every head-to-head, never verdicts: the other test's verdict; a family-level check (the sign test over the families' median d, E207's fix); the bootstrap of the median d".
+   d = |ln(measured / other)| - |ln(measured / MM1-v2)| per time case (H1-H3, H5) or point (H4, H6); MM1-v2 closer where d > the tie (0.005 in ln for cycles and seconds, 0.01 for joules).
+
+H1: cycles an op, the wall: MM1-v2 against MM1-v1, both at each run's measured clock, per time case
+   cells: MM1-v2 closer 17, MM1-v1 closer 11, ties 13 (untied 28)
+   REGISTERED, decides: the bootstrap of the mean d: mean +0.01578, 95% [+0.00370, +0.02934] (above 0; n 41) -> MM1-v2 BETTER
+   REPORTED, the other test's verdict: the exact sign test: 17 against 11, p 0.345 -> NOT DECIDED
+   REPORTED, the bootstrap of the median d: median +0.00237, 95% [-0.00423, +0.00963] (spans 0)
+   REPORTED, the family-level check (the sign test over the families' median d, the tie 0.005): MM1-v2 closer 2, MM1-v1 closer 2, within the tie 5; p 1.000
+      families' median d: subsets +0.0541; the knee +0.0119; long K +0.0047; inside the L3 +0.0030; governor +0.0030; kinds +0.0024; past the L3 -0.0042; power-of-two stride -0.0172; one K block -0.0352
+      POST HOC, by family (n; MM1-v2 closer / other closer / ties; mean d; share of the sum of d): subsets 8; 5/3/0; +0.0541; +0.67; the knee 7; 5/1/1; +0.0268; +0.29; inside the L3 6; 2/0/4; +0.0120; +0.11; long K 5; 2/0/3; +0.0092; +0.07; governor 2; 1/0/1; +0.0030; +0.01; kinds 1; 0/0/1; +0.0024; +0.00; past the L3 5; 1/2/2; +0.0003; +0.00; power-of-two stride 5; 1/3/1; -0.0061; -0.05; one K block 2; 0/2/0; -0.0352; -0.11
+   re-derived here from the scorer's per-case figures: cells EQUAL, counts EQUAL, sign p EQUAL, both bootstrap intervals (seed 'E209|bootstrap|H1', 10000 resamples) EQUAL, the family check EQUAL to the scorer's JSON
+
+H2: cycles an op, the counter's mean: MM1-v2 against MM1-v1 at the measured clock, per time case
+   cells: MM1-v2 closer 15, MM1-v1 closer 11, ties 15 (untied 26)
+   REGISTERED, decides: the bootstrap of the mean d: mean +0.02329, 95% [+0.00630, +0.04505] (above 0; n 41) -> MM1-v2 BETTER
+   REPORTED, the other test's verdict: the exact sign test: 15 against 11, p 0.557 -> NOT DECIDED
+   REPORTED, the bootstrap of the median d: median +0.00284, 95% [-0.00394, +0.00963] (spans 0)
+   REPORTED, the family-level check (the sign test over the families' median d, the tie 0.005): MM1-v2 closer 2, MM1-v1 closer 2, within the tie 5; p 1.000
+      families' median d: subsets +0.0552; the knee +0.0097; long K +0.0047; past the L3 +0.0044; inside the L3 +0.0030; kinds +0.0024; governor +0.0016; power-of-two stride -0.0172; one K block -0.0246
+      POST HOC, by family (n; MM1-v2 closer / other closer / ties; mean d; share of the sum of d): subsets 8; 4/4/0; +0.0851; +0.71; the knee 7; 4/2/1; +0.0234; +0.17; inside the L3 6; 2/0/4; +0.0163; +0.10; long K 5; 2/0/3; +0.0092; +0.05; past the L3 5; 2/0/3; +0.0082; +0.04; governor 2; 0/0/2; +0.0016; +0.00; kinds 1; 0/0/1; +0.0024; +0.00; power-of-two stride 5; 1/3/1; -0.0061; -0.03; one K block 2; 0/2/0; -0.0246; -0.05
+   re-derived here from the scorer's per-case figures: cells EQUAL, counts EQUAL, sign p EQUAL, both bootstrap intervals (seed 'E209|bootstrap|H2', 10000 resamples) EQUAL, the family check EQUAL to the scorer's JSON
+
+H3: seconds a GEMM given the measured clock: MM1-v2 against MM1-v1, per time case (equal to H1 by the reducer's arithmetic)
+   cells: MM1-v2 closer 17, MM1-v1 closer 11, ties 13 (untied 28)
+   REGISTERED, decides: the bootstrap of the mean d: mean +0.01578, 95% [+0.00361, +0.02907] (above 0; n 41) -> MM1-v2 BETTER
+   REPORTED, the other test's verdict: the exact sign test: 17 against 11, p 0.345 -> NOT DECIDED
+   REPORTED, the bootstrap of the median d: median +0.00237, 95% [-0.00423, +0.00963] (spans 0)
+   REPORTED, the family-level check (the sign test over the families' median d, the tie 0.005): MM1-v2 closer 2, MM1-v1 closer 2, within the tie 5; p 1.000
+      families' median d: subsets +0.0541; the knee +0.0119; long K +0.0047; inside the L3 +0.0030; governor +0.0030; kinds +0.0024; past the L3 -0.0042; power-of-two stride -0.0172; one K block -0.0352
+      POST HOC, by family (n; MM1-v2 closer / other closer / ties; mean d; share of the sum of d): subsets 8; 5/3/0; +0.0541; +0.67; the knee 7; 5/1/1; +0.0268; +0.29; inside the L3 6; 2/0/4; +0.0120; +0.11; long K 5; 2/0/3; +0.0092; +0.07; governor 2; 1/0/1; +0.0030; +0.01; kinds 1; 0/0/1; +0.0024; +0.00; past the L3 5; 1/2/2; +0.0003; +0.00; power-of-two stride 5; 1/3/1; -0.0061; -0.05; one K block 2; 0/2/0; -0.0352; -0.11
+   re-derived here from the scorer's per-case figures: cells EQUAL, counts EQUAL, sign p EQUAL, both bootstrap intervals (seed 'E209|bootstrap|H3', 10000 resamples) EQUAL, the family check EQUAL to the scorer's JSON
+
+H4: J over idle given the measured seconds (and clock): MM1-v2 against MM1-v1, per point both price
+   cells: MM1-v2 closer 9, MM1-v1 closer 5, ties 25 (untied 14)
+   REGISTERED, decides: the bootstrap of the mean d: mean +0.00377, 95% [-0.00047, +0.00849] (spans 0; n 39) -> NOT DECIDED
+   REPORTED, the other test's verdict: the exact sign test: 9 against 5, p 0.424 -> NOT DECIDED
+   REPORTED, the bootstrap of the median d: median +0.00114, 95% [-0.00321, +0.00535] (spans 0)
+   REPORTED, the family-level check (the sign test over the families' median d, the tie 0.01): MM1-v2 closer 1, MM1-v1 closer 0, within the tie 8; p 1.000
+      families' median d: subsets +0.0290; governor +0.0096; kinds +0.0054; one K block +0.0038; inside the L3 +0.0037; long K -0.0025; power-of-two stride -0.0032; past the L3 -0.0060; the knee -0.0068
+      POST HOC, by family (n; MM1-v2 closer / other closer / ties; mean d; share of the sum of d): subsets 8; 6/0/2; +0.0241; +1.31; governor 2; 1/0/1; +0.0096; +0.13; inside the L3 5; 1/0/4; +0.0038; +0.13; one K block 2; 0/0/2; +0.0038; +0.05; kinds 1; 0/0/1; +0.0054; +0.04; past the L3 4; 0/0/4; -0.0037; -0.10; power-of-two stride 5; 0/0/5; -0.0039; -0.13; long K 5; 0/2/3; -0.0051; -0.17; the knee 7; 1/3/3; -0.0054; -0.26
+   re-derived here from the scorer's per-case figures: cells EQUAL, counts EQUAL, sign p EQUAL, both bootstrap intervals (seed 'E209|bootstrap|H4', 10000 resamples) EQUAL, the family check EQUAL to the scorer's JSON
+
+H5: cycles an op, the wall: MM1-v2 (measured clock) against F1@800, per time case
+   cells: MM1-v2 closer 38, F1@800 closer 3, ties 0 (untied 41)
+   REGISTERED, decides: the exact sign test: 38 against 3, p 1.05e-08 -> MM1-v2 BETTER
+   REPORTED, the other test's verdict: the bootstrap of the mean d: mean +0.10975, 95% [+0.08307, +0.13648] (above 0; n 41) -> MM1-v2 BETTER
+   REPORTED, the bootstrap of the median d: median +0.10270, 95% [+0.08052, +0.15760] (above 0)
+   REPORTED, the family-level check (the sign test over the families' median d, the tie 0.005): MM1-v2 closer 9, F1@800 closer 0, within the tie 0; p 0.00391
+      families' median d: kinds +0.1867; the knee +0.1799; past the L3 +0.1734; governor +0.1126; subsets +0.1034; inside the L3 +0.0871; one K block +0.0778; long K +0.0468; power-of-two stride +0.0124
+      POST HOC, by family (n; MM1-v2 closer / other closer / ties; mean d; share of the sum of d): subsets 8; 8/0/0; +0.1278; +0.23; the knee 7; 5/2/0; +0.1268; +0.20; past the L3 5; 5/0/0; +0.1714; +0.19; long K 5; 5/0/0; +0.0988; +0.11; inside the L3 6; 6/0/0; +0.0704; +0.09; power-of-two stride 5; 4/1/0; +0.0497; +0.06; governor 2; 2/0/0; +0.1126; +0.05; kinds 1; 1/0/0; +0.1867; +0.04; one K block 2; 2/0/0; +0.0778; +0.03
+   re-derived here from the scorer's per-case figures: cells EQUAL, counts EQUAL, sign p EQUAL, both bootstrap intervals (seed 'E209|bootstrap|H5', 10000 resamples) EQUAL, the family check EQUAL to the scorer's JSON
+
+H6: J over idle with the seconds forecast: MM1-v2 (measured clock) against F2@800, per point both price
+   cells: MM1-v2 closer 35, F2@800 closer 5, ties 2 (untied 40)
+   REGISTERED, decides: the exact sign test: 35 against 5, p 1.38e-06 -> MM1-v2 BETTER
+   REPORTED, the other test's verdict: the bootstrap of the mean d: mean +0.47781, 95% [+0.29902, +0.67297] (above 0; n 42) -> MM1-v2 BETTER
+   REPORTED, the bootstrap of the median d: median +0.18011, 95% [+0.08974, +0.37884] (above 0)
+   REPORTED, the family-level check (the sign test over the families' median d, the tie 0.01): MM1-v2 closer 9, F2@800 closer 0, within the tie 0; p 0.00391
+      families' median d: subsets +1.6159; one K block +0.7640; inside the L3 +0.7383; governor +0.3673; long K +0.2513; power-of-two stride +0.0863; the knee +0.0827; past the L3 +0.0277; kinds +0.0263
+      POST HOC, by family (n; MM1-v2 closer / other closer / ties; mean d; share of the sum of d): subsets 8; 7/1/0; +1.4210; +0.57; inside the L3 5; 5/0/0; +0.6582; +0.16; one K block 2; 2/0/0; +0.7640; +0.08; long K 5; 5/0/0; +0.2455; +0.06; kinds 4; 2/2/0; +0.2292; +0.05; governor 2; 2/0/0; +0.3673; +0.04; the knee 7; 6/0/1; +0.0873; +0.03; power-of-two stride 5; 4/1/0; +0.0605; +0.02; past the L3 4; 2/1/1; +0.0222; +0.00
+   re-derived here from the scorer's per-case figures: cells EQUAL, counts EQUAL, sign p EQUAL, both bootstrap intervals (seed 'E209|bootstrap|H6', 10000 resamples) EQUAL, the family check EQUAL to the scorer's JSON
+
+B. THE REGISTERED READINGS (a)-(d) (E209.md section 7; REPORTED; the frozen scorer's readings() computes (e)-(j) only). The scorer's figures: measured = the mean of a point's kept runs; MM1-v2 and MM1-v1 at each run's measured clock (route m); F1@800 and F2@800 as frozen.
+(a) the stride step: the wall cycles an op of the power-of-two NB points.
+   e28 / e29 = gemmL1x8x6 / gemmL1x7x6, fp32, the full chip (both measured, 2 runs each): measured 1.2971; MM1-v2 1.1866; MM1-v1 1.1787; F1@800 1.0000 (wall: e28 1704.8, e29 1314.3 cycles an op)
+   e33 (gemmL1x16x6 fp16) and e30 (gemmL2x8x4 int8), "against their neighbours' forecasts": no neighbour of theirs ran on the day and the registration names none, so each model's step is read against that model's own forecast of the point: (measured / the model's neighbour forecast) over (the model's forecast / the same neighbour forecast) = measured / the model's forecast, whatever the neighbour; no new forecast is made.
+   e33 (gemmL1x16x6 fp16): measured 1698.9; measured / MM1-v2 1.0433, / MM1-v1 1.0221, / F1@800 1.0549
+   e30 (gemmL2x8x4 int8): measured 1680.8; measured / MM1-v2 1.0155, / MM1-v1 1.0185, / F1@800 0.9989
+   e32 (gemmL1x4x12 fp32; the family NB 4 point, beside: not named in (a)): measured 1725.8; measured / MM1-v2 0.9410, / MM1-v1 0.9598, / F1@800 0.8682
+(b) one K block (int8, the full chip, at the top point): the measured wall and counter's mean against MM1-v1's (its L2 time clock-free) and MM1-v2's (its L2 time in cycles), both at each run's measured clock.
+   e07 (gemmL1x3x1; 2 run(s) read for time; flags CAPPED, STEP; view clock 799.18 MHz, burst 766.7 MHz): measured wall 1008.8 / mean 885.9; MM1-v2 870.9 / 773.4 (measured x1.158 / x1.145); MM1-v1 905.1 / 803.8 (x1.115 / x1.102)
+   e08 (gemmL3x5x1; 1 run(s) read for time; flags none; view clock 798.99 MHz, burst 794.3 MHz): measured wall 1033.8 / mean 946.6; MM1-v2 937.0 / 926.8 (measured x1.103 / x1.021); MM1-v1 967.2 / 956.7 (x1.069 / x0.989)
+(c) the subsets: the wall and the counter's mean at each mask, their ratio, and which model is closer on each (the registered tie, 0.005 in ln; the same cells as H1 and H2 at these time cases).
+   e43 mask 0x1 (1 shire; gemmL1x3x2 fp16): measured wall 1060.2, mean 1060.2, wall/mean 1.000 (MM1-v2 1.126, MM1-v1 1.126); ln(measured/forecast) wall MM1-v2 -2.6%, MM1-v1 +13.9% -> MM1-v2 closer; mean MM1-v2 +9.3%, MM1-v1 +25.8% -> MM1-v2 closer
+   e39 mask 0x80000000 (1 shire; gemmL2x6x10 fp32): measured wall 1655.7, mean 1655.7, wall/mean 1.000 (MM1-v2 1.011, MM1-v1 1.011); ln(measured/forecast) wall MM1-v2 +21.5%, MM1-v1 +20.2% -> MM1-v1 closer; mean MM1-v2 +22.6%, MM1-v1 +21.3% -> MM1-v1 closer
+   e17 mask 0xf (4 shires; gemmL1x1x7 int8): measured wall 1152.4, mean 1056.8, wall/mean 1.090 (MM1-v2 1.126, MM1-v1 1.367); ln(measured/forecast) wall MM1-v2 +5.0%, MM1-v1 +17.2% -> MM1-v2 closer; mean MM1-v2 +8.2%, MM1-v1 +39.8% -> MM1-v2 closer
+   e31 mask 0x1111 (4 shires; gemmL2x3x2 int8): measured wall 1134.8, mean 1038.0, wall/mean 1.093 (MM1-v2 1.126, MM1-v1 1.126); ln(measured/forecast) wall MM1-v2 +4.2%, MM1-v1 +18.2% -> MM1-v2 closer; mean MM1-v2 +7.1%, MM1-v1 +21.2% -> MM1-v2 closer
+   e40 mask 0x1111 (4 shires; gemmL1x8x6 fp32): measured wall 1560.0, mean 1560.0, wall/mean 1.000 (MM1-v2 1.011, MM1-v1 1.011); ln(measured/forecast) wall MM1-v2 +9.9%, MM1-v1 +8.0% -> MM1-v1 closer; mean MM1-v2 +11.0%, MM1-v1 +9.1% -> MM1-v1 closer
+   e42 mask 0xf000 (4 shires; gemmL6x6x6 int8): measured wall 1239.8, mean 1239.4, wall/mean 1.000 (MM1-v2 1.227, MM1-v1 1.227); ln(measured/forecast) wall MM1-v2 -3.0%, MM1-v1 -3.7% -> MM1-v2 closer; mean MM1-v2 +17.4%, MM1-v1 +16.7% -> MM1-v1 closer
+   e09 mask 0xff (8 shires; gemmL2x1x3 fp32): measured wall 1077.1, mean 985.5, wall/mean 1.093 (MM1-v2 1.212, MM1-v1 1.212); ln(measured/forecast) wall MM1-v2 -0.8%, MM1-v1 +10.9% -> MM1-v2 closer; mean MM1-v2 +9.5%, MM1-v1 +21.3% -> MM1-v2 closer
+   e04 mask 0xffff (16 shires; gemmL1x3x2 fp32): measured wall 1063.2, mean 956.6, wall/mean 1.111 (MM1-v2 1.126, MM1-v1 1.126); ln(measured/forecast) wall MM1-v2 -1.3%, MM1-v1 +7.2% -> MM1-v2 closer; mean MM1-v2 +0.0%, MM1-v1 +8.5% -> MM1-v2 closer
+   e41 mask 0xffff0000 (16 shires; gemmL3x5x5 fp32): measured wall 1212.6, mean 1212.5, wall/mean 1.000 (MM1-v2 1.011, MM1-v1 1.011); ln(measured/forecast) wall MM1-v2 -10.2%, MM1-v1 -8.3% -> MM1-v1 closer; mean MM1-v2 -9.1%, MM1-v1 -7.2% -> MM1-v1 closer
+   on the wall: MM1-v2 closer at 6 of 9, MM1-v1 at 3, ties 0; on the counter's mean: MM1-v2 at 5, MM1-v1 at 4, ties 0 (these cells equal the scorer's H1 and H2 cells: yes)
+(d) the kinds: J over idle of each zeros, ones and real point over its time case's random point, measured beside each model's ratio (each model at its own seconds; MM1-v2 and MM1-v1 also given the measured seconds, beside).
+   e34/e18 (real over random, fp32, gemmL2x6x10): measured 0.9859 (W 0.9869, t 0.9991); MM1-v2 0.9922; MM1-v1 n.f.; F1@800 0.9974; F2@800 0.9793; nearest MM1-v2; given the measured seconds MM1-v2 0.9920, MM1-v1 n.f. ('n.f.' = NOT FORECAST)
+   e35/e01 (real over random, int8, gemmL1x3x2): measured 0.9102 (W 0.9063, t 1.0043); MM1-v2 0.9729; MM1-v1 n.f.; F1@800 0.9263; F2@800 0.8732; nearest F1@800; given the measured seconds MM1-v2 0.9751, MM1-v1 n.f. ('n.f.' = NOT FORECAST)
+   e36/e19 (real over random, fp16, gemmL3x5x5): measured 0.9701 (W 0.9729, t 0.9971); MM1-v2 0.9829; MM1-v1 n.f.; F1@800 0.9911; F2@800 0.9708; nearest F2@800; given the measured seconds MM1-v2 0.9821, MM1-v1 n.f. ('n.f.' = NOT FORECAST)
+   e38/e20 (zeros over random, int8, gemmL6x6x6): measured 0.5891 (W 0.5914, t 0.9961); MM1-v2 0.5710; MM1-v1 0.5810; F1@800 0.7048; F2@800 0.6299; nearest MM1-v1; given the measured seconds MM1-v2 0.5660, MM1-v1 0.5724 ('n.f.' = NOT FORECAST)
+
+C. POST HOC: THE MARGINS OF THE REGISTERED RULES (a rule PASSES at a share of at least 0.9 of its scored cells; 'could take' = more failing cells it could take and still PASS). Each cell re-derived from the scorer's figures and compared with its cell.
+   T1m (band 19%): PASS 39 of 41; could take 2 more; failing: gemmL2x6x10|fp32|0x80000000 +23.96%, gemmL3x1x5|fp32|0xffffffff +19.34%; nearest the band: gemmL1x3x1|int8|0xffffffff +15.84%, gemmL1x1x13|fp32|0xffffffff +15.07%, gemmL1x2x24|fp32|0xffffffff +11.93%; cells = the scorer
+   T1c (band 19%): PASS 39 of 41; could take 2 more; failing: gemmL2x6x10|fp32|0x80000000 +23.98%, gemmL3x1x5|fp32|0xffffffff +19.36%; nearest the band: gemmL1x3x1|int8|0xffffffff +15.86%, gemmL1x1x13|fp32|0xffffffff +15.09%, gemmL1x2x24|fp32|0xffffffff +11.94%; cells = the scorer
+   T2m (band 19%): PASS 39 of 41; could take 2 more; failing: gemmL2x6x10|fp32|0x80000000 +25.33%, gemmL6x6x6|int8|0xf000 +19.03%; nearest the band: gemmL3x1x5|fp32|0xffffffff +18.57%, gemmL1x3x1|int8|0xffffffff +14.55%, gemmL1x1x13|fp32|0xffffffff +14.32%; cells = the scorer
+   T2c (band 19%): PASS 39 of 41; could take 2 more; failing: gemmL2x6x10|fp32|0x80000000 +25.34%, gemmL6x6x6|int8|0xf000 +19.04%; nearest the band: gemmL3x1x5|fp32|0xffffffff +18.58%, gemmL1x3x1|int8|0xffffffff +14.56%, gemmL1x1x13|fp32|0xffffffff +14.33%; cells = the scorer
+   T3m (band 19%): PASS 39 of 41; could take 2 more; failing: gemmL2x6x10|fp32|0x80000000 +23.96%, gemmL3x1x5|fp32|0xffffffff +19.34%; nearest the band: gemmL1x3x1|int8|0xffffffff +15.84%, gemmL1x1x13|fp32|0xffffffff +15.07%, gemmL1x2x24|fp32|0xffffffff +11.93%; cells = the scorer
+   T3c (band 19%): PASS 39 of 41; could take 2 more; failing: gemmL2x6x10|fp32|0x80000000 +23.96%, gemmL3x1x5|fp32|0xffffffff +19.34%; nearest the band: gemmL1x3x1|int8|0xffffffff +15.83%, gemmL1x1x13|fp32|0xffffffff +15.07%, gemmL1x2x24|fp32|0xffffffff +11.93%; cells = the scorer
+   E1 (band 14%): PASS 45 of 45; could take 4 more; failing: none; nearest the band: e08 +11.13%, e25 -10.07%, e23 -8.99%; cells = the scorer
+   E2m (band 15%): PASS 42 of 45; could take 1 more; failing: e39 +21.09%, e15 +18.14%, e08 +15.47%; nearest the band: e11 +13.27%, e25 -11.27%, e41 -10.93%; cells = the scorer
+   E2c (band 15%): PASS 41 of 44; could take 1 more; failing: e39 +21.17%, e15 +18.19%, e08 +15.47%; nearest the band: e11 +13.33%, e25 -11.25%, e41 -10.90%; cells = the scorer
+   E3 (band 5%): PASS 43 of 45; could take 2 more; failing: e08 +5.46%, e23 -5.16%; nearest the band: e25 -4.72%, e36 -4.27%, e41 -4.16%; cells = the scorer
+   E4m (band 13%): PASS 42 of 45; could take 1 more; failing: e39 +23.23%, e15 +18.93%, e11 +14.46%; nearest the band: e08 +12.93%, e07 +12.19%, e41 -10.33%; cells = the scorer
+   E4c (band 13%): PASS 41 of 44; could take 1 more; failing: e39 +23.25%, e15 +18.95%, e11 +14.47%; nearest the band: e08 +12.93%, e07 +12.22%, e41 -10.32%; cells = the scorer
+   K1 (band 23 MHz): PASS 44 of 45; could take 3 more; failing: e44 +24.8 MHz; nearest the band: e45 +17.6 MHz, e02 +16.9 MHz, e30 -16.5 MHz; cells = the scorer
+   watts points (scored in watts, band 0.35 W): 0, so no cell used the watts band; the day's replicate spread of W over idle (reading (h), the scorer's): pooled sd 0.299 W over 9 points (df 9) beside the registered SD_rep 0.173 W
+
+D. REPORTED: THE GOVERNOR (K1, registered; K2, REPORTED).
+   K1 (the burst's mean clock within 23 MHz of MM1-v2's forecast): PASS 44 of 45; rms 9.89 MHz, mean +2.37 MHz
+   K2 (REPORTED): MM1-v2's capped forecast agrees with 53 of 55 kept runs' measured capped flags; 'never capped' with 54 (the reducer's line: a run is capped when fewer than 80% of its launches 1.0 s or more into a process are in the 800 MHz band)
+   run 036-e44: forecast capped (800 MHz share 0.78), measured not capped (share 1.000); the point's burst clock 788.9 MHz measured, 764.1 forecast; the board's mean in its view 68.27 W
+   run 056-e07: forecast not capped (800 MHz share 1.00), measured capped (share 0.727); the point's burst clock 766.7 MHz measured, 778.8 forecast; the board's mean in its view 44.22 W
+
+RE-DERIVATION AGAINST THE SCORER'S OUTPUT: every re-derived cell, count, p value, interval and family check EQUAL (exact)
