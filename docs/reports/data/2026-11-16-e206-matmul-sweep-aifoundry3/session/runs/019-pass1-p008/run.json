@@ -1,0 +1,92 @@
+{
+ "n": 19,
+ "block": "pass1",
+ "id": "p008",
+ "name": "gemmL8x4x4.fp32.random",
+ "arm": "A",
+ "run": "019-pass1-p008",
+ "gate": {
+  "c": 55.0,
+  "die": 55,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1794877227123,
+  "t1_ms": 1794877237124
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/aifoundry/build/e206rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL8x4x4:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/aifoundry/build/e206rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "~/aifoundry/build/e206/T1794876802-A/STOP"
+   ],
+   "rc": 0,
+   "hung": false,
+   "t0_ms": 1794877237124,
+   "t1_ms": 1794877244105,
+   "n_launch": 15,
+   "runtime_other_cards": [],
+   "launches_ok": true,
+   "check": "approx",
+   "check_ok": true,
+   "check_cycles_per_op": 1120.588,
+   "stopped_by_file": false,
+   "k1": false,
+   "records": {
+    "runtime_lines": 0,
+    "unparsed": 0,
+    "mismatched": 0,
+    "other": 0
+   },
+   "launch_window_ms": [
+    1794877237446,
+    1794877243961
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 71,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1794877237124,
+  "t1_ms": 1794877244105
+ },
+ "tail_end_ms": 1794877248106,
+ "stop": null
+}
