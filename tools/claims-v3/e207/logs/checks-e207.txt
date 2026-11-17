@@ -1,0 +1,33 @@
+E207 kit: the quick set, 2026-11-17 01:43:40 PST, /usr/bin/python3 3.12.3, on aifoundry2 (desk)
+== e207_common.py: E207-COMMON SELF-CHECK PASS
+== e207_ident.py: E207-IDENT SELF-CHECK PASS
+== check_e207.py --check: CHECK PASS
+== check_e207.py --box: HARNESS OK: 37 files at harness-e207.json's sha256
+== the registration's points_e207.py --check: PASS
+== the registration's rules_e207.py --check: PASS
+== the registration's plan_e207.py --check: PASS
+== the registration's desk/kernel_e207.py --check: PASS
+== score_e207.py --forecasts: rc 0, byte-identical to forecasts-e207.txt: yes
+== score_e207.py --selftest-standins: rc 0, JSON and text byte-identical to the committed: yes
+== score_e207.py --selftest-e206: rc 0, JSON and text byte-identical to the committed: yes; selftest-e206: PASS: E206 arm A's committed runs through thi
+== postscore_e207.py --selftest (E207.md A1, fix-e207): rc 0, JSON and text byte-identical to the committed: yes; selftest-postscore: PASS (31 of 31 checks as stated)
+== the registration's list: 24 of 24 OK
+== MM1-v1's folder list (tools/matmul/mm1/v1/SHA256SUMS): 77 of 77 OK
+== the preflight: dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+== bash -n of every shell file of the kit: 22 files, 0 with a syntax error
+== python3 compile of every Python file of the kit (in memory, no __pycache__ written): 19 files, 0 that do not parse
+== every line of the kit's code naming 'timeout -k', 'kill -9', SIGKILL or .kill() (a reader checks each is prose: a comment, a docstring or a message; no call):
+   e207_common.py:32:    `timeout 10 <host> <the point's host_args> --kernel <ELF> --stop-file <STOP>`, never `timeout -k`;
+   run_e207.py:9:  - NO SIGKILL ANYWHERE (W/out/orch/kill-rule.txt; AGENT.md "never kill -9"): every process this runner starts that can open a device is
+   run_e207.py:382:        """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s; each wait ends CLOSE_S / 2 before the end bound but lasts
+   run_e207.py:401:            self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+   run_e207.py:549:                 f"at {C.HOST_TIMEOUT_S} s: nothing kills it (no SIGKILL, ever); the stop file is touched, nothing further starts and no "
+   build_e207.sh:7:#   2. cmake against the box's /opt/et into build/e207rgm (nice 10, -j2), each call under a plain `timeout 300` (never -k: no SIGKILL
+   rb/rb_e207.sh:7:# device process on the box runs under the runner's plain `timeout 10` and nothing of E207's ever sends it a SIGKILL), and changes only:
+== calls that could send a kill in the kit's own code (subprocess .kill(), os.kill, signal.SIGKILL, 'kill -9', 'timeout -k' outside prose): 0
+== the desk tests' own stand-in kills (the tests end THEIR OWN helper processes, never a device process: terminate() of a lock holder, kill of a sleep decoy):
+   selftest_run_e207.py:255:        holder.terminate()
+   desk/realpath_e207.py:238:    holder.terminate()
+   desk/realpath_e207.py:257:    dp.terminate()
+   rb/selftest_rb_e207.sh:277:kill "$p1" "$p2" 2>/dev/null
+   rb/selftest_rb_e207.sh:371:kill "$p3" 2>/dev/null

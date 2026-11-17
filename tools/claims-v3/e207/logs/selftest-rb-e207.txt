@@ -1,0 +1,143 @@
+scratch repository: a shared sparse clone of the lab clone (the kit's files untracked in the lab clone: the scratch built at its HEAD ef1c26572a90; the registration in it), the kit as one stand-in commit 86741013f5f3; the kit's stand-in list 45 files
+
+== A: the dry listing
+-> PASS (dry listing: 15 steps listed, 0 exited non-zero, 0 box calls)
+
+== K: step 2 with no window
+-> PASS ([s03_desk_e207] STOP: no window in RB_OUT: run s02_window_e207.sh A with the day, last start and last end first)
+
+== W1: a window written for another arm; W2: a window written for another runbook; W3: step 1 for another day; W4: step 1 with the arm B
+-> PASS ([s03_desk_e207] STOP: RB_OUT's window was written for arm B, not E207's arm A; [s03_desk_e207] STOP: RB_OUT's window was written for e206, not E207: one RB_OUT per runbook; [s02_window_e207] STOP: the first word is the arm: A (aifoundry3 card 0), E207's one arm)
+
+== G: step 2 without RB_GITLOCK
+-> PASS ([s03_desk_e207] STOP: RB_GITLOCK is not set (the lab-git lock every commit to the shared lab clone t)
+
+== N: step 2 inside the lab-git lock (nested)
+-> PASS ([s03_desk_e207] STOP: the desk check failed: pull pull(rc 14; a nested lab-git lock exits 75))
+
+== P1: step 2 on the scratch repository
+-> PASS ([s03_desk_e207] desk check: the window written today for E207; pulled under the lab-git lock, HEAD 86741013f5f3 descends from the registration ef1c26572a90 (subtree d2089226) and the kit 86741013f5f3, the paths clean, HISTORY OK, the lists at their pinned counts and bytes (24; the kit's 45; MM1-v1's)
+
+== P2: the registration's list one line short; P3: the kit's list one line short; P4: MM1-v1's folder list one line short
+-> PASS ([s03_desk_e207] STOP: the desk check failed: status history SHA256SUMS-e207-registration(23 OK of 23; pinned 24; its own bytes differ from the pin))
+
+== H1: a committed edit of a registration file; H2: a committed shadowing addition (tools/claims-v3/e207/json.py)
+-> PASS ([s03_desk_e207] STOP: the desk check failed: history SHA256SUMS-e207-registration(23 OK of 24; pinned 24); HISTORY FAIL: a shadowing addition (a standard-library module's name): tools/claims-v3/e207/json.py)
+
+== DA: E207 data committed: step 2 refuses; GS: a gate stop's record committed: step 2 reports it and goes on
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/README.md' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/gate-stops/2026-11-17-e207-blind-matmul-T1-aifoundry3/README.md' not uptodate; will not remove from working tree.
+-> PASS ([s03_desk_e207] STOP: the desk check failed: E207-has-data(1 commit(s)); E207 data commits: 0; gate-stop commits (reported): 1; sealed-forecast note commits (reported): 0)
+
+== O: the look on the stand-in box (k6's s05)
+-> PASS (aifoundry3: HOLDER-RULE: FREE after 0 s of polls)
+
+== OL: E207's ours_live counts a session_e207.sh by its own script, never by a command string
+-> PASS (before: 0 0; a script whose arguments and text name session_e207.sh: 0 0; a session_e207.sh run as a script: 1 1; after it ended: 0 0)
+
+== SY: step 5 on the stand-in box
+-> PASS ([s07_sync_e207] synced to aifoundry3:aifoundry/ (38 paths); the rsync sent 38 files' contents there; HARNESS OK on the box)
+
+== L1: a login link on a read (step 5's first read); L2: a read that hangs (the read class's bound 3 s for this call)
+-> PASS ([s07_sync_e207] STOP: a login check is needed on aifoundry3 (appended to the lock file; the link is in RB_LINKS): approv; [s07_sync_e207] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again)
+
+== T: NO-THIRD-BUILD on aifoundry3
+-> PASS ([s08_build_e207] STOP: NO-THIRD-BUILD: 2 builds were started on aifoundry3 today (Pacific): no E207 session today)
+
+== BA: step 6 on aifoundry3: the real build
+-> PASS ([s08_build_e207] built today on aifoundry3: rgm136 into build/e207rgm (THE KERNEL GATE: KERNEL OK; the host read by its behaviour); harness, preflight GO and bo)
+
+== NR: step 6n, the never-run search repeated, on stand-in roots: b10 RAN BEFORE (a lab data directory of 1 Nov), n02 TO DATE (a box run folder), b27 AFTER THE FREEZE (a card lane's session T0), b02 DESK-ONLY (kit-e209), b30 never read (ee-*); b01 in an E207 lane's desk test and n01 in E207's own dry pass on the box, both subtracted
+-> PASS (NEVER-RUN 50 of 53 points, 44 of 47 cases; RAN BEFORE: b10; TO DATE: n02; AFTER THE FREEZE (REPORTED, kept): b27; DESK-ONLY (dismissed): b02; desk-only: NEVER-RUN 51 of 53 points, 45 of 47 cases; RAN BEFORE: b10; AFTER THE FREEZE (REPORTED, kept): b27; DESK-ONLY (dismissed): b02; aifoundry3 NOT SEARCHED)
+
+== R7: STEP 7 needs a fresh never-run report and the rest: (a) no report: 10, no config read; (b) a report 31 minutes old: 10; (c) the rest not run (a session ended 10 minutes ago): 10; (d) both: 0, the reader called once
+-> PASS (no report: [s09_reads_e207] STOP: no never-run report (RB_OUT/e207-neverrun.txt): run step 6n (s06n_n; 31 min: [s09_reads_e207] STOP: the never-run report is 31 minutes old (more than 30): run step 6n ; 10 min after a session: [s09_reads_e207] STOP: the rest has not run: REFUSED: 10 minutes since E185's session end  (reader calls 0); then: [s09_a3_reads_k6] aifoundry3: manifest kept on the box (build/q141k/), config TDP 0 W / 65)
+
+== D: step 8 on the stand-in box
+-> PASS (E207-DRY arm A rc=0 runs=3)
+
+== HG: a HUNG marker in a session log of ours on aifoundry3: step 9 refuses
+-> PASS (REFUSED: a HUNG marker of ours on the box (2026-11-16 22:38:15 PST HUNG: a device process did not end after its timeout TERM (desk test)): a)
+
+== SD: the same-day rule: an E207 session that opened the card earlier today
+-> PASS (REFUSED: the same-day rule: an E207 session opened the card earlier today (1): not again today)
+
+== LS: THE LAST START passed (the window's last end still far): step 9 refuses (16) before anything is sent
+-> PASS ([s11_session_e207] STOP: past the round's last start (2026-11-17 23:58 PST): no new card session; box calls 0)
+
+== NS: no never-run report from today in RB_OUT: step 9 refuses (10) before anything is sent
+-> PASS ([s11_session_e207] STOP: no never-run report from today in RB_OUT (step 6n, then step 7, come before the session); box calls 0)
+
+== LA: step 9 launches the REAL session_e207.sh, which stops at its box check (the desk's own hostname); step 10 reads the gate
+-> PASS (2026-11-17 01:38:16 PST refused, no device opened: the box or the build is not the registered one (this host is 'aifoundry2', not arm A's 'aifoundry3'))
+
+== W10: step 10's readings on stand-in logs (a running session, none, HUNG, K1, CRASH, an ended session with a STOP line)
+-> PASS (running 17, gone 14, HUNG 16, K1 16, CRASH 16, ended with a STOP line 0)
+
+== C: step 11 on LA's session, step 12 (the gate stop's record), step 13 refuses it; C2: a byte changed after the manifest
+-> PASS (COLLECTED-GATE-STOP docs/reports/gate-stops/2026-11-17-e207-blind-matmul-T1794908296-aifoundry3; step 13: [s24_score_e207] STOP: docs/reports/gate-stops/2026-11-17-e207-blind-matmul-T1794908296-aifoundry3 i)
+-> PASS ([s22_collect_e207] STOP: the copy is not exact (the lines above): commit nothing; copy again into a new RB_OUT/e207-raw/A)
+
+== CD: a session that ran (step 8's dry session copied as a session): steps 11, 12 and, after a stand-in data commit, 13 (the FROZEN scorer)
+-> PASS (COLLECTED docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3; [s24_score_e207] scored arm A: RB_OUT/scores-e207-A.json and .txt (the scorer's words) and postscore-e207-A.json and .tx; R0 in the scorer's words: R0 PASS (6 checks, 0 wrong))
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/SHA256SUMS' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/data-e207.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/neverrun-e207-card.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/neverrun-e207-card.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/ranbefore-e207-card.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/reduce-e207.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/MANIFEST.sha256' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/STOPTEST-board' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/STOPTEST-die' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/config-end.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/config-end.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/config-end.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/config-start.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/config-start.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/config-start.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/etwho-before.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/etwho-identity.txt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/fake_sched.jsonl' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/fakedev/et0_mgmt' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/fakedev/et0_ops' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/identity.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/queue.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/reads/etwho-001-tie-t01.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/reads/etwho-001-tie-t01.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/reads/etwho-002-pass1-n06.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/reads/etwho-002-pass1-n06.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/reads/etwho-003-pass1-b32.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/reads/etwho-003-pass1-b32.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/reads/etwho-before.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/reads/etwho-before.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/reads/etwho-identity.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/reads/etwho-identity.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/runs/001-tie-t01/proc-00.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/runs/001-tie-t01/proc-00.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/runs/001-tie-t01/run.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/runs/002-pass1-n06/proc-00.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/runs/002-pass1-n06/proc-00.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/runs/002-pass1-n06/run.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/runs/003-pass1-b32/proc-00.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/runs/003-pass1-b32/proc-00.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/runs/003-pass1-b32/run.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/sampler.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/session.log' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/smoke/b01/proc.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/smoke/b01/proc.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/smoke/b01/smoke.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/smoke/b02/proc.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/smoke/b02/proc.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/smoke/b02/smoke.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/smoke/b03/proc.err' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/smoke/b03/proc.out' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/smoke/b03/smoke.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/smoke/rest.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/stop-path.json' not uptodate; will not remove from working tree.
+error: Path 'docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/session/telemetry.jsonl.gz' not uptodate; will not remove from working tree.
+
+== Z: nothing of this test left running
+-> PASS (processes whose working directory is under the scratch directory (the stand-in box's jobs, sessions, builds))
+
+box calls the stand-ins served: 64 (all to the stand-in box; no lab box was reached)
+SELFTEST-RB-E207 28 of 28 PASS
