@@ -1,0 +1,201 @@
+{
+ "e208_sessions": [
+  "a1c0-S1",
+  "a1c1-S1",
+  "a1c1-S2",
+  "a1c1-S3",
+  "a2c0-S1",
+  "a2c0-S2"
+ ],
+ "energy": {
+  "form": "v2",
+  "governed_base_w": [
+   [
+    600.0,
+    25.456
+   ],
+   [
+    700.0,
+    28.243
+   ],
+   [
+    800.0,
+    33.61
+   ]
+  ],
+  "theta": {
+   "Dones|fp16": 8.297463005749155,
+   "Dones|fp32": 8.51959103517412,
+   "Dones|int8": 1.8441234299282496,
+   "Pmem": 0.18360243179247976,
+   "Pmin|aifoundry1 card 0": 1.131929366564004,
+   "Pmin|aifoundry1 card 1": 2.4055089319331864,
+   "Pmin|aifoundry2 card 0": 2.0611335343374755,
+   "Pmin|aifoundry3 card 0": 1.3785594908247079,
+   "b2": 58.88722407683126,
+   "b3": 245.09137793440777,
+   "bF": 794.6889124197429,
+   "d2": 501.20554264545984,
+   "d3": 1150.2317781305248,
+   "dF": 1298.5508806921302,
+   "g": 0.7789099881632507,
+   "kres|aifoundry1 card 0|fp16": 1.4450427480732542,
+   "kres|aifoundry1 card 0|fp32": 1.3436429331845563,
+   "kres|aifoundry1 card 0|int8": 1.1013123943734646,
+   "kres|aifoundry2 card 0|fp16": 0.9904591393681415,
+   "kres|aifoundry2 card 0|int8": 0.9677783541882972
+  },
+  "units": "b, d: pJ a line a shire-op; Pmin: W at 1,024 minions; Pmem: W at u = 1; g: share of B(f) - B(600); kres: x the anchor; Dones: W over zeros at 600 MHz (resident)",
+  "volts": {
+   "aifoundry1 card 0": [
+    [
+     600.0,
+     0.517
+    ],
+    [
+     700.0,
+     0.5605
+    ],
+    [
+     800.0,
+     0.604
+    ]
+   ],
+   "aifoundry2 card 0": [
+    [
+     600.0,
+     0.517
+    ],
+    [
+     700.0,
+     0.568
+    ],
+    [
+     800.0,
+     0.618
+    ]
+   ],
+   "pinned": {
+    "aifoundry1 card 1": 0.517,
+    "aifoundry3 card 0": 0.522
+   }
+  }
+ },
+ "model": "MM1-v2",
+ "numpy": "1.26.4",
+ "python": "3.12.3",
+ "scope": "rgm136 gemmL<MB>x<NB>x<KB> on its grid (M = 1,024 MB, N = 512 NB, K = 512 KB w; off-grid sizes padded) and the run_gemm c-arms; shire masks run the masked shires only; one card, one clock per launch",
+ "switch_constants": {
+  "counted_pJ_fp32_random": [
+   1.925,
+   2.706
+  ],
+  "fin_edges_fp32_random": [
+   71092.0,
+   107508.0
+  ],
+  "gov_leak_share": [
+   0.55,
+   0.65,
+   0.8
+  ],
+  "k_leak_w_per_c": 0.47,
+  "k_rise_c_per_w": [
+   0.12,
+   0.145
+  ],
+  "kappa_die": [
+   2.2e+16,
+   3.97e+16,
+   4.86e+16
+  ],
+  "reg_loss_band": [
+   0.0,
+   0.294
+  ],
+  "reg_loss_coeff": {
+   "aifoundry1 card 1": 0.102,
+   "aifoundry2 card 0": 0.188,
+   "aifoundry3 card 0": 0.181
+  }
+ },
+ "time": {
+  "c1_law": {
+   "fp16": [
+    527.48,
+    0.0176
+   ],
+   "fp32": [
+    527.48,
+    0.0176
+   ],
+   "int8": [
+    283.03,
+    0.0146
+   ]
+  },
+  "floor_cycles": {
+   "fp16": 529.0,
+   "fp32": 529.0,
+   "int8": 270.0
+  },
+  "form": "v2",
+  "halves": true,
+  "imbalance_mean": {
+   "eta_m": 0.21366131750175743,
+   "fitted_on": [
+    {
+     "id": "p096",
+     "mask": "0xf",
+     "wall_over_mean": 1.2132
+    },
+    {
+     "id": "p097",
+     "mask": "0xf",
+     "wall_over_mean": 1.2141
+    },
+    {
+     "id": "p098",
+     "mask": "0xff",
+     "wall_over_mean": 1.0692
+    },
+    {
+     "id": "p099",
+     "mask": "0xff",
+     "wall_over_mean": 1.0833
+    }
+   ],
+   "gamma": 2.540196550325052,
+   "how": "MM1-v1's term on the same four E206 points (post hoc); v2 applies it only when MB >= 2 (E208's MB = 1 subsets read none)"
+  },
+  "masked_map": false,
+  "rho_wall_over_mean": {
+   "c4s": 1.143,
+   "c8s": 1.143,
+   "inside": 1.126,
+   "one_block": 1.006,
+   "past": 1.011,
+   "stream": 1.001
+  },
+  "rule": "r1",
+  "theta": {
+   "F2": 339.585906860574,
+   "T2": 0.023262639140309644,
+   "c3": 318.81387220885085,
+   "cF": 408.8575189735831,
+   "chi": 0.0,
+   "chi3": -0.035845727850493815,
+   "chiF": 0.26949030333534746,
+   "eta": 5.708843609987023e-11,
+   "kA": 1.1080067906948874,
+   "m3": 0.8009643429478865,
+   "mF": 1.562396093313325,
+   "piF0": 0.21361903900197055,
+   "s": 4.53488119070081,
+   "x50": 39.740920957918604,
+   "zeta": 0.7205177164583191
+  },
+  "units": "c3, cF, F2: cycles; m3, mF, T2: us; x50, s: MB; zeta, piF0, chi3, chiF, eta, kA: dimensionless"
+ },
+ "what": "MM1-v1 refitted with E208 on three cards (desk fits, post hoc as an act)"
+}
