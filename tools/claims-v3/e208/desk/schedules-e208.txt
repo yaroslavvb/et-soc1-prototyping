@@ -1,0 +1,487 @@
+arms.json: kit 1116-mmsweep, 74 arms
+  families (an arm may be in two): K 30, N 6, M 5, SQ 5, D 27, S 10
+  types: fp16 10, fp32 46, int8 18
+  kinds: ones 9, rnd 44, zeros 21
+  masks: 0x1 3, 0xf 3, 0xffff 4, 0xffffffff 64
+  M 1024-8192, N 512-8192, K 512-32768
+  small (sus3 form): 8 arms
+
+a1c0-S1.json: card a1c0 session S1 seed 11161-a1c0-S1 kit 1116-mmsweep
+  runs 50 (anchor 9, arm 37, null 4); forms {'burst': 42, 'null': 4, 'sus3': 4}; distinct arms 38 (not in arms.json: 0); device processes planned 54
+  blocks in order: K1 K2 K3a K3b D NM SQ S
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 52.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 45.0}; planned 35.1 card-minutes; planning line 52.0 W; cap_est_w None
+  highest planned peak in the schedule 51.0 W (smoke 1x1x4-fp32-zeros 0xffffffff, 1x1x4-fp16-ones 0xffffffff, 1x1x4-int8-rnd 0xffffffff)
+      1  K1    anchor burst 4x8x8-int8-rnd         0xffffffff
+      2  K1    null   null  null-1                 -
+      3  K1    arm    burst 1x1x24-fp32-zeros      0xffffffff
+      4  K1    arm    burst 1x1x8-fp32-zeros       0xffffffff
+      5  K1    arm    burst 1x1x4-fp32-ones        0xffffffff
+      6  K1    arm    burst 1x1x4-fp32-zeros       0xffffffff
+      7  K1    arm    burst 1x1x1-fp32-zeros       0xffffffff
+      8  K1    arm    burst 1x1x16-fp32-zeros      0xffffffff
+      9  K1    arm    burst 1x1x12-fp32-zeros      0xffffffff
+     10  K1    anchor burst 4x8x8-int8-rnd         0xffffffff
+     11  K2    arm    burst 1x1x10-fp32-zeros      0xffffffff
+     12  K2    arm    burst 1x1x14-fp32-zeros      0xffffffff
+     13  K2    arm    burst 1x1x2-fp32-zeros       0xffffffff
+     14  K2    anchor burst 4x8x8-int8-rnd         0xffffffff
+     15  K3a   arm    burst 1x1x1-int8-zeros       0xffffffff
+     16  K3a   arm    burst 1x1x12-int8-rnd        0xffffffff
+     17  K3a   arm    burst 1x1x4-int8-zeros       0xffffffff
+     18  K3a   arm    burst 1x1x4-int8-ones        0xffffffff
+     19  K3a   arm    burst 1x1x4-int8-rnd         0xffffffff
+     20  K3a   arm    burst 1x1x8-int8-rnd         0xffffffff
+     21  K3a   arm    burst 1x1x16-int8-rnd        0xffffffff
+     22  K3a   anchor burst 4x8x8-int8-rnd         0xffffffff
+     23  K3b   arm    burst 1x1x6-int8-rnd         0xffffffff
+     24  K3b   arm    burst 1x1x10-int8-rnd        0xffffffff
+     25  K3b   arm    burst 1x1x14-int8-rnd        0xffffffff
+     26  K3b   arm    burst 1x1x2-int8-rnd         0xffffffff
+     27  K3b   anchor burst 4x8x8-int8-rnd         0xffffffff
+     28  D     arm    sus3  4x8x8-int8-zeros       0xffffffff
+     29  D     arm    sus3  4x8x8-int8-ones        0xffffffff
+     30  D     arm    burst 1x1x4-fp16-zeros       0xffffffff
+     31  D     arm    burst 1x1x4-fp16-ones        0xffffffff
+     32  D     null   null  null-2                 -
+     33  D     arm    burst 4x8x8-fp16-zeros       0xffffffff
+     34  D     arm    burst 4x8x8-fp16-ones        0xffffffff
+     35  D     arm    burst 4x8x8-fp32-ones        0xffffffff
+     36  D     arm    burst 4x8x8-fp32-zeros       0xffffffff
+     37  D     arm    burst 1x1x1-fp16-zeros       0xffffffff
+     38  D     anchor burst 4x8x8-int8-rnd         0xffffffff
+     39  NM    arm    burst 1x16x4-fp32-zeros      0xffffffff
+     40  NM    arm    burst 8x1x4-fp32-zeros       0xffffffff
+     41  NM    anchor burst 4x8x8-int8-rnd         0xffffffff
+     42  SQ    arm    burst 2x4x1-int8-rnd         0xffffffff
+     43  SQ    arm    burst 4x8x2-int8-rnd         0xffffffff
+     44  SQ    anchor burst 4x8x8-int8-rnd         0xffffffff
+     45  S     null   null  null-3                 -
+     46  S     arm    sus3  1x1x1-fp32-zeros-s1    0x1
+     47  S     arm    sus3  1x1x1-fp32-zeros-s4    0xf
+     48  S     arm    burst 1x1x1-fp32-zeros-s16   0xffff
+     49  S     null   null  null-4                 -
+     50  S     anchor burst 4x8x8-int8-rnd         0xffffffff
+
+a1c1-S1.json: card a1c1 session S1 seed 11161-a1c1-S1 kit 1116-mmsweep
+  runs 87 (anchor 9, arm 73, null 5); forms {'burst': 74, 'null': 5, 'sus3': 8}; distinct arms 74 (not in arms.json: 0); device processes planned 98
+  blocks in order: K1 K2 K3a K3b D NM SQ S
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 72.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 65.0}; planned 59.4 card-minutes; planning line 70.0 W; cap_est_w None
+  highest planned peak in the schedule 66.6 W (smoke 1x1x4-fp32-zeros 0xffffffff, 1x1x4-fp16-ones 0xffffffff, 1x1x4-int8-rnd 0xffffffff)
+      1  K1    anchor burst 4x8x8-int8-rnd         0xffffffff
+      2  K1    null   null  null-1                 -
+      3  K1    arm    burst 1x1x16-fp32-rnd        0xffffffff
+      4  K1    arm    burst 1x1x16-fp32-zeros      0xffffffff
+      5  K1    arm    burst 1x1x8-fp32-rnd         0xffffffff
+      6  K1    arm    burst 1x1x8-fp32-zeros       0xffffffff
+      7  K1    arm    burst 1x1x12-fp32-zeros      0xffffffff
+      8  K1    arm    burst 1x1x12-fp32-rnd        0xffffffff
+      9  K1    arm    burst 1x1x1-fp32-zeros       0xffffffff
+     10  K1    arm    burst 1x1x1-fp32-ones        0xffffffff
+     11  K1    arm    burst 1x1x1-fp32-rnd         0xffffffff
+     12  K1    null   null  null-2                 -
+     13  K1    arm    burst 1x1x24-fp32-rnd        0xffffffff
+     14  K1    arm    burst 1x1x24-fp32-zeros      0xffffffff
+     15  K1    arm    burst 1x1x4-fp32-ones        0xffffffff
+     16  K1    arm    burst 1x1x4-fp32-rnd         0xffffffff
+     17  K1    arm    burst 1x1x4-fp32-zeros       0xffffffff
+     18  K1    anchor burst 4x8x8-int8-rnd         0xffffffff
+     19  K2    arm    burst 1x1x32-fp32-rnd        0xffffffff
+     20  K2    arm    burst 1x1x6-fp32-rnd         0xffffffff
+     21  K2    arm    burst 1x1x2-fp32-rnd         0xffffffff
+     22  K2    arm    burst 1x1x2-fp32-zeros       0xffffffff
+     23  K2    arm    burst 1x1x20-fp32-rnd        0xffffffff
+     24  K2    arm    burst 1x1x10-fp32-rnd        0xffffffff
+     25  K2    arm    burst 1x1x10-fp32-zeros      0xffffffff
+     26  K2    arm    burst 1x1x14-fp32-rnd        0xffffffff
+     27  K2    arm    burst 1x1x14-fp32-zeros      0xffffffff
+     28  K2    anchor burst 4x8x8-int8-rnd         0xffffffff
+     29  K3a   arm    burst 1x1x12-int8-rnd        0xffffffff
+     30  K3a   arm    burst 1x1x16-int8-rnd        0xffffffff
+     31  K3a   arm    burst 1x1x1-int8-rnd         0xffffffff
+     32  K3a   arm    burst 1x1x1-int8-ones        0xffffffff
+     33  K3a   arm    burst 1x1x1-int8-zeros       0xffffffff
+     34  K3a   arm    burst 1x1x4-int8-ones        0xffffffff
+     35  K3a   arm    burst 1x1x4-int8-rnd         0xffffffff
+     36  K3a   arm    burst 1x1x4-int8-zeros       0xffffffff
+     37  K3a   arm    burst 1x1x8-int8-rnd         0xffffffff
+     38  K3a   anchor burst 4x8x8-int8-rnd         0xffffffff
+     39  K3b   arm    burst 1x1x2-int8-rnd         0xffffffff
+     40  K3b   arm    burst 1x1x14-int8-rnd        0xffffffff
+     41  K3b   arm    burst 1x1x10-int8-rnd        0xffffffff
+     42  K3b   arm    burst 1x1x6-int8-rnd         0xffffffff
+     43  K3b   anchor burst 4x8x8-int8-rnd         0xffffffff
+     44  D     arm    burst 1x1x1-fp16-ones        0xffffffff
+     45  D     arm    burst 1x1x1-fp16-rnd         0xffffffff
+     46  D     arm    burst 1x1x1-fp16-zeros       0xffffffff
+     47  D     arm    burst 4x8x8-fp16-rnd         0xffffffff
+     48  D     arm    burst 4x8x8-fp16-ones        0xffffffff
+     49  D     arm    burst 4x8x8-fp16-zeros       0xffffffff
+     50  D     arm    burst 1x1x4-fp16-rnd         0xffffffff
+     51  D     arm    burst 1x1x4-fp16-ones        0xffffffff
+     52  D     arm    burst 1x1x4-fp16-zeros       0xffffffff
+     53  D     arm    burst 4x8x8-fp32-rnd         0xffffffff
+     54  D     arm    burst 4x8x8-fp32-zeros       0xffffffff
+     55  D     arm    burst 4x8x8-fp32-ones        0xffffffff
+     56  D     arm    sus3  4x8x8-int8-ones        0xffffffff
+     57  D     arm    sus3  4x8x8-int8-zeros       0xffffffff
+     58  D     anchor burst 4x8x8-int8-rnd         0xffffffff
+     59  NM    arm    burst 4x1x4-fp32-rnd         0xffffffff
+     60  NM    arm    burst 2x1x4-fp32-rnd         0xffffffff
+     61  NM    arm    burst 1x4x4-fp32-rnd         0xffffffff
+     62  NM    arm    burst 1x8x4-fp32-rnd         0xffffffff
+     63  NM    arm    burst 1x16x4-fp32-zeros      0xffffffff
+     64  NM    arm    burst 1x16x4-fp32-rnd        0xffffffff
+     65  NM    arm    burst 8x1x4-fp32-zeros       0xffffffff
+     66  NM    arm    burst 8x1x4-fp32-rnd         0xffffffff
+     67  NM    arm    burst 1x2x4-fp32-rnd         0xffffffff
+     68  NM    anchor burst 4x8x8-int8-rnd         0xffffffff
+     69  SQ    arm    burst 1x2x2-fp32-rnd         0xffffffff
+     70  SQ    arm    burst 2x4x1-int8-rnd         0xffffffff
+     71  SQ    arm    burst 4x8x2-int8-rnd         0xffffffff
+     72  SQ    arm    burst 2x4x4-fp32-rnd         0xffffffff
+     73  SQ    anchor burst 4x8x8-int8-rnd         0xffffffff
+     74  S     null   null  null-3                 -
+     75  S     arm    sus3  1x1x1-fp32-rnd-s4      0xf
+     76  S     arm    sus3  1x1x1-fp32-zeros-s4    0xf
+     77  S     arm    sus3  1x1x4-fp32-rnd-s1      0x1
+     78  S     null   null  null-4                 -
+     79  S     arm    sus3  1x1x1-fp32-rnd-s1      0x1
+     80  S     arm    sus3  1x1x1-fp32-zeros-s1    0x1
+     81  S     arm    sus3  1x1x4-fp32-rnd-s4      0xf
+     82  S     arm    burst 1x1x1-fp32-zeros-s16   0xffff
+     83  S     arm    burst 1x1x1-fp32-rnd-s16     0xffff
+     84  S     arm    burst 1x1x1-fp16-rnd-s16     0xffff
+     85  S     arm    burst 1x1x4-fp32-rnd-s16     0xffff
+     86  S     null   null  null-5                 -
+     87  S     anchor burst 4x8x8-int8-rnd         0xffffffff
+
+a1c1-S2.json: card a1c1 session S2 seed 11161-a1c1-S2 kit 1116-mmsweep
+  runs 86 (anchor 9, arm 73, null 4); forms {'burst': 74, 'null': 4, 'sus3': 8}; distinct arms 74 (not in arms.json: 0); device processes planned 98
+  blocks in order: S SQ NM D K3b K3a K2 K1
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 72.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 65.0}; planned 58.4 card-minutes; planning line 70.0 W; cap_est_w None
+  highest planned peak in the schedule 66.6 W (smoke 1x1x4-fp32-zeros 0xffffffff, 1x1x4-fp16-ones 0xffffffff, 1x1x4-int8-rnd 0xffffffff)
+      1  S     anchor burst 4x8x8-int8-rnd         0xffffffff
+      2  S     null   null  null-1                 -
+      3  S     arm    sus3  1x1x1-fp32-zeros-s4    0xf
+      4  S     arm    sus3  1x1x1-fp32-rnd-s4      0xf
+      5  S     arm    sus3  1x1x4-fp32-rnd-s1      0x1
+      6  S     null   null  null-2                 -
+      7  S     arm    sus3  1x1x4-fp32-rnd-s4      0xf
+      8  S     arm    sus3  1x1x1-fp32-zeros-s1    0x1
+      9  S     arm    sus3  1x1x1-fp32-rnd-s1      0x1
+     10  S     arm    burst 1x1x1-fp16-rnd-s16     0xffff
+     11  S     arm    burst 1x1x4-fp32-rnd-s16     0xffff
+     12  S     arm    burst 1x1x1-fp32-rnd-s16     0xffff
+     13  S     arm    burst 1x1x1-fp32-zeros-s16   0xffff
+     14  S     null   null  null-3                 -
+     15  S     anchor burst 4x8x8-int8-rnd         0xffffffff
+     16  SQ    arm    burst 2x4x4-fp32-rnd         0xffffffff
+     17  SQ    arm    burst 2x4x1-int8-rnd         0xffffffff
+     18  SQ    arm    burst 1x2x2-fp32-rnd         0xffffffff
+     19  SQ    arm    burst 4x8x2-int8-rnd         0xffffffff
+     20  SQ    anchor burst 4x8x8-int8-rnd         0xffffffff
+     21  NM    arm    burst 1x4x4-fp32-rnd         0xffffffff
+     22  NM    arm    burst 1x8x4-fp32-rnd         0xffffffff
+     23  NM    arm    burst 1x16x4-fp32-rnd        0xffffffff
+     24  NM    arm    burst 1x16x4-fp32-zeros      0xffffffff
+     25  NM    arm    burst 8x1x4-fp32-rnd         0xffffffff
+     26  NM    arm    burst 8x1x4-fp32-zeros       0xffffffff
+     27  NM    arm    burst 1x2x4-fp32-rnd         0xffffffff
+     28  NM    arm    burst 2x1x4-fp32-rnd         0xffffffff
+     29  NM    arm    burst 4x1x4-fp32-rnd         0xffffffff
+     30  NM    anchor burst 4x8x8-int8-rnd         0xffffffff
+     31  D     arm    burst 4x8x8-fp32-ones        0xffffffff
+     32  D     arm    burst 4x8x8-fp32-zeros       0xffffffff
+     33  D     arm    burst 4x8x8-fp32-rnd         0xffffffff
+     34  D     arm    sus3  4x8x8-int8-zeros       0xffffffff
+     35  D     arm    sus3  4x8x8-int8-ones        0xffffffff
+     36  D     arm    burst 1x1x1-fp16-zeros       0xffffffff
+     37  D     arm    burst 1x1x1-fp16-rnd         0xffffffff
+     38  D     arm    burst 1x1x1-fp16-ones        0xffffffff
+     39  D     arm    burst 4x8x8-fp16-zeros       0xffffffff
+     40  D     arm    burst 4x8x8-fp16-ones        0xffffffff
+     41  D     arm    burst 4x8x8-fp16-rnd         0xffffffff
+     42  D     arm    burst 1x1x4-fp16-zeros       0xffffffff
+     43  D     arm    burst 1x1x4-fp16-ones        0xffffffff
+     44  D     arm    burst 1x1x4-fp16-rnd         0xffffffff
+     45  D     anchor burst 4x8x8-int8-rnd         0xffffffff
+     46  K3b   arm    burst 1x1x10-int8-rnd        0xffffffff
+     47  K3b   arm    burst 1x1x14-int8-rnd        0xffffffff
+     48  K3b   arm    burst 1x1x6-int8-rnd         0xffffffff
+     49  K3b   arm    burst 1x1x2-int8-rnd         0xffffffff
+     50  K3b   anchor burst 4x8x8-int8-rnd         0xffffffff
+     51  K3a   arm    burst 1x1x16-int8-rnd        0xffffffff
+     52  K3a   arm    burst 1x1x4-int8-zeros       0xffffffff
+     53  K3a   arm    burst 1x1x4-int8-rnd         0xffffffff
+     54  K3a   arm    burst 1x1x4-int8-ones        0xffffffff
+     55  K3a   arm    burst 1x1x8-int8-rnd         0xffffffff
+     56  K3a   arm    burst 1x1x1-int8-zeros       0xffffffff
+     57  K3a   arm    burst 1x1x1-int8-ones        0xffffffff
+     58  K3a   arm    burst 1x1x1-int8-rnd         0xffffffff
+     59  K3a   arm    burst 1x1x12-int8-rnd        0xffffffff
+     60  K3a   anchor burst 4x8x8-int8-rnd         0xffffffff
+     61  K2    arm    burst 1x1x14-fp32-zeros      0xffffffff
+     62  K2    arm    burst 1x1x14-fp32-rnd        0xffffffff
+     63  K2    arm    burst 1x1x10-fp32-zeros      0xffffffff
+     64  K2    arm    burst 1x1x10-fp32-rnd        0xffffffff
+     65  K2    arm    burst 1x1x32-fp32-rnd        0xffffffff
+     66  K2    arm    burst 1x1x6-fp32-rnd         0xffffffff
+     67  K2    arm    burst 1x1x2-fp32-zeros       0xffffffff
+     68  K2    arm    burst 1x1x2-fp32-rnd         0xffffffff
+     69  K2    arm    burst 1x1x20-fp32-rnd        0xffffffff
+     70  K2    anchor burst 4x8x8-int8-rnd         0xffffffff
+     71  K1    arm    burst 1x1x24-fp32-zeros      0xffffffff
+     72  K1    arm    burst 1x1x24-fp32-rnd        0xffffffff
+     73  K1    arm    burst 1x1x8-fp32-zeros       0xffffffff
+     74  K1    arm    burst 1x1x8-fp32-rnd         0xffffffff
+     75  K1    arm    burst 1x1x4-fp32-zeros       0xffffffff
+     76  K1    arm    burst 1x1x4-fp32-rnd         0xffffffff
+     77  K1    arm    burst 1x1x4-fp32-ones        0xffffffff
+     78  K1    arm    burst 1x1x12-fp32-rnd        0xffffffff
+     79  K1    arm    burst 1x1x12-fp32-zeros      0xffffffff
+     80  K1    arm    burst 1x1x16-fp32-zeros      0xffffffff
+     81  K1    arm    burst 1x1x16-fp32-rnd        0xffffffff
+     82  K1    arm    burst 1x1x1-fp32-rnd         0xffffffff
+     83  K1    null   null  null-4                 -
+     84  K1    arm    burst 1x1x1-fp32-ones        0xffffffff
+     85  K1    arm    burst 1x1x1-fp32-zeros       0xffffffff
+     86  K1    anchor burst 4x8x8-int8-rnd         0xffffffff
+
+a1c1-S3.json: card a1c1 session S3 seed 11161-a1c1-S3 kit 1116-mmsweep
+  runs 36 (anchor 5, arm 26, null 5); forms {'burst': 23, 'null': 5, 'sus3': 8}; distinct arms 27 (not in arms.json: 0); device processes planned 47
+  blocks in order: C NM D S
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 47.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 40.0}; planned 30.0 card-minutes; planning line 70.0 W; cap_est_w None
+  highest planned peak in the schedule 60.2 W (smoke 1x1x4-fp32-zeros 0xffffffff, 1x1x4-fp16-ones 0xffffffff, 1x1x4-int8-rnd 0xffffffff)
+      1  C     anchor burst 4x8x8-int8-rnd         0xffffffff
+      2  C     null   null  null-1                 -
+      3  C     arm    burst 1x1x14-fp32-rnd        0xffffffff
+      4  C     arm    burst 1x1x14-fp32-zeros      0xffffffff
+      5  C     arm    burst 1x1x10-fp32-rnd        0xffffffff
+      6  C     arm    burst 1x1x10-fp32-zeros      0xffffffff
+      7  C     arm    burst 1x1x12-fp32-zeros      0xffffffff
+      8  C     arm    burst 1x1x12-fp32-rnd        0xffffffff
+      9  C     arm    burst 1x1x16-fp32-rnd        0xffffffff
+     10  C     arm    burst 1x1x16-fp32-zeros      0xffffffff
+     11  C     arm    burst 1x1x8-fp32-rnd         0xffffffff
+     12  C     arm    burst 1x1x8-fp32-zeros       0xffffffff
+     13  C     anchor burst 4x8x8-int8-rnd         0xffffffff
+     14  NM    arm    burst 1x4x4-fp32-rnd         0xffffffff
+     15  NM    arm    burst 2x1x4-fp32-rnd         0xffffffff
+     16  NM    null   null  null-2                 -
+     17  NM    arm    burst 1x8x4-fp32-rnd         0xffffffff
+     18  NM    arm    burst 4x1x4-fp32-rnd         0xffffffff
+     19  NM    anchor burst 4x8x8-int8-rnd         0xffffffff
+     20  D     arm    sus3  4x8x8-int8-ones        0xffffffff
+     21  D     arm    sus3  4x8x8-int8-zeros       0xffffffff
+     22  D     anchor burst 4x8x8-int8-rnd         0xffffffff
+     23  S     null   null  null-3                 -
+     24  S     arm    sus3  1x1x1-fp32-rnd-s4      0xf
+     25  S     arm    sus3  1x1x1-fp32-zeros-s4    0xf
+     26  S     arm    sus3  1x1x4-fp32-rnd-s4      0xf
+     27  S     null   null  null-4                 -
+     28  S     arm    sus3  1x1x1-fp32-rnd-s1      0x1
+     29  S     arm    sus3  1x1x1-fp32-zeros-s1    0x1
+     30  S     arm    sus3  1x1x4-fp32-rnd-s1      0x1
+     31  S     arm    burst 1x1x1-fp16-rnd-s16     0xffff
+     32  S     arm    burst 1x1x4-fp32-rnd-s16     0xffff
+     33  S     arm    burst 1x1x1-fp32-zeros-s16   0xffff
+     34  S     arm    burst 1x1x1-fp32-rnd-s16     0xffff
+     35  S     null   null  null-5                 -
+     36  S     anchor burst 4x8x8-int8-rnd         0xffffffff
+
+a2c0-S1.json: card a2c0 session S1 seed 11161-a2c0-S1 kit 1116-mmsweep
+  runs 85 (anchor 9, arm 60, null 5, time 11); forms {'burst': 72, 'null': 5, 'sus3': 8}; distinct arms 72 (not in arms.json: 0); device processes planned 96
+  blocks in order: K1 K2 K3a K3b D NM SQ S
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 72.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 65.0}; planned 58.3 card-minutes; planning line 80.0 W; cap_est_w 69.8
+  highest planned peak in the schedule 73.3 W (smoke 1x1x4-fp32-zeros 0xffffffff, 1x1x4-fp16-ones 0xffffffff, 1x1x4-int8-rnd 0xffffffff)
+  role time (energy not read; run for its time and clock): 1x1x4-fp32-rnd, 1x1x8-fp32-rnd, 1x1x10-fp32-rnd, 1x1x2-fp32-rnd, 1x1x6-fp32-rnd, 1x1x1-int8-rnd, 1x1x4-fp16-rnd, 1x4x4-fp32-rnd, 2x1x4-fp32-rnd, 1x2x4-fp32-rnd, 1x2x2-fp32-rnd
+      1  K1    anchor burst 4x8x8-int8-rnd         0xffffffff
+      2  K1    null   null  null-1                 -
+      3  K1    arm    burst 1x1x1-fp32-ones        0xffffffff
+      4  K1    arm    burst 1x1x1-fp32-zeros       0xffffffff
+      5  K1    time   burst 1x1x4-fp32-rnd         0xffffffff
+      6  K1    arm    burst 1x1x4-fp32-ones        0xffffffff
+      7  K1    arm    burst 1x1x4-fp32-zeros       0xffffffff
+      8  K1    arm    burst 1x1x24-fp32-rnd        0xffffffff
+      9  K1    arm    burst 1x1x24-fp32-zeros      0xffffffff
+     10  K1    arm    burst 1x1x16-fp32-zeros      0xffffffff
+     11  K1    arm    burst 1x1x16-fp32-rnd        0xffffffff
+     12  K1    arm    burst 1x1x12-fp32-zeros      0xffffffff
+     13  K1    arm    burst 1x1x12-fp32-rnd        0xffffffff
+     14  K1    time   burst 1x1x8-fp32-rnd         0xffffffff
+     15  K1    arm    burst 1x1x8-fp32-zeros       0xffffffff
+     16  K1    anchor burst 4x8x8-int8-rnd         0xffffffff
+     17  K2    time   burst 1x1x10-fp32-rnd        0xffffffff
+     18  K2    arm    burst 1x1x10-fp32-zeros      0xffffffff
+     19  K2    time   burst 1x1x2-fp32-rnd         0xffffffff
+     20  K2    arm    burst 1x1x2-fp32-zeros       0xffffffff
+     21  K2    arm    burst 1x1x14-fp32-zeros      0xffffffff
+     22  K2    arm    burst 1x1x14-fp32-rnd        0xffffffff
+     23  K2    arm    burst 1x1x20-fp32-rnd        0xffffffff
+     24  K2    time   burst 1x1x6-fp32-rnd         0xffffffff
+     25  K2    arm    burst 1x1x32-fp32-rnd        0xffffffff
+     26  K2    anchor burst 4x8x8-int8-rnd         0xffffffff
+     27  K3a   arm    burst 1x1x1-int8-zeros       0xffffffff
+     28  K3a   arm    burst 1x1x1-int8-ones        0xffffffff
+     29  K3a   time   burst 1x1x1-int8-rnd         0xffffffff
+     30  K3a   arm    burst 1x1x4-int8-ones        0xffffffff
+     31  K3a   arm    burst 1x1x4-int8-zeros       0xffffffff
+     32  K3a   arm    burst 1x1x4-int8-rnd         0xffffffff
+     33  K3a   arm    burst 1x1x12-int8-rnd        0xffffffff
+     34  K3a   arm    burst 1x1x16-int8-rnd        0xffffffff
+     35  K3a   arm    burst 1x1x8-int8-rnd         0xffffffff
+     36  K3a   anchor burst 4x8x8-int8-rnd         0xffffffff
+     37  K3b   arm    burst 1x1x2-int8-rnd         0xffffffff
+     38  K3b   arm    burst 1x1x6-int8-rnd         0xffffffff
+     39  K3b   arm    burst 1x1x10-int8-rnd        0xffffffff
+     40  K3b   arm    burst 1x1x14-int8-rnd        0xffffffff
+     41  K3b   anchor burst 4x8x8-int8-rnd         0xffffffff
+     42  D     arm    sus3  4x8x8-int8-zeros       0xffffffff
+     43  D     arm    sus3  4x8x8-int8-ones        0xffffffff
+     44  D     arm    burst 1x1x4-fp16-ones        0xffffffff
+     45  D     arm    burst 1x1x4-fp16-zeros       0xffffffff
+     46  D     time   burst 1x1x4-fp16-rnd         0xffffffff
+     47  D     arm    burst 4x8x8-fp16-rnd         0xffffffff
+     48  D     arm    burst 4x8x8-fp16-ones        0xffffffff
+     49  D     arm    burst 4x8x8-fp16-zeros       0xffffffff
+     50  D     arm    burst 1x1x1-fp16-ones        0xffffffff
+     51  D     arm    burst 1x1x1-fp16-zeros       0xffffffff
+     52  D     arm    burst 4x8x8-fp32-zeros       0xffffffff
+     53  D     arm    burst 4x8x8-fp32-ones        0xffffffff
+     54  D     arm    burst 4x8x8-fp32-rnd         0xffffffff
+     55  D     anchor burst 4x8x8-int8-rnd         0xffffffff
+     56  NM    time   burst 1x4x4-fp32-rnd         0xffffffff
+     57  NM    time   burst 2x1x4-fp32-rnd         0xffffffff
+     58  NM    null   null  null-2                 -
+     59  NM    arm    burst 8x1x4-fp32-zeros       0xffffffff
+     60  NM    arm    burst 8x1x4-fp32-rnd         0xffffffff
+     61  NM    time   burst 1x2x4-fp32-rnd         0xffffffff
+     62  NM    arm    burst 1x16x4-fp32-rnd        0xffffffff
+     63  NM    arm    burst 1x16x4-fp32-zeros      0xffffffff
+     64  NM    arm    burst 4x1x4-fp32-rnd         0xffffffff
+     65  NM    arm    burst 1x8x4-fp32-rnd         0xffffffff
+     66  NM    anchor burst 4x8x8-int8-rnd         0xffffffff
+     67  SQ    time   burst 1x2x2-fp32-rnd         0xffffffff
+     68  SQ    arm    burst 4x8x2-int8-rnd         0xffffffff
+     69  SQ    arm    burst 2x4x4-fp32-rnd         0xffffffff
+     70  SQ    arm    burst 2x4x1-int8-rnd         0xffffffff
+     71  SQ    anchor burst 4x8x8-int8-rnd         0xffffffff
+     72  S     null   null  null-3                 -
+     73  S     arm    sus3  1x1x1-fp32-rnd-s4      0xf
+     74  S     arm    sus3  1x1x1-fp32-zeros-s4    0xf
+     75  S     arm    sus3  1x1x4-fp32-rnd-s1      0x1
+     76  S     null   null  null-4                 -
+     77  S     arm    sus3  1x1x1-fp32-rnd-s1      0x1
+     78  S     arm    sus3  1x1x1-fp32-zeros-s1    0x1
+     79  S     arm    sus3  1x1x4-fp32-rnd-s4      0xf
+     80  S     arm    burst 1x1x1-fp16-rnd-s16     0xffff
+     81  S     arm    burst 1x1x1-fp32-zeros-s16   0xffff
+     82  S     arm    burst 1x1x1-fp32-rnd-s16     0xffff
+     83  S     arm    burst 1x1x4-fp32-rnd-s16     0xffff
+     84  S     null   null  null-5                 -
+     85  S     anchor burst 4x8x8-int8-rnd         0xffffffff
+
+a2c0-S2.json: card a2c0 session S2 seed 11161-a2c0-S2 kit 1116-mmsweep
+  runs 84 (anchor 9, arm 60, null 4, time 11); forms {'burst': 72, 'null': 4, 'sus3': 8}; distinct arms 72 (not in arms.json: 0); device processes planned 96
+  blocks in order: S SQ NM D K3b K3a K2 K1
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 72.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 65.0}; planned 57.3 card-minutes; planning line 80.0 W; cap_est_w 69.8
+  highest planned peak in the schedule 73.3 W (smoke 1x1x4-fp32-zeros 0xffffffff, 1x1x4-fp16-ones 0xffffffff, 1x1x4-int8-rnd 0xffffffff)
+  role time (energy not read; run for its time and clock): 1x2x2-fp32-rnd, 2x1x4-fp32-rnd, 1x2x4-fp32-rnd, 1x4x4-fp32-rnd, 1x1x4-fp16-rnd, 1x1x1-int8-rnd, 1x1x6-fp32-rnd, 1x1x2-fp32-rnd, 1x1x10-fp32-rnd, 1x1x8-fp32-rnd, 1x1x4-fp32-rnd
+      1  S     anchor burst 4x8x8-int8-rnd         0xffffffff
+      2  S     null   null  null-1                 -
+      3  S     arm    sus3  1x1x4-fp32-rnd-s4      0xf
+      4  S     arm    sus3  1x1x1-fp32-zeros-s4    0xf
+      5  S     arm    sus3  1x1x1-fp32-rnd-s4      0xf
+      6  S     null   null  null-2                 -
+      7  S     arm    sus3  1x1x1-fp32-zeros-s1    0x1
+      8  S     arm    sus3  1x1x1-fp32-rnd-s1      0x1
+      9  S     arm    sus3  1x1x4-fp32-rnd-s1      0x1
+     10  S     arm    burst 1x1x1-fp16-rnd-s16     0xffff
+     11  S     arm    burst 1x1x1-fp32-rnd-s16     0xffff
+     12  S     arm    burst 1x1x1-fp32-zeros-s16   0xffff
+     13  S     arm    burst 1x1x4-fp32-rnd-s16     0xffff
+     14  S     null   null  null-3                 -
+     15  S     anchor burst 4x8x8-int8-rnd         0xffffffff
+     16  SQ    arm    burst 4x8x2-int8-rnd         0xffffffff
+     17  SQ    arm    burst 2x4x1-int8-rnd         0xffffffff
+     18  SQ    time   burst 1x2x2-fp32-rnd         0xffffffff
+     19  SQ    arm    burst 2x4x4-fp32-rnd         0xffffffff
+     20  SQ    anchor burst 4x8x8-int8-rnd         0xffffffff
+     21  NM    arm    burst 8x1x4-fp32-rnd         0xffffffff
+     22  NM    arm    burst 8x1x4-fp32-zeros       0xffffffff
+     23  NM    arm    burst 1x8x4-fp32-rnd         0xffffffff
+     24  NM    time   burst 2x1x4-fp32-rnd         0xffffffff
+     25  NM    null   null  null-4                 -
+     26  NM    arm    burst 1x16x4-fp32-zeros      0xffffffff
+     27  NM    arm    burst 1x16x4-fp32-rnd        0xffffffff
+     28  NM    time   burst 1x2x4-fp32-rnd         0xffffffff
+     29  NM    arm    burst 4x1x4-fp32-rnd         0xffffffff
+     30  NM    time   burst 1x4x4-fp32-rnd         0xffffffff
+     31  NM    anchor burst 4x8x8-int8-rnd         0xffffffff
+     32  D     arm    burst 1x1x1-fp16-zeros       0xffffffff
+     33  D     arm    burst 1x1x1-fp16-ones        0xffffffff
+     34  D     time   burst 1x1x4-fp16-rnd         0xffffffff
+     35  D     arm    burst 1x1x4-fp16-zeros       0xffffffff
+     36  D     arm    burst 1x1x4-fp16-ones        0xffffffff
+     37  D     arm    burst 4x8x8-fp32-rnd         0xffffffff
+     38  D     arm    burst 4x8x8-fp32-ones        0xffffffff
+     39  D     arm    burst 4x8x8-fp32-zeros       0xffffffff
+     40  D     arm    burst 4x8x8-fp16-zeros       0xffffffff
+     41  D     arm    burst 4x8x8-fp16-ones        0xffffffff
+     42  D     arm    burst 4x8x8-fp16-rnd         0xffffffff
+     43  D     arm    sus3  4x8x8-int8-ones        0xffffffff
+     44  D     arm    sus3  4x8x8-int8-zeros       0xffffffff
+     45  D     anchor burst 4x8x8-int8-rnd         0xffffffff
+     46  K3b   arm    burst 1x1x6-int8-rnd         0xffffffff
+     47  K3b   arm    burst 1x1x14-int8-rnd        0xffffffff
+     48  K3b   arm    burst 1x1x10-int8-rnd        0xffffffff
+     49  K3b   arm    burst 1x1x2-int8-rnd         0xffffffff
+     50  K3b   anchor burst 4x8x8-int8-rnd         0xffffffff
+     51  K3a   time   burst 1x1x1-int8-rnd         0xffffffff
+     52  K3a   arm    burst 1x1x1-int8-ones        0xffffffff
+     53  K3a   arm    burst 1x1x1-int8-zeros       0xffffffff
+     54  K3a   arm    burst 1x1x12-int8-rnd        0xffffffff
+     55  K3a   arm    burst 1x1x4-int8-rnd         0xffffffff
+     56  K3a   arm    burst 1x1x4-int8-zeros       0xffffffff
+     57  K3a   arm    burst 1x1x4-int8-ones        0xffffffff
+     58  K3a   arm    burst 1x1x8-int8-rnd         0xffffffff
+     59  K3a   arm    burst 1x1x16-int8-rnd        0xffffffff
+     60  K3a   anchor burst 4x8x8-int8-rnd         0xffffffff
+     61  K2    arm    burst 1x1x20-fp32-rnd        0xffffffff
+     62  K2    time   burst 1x1x6-fp32-rnd         0xffffffff
+     63  K2    arm    burst 1x1x14-fp32-rnd        0xffffffff
+     64  K2    arm    burst 1x1x14-fp32-zeros      0xffffffff
+     65  K2    arm    burst 1x1x2-fp32-zeros       0xffffffff
+     66  K2    time   burst 1x1x2-fp32-rnd         0xffffffff
+     67  K2    arm    burst 1x1x10-fp32-zeros      0xffffffff
+     68  K2    time   burst 1x1x10-fp32-rnd        0xffffffff
+     69  K2    arm    burst 1x1x32-fp32-rnd        0xffffffff
+     70  K2    anchor burst 4x8x8-int8-rnd         0xffffffff
+     71  K1    arm    burst 1x1x12-fp32-rnd        0xffffffff
+     72  K1    arm    burst 1x1x12-fp32-zeros      0xffffffff
+     73  K1    arm    burst 1x1x16-fp32-rnd        0xffffffff
+     74  K1    arm    burst 1x1x16-fp32-zeros      0xffffffff
+     75  K1    arm    burst 1x1x24-fp32-zeros      0xffffffff
+     76  K1    arm    burst 1x1x24-fp32-rnd        0xffffffff
+     77  K1    arm    burst 1x1x8-fp32-zeros       0xffffffff
+     78  K1    time   burst 1x1x8-fp32-rnd         0xffffffff
+     79  K1    arm    burst 1x1x1-fp32-zeros       0xffffffff
+     80  K1    arm    burst 1x1x1-fp32-ones        0xffffffff
+     81  K1    arm    burst 1x1x4-fp32-zeros       0xffffffff
+     82  K1    arm    burst 1x1x4-fp32-ones        0xffffffff
+     83  K1    time   burst 1x1x4-fp32-rnd         0xffffffff
+     84  K1    anchor burst 4x8x8-int8-rnd         0xffffffff
+
+arms scheduled in at least one session: 74 of 74; never scheduled: none
