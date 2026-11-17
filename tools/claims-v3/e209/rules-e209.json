@@ -1,0 +1,713 @@
+{
+ "bands": {
+  "E1": {
+   "arithmetic": "2 x max(4.82, 6.59) = 13.18 -> 14%",
+   "band_pct": 14,
+   "band_rel": 0.14,
+   "i": 4.82,
+   "i_src": "holdout_v2.json > energy v2 > LOEO | W = J over idle given t (>= 3 W) | E208 aifoundry2 card 0",
+   "ii": 6.59,
+   "ii_src": "... | all",
+   "larger_pct": 6.59,
+   "what": "J over idle given the measured seconds, per point"
+  },
+  "E2": {
+   "arithmetic": "2 x max(5.94, 7.35) = 14.70 -> 15%",
+   "band_pct": 15,
+   "band_rel": 0.15,
+   "i": 5.94,
+   "i_src": "holdout_v2.json > energy v2 > LOEO | J over idle t forecast (>= 3 W) | E208 aifoundry2 card 0",
+   "ii": 7.35,
+   "ii_src": "... | all",
+   "larger_pct": 7.35,
+   "what": "J over idle with the seconds forecast, per point"
+  },
+  "E3": {
+   "arithmetic": "2 x max(2.02, 2.03) = 4.06 -> 5%",
+   "band_pct": 5,
+   "band_rel": 0.05,
+   "i": 2.02,
+   "i_src": "holdout_v2.json > energy v2 > LOEO | J at rest given t | E208 aifoundry2 card 0",
+   "ii": 2.03,
+   "ii_src": "... | all",
+   "larger_pct": 2.03,
+   "what": "J with the card at rest given the measured seconds, per point"
+  },
+  "E4": {
+   "arithmetic": "2 x max(6.31, 5.05) = 12.62 -> 13%",
+   "band_pct": 13,
+   "band_rel": 0.13,
+   "i": 6.31,
+   "i_src": "holdout_v2.json > energy v2 > LOEO | J at rest t forecast | E208 aifoundry2 card 0",
+   "ii": 5.05,
+   "ii_src": "... | all",
+   "larger_pct": 6.31,
+   "what": "J with the card at rest with the seconds forecast, per point"
+  },
+  "T1": {
+   "arithmetic": "2 x max(9.09, 5.41) = 18.18 -> 19%",
+   "band_pct": 19,
+   "band_rel": 0.19,
+   "i": 9.09,
+   "i_src": "holdout_v2.json > time v2 > loeo > E208 aifoundry2 card 0",
+   "ii": 5.41,
+   "ii_src": "holdout_v2.json > time v2 > loeo > all",
+   "larger_pct": 9.09,
+   "what": "cycles an op, the wall, per time case"
+  },
+  "T2": {
+   "arithmetic": "2 x max(9.1, 7.88) = 18.20 -> 19%",
+   "band_pct": 19,
+   "band_rel": 0.19,
+   "i": 9.1,
+   "i_src": "computed here (summary_v2.py's method, E208's aifoundry2 points, column v2_loeo)",
+   "ii": 7.88,
+   "ii_src": "summary_v2.json > heldout > counter's mean, E208 > v2_loeo (all three cards; LOEO over all points not recorded)",
+   "larger_pct": 9.1,
+   "what": "cycles an op, the counter's mean, per time case"
+  },
+  "T3": {
+   "arithmetic": "2 x max(9.09, 5.41) = 18.18 -> 19%",
+   "band_pct": 19,
+   "band_rel": 0.19,
+   "i": 9.09,
+   "i_src": "holdout_v2.json > time v2 > loeo > E208 aifoundry2 card 0",
+   "ii": 5.41,
+   "ii_src": "holdout_v2.json > time v2 > loeo > all",
+   "larger_pct": 9.09,
+   "what": "seconds a GEMM, per time case (given the measured clock = the wall cycles given the clock; the same band)"
+  }
+ },
+ "clock": {
+  "band_mhz": 23,
+  "basis_mhz": 11.15,
+  "how": "2 x the chain's rms of the burst's mean clock on E208's 160 aifoundry2 runs (governor_v2.json > chain; in sample), rounded up to a MHz"
+ },
+ "counter_mean_heldout_desk": {
+  "E208 aifoundry2 card 0, LOCO": {
+   "bias_pct": 0.38,
+   "n": 72,
+   "rms_pct": 3.71
+  },
+  "E208 aifoundry2 card 0, in sample": {
+   "bias_pct": -1.49,
+   "n": 72,
+   "rms_pct": 4.59
+  },
+  "E208 aifoundry2 card 0, the E208 fold": {
+   "bias_pct": -0.78,
+   "n": 72,
+   "rms_pct": 9.1
+  },
+  "all E208 (the E208 fold)": {
+   "bias_pct": -2.14,
+   "n": 184,
+   "rms_pct": 7.88
+  }
+ },
+ "experiment": "E209",
+ "head_to_head": {
+  "alpha": 0.05,
+  "min_untied": 10,
+  "replicate_floors_ln": {
+   "J over idle": 0.009854,
+   "cycles mean": 0.002134,
+   "cycles wall": 0.002132,
+   "seconds": 0.002084
+  },
+  "rules": {
+   "H1": {
+    "decision": "bootstrap",
+    "what": "cycles an op, the wall: MM1-v2 against MM1-v1, both at each run's measured clock, per time case"
+   },
+   "H2": {
+    "decision": "bootstrap",
+    "what": "cycles an op, the counter's mean: MM1-v2 against MM1-v1 at the measured clock, per time case"
+   },
+   "H3": {
+    "decision": "bootstrap",
+    "what": "seconds a GEMM given the measured clock: MM1-v2 against MM1-v1, per time case (equal to H1 by the reducer's arithmetic)"
+   },
+   "H4": {
+    "decision": "bootstrap",
+    "what": "J over idle given the measured seconds (and clock): MM1-v2 against MM1-v1, per point both price"
+   },
+   "H5": {
+    "decision": "sign",
+    "what": "cycles an op, the wall: MM1-v2 (measured clock) against F1@800, per time case"
+   },
+   "H6": {
+    "decision": "sign",
+    "what": "J over idle with the seconds forecast: MM1-v2 (measured clock) against F2@800, per point both price"
+   }
+  },
+  "tie_ln": {
+   "cycles": 0.005,
+   "joules": 0.01
+  },
+  "tie_w": 0.05
+ },
+ "inputs_sha256": {
+  "docs/reports/data/2026-11-17-e208-mmsweep-a2c0-S1r/data-e208-a2c0-S1r.json": "b17a67a4b09e00760e7e9c654314ce7ec845f4f78099e0c0d1e84df47bfcca94",
+  "tools/matmul/mm1/v2/data_e208.py": "4a6e7a828b61a915d5b95966b1a896129eead6e3314752fefe09f3e58bc6cfe3",
+  "tools/matmul/mm1/v2/inputs/e208/a2c0-S1__data-e208-a2c0-S1.json": "6b515973cad4912bb902599e3cd423f446b736c32bba8b0af88211cc3d999fab",
+  "tools/matmul/mm1/v2/inputs/e208/a2c0-S2__data-e208-a2c0-S2.json": "76f9967bc1232999453a69bd8181243906a8a4be0937c0d1b024ab7892fedf8f",
+  "tools/matmul/mm1/v2/out/governor_v2.json": "5ac5cfb7bc59cdc6e770e82c8de83f7ade6cb450b2209604f684de0df4156a70",
+  "tools/matmul/mm1/v2/out/holdout_v2.json": "6cfe0b3d6b1c7a10970584acdb11f8572245d6ae658cf509c3757407d39413a2",
+  "tools/matmul/mm1/v2/out/points_time_v2.csv": "78e56a1187a032fe81f8cfe131aca15a8e493e6fc26411acd7962a4425fb6f52",
+  "tools/matmul/mm1/v2/out/summary_v2.json": "c9fe01ea9e2d2257dec64c756d1361141bb57da67d7e132894796189b2c64a8c"
+ },
+ "numpy": "1.26.4",
+ "p_pass_REPORTED": {
+  "E1": {
+   "at_1.25x": 0.624,
+   "at_1.5x": 0.148,
+   "at_1x": 0.981,
+   "n": 45
+  },
+  "E2": {
+   "at_1.25x": 0.504,
+   "at_1.5x": 0.092,
+   "at_1x": 0.96,
+   "n": 45
+  },
+  "E3": {
+   "at_1.25x": 0.932,
+   "at_1.5x": 0.522,
+   "at_1x": 1.0,
+   "n": 45
+  },
+  "E4": {
+   "at_1.25x": 0.533,
+   "at_1.5x": 0.103,
+   "at_1x": 0.967,
+   "n": 45
+  },
+  "T1": {
+   "at_1.25x": 0.653,
+   "at_1.5x": 0.183,
+   "at_1x": 0.981,
+   "n": 41
+  },
+  "T2": {
+   "at_1.25x": 0.65,
+   "at_1.5x": 0.181,
+   "at_1x": 0.98,
+   "n": 41
+  },
+  "T3": {
+   "at_1.25x": 0.653,
+   "at_1.5x": 0.183,
+   "at_1x": 0.981,
+   "n": 41
+  },
+  "how": "desk: P(at least 90% of n inside the band) with independent normal errors in ln at 1, 1.25 and 1.5 x the band's basis"
+ },
+ "pins_local": {
+  "points-e209.json": "cfdda741bcc8cbd8555ff21809f2897fae0f734b66727b108795cd138fb07261"
+ },
+ "power_REPORTED": {
+  "H1": {
+   "cases_gap_over_2pct": 13,
+   "cases_gap_under_tie": 13,
+   "n": 41,
+   "predicted_gap_rms_ln": 0.0503,
+   "sigma_held_out": {
+    "result": {
+     "MM1-v2": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.357,
+       "NOT DECIDED": 0.641,
+       "OTHER BETTER": 0.002
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.103,
+       "NOT DECIDED": 0.897,
+       "OTHER BETTER": 0.0,
+       "TOO FEW": 0.0
+      }
+     },
+     "midpoint": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.036,
+       "NOT DECIDED": 0.918,
+       "OTHER BETTER": 0.046
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.017,
+       "NOT DECIDED": 0.972,
+       "OTHER BETTER": 0.011,
+       "TOO FEW": 0.0
+      }
+     },
+     "other": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.001,
+       "NOT DECIDED": 0.622,
+       "OTHER BETTER": 0.377
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.001,
+       "NOT DECIDED": 0.91,
+       "OTHER BETTER": 0.089,
+       "TOO FEW": 0.0
+      }
+     }
+    },
+    "sigma_ln": 0.0909
+   },
+   "sigma_in_sample": {
+    "result": {
+     "MM1-v2": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.847,
+       "NOT DECIDED": 0.153,
+       "OTHER BETTER": 0.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.285,
+       "NOT DECIDED": 0.715,
+       "OTHER BETTER": 0.0,
+       "TOO FEW": 0.0
+      }
+     },
+     "midpoint": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.038,
+       "NOT DECIDED": 0.917,
+       "OTHER BETTER": 0.045
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.013,
+       "NOT DECIDED": 0.966,
+       "OTHER BETTER": 0.021,
+       "TOO FEW": 0.0
+      }
+     },
+     "other": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.169,
+       "OTHER BETTER": 0.831
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.731,
+       "OTHER BETTER": 0.269,
+       "TOO FEW": 0.0
+      }
+     }
+    },
+    "sigma_ln": 0.0459
+   }
+  },
+  "H2": {
+   "cases_gap_over_2pct": 13,
+   "cases_gap_under_tie": 13,
+   "n": 41,
+   "predicted_gap_rms_ln": 0.0678,
+   "sigma_held_out": {
+    "result": {
+     "MM1-v2": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.475,
+       "NOT DECIDED": 0.525,
+       "OTHER BETTER": 0.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.117,
+       "NOT DECIDED": 0.883,
+       "OTHER BETTER": 0.0,
+       "TOO FEW": 0.0
+      }
+     },
+     "midpoint": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.031,
+       "NOT DECIDED": 0.928,
+       "OTHER BETTER": 0.041
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.016,
+       "NOT DECIDED": 0.97,
+       "OTHER BETTER": 0.014,
+       "TOO FEW": 0.0
+      }
+     },
+     "other": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.521,
+       "OTHER BETTER": 0.479
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.001,
+       "NOT DECIDED": 0.886,
+       "OTHER BETTER": 0.113,
+       "TOO FEW": 0.0
+      }
+     }
+    },
+    "sigma_ln": 0.091
+   },
+   "sigma_in_sample": {
+    "result": {
+     "MM1-v2": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.92,
+       "NOT DECIDED": 0.08,
+       "OTHER BETTER": 0.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.293,
+       "NOT DECIDED": 0.707,
+       "OTHER BETTER": 0.0,
+       "TOO FEW": 0.0
+      }
+     },
+     "midpoint": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.044,
+       "NOT DECIDED": 0.919,
+       "OTHER BETTER": 0.037
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.016,
+       "NOT DECIDED": 0.974,
+       "OTHER BETTER": 0.01,
+       "TOO FEW": 0.0
+      }
+     },
+     "other": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.098,
+       "OTHER BETTER": 0.902
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.716,
+       "OTHER BETTER": 0.284,
+       "TOO FEW": 0.0
+      }
+     }
+    },
+    "sigma_ln": 0.0459
+   }
+  },
+  "H3": {
+   "note": "H3 equals H1 (seconds given the measured clock are the wall cycles given the clock)"
+  },
+  "H4": {
+   "cases_gap_over_2pct": 13,
+   "cases_gap_under_tie": 17,
+   "n": 39,
+   "predicted_gap_rms_ln": 0.0331,
+   "sigma_held_out": {
+    "result": {
+     "MM1-v2": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.285,
+       "NOT DECIDED": 0.715,
+       "OTHER BETTER": 0.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.101,
+       "NOT DECIDED": 0.898,
+       "OTHER BETTER": 0.001,
+       "TOO FEW": 0.0
+      }
+     },
+     "midpoint": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.035,
+       "NOT DECIDED": 0.939,
+       "OTHER BETTER": 0.026
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.007,
+       "NOT DECIDED": 0.988,
+       "OTHER BETTER": 0.005,
+       "TOO FEW": 0.0
+      }
+     },
+     "other": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.713,
+       "OTHER BETTER": 0.287
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.9,
+       "OTHER BETTER": 0.1,
+       "TOO FEW": 0.0
+      }
+     }
+    },
+    "sigma_ln": 0.0659
+   },
+   "sigma_in_sample": {
+    "result": {
+     "MM1-v2": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.468,
+       "NOT DECIDED": 0.532,
+       "OTHER BETTER": 0.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.164,
+       "NOT DECIDED": 0.836,
+       "OTHER BETTER": 0.0,
+       "TOO FEW": 0.0
+      }
+     },
+     "midpoint": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.042,
+       "NOT DECIDED": 0.93,
+       "OTHER BETTER": 0.028
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.019,
+       "NOT DECIDED": 0.971,
+       "OTHER BETTER": 0.01,
+       "TOO FEW": 0.0
+      }
+     },
+     "other": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.539,
+       "OTHER BETTER": 0.461
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.822,
+       "OTHER BETTER": 0.178,
+       "TOO FEW": 0.0
+      }
+     }
+    },
+    "sigma_ln": 0.0496
+   }
+  },
+  "H5": {
+   "cases_gap_over_2pct": 38,
+   "cases_gap_under_tie": 0,
+   "n": 41,
+   "predicted_gap_rms_ln": 0.1714,
+   "sigma_held_out": {
+    "result": {
+     "MM1-v2": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 1.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 0.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.954,
+       "NOT DECIDED": 0.046,
+       "OTHER BETTER": 0.0,
+       "TOO FEW": 0.0
+      }
+     },
+     "midpoint": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.029,
+       "NOT DECIDED": 0.939,
+       "OTHER BETTER": 0.032
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.018,
+       "NOT DECIDED": 0.969,
+       "OTHER BETTER": 0.013,
+       "TOO FEW": 0.0
+      }
+     },
+     "other": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.001,
+       "OTHER BETTER": 0.999
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.045,
+       "OTHER BETTER": 0.955,
+       "TOO FEW": 0.0
+      }
+     }
+    },
+    "sigma_ln": 0.0909
+   },
+   "sigma_in_sample": {
+    "result": {
+     "MM1-v2": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 1.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 0.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 1.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 0.0,
+       "TOO FEW": 0.0
+      }
+     },
+     "midpoint": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.02,
+       "NOT DECIDED": 0.951,
+       "OTHER BETTER": 0.029
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.01,
+       "NOT DECIDED": 0.983,
+       "OTHER BETTER": 0.007,
+       "TOO FEW": 0.0
+      }
+     },
+     "other": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 1.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 1.0,
+       "TOO FEW": 0.0
+      }
+     }
+    },
+    "sigma_ln": 0.0459
+   }
+  },
+  "H6": {
+   "cases_gap_over_2pct": 42,
+   "cases_gap_under_tie": 0,
+   "n": 42,
+   "predicted_gap_rms_ln": 0.8002,
+   "sigma_held_out": {
+    "result": {
+     "MM1-v2": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 1.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 0.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 1.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 0.0,
+       "TOO FEW": 0.0
+      }
+     },
+     "midpoint": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.022,
+       "NOT DECIDED": 0.943,
+       "OTHER BETTER": 0.035
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.012,
+       "NOT DECIDED": 0.979,
+       "OTHER BETTER": 0.009,
+       "TOO FEW": 0.0
+      }
+     },
+     "other": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 1.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 1.0,
+       "TOO FEW": 0.0
+      }
+     }
+    },
+    "sigma_ln": 0.0659
+   },
+   "sigma_in_sample": {
+    "result": {
+     "MM1-v2": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 1.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 0.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 1.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 0.0,
+       "TOO FEW": 0.0
+      }
+     },
+     "midpoint": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.032,
+       "NOT DECIDED": 0.936,
+       "OTHER BETTER": 0.032
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.02,
+       "NOT DECIDED": 0.961,
+       "OTHER BETTER": 0.019,
+       "TOO FEW": 0.0
+      }
+     },
+     "other": {
+      "bootstrap": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 1.0
+      },
+      "sign": {
+       "MM1-v2 BETTER": 0.0,
+       "NOT DECIDED": 0.0,
+       "OTHER BETTER": 1.0,
+       "TOO FEW": 0.0
+      }
+     }
+    },
+    "sigma_ln": 0.0496
+   }
+  }
+ },
+ "python": "3.12.3",
+ "simulations": {
+  "bootstrap_resamples_in_simulation": 1000,
+  "days": 1000
+ },
+ "verdict": {
+  "how": "PASS if at least 90% of a rule's scored cases or points pass; FAIL otherwise; TOO FEW under 10; NO DATA with none",
+  "min_scored": 10,
+  "share": 0.9
+ },
+ "watts": {
+  "S1_vs_S1r_REPORTED": {
+   "arms": 61,
+   "mean_diff_W": 0.1686,
+   "per_run_sd_W": 0.1184
+  },
+  "SD_rep_W": 0.173,
+  "anchor_runs_by_session": {
+   "a2c0-S1": 9,
+   "a2c0-S1r": 9,
+   "a2c0-S2": 9
+  },
+  "band_w": 0.35,
+  "df": 24,
+  "how": "2 x the pooled within-session sd of E208's anchor's W over idle (a2c0-S1, a2c0-S2, a2c0-S1r: 9 runs each), rounded up to 0.01 W",
+  "threshold_w": 3.0,
+  "which_points": "a point whose MM1-v2 W over idle at 799.0 MHz is under 3 W (none of E209's 45: its lowest is e39, 7.51 W) or whose measured W over idle (the mean over its energy runs) is under 3 W"
+ },
+ "what": "every band, tie, threshold and test of E209's scoring (E209.md section 7); desk, from committed files"
+}
