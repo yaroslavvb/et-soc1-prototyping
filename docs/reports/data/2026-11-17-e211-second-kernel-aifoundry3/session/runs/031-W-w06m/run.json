@@ -1,0 +1,102 @@
+{
+ "n": 31,
+ "block": "W",
+ "id": "w06m",
+ "name": "gemmL3x5x7",
+ "pair": "w06",
+ "arm": "A",
+ "run": "031-W-w06m",
+ "gate": {
+  "c": 53.0,
+  "die": 53,
+  "waited_s": 5.5
+ },
+ "rest": {
+  "t0_ms": 1794951228545,
+  "t1_ms": 1794951238545
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/aifoundry/build/e211rgm/rgm136/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL3x5x7:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/aifoundry/build/e211rgm/rgm136/kernel/sparsity.elf",
+    "--stop-file",
+    "~/aifoundry/build/e211/T1794950494-A/STOP"
+   ],
+   "rc": 0,
+   "hung": false,
+   "t0_ms": 1794951238546,
+   "t1_ms": 1794951245477,
+   "n_launch": 15,
+   "runtime_other_cards": [],
+   "family": "gemmL",
+   "host": "rgm136",
+   "kernel": "rgm136",
+   "gate": "GATE OK: gemmL: rgm136, .text 61315bf6a449c282... the pinned one; ELF ff2723b81e2ce409... not the desk build's (sections the card never loads differ), its loadable identity 649d40793e459e51... the pinned one",
+   "walk_ok": true,
+   "walk_words": "no walk (rgm136's host prints none)",
+   "walk": {},
+   "tensor_errors": 0,
+   "launches_ok": true,
+   "check": "approx",
+   "check_ok": true,
+   "check_cycles_per_op": 1172.275,
+   "stopped_by_file": false,
+   "k1": false,
+   "records": {
+    "runtime_lines": 0,
+    "unparsed": 0,
+    "mismatched": 0,
+    "other": 0
+   },
+   "launch_window_ms": [
+    1794951238871,
+    1794951245349
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 70,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "gate_words": "GATE OK: gemmL: rgm136, .text 61315bf6a449c282... the pinned one; ELF ff2723b81e2ce409... not the desk build's (sections the card never loads differ), its loadable identity 649d40793e459e51... the pinned one",
+ "ran": true,
+ "work": {
+  "t0_ms": 1794951238546,
+  "t1_ms": 1794951245477
+ },
+ "tail_end_ms": 1794951249477,
+ "stop": null
+}

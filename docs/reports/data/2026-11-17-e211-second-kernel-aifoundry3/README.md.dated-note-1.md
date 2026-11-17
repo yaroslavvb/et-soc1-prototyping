@@ -1,0 +1,15 @@
+# E211 data, dated note 1: step 6n's "rgm211 on a card before E211" names source files of E211's own kit, not runs
+
+*Tue 17 Nov 2026, 13:41 PST, the card lane `card-e211` (Q204), before the data commit. A dated note beside this directory's README, as CARD-LANE-BRIEF.md section 2 (step 12) and the readiness lane's go lines (FINDING 1) ask when step 6n names a key. It changes no datum, no forecast, no rule and no verdict; the frozen scorer is never changed.*
+
+**What step 6n printed** (2026-11-17 13:21:06 PST, right before the session's first card command; `neverrun-e211-card.txt` and `neverrun-e211-card.json` in this directory): "NEVER-RUN-E211 rgm211 on a card before E211: gemmLn2x2x2|fp32|random|1024|0xffffffff, gemmLn3x5x7|fp32|default|1024|0xffffffff, gemmLn3x5x7|fp32|random|1024|0xffffffff; gemmLn/gemmLnc configurations found 13 (simulator records 28); twins with a card record: 8 of 13; aifoundry3 searched".
+
+**The keys and where the scan found them:** `gemmLn2x2x2|fp32|random|1024|0xffffffff` (cards {'aifoundry3 card 0': 1}, how {'command': 1}; paths: `HOME/claude/work/q204-kit-e211/tree/tools/claims-v3/e211/build_e211.sh`); `gemmLn3x5x7|fp32|default|1024|0xffffffff` (cards {'aifoundry3 card 0': 1}, how {'record': 1}; paths: `HOME/claude/work/q204-kit-e211/tree/tools/claims-v3/e211/e211_common.py`); `gemmLn3x5x7|fp32|random|1024|0xffffffff` (cards {'aifoundry3 card 0': 1}, how {'record': 1}; paths: `HOME/claude/work/q204-kit-e211/tree/tools/claims-v3/e211/e211_common.py`).
+
+**What they are.** Each path is a *source file* in the kit lane's box-build tree on aifoundry3 (`~/claude/work/q204-kit-e211/tree/tools/claims-v3/e211/`, a copy of E211's own committed kit files, made for the kit's `build_e211.sh` run at 01:14 PST Tue 17 Nov 2026): `build_e211.sh` names `gemmLn2x2x2` in its host-refusal checks' command lines, and `e211_common.py` names `gemmLn3x5x7` in its self-check's example records. E206's scanner (unchanged, as E211.md section 4 registers it) reads record-shaped text anywhere under aifoundry3's scanned folders as "aifoundry3 card 0"; the same files in the lab clone are left out by name (`tools/claims-v3/e211`), the box's copy is not. The readiness lane (ready-e211) found and named exactly these three keys and these two files before this session (its FINDING 1, a false positive), and no gemmLn or gemmLnc run folder, `out.json` or session record of a card exists anywhere the scan read.
+
+**What it does to the blindness of those points: nothing.** No rgm211 process ran on a card before this session's smoke: `gemmLn2x2x2` fp32 random is the smoke's s02 and `gemmLn3x5x7` fp32 random is family W's w06n, each first run on a card in this session; `gemmLn3x5x7` with default values is no E211 point. Every point and case keeps its registered label (blind); a later scores lane reads this note as it stands.
+
+The orchestrator is told (the card lane's result). A later kit or tool should skip source files (a record must sit in a run's own output, not in a `.py` or `.sh`).
+
+SPDX-License-Identifier: Apache-2.0
