@@ -1,0 +1,106 @@
+{
+ "what": "data-e212's check W of the claim's window for one E212 session (reads only)",
+ "session": "session",
+ "freeze_utc": "2026-11-17T13:22:43.963Z",
+ "meta": {
+  "label": "a1c1-S4",
+  "sid": "1794927723-a1c1-S4",
+  "box": "aifoundry1",
+  "card": "1",
+  "card_label": "aifoundry1 card 1 at 600 MHz",
+  "schedule": "a1c1-S4.json",
+  "claim": {
+   "post": "#11.4",
+   "posted": "06:57:39 PST",
+   "posted_utc": "2026-11-17T14:57:39.079Z",
+   "record": "Claiming aifoundry1 card 1 (`ET_DEVICES=1`) for session S4 of the NDA box's second matmul sweep 1117-mmsweep2, from 07:02 to 08:00 PST, holding the card's lock for the whole window, with nothing of ours on card 0 meanwhile. S4 goes before S2 because it has no operand-pattern arm, so its data need not wait for E210's forecasts. The session is 87 runs over 80 arms (`src/sched/a1c1-S4.json`: the blind repeats, the deep-K and KB-edge ladders, the memory-line rungs), about 57 card-minutes planned and at most 72; no run starts that cannot end by 08:00. It runs E136's rgm136 unchanged: kernel aace138caf80\u2026 and host 63fddd715a89\u2026 as in #11.1.",
+   "record_kind": "its words after the tag and his line, verbatim, from the round's Discussion watcher's printed copy; the sentence naming the kit's home folder and the forecast's short hash left out"
+  },
+  "window": [
+   "2026-11-17T07:02:00",
+   "2026-11-17T08:00:00",
+   null
+  ],
+  "plan": {
+   "runs": 87,
+   "arms": 80,
+   "planned_min": 57,
+   "cap_min": 72
+  },
+  "release": {
+   "post": "#11.4.2",
+   "posted": "07:42:25 PST",
+   "posted_utc": "2026-11-17T15:42:25.672Z",
+   "record": "Released aifoundry1 card 1 at 07:42 PST: session S4 ended cleanly at 07:40:14 (87 runs, 38.1 card-minutes, runner rc 0, no stop, nothing left running; no operand-pattern arm in it), which ends tonight's sessions, so aifoundry1 is the lab's again.",
+   "record_kind": "its words after the tag, verbatim, from the round's Discussion watcher's printed copy, up to the clause naming the kit's home folder (left out with the rest of the sentence)"
+  },
+  "copied": "07:44:52 PST: one read-only listing and one read-only rsync from aifoundry1 of the model session's sessions/1794927723-a1c1-S4/ (rsync -a, rc 0; 298 files; its MANIFEST.sha256 295 of 295 OK), with no claim of the model session standing on the box",
+  "host_sha256_claim": "63fddd715a89114146788f3d5d6e326db1a951a25d178bce70a8154e8911d981",
+  "registration": {
+   "sha": "c83a29d133d7bc32627b0f7f5b07a2713d457d3e",
+   "time": "2026-11-17T08:00:20-08:00"
+  }
+ },
+ "checks": {
+  "W1_claim_first": {
+   "verdict": "PASS",
+   "claim_post": "#11.4 Tue 06:57:39.079 PST",
+   "session_t0": "Tue 07:02:03.000 PST",
+   "first_card_command": "Tue 07:02:06.913 PST",
+   "claim_lead_s": 267.834
+  },
+  "W2_window_start": {
+   "verdict": "PASS",
+   "window_start": "Tue 07:02:00.000 PST",
+   "t0_after_s": 3.0,
+   "first_after_s": 6.913,
+   "first_log_line": "2026-11-17 07:02:03 PST session start (T0 1794927723; card a"
+  },
+  "W3_window_end": {
+   "verdict": "PASS",
+   "window_end": "Tue 08:00:00.000 PST",
+   "close": "Tue 07:40:14.713 PST",
+   "last_sample": "Tue 07:40:14.331 PST",
+   "close_before_end_s": 1185.287,
+   "last_line": "2026-11-17 07:40:14 PST session end (T0 1794927723; 87 runs ran; 38.13 card-minutes)"
+  },
+  "W4_bound": {
+   "verdict": "PASS",
+   "card_minutes": 38.13,
+   "status_card_min": 38.13,
+   "claim_cap_min": 72,
+   "schedule_cap_min": 72.0,
+   "planned_min_claim": 57,
+   "planned_min_schedule": 56.9,
+   "runner_end_bound": "Tue 08:14:06.913 PST"
+  },
+  "W5_plan": {
+   "verdict": "PASS",
+   "runs_ran": 87,
+   "runs_claim": 87,
+   "runs_listed": 87,
+   "arm_names_incl_anchor_and_nulls": 80,
+   "arm_names_without_nulls": 75,
+   "arms_claim": 80,
+   "schedule": "a1c1-S4.json",
+   "schedule_sha256": "0fd7222d085dd783c863e8892637aa51cf8e26d659b9b35ab2d618e5927adc76",
+   "registered_entry": "0fd7222d085dd783c863e8892637aa51cf8e26d659b9b35ab2d618e5927adc76"
+  },
+  "W6_release": {
+   "verdict": "PASS",
+   "release_post": "#11.4.2 Tue 07:42:25.672 PST",
+   "released_by": "not named in the record of the claim",
+   "release_after_close_s": 130.959
+  },
+  "W7_freeze_first": {
+   "verdict": "PASS",
+   "freeze_post": "#11 Tue 05:22:43.963 PST",
+   "freeze_lead": "99.38 min",
+   "registration_commit": "c83a29d1 2026-11-17T08:00:20-08:00",
+   "registration_vs_session": "after the session's close (the post is the registration)"
+  }
+ },
+ "verdict": "ALL PASS",
+ "python": "3.12.3",
+ "interpreter": "/usr/bin/python3"
+}
