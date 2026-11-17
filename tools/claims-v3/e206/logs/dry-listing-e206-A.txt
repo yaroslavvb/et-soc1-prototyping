@@ -1,0 +1,683 @@
+E206 runbook, arm A (aifoundry3 card 0), dry listing (nothing below was run). Sample window: 2026-11-16, last start 14:30, last end 16:30 (Pacific).
+
+---- the runbook's prelude for aifoundry3: every remote script on aifoundry3 starts with these lines
+    | set -u
+    | cd ~/aifoundry || { echo "NO-TREE: ~/aifoundry"; exit 1; }
+    | BOX=aifoundry3
+    | DEV_COMM='_host$|^ettelem$|^dev_mngt_servi|^et-powertop$|^mmbench_launch|^sys_emu$'   # lib.sh's DEV_COMM
+    | OTHER_COMM="$DEV_COMM|^Runner.Worker$"                                                # lib.sh's OTHER_COMM
+    | hold_read() {  # the holder rule's read: et-who (et-holders) and ps, as counts; FREE=1 when nothing blocks this box's card
+    |   W=$(timeout 20 et-who 2>&1); WRC=$?
+    |   ME=$(id -un)
+    |   NH=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et/ || $1 ~ /^lock:/ {n++} END {print n+0}')
+    |   NO=$(printf '%s\n' "$W" | awk -v me="$ME" '($1 ~ /^\/dev\/et/ || $1 ~ /^lock:/) && $2 == me {n++} END {print n+0}')
+    |   C1=$(printf '%s\n' "$W" | awk '$1 ~ /^\/dev\/et1_/ || $1 == "lock:etsoc-shire1.lock" {n++} END {print n+0}')
+    |   PO=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$DEV_COMM" '$1 == me && $3 ~ re {n++} END {print n+0}')
+    |   PX=$(ps -eo uid=,pid=,comm= | awk -v me="$(id -u)" -v re="$OTHER_COMM" '$1 != me && $3 ~ re {n++} END {print n+0}')
+    |   LG=$(who | wc -l | tr -d ' ')
+    |   FREE=0
+    |   if [ "$BOX" = aifoundry1 ]; then
+    |     # card 1's own lines decide, and nothing of ours on either card (launch_e164_a1.sh's rule)
+    |     [ "$WRC" -eq 0 ] && [ "$C1" -eq 0 ] && [ "$NO" -eq 0 ] && [ "$PO" -eq 0 ] && FREE=1
+    |   else
+    |     # one card: et-who's "No process holds ..." (the E158-E169 queues' rule) and no other user's device process (lib.sh)
+    |     case "$(printf '%s\n' "$W" | head -n 1)" in "No process holds"*) [ "$WRC" -eq 0 ] && [ "$PX" -eq 0 ] && FREE=1 ;; esac
+    |   fi
+    |   echo "holders: et-who rc $WRC, holder lines $NH (ours $NO; card 1's $C1), our device processes $PO, other users' device processes $PX; logins $LG (an idle login does not block)"
+    | }
+    | ours_live() {  # our real card sessions on this box (a dry pass or a V3_DRY session is not one); E170's queue on aifoundry1 counts;
+    |   #             v3: any queue_eNNN.py or session_eNNN.sh of ours (the lab's naming convention), so a later card day's run counts too;
+    |   #             k6: E171's and E172's processes by name (their sessions, queues, blocks and runners), and E173's and E174's queues
+    |   n=0
+    |   for pid in $(pgrep -u "$(id -u)" -f '(queue|session)_e[0-9]+[a-z0-9_]*\.(py|sh)|(session|queue|block)_e17[12]\.sh|run_e17[12]\.py|queue_e17[34]\.py|session_e16[346]\.sh|queue_e16[5-9]\.py|queue_e170\.py|run_e170\.py' 2>/dev/null); do
+    |     case "$(tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null)" in *--dry*) continue ;; esac
+    |     tr '\0' '\n' < /proc/$pid/environ 2>/dev/null | grep -q '^V3_DRY=' && continue
+    |     n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+    | jobs_live() {  # the runbook's own detached dry jobs still running on this box (any day's: a live process is live)
+    |   n=0
+    |   for p in build/q141k/jobs/*.pid; do
+    |     [ -e "$p" ] || continue
+    |     [ -e "${p%.pid}.rc" ] && continue
+    |     kill -0 "$(cat "$p")" 2>/dev/null && n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+    | fresh() {  # fresh <file>: it exists and was written today by the Pacific calendar (the card day's); another day's never counts
+    |   [ -e "$1" ] && [ "$(TZ=America/Los_Angeles date -r "$1" +%F 2>/dev/null)" = "$(TZ=America/Los_Angeles date +%F)" ]
+    | }
+    | job_ok_today() {  # job_ok_today <job>: the runbook's dry job <job> ended rc 0 today
+    |   fresh "build/q141k/jobs/$1.rc" && [ "$(cat "build/q141k/jobs/$1.rc" 2>/dev/null)" = 0 ]
+    | }
+    | ours_live() {  # E206's (rb/rb_e206.sh, E190's): our sessions and queues by each process's own script, never by a command string's text
+    |   local n=0 pid w s first dashc want=${1:-}
+    |   for pid in $(pgrep -u "$(id -u)" . 2>/dev/null); do
+    |     s=""; first=1; dashc=0
+    |     while IFS= read -r -d '' w; do
+    |       if [ "$first" = 1 ]; then first=0; continue; fi
+    |       case "$w" in -c) dashc=1; break ;; -*) continue ;; *) s=$w; break ;; esac
+    |     done 2>/dev/null < "/proc/$pid/cmdline"
+    |     [ "$dashc" = 0 ] && [ -n "$s" ] || continue
+    |     if [ -n "$want" ]; then
+    |       case "${s##*/}" in $want) ;; *) continue ;; esac
+    |     else
+    |       case "${s##*/}" in session_e[0-9]*.sh|queue_e[0-9]*.py|queue_e[0-9]*.sh|block_e17[12].sh|run_e17[012].py) ;; *) continue ;; esac
+    |     fi
+    |     case "$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null)" in *--dry*) continue ;; esac
+    |     tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null | grep -q '^V3_DRY=' && continue
+    |     n=$((n + 1))
+    |   done
+    |   echo "$n"
+    | }
+
+################ B (the card lane's): the queue and THE REST by the clock first; then 'bash W/book.sh take aifoundry3 <lane>' (exit 0: G = that moment; 1: make no ssh call to aifoundry3, stop)
+
+################ 0 (the card lane's): 'bash W/onelab.sh desk <lane>'; uptime (THE LOAD RULE); GitHub main read; E206's anchor lines (the land record); any posted sealed forecast for arm A registered in tools/claims-v3/sealed-e206/ first. Any line not as stated: E (with undesk)
+
+################ H (the card lane's): 'bash W/hold.sh add <lane>' (THE QUIET HOLD, one owner a line); git -C <lab clone> status --porcelain --untracked-files=all reads 0 lines. Else E (with undesk)
+
+################ tools/claims-v3/e206/rb/s02_window_e206.sh A 2026-11-16 14:30 16:30
+=== [s02_window_e206] dry listing: nothing below is run
+[s02_window_e206] (dry listing; a real run would say:) window (arm A, aifoundry3): last start 2026-11-16 14:30 PST, last end 2026-11-16 16:30 PST (61 min from now); fits now: nothing (before the box steps' own time: the look, the sync, the build, step 7, the dry pass, the copy-back)
+# the arm's window, recorded 2026-11-16 15:28:54 PST by s02_window_e206.sh
+RB_DAY=2026-11-16
+RB_LAST_START=2026-11-16\ 14:30\ PST
+RB_LAST_END=2026-11-16\ 16:30\ PST
+RB_LAST_START_EPOCH=1794868200
+RB_LAST_END_EPOCH=1794875400
+RB_LAST_START_HM=14:30
+RB_LAST_END_HM=16:30
+RB_PLAN=e206
+RB_ARM=A
+RB_GO_EPOCH=1794871734
+(exit 0)
+
+################ tools/claims-v3/e206/rb/s03_desk_e206.sh A
+=== [s03_desk_e206] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E206 arm A and naming today; its last start and last end read
+--- copy, run on the desk (git pull --ff-only under the lab-git lock): /usr/bin/flock -w 600 -E 75 <RB_GITLOCK> git -C <lab clone> pull --ff-only
+--- read, run on the Intel (HEAD before the checks): git -C <lab clone> rev-parse HEAD
+--- read, run on the Intel (E206's registration, by its content (the commit that added E206.md)): git -C <lab clone> log --diff-filter=A --format=%H -- tools/claims-v3/e206/E206.md
+--- read, run on the Intel (E206's kit commit, by its content (the commit that added KIT.md)): git -C <lab clone> log --diff-filter=A --format=%H -- tools/claims-v3/e206/KIT.md
+--- read, run on the Intel (E206's paths clean): git -C <lab clone> status --short tools/claims-v3/e206 tools/claims-v3/e136/rgm136 tools/claims-v3/kinds/tiles tools/claims-v3/kinds/real2/tiles tools/claims-v3/kinds/kinds.json tools/claims-v3/kinds/real2/real2.json tools/claims-v3/q141k-runbook tools/claims-v3/e172/box tools/claims-v3/e190 tools/ledger tools/claims-v3/dmcmd_audit_v2.py tools/claims-v3/dmcmd_table_v2.json
+--- read, run on the Intel (the history check: additions only under tools/claims-v3/e206 since the registration, no shadowing addition (check_history_e206.py)): /usr/bin/python3 -I -B tools/claims-v3/e206/rb/check_history_e206.py tree
+--- read, run on the Intel (the own sha256 of the lists E206 reads (pinned)): sha256sum tools/claims-v3/e206/SHA256SUMS-e206-registration tools/claims-v3/e206/SHA256SUMS-e206-kit
+--- read, run on the Intel (the list SHA256SUMS-e206-registration (pinned at 25 entries and its own sha256)): sha256sum -c tools/claims-v3/e206/SHA256SUMS-e206-registration
+--- read, run on the Intel (the list SHA256SUMS-e206-kit (pinned at 44 entries and its own sha256)): sha256sum -c tools/claims-v3/e206/SHA256SUMS-e206-kit
+--- read, run on the Intel (every file with SHA256SUMS anywhere in its name under tools/claims-v3/e206): find tools/claims-v3/e206 -name '*SHA256SUMS*' -type f
+--- desk, run on the Intel (harness-e206.json re-made): /usr/bin/python3 -I -B tools/claims-v3/e206/check_e206.py --check
+--- desk, run on the Intel (every harness file at its sha256 in the lab clone): /usr/bin/python3 -I -B tools/claims-v3/e206/check_e206.py --box
+--- read, run on the Intel (the common module's self-check (the arms, the order, the stops and the latch reading, the gates, the argv, the records)): /usr/bin/python3 -I -B tools/claims-v3/e206/e206_common.py
+--- read, run on the Intel (the identity module's self-check): /usr/bin/python3 -I -B tools/claims-v3/e206/e206_ident.py
+--- desk, run on the Intel (the registration's points_e206.py --check): /usr/bin/python3 -I -B tools/claims-v3/e206/points_e206.py --check
+--- desk, run on the Intel (the registration's forecast_e206.py --check): /usr/bin/python3 -I -B tools/claims-v3/e206/forecast_e206.py --check
+--- desk, run on the Intel (the registration's plan_e206.py --check): /usr/bin/python3 -I -B tools/claims-v3/e206/plan_e206.py --check
+--- desk, run on the Intel (the registration's desk/kernel_e206.py --check): /usr/bin/python3 -I -B tools/claims-v3/e206/desk/kernel_e206.py --check
+--- desk, run on the Intel (the frozen scorer's stand-in self-test): /usr/bin/python3 -I -B tools/claims-v3/e206/score_e206.py --selftest-standins <RB_OUT>/selftest-standins-e206-A.json
+--- desk, run on the Intel (the frozen scorer's E190 self-test): /usr/bin/python3 -I -B tools/claims-v3/e206/score_e206.py --selftest-e190 <RB_OUT>/selftest-e190-e206-A.json
+--- desk, run on the Intel (the preflight: dmcmd_audit_v2 on the session's files, no WRITE allowed): bash tools/claims-v3/e206/preflight_e206.sh
+--- read, run on the Intel (a desk test's log, as committed: logs/selftest-run-e206.txt): grep -cE '^SELFTEST-RUN-E206.[0-9]+.of.[0-9]+.PASS$' tools/claims-v3/e206/logs/selftest-run-e206.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/realpath-e206.txt): grep -cE '^REALPATH-E206.[0-9]+.of.[0-9]+.PASS$' tools/claims-v3/e206/logs/realpath-e206.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/realbytes-e206.txt): grep -cE '^REALBYTES-E206.[0-9]+.of.[0-9]+.PASS$' tools/claims-v3/e206/logs/realbytes-e206.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/desktest-build-e206.txt): grep -cE '^DESKTEST-BUILD-E206.[0-9]+.of.[0-9]+.PASS$' tools/claims-v3/e206/logs/desktest-build-e206.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/selftest-rb-e206.txt): grep -cE '^SELFTEST-RB-E206.[0-9]+.of.[0-9]+.PASS$' tools/claims-v3/e206/logs/selftest-rb-e206.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/dry-listing-e206-A.txt): grep -cE '^dry.listing:.[0-9]+.steps.listed,.0.exited.non-zero,.0.box.calls$' tools/claims-v3/e206/logs/dry-listing-e206-A.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/dry-listing-e206-B.txt): grep -cE '^dry.listing:.[0-9]+.steps.listed,.0.exited.non-zero,.0.box.calls$' tools/claims-v3/e206/logs/dry-listing-e206-B.txt
+--- read, run on the Intel (a desk test's log, as committed: logs/dmcmd-audit-e206.txt): grep -cE '^dmcmd_audit:.GO' tools/claims-v3/e206/logs/dmcmd-audit-e206.txt
+--- read, run on the Intel (HEAD after the checks): git -C <lab clone> rev-parse HEAD
+--- read, run on the Intel (E206 data of arm A (aifoundry3) in any ref (want none before its session)): git -C <lab clone> log --all --oneline -- 'docs/reports/data/*e206*-aifoundry3*'
+--- read, run on the Intel (the other arm's E206 data and the gate-stop records in any ref (REPORTED)): git -C <lab clone> log --all --oneline -- 'docs/reports/data/*e206*' 'docs/reports/gate-stops/*e206*'
+--- read, run on the Intel (a sealed-forecast note for E206 (REPORTED; E206.md 0)): git -C <lab clone> log --oneline -- tools/claims-v3/sealed-e206
+[s03_desk_e206] (dry listing; a real run would say:) desk check (arm A): the window written today for E206 arm A; pulled under the lab-git lock, HEAD DRY descends from the registration DRY (subtree 114c094b) and the kit DRY, the paths clean, HISTORY OK, the lists at their pinned counts and bytes (25; the kit's 44), lists not pinned (reported): none; the harness re-made and at its sha256, both self-checks, the registration's checks and the scorer's self-tests, the preflight GO, the desk tests' logs; arm A data commits: 0; any E206 data or gate-stop commits (reported): 0; sealed-forecast note commits (reported): 0
+(exit 0)
+
+################ after step 2 (the card lane's): 'bash W/onelab.sh undesk <lane>' (on 0 and on every stop path inside steps 0-2: E with undesk)
+
+################ tools/claims-v3/q141k-runbook/k6/s05_look_k6.sh aifoundry3
+=== [s05_look_k6] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (look first: et-who, who, uptime; the holder rule): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | MODE=''
+    | LIM=520; POLL=30
+    | date '+%F %T %Z'; uptime; echo "booted $(uptime -s)"
+    | echo "login $(id -un)"
+    | hold_read
+    | while [ "$FREE" -eq 0 ] && [ "$MODE" = --wait ] && [ "$SECONDS" -lt "$LIM" ]; do   # v3: the box's clock bounds the loop
+    |   sleep "$POLL"; hold_read
+    | done
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD) after $SECONDS s of polls"
+(exit 0)
+
+################ 3: the post: none, by the owner's standing waiver (his words, Sun 15 Nov 2026 10:22:36 PST: "don't worry about discord post, just use the machines, nobody is using them")
+
+################ tools/claims-v3/e206/rb/s07_sync_e206.sh A
+=== [s07_sync_e206] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E206 arm A and naming today; its last start and last end read
+--- gate: now <= the round's last start (2026-11-16 14:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (no card session of ours and no runbook job on the box before the sync): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on $BOX: E206's sync never runs beside one"; exit 3; fi
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: $(jobs_live) runbook job(s) still run on $BOX: E206's sync never runs under one"; exit 3; fi
+    | echo "NOT-BESIDE-OURS: no card session of ours and no runbook job on $BOX"
+--- read, run on the Intel (the synced paths clean before the sync): git -C <lab clone> status --short tools/claims-v3/e206/run_e206.py tools/claims-v3/e206/e206_common.py tools/claims-v3/e206/e206_ident.py tools/claims-v3/e206/session_e206.sh tools/claims-v3/e206/build_e206.sh tools/claims-v3/e206/check_e206.py tools/claims-v3/e206/preflight_e206.sh tools/claims-v3/e206/ettelem_guard_e206.sh tools/claims-v3/e206/fake_card_e206.py tools/claims-v3/e206/plan-e206.json tools/claims-v3/e206/points-e206.json tools/claims-v3/e206/forecast-e206.json tools/claims-v3/dmcmd_audit_v2.py tools/claims-v3/dmcmd_table_v2.json tools/claims-v3/kinds/kinds.json tools/claims-v3/kinds/real2/real2.json tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin tools/claims-v3/kinds/tiles/fp16/randn.bin tools/claims-v3/kinds/tiles/fp16/zeros.bin tools/claims-v3/kinds/tiles/fp32/randn.bin tools/claims-v3/kinds/tiles/fp32/sparse50.bin tools/claims-v3/kinds/tiles/fp32/zeros.bin tools/claims-v3/kinds/tiles/int8/full.bin tools/claims-v3/kinds/tiles/int8/sparse50.bin tools/claims-v3/kinds/tiles/int8/zeros.bin tools/claims-v3/e136/rgm136/CMakeLists.txt tools/claims-v3/e136/rgm136/README.md tools/claims-v3/e136/rgm136/sparsity_args.h tools/claims-v3/e136/rgm136/host/CMakeLists.txt tools/claims-v3/e136/rgm136/host/Constants.h.in tools/claims-v3/e136/rgm136/host/main.cpp tools/claims-v3/e136/rgm136/kernel/CMakeLists.txt tools/claims-v3/e136/rgm136/kernel/crt.S tools/claims-v3/e136/rgm136/kernel/sections.ld tools/claims-v3/e136/rgm136/kernel/sparsity.c tools/claims-v3/e206/harness-e206.json
+--- read, run on the Intel (the lab clone's copies of harness-e206.json's files at their sha256): /usr/bin/python3 -I -B tools/claims-v3/e206/check_e206.py --box
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- copy, run on the Intel (aifoundry3's rsync: harness-e206.json's files (itemized)): rsync -a -c -R -i --exclude __pycache__ -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' tools/claims-v3/e206/run_e206.py tools/claims-v3/e206/e206_common.py tools/claims-v3/e206/e206_ident.py tools/claims-v3/e206/session_e206.sh tools/claims-v3/e206/build_e206.sh tools/claims-v3/e206/check_e206.py tools/claims-v3/e206/preflight_e206.sh tools/claims-v3/e206/ettelem_guard_e206.sh tools/claims-v3/e206/fake_card_e206.py tools/claims-v3/e206/plan-e206.json tools/claims-v3/e206/points-e206.json tools/claims-v3/e206/forecast-e206.json tools/claims-v3/dmcmd_audit_v2.py tools/claims-v3/dmcmd_table_v2.json tools/claims-v3/kinds/kinds.json tools/claims-v3/kinds/real2/real2.json tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin tools/claims-v3/kinds/real2/tiles/fp32/bert_l6_up.bin tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l3_mlp_down.bin tools/claims-v3/kinds/real2/tiles/fp32/gpt2_l9_attn_qk.bin tools/claims-v3/kinds/real2/tiles/fp32/vit_l5_down.bin tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin tools/claims-v3/kinds/tiles/fp16/randn.bin tools/claims-v3/kinds/tiles/fp16/zeros.bin tools/claims-v3/kinds/tiles/fp32/randn.bin tools/claims-v3/kinds/tiles/fp32/sparse50.bin tools/claims-v3/kinds/tiles/fp32/zeros.bin tools/claims-v3/kinds/tiles/int8/full.bin tools/claims-v3/kinds/tiles/int8/sparse50.bin tools/claims-v3/kinds/tiles/int8/zeros.bin tools/claims-v3/e136/rgm136/CMakeLists.txt tools/claims-v3/e136/rgm136/README.md tools/claims-v3/e136/rgm136/sparsity_args.h tools/claims-v3/e136/rgm136/host/CMakeLists.txt tools/claims-v3/e136/rgm136/host/Constants.h.in tools/claims-v3/e136/rgm136/host/main.cpp tools/claims-v3/e136/rgm136/kernel/CMakeLists.txt tools/claims-v3/e136/rgm136/kernel/crt.S tools/claims-v3/e136/rgm136/kernel/sections.ld tools/claims-v3/e136/rgm136/kernel/sparsity.c tools/claims-v3/e206/harness-e206.json aifoundry3:aifoundry/
+--- read on aifoundry3 (the harness at its sha256 on the box): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | python3 -B tools/claims-v3/e206/check_e206.py --box | tail -n 1
+(exit 0)
+
+################ tools/claims-v3/e206/rb/s08_build_e206.sh A start
+=== [s08_build_e206] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E206 arm A and naming today; its last start and last end read
+--- gate: now <= the round's last start (2026-11-16 14:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (the build-attempt count today and the last build's verdict): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | JOB=a3-build-e206
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on $BOX: E206's build never runs beside one"; exit 3; fi
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: $(jobs_live) runbook job(s) still run on $BOX: E206's build starts alone"; exit 3; fi
+    | TODAY=$(TZ=America/Los_Angeles date +%F)
+    | n=0; [ -f build/e206-build-attempts.txt ] && n=$(grep -cE "^$TODAY .* $JOB started\$" build/e206-build-attempts.txt)
+    | echo "E206-BUILDS-TODAY $n"
+    | if job_ok_today "$JOB" && grep -q '^RGM-BUILT rc=0' "build/q141k/jobs/$JOB.out" 2>/dev/null; then echo "BUILT-TODAY"; fi
+--- launch on aifoundry3 (start the dry pass a3-build-e206, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-build-e206
+    | MAXJ=1
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/aifoundry || exit 1
+    | echo "$$" > build/q141k/jobs/a3-build-e206.pid
+    | echo "JOB-BEGIN a3-build-e206 $(date '+%F %T %Z')"
+    | (
+    | JOB=a3-build-e206
+    | mkdir -p build/e206-build-logs
+    | TODAY=$(TZ=America/Los_Angeles date +%F)
+    | k=1; [ -f build/e206-build-attempts.txt ] && k=$(( $(grep -c "^$TODAY .* $JOB started\$" build/e206-build-attempts.txt) + 1 ))
+    | echo "$(TZ=America/Los_Angeles date '+%F %T %Z') $JOB started" >> build/e206-build-attempts.txt
+    | L=build/e206-build-logs/$TODAY-start$k.txt
+    | timeout 500 bash tools/claims-v3/e206/build_e206.sh > "$L" 2>&1
+    | rc=$?
+    | cat "$L"
+    | echo "$(TZ=America/Los_Angeles date '+%F %T %Z') $JOB ended rc=$rc: $(grep -E '^RGM-(BUILT|BUILD-FAILED)' "$L" | cut -c1-60)" >> build/e206-build-attempts.txt
+    | exit $rc
+    | )
+    | rc=$?
+    | echo "JOB-END a3-build-e206 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a3-build-e206.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+[s08_build_e206] (dry listing; a real run would say:) the build job a3-build-e206 started on aifoundry3: run this step's wait (bounded) until it ends
+(exit 0)
+
+################ tools/claims-v3/e206/rb/s08_build_e206.sh A wait
+=== [s08_build_e206] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E206 arm A and naming today; its last start and last end read
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on the dry pass a3-build-e206): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-build-e206
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | fresh "$J.sh" || { echo "JOB-UNKNOWN ${J##*/}: not started today (its script is from $(TZ=America/Los_Angeles date -r "$J.sh" +%F)): start it again"; exit 3; }
+    | t=0; lost=0
+    | while [ ! -e "$J.rc" ] && [ "$SECONDS" -lt "$LIM" ]; do      # v3: the box's clock bounds the loop, not the sum of its sleeps
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then
+    |     # the grace: the job writes its pid as its first line and its exit status as its last; read both again before calling it lost
+    |     sleep 2
+    |     [ -e "$J.rc" ] && break
+    |     if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then lost=1; break; fi
+    |     continue
+    |   fi
+    |   sleep 10
+    | done
+    | t=$SECONDS
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"
+    | elif [ "$lost" -eq 1 ]; then echo "JOB-LOST ${J##*/}: no process (pid $(cat "$J.pid" 2>/dev/null || echo none)) and no exit status"
+    | else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+[s08_build_e206] (dry listing; a real run would say:) then: RB_OUT/e206-built-A.txt from the verdict line; the build record, the harness, the preflight and both self-checks, one 60 s read
+(exit 0)
+
+################ step 6's rule: at most two starts a Pacific day on a box (the third: NO-THIRD-BUILD, 16, no session of arm A); a 14 on wait is no reading, wait again
+
+################ 7: ONLY ONCE THE REST HAS OPENED (40 minutes after our last session on aifoundry3 ended): the rest rule first on the box, no card command; then the config read
+
+################ tools/claims-v3/e206/rb/s09_reads_e206.sh A
+=== [s09_reads_e206] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E206 arm A and naming today; its last start and last end read
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (THE REST RULE before any card command (every session-log form of ours on the box, the floor, the model session's folders)): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | # E206 (Q198, lane kit-e206, Mon 16 Nov 2026, before any E206 datum): THE REST RULE, the lines step 7 (rb/s09_reads_e206.sh, before its
+    | # config read) and step 9 (rb/s11_session_e206.sh, before the launch) send to the arm's box (aifoundry3 for arm A, aifoundry1 for arm B).
+    | # It is E202's rest rule (tools/claims-v3/e202/rb/rest_rule_e202.sh: E195's, E193's and E189's, with fix-e202's activity floor) LINE FOR
+    | # LINE from its first line of code, with three changes: its refusal's words name E206; the activity floor leaves out E206's own folders
+    | # (build/e206, build/e206rgm) where E202's left out E202's; and ONE ADDITION, THE MODEL SESSION'S FOLDERS (Discussion #2.6.2, 11:01:08 PST
+    | # Mon 16 Nov 2026: the model session runs its own matmul sweeps on aifoundry1 and aifoundry2 under the same login, its data in
+    | # ~/claude/work/ee-1116-mmsweep/): the newest write of any regular file under ~/claude/work/ee-*/ counts as a session's end too (over-reading
+    | # only delays a launch). E206.md 6: "each arm's first card command at least 40 minutes after our previous session on that box ended (on
+    | # aifoundry1, either card)". Every card command counts: step 7's config read is a card command, so it too waits for the rest (E192's data
+    | # note 1). It reads every session log of ours on the box, whatever its form:
+    | #   build/eNNN/session.log, build/eNNN/session-*.log, build/eNNN/T<T0>/session.log, build/eNNN/T<T0>/session-*.log
+    | # and energy.sh's output folders in every tree of ours (~/aifoundry, ~/nekko, ~/claude/et-soc1-prototyping), the activity floor (the
+    | # newest write in a T0-named folder of ours under build/, outside the dry paths and E206's own folders and the runbook's build/q141k) and
+    | # the model session's folders. A real block with no "session end" is counted as ended at the latest of its last timestamped line, its log's
+    | # last write and its run's latest write. Dry paths and blocks are skipped; a block opened no device only by "refused, no device opened: ..."
+    | # or "GATE-STOP: ... (no device opened)" at a line's start after its stamp (E206's runner ends such a block with "...: no device opened",
+    | # which is NOT one of those two forms, so E206's own refusals count as sessions here: that only delays a launch).
+    | # Prints "rest: <m> minutes since ...", or "rest: no real session of ours ...", or "REFUSED: <m> minutes since ..." and exits 3 (steps 7
+    | # and 9 then stop with 10, nothing read or launched). Run from the box's tree, under the prelude's set -u; GNU date, find.
+    | # SPDX-License-Identifier: Apache-2.0
+    | latest_write() {  # latest_write <run, e.g. e189>: the newest write (epoch seconds) of a regular file of that run's real paths, or nothing
+    |   local d p=""
+    |   for d in "build/$1" "build/claims-v3/aifoundry3/$1" build/claims-v3/aifoundry3/"$1"-*; do [ -d "$d" ] && p="$p $d"; done
+    |   [ -n "$p" ] || return 0
+    |   find $p -type f ! -path '*-dry*' ! -path '*dry-t*' 2>/dev/null | while IFS= read -r f; do date -r "$f" +%s 2>/dev/null; done | sort -n | tail -n 1
+    | }
+    | last=""; lastw=""; lastt=0; lastkind=""
+    | for L in build/e[0-9]*/session.log build/e[0-9]*/session-*.log build/e[0-9]*/T[0-9]*/session.log build/e[0-9]*/T[0-9]*/session-*.log; do
+    |   [ -f "$L" ] || continue
+    |   case "$L" in *-dry*|*dry-t*) continue ;; esac
+    |   w=$(echo "$L" | cut -d/ -f2)
+    |   mt=$(date -r "$L" +%s 2>/dev/null || echo 0)
+    |   ends=$(awk '
+    |     function flush(final) {
+    |       if (inblk && !dry && !nodev) {
+    |         if (endts != "") print "END 0 " endts
+    |         else if (lastts != "") print "NOEND " final " " lastts
+    |       }
+    |     }
+    |     { m = $0; sub(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [A-Z][A-Z]* /, "", m) }
+    |     /session start/ { flush(0); inblk = 1; dry = 0; nodev = 0; endts = ""; lastts = "" }
+    |     inblk && (m ~ /^DRY[ :]/ || m ~ /^DESK: / || (m ~ /^session start/ && m ~ /( DRY|; DRY\))$/)) { dry = 1 }
+    |     inblk && (m ~ /^refused, no device opened: / || (m ~ /^GATE-STOP: / && m ~ /\(no device opened\)$/)) { nodev = 1 }
+    |     inblk && /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [A-Z][A-Z]* / { lastts = $1 " " $2 " " $3 }
+    |     inblk && /session end( \(T0 [0-9]+\))?$/ && $0 !~ /DRY session end/ { endts = $1 " " $2 " " $3 }
+    |     END { flush(1) }' "$L" 2>/dev/null)
+    |   while read -r kind fin d1 d2 d3; do
+    |     [ -n "$kind" ] || continue
+    |     t=$(date -d "$d1 $d2 $d3" +%s 2>/dev/null) || continue
+    |     ts="$d1 $d2 $d3"
+    |     if [ "$kind" = NOEND ] && [ "$fin" = 1 ] && [ "$mt" -gt "$t" ]; then t=$mt; ts="$(date -d @"$mt" '+%F %T %Z') (the log's last write)"; fi
+    |     if [ "$kind" = NOEND ]; then
+    |       lw=$(latest_write "$w")
+    |       case "$lw" in ''|*[!0-9]*) lw=0 ;; esac
+    |       if [ "$lw" -gt "$t" ]; then t=$lw; ts="$(date -d @"$lw" '+%F %T %Z') (the latest write of E${w#e}'s files outside the dry paths)"; fi
+    |     fi
+    |     if [ -z "$last" ] || [ "$t" -gt "$lastt" ]; then last=$ts; lastt=$t; lastw=E${w#e}; lastkind=$kind; fi
+    |   done <<< "$ends"
+    | done
+    | for T in "$HOME/aifoundry" "$HOME/nekko" "$HOME/claude/et-soc1-prototyping"; do                                   # E189's addition, kept: energy.sh's form
+    |   for F in "$T"/build/sparseparity-energy/*/; do
+    |     [ -d "$F" ] || continue
+    |     case "$F" in *-dry/|*-dry*) continue ;; esac
+    |     lw=$(find "$F" -type f 2>/dev/null | while IFS= read -r f; do date -r "$f" +%s 2>/dev/null; done | sort -n | tail -n 1)
+    |     case "$lw" in ''|*[!0-9]*) continue ;; esac
+    |     if [ -z "$last" ] || [ "$lw" -gt "$lastt" ]; then
+    |       last="$(date -d @"$lw" '+%F %T %Z') (the latest write of an energy.sh run's folder, $(basename "$F"))"; lastt=$lw; lastw="energy.sh"; lastkind=ENERGY
+    |     fi
+    |   done
+    | done
+    | fl=$(find build -path build/e206 -prune -o -path build/e206rgm -prune -o -path build/q141k -prune -o \
+    |   -type f -path '*/T[0-9]*/*' ! -path '*-dry*' ! -path '*dry-t*' -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -n 1)   # fix-e202's floor (E206's own folders left out)
+    | if [ -n "$fl" ]; then
+    |   ft=${fl%%.*}; fp=${fl#* }
+    |   case "$ft" in ''|*[!0-9]*) ft=0 ;; esac
+    |   fw=$(printf '%s\n' "$fp" | tr '/' '\n' | grep -m1 -E '^e[0-9]+' || true)
+    |   if [ "$ft" -gt 0 ] && { [ -z "$last" ] || [ "$ft" -gt $((lastt + 60)) ]; }; then   # more than a minute past the log rule's reading
+    |     last="$(date -d @"$ft" '+%F %T %Z') (the newest write in a session folder of ours: $fp)"; lastt=$ft
+    |     lastw=$( [ -n "$fw" ] && echo "E${fw#e}" || echo "a session of ours" ); lastkind=FLOOR
+    |   fi
+    | fi
+    | for F in "$HOME"/claude/work/ee-*/; do                                                       # E206: the model session's folders
+    |   [ -d "$F" ] || continue
+    |   lw=$(find "$F" -type f -printf '%T@\n' 2>/dev/null | sort -n | tail -n 1)
+    |   lw=${lw%%.*}
+    |   case "$lw" in ''|*[!0-9]*) continue ;; esac
+    |   if [ -z "$last" ] || [ "$lw" -gt "$lastt" ]; then
+    |     last="$(date -d @"$lw" '+%F %T %Z') (the newest write in the model session's folder $(basename "$F"))"; lastt=$lw; lastw="the model session"; lastkind=MODEL
+    |   fi
+    | done
+    | if [ -n "$last" ]; then
+    |   what="session end"; [ "$lastkind" = NOEND ] && what="last real session activity (no 'session end': the latest of its last line and its run's latest write)"
+    |   [ "$lastkind" = ENERGY ] && what="run"
+    |   [ "$lastkind" = FLOOR ] && what="last write (THE ACTIVITY FLOOR: a session folder's newest file, whatever its log's form)"
+    |   [ "$lastkind" = MODEL ] && what="last write (a folder of the model session's own sweeps)"
+    |   [ "$lastkind" = NOEND ] && echo "note: $lastw's last real session block has no 'session end': counted as ended at $last"
+    |   rest=$(( ($(date +%s) - lastt) / 60 ))
+    |   [ "$rest" -ge 40 ] || { echo "REFUSED: $rest minutes since $lastw's $what ($last): E206's first card command comes on a rested card, at least 40 minutes after our last real session there (E206.md 6; the kit)"; exit 3; }
+    |   echo "rest: $rest minutes since $lastw's $what ($last; dry sessions and blocks that opened no device skipped)"
+    | else
+    |   echo "rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log, energy.sh's folders, any T0-named folder under build/ or the model session's folders"
+    | fi
+    | echo "REST-OK: the rest has run on $BOX"
+--- then the time stamped in RB_OUT/e206-step7-A.txt and k6's step 7, unchanged: bash tools/claims-v3/q141k-runbook/k6/s09_a3_reads_k6.sh (its own listing follows)
+=== [s09_a3_reads_k6] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (et-lab-manifest, the card config read through the guard, et-who): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 50 lines: printed once at the top of the listing>
+    | unset V3_DEVICE ET_DEVICES
+    | export LD_LIBRARY_PATH=/opt/et/lib
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours runs on aifoundry3: the config read waits (it opens card 0)"; exit 3; fi
+    | mkdir -p build/q141k
+    | et-lab-manifest | tee build/q141k/et-lab-manifest-$(date +%Y%m%dT%H%M%S).txt
+    | c=$(flock -n /run/lock/etsoc-shire0.lock timeout 10 bash tools/claims-v3/e128/ettelem_guard.sh config < /dev/null 2>/dev/null | grep '^{' | tail -1)
+    | echo "CONFIG $c"
+    | hold_read
+    | echo "HOLDER-RULE: $([ "$FREE" -eq 1 ] && echo FREE || echo HELD)"
+(exit 0)
+
+################ tools/claims-v3/e206/rb/s10_dry_e206.sh A start
+=== [s10_dry_e206] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E206 arm A and naming today; its last start and last end read
+--- gate: now <= the round's last start (2026-11-16 14:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- launch on aifoundry3 (start the dry pass a3-dry-e206, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-dry-e206
+    | MAXJ=1
+    | mkdir -p build/q141k/jobs
+    | if [ "$(ours_live)" -gt 0 ]; then echo "JOB-REFUSED: a card session of ours runs on $BOX: no dry pass during a session"; exit 3; fi
+    | if [ -e "$J.pid" ] && [ ! -e "$J.rc" ] && kill -0 "$(cat "$J.pid")" 2>/dev/null; then echo "JOB-REFUSED: ${J##*/} still runs"; exit 3; fi
+    | if [ "$(jobs_live)" -ge "$MAXJ" ]; then echo "JOB-REFUSED: $(jobs_live) dry passes already run on $BOX (at most $MAXJ at a time)"; exit 3; fi
+    | rm -f "$J.rc" "$J.out" "$J.pid"
+    | cat > "$J.sh" <<'RB_JOB_EOF'
+    | cd ~/aifoundry || exit 1
+    | echo "$$" > build/q141k/jobs/a3-dry-e206.pid
+    | echo "JOB-BEGIN a3-dry-e206 $(date '+%F %T %Z')"
+    | (
+    | ARM=A
+    | T0=$(date +%s)
+    | D=build/e206/T$T0-$ARM-dry
+    | E206_FAKE_SCALE=0.05 E206_FAKE_TAU_S=1 python3 -B tools/claims-v3/e206/run_e206.py session --dry --arm "$ARM" --t0 "$T0" --out "$D" \
+    |   --sequence short --rest-s 1 --smoke-rest-s 3 --tail-s 0.5 --gate-wait-s 20
+    | rc=$?
+    | grep -E 'identity|stop-path|smoke gate|run [0-9]+-.* done|STOP|HUNG|session end' "$D/session.log" | cut -c1-200
+    | n=$(grep -c 'run [0-9]*-.* done: .* rc \[0\]' "$D/session.log")
+    | echo "E206-DRY arm $ARM rc=$rc runs=$n"
+    | [ "$rc" -eq 0 ] && [ "$n" -ge 3 ] && grep -q 'smoke gate passed' "$D/session.log" && grep -q 'stop-path test passed' "$D/session.log" && \
+    |   grep -q 'the identity read: ' "$D/session.log" && [ -s "$D/MANIFEST.sha256" ]
+    | )
+    | rc=$?
+    | echo "JOB-END a3-dry-e206 rc=$rc $(date '+%F %T %Z')"
+    | echo "$rc" > build/q141k/jobs/a3-dry-e206.rc
+    | RB_JOB_EOF
+    | setsid nohup bash "$J.sh" > "$J.out" 2>&1 < /dev/null &
+    | sleep 2
+    | echo "JOB-STARTED ${J##*/} $(date '+%F %T %Z') pid $(cat "$J.pid" 2>/dev/null)"
+[s10_dry_e206] (dry listing; a real run would say:) the dry pass a3-dry-e206 started on aifoundry3: run this step's wait (bounded) until it ends
+(exit 0)
+
+################ tools/claims-v3/e206/rb/s10_dry_e206.sh A wait
+=== [s10_dry_e206] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E206 arm A and naming today; its last start and last end read
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on the dry pass a3-dry-e206): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | J=build/q141k/jobs/a3-dry-e206
+    | LIM=520
+    | [ -e "$J.sh" ] || { echo "JOB-UNKNOWN ${J##*/}: never started here"; exit 3; }
+    | fresh "$J.sh" || { echo "JOB-UNKNOWN ${J##*/}: not started today (its script is from $(TZ=America/Los_Angeles date -r "$J.sh" +%F)): start it again"; exit 3; }
+    | t=0; lost=0
+    | while [ ! -e "$J.rc" ] && [ "$SECONDS" -lt "$LIM" ]; do      # v3: the box's clock bounds the loop, not the sum of its sleeps
+    |   if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then
+    |     # the grace: the job writes its pid as its first line and its exit status as its last; read both again before calling it lost
+    |     sleep 2
+    |     [ -e "$J.rc" ] && break
+    |     if ! kill -0 "$(cat "$J.pid" 2>/dev/null)" 2>/dev/null; then lost=1; break; fi
+    |     continue
+    |   fi
+    |   sleep 10
+    | done
+    | t=$SECONDS
+    | tail -n 400 "$J.out" 2>/dev/null | cut -c1-300
+    | if [ -e "$J.rc" ]; then echo "JOB-DONE ${J##*/} rc=$(cat "$J.rc")"
+    | elif [ "$lost" -eq 1 ]; then echo "JOB-LOST ${J##*/}: no process (pid $(cat "$J.pid" 2>/dev/null || echo none)) and no exit status"
+    | else echo "JOB-RUNNING ${J##*/} after $t s"; fi
+(exit 0)
+
+################ tools/claims-v3/e206/rb/s11_session_e206.sh A
+=== [s11_session_e206] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E206 arm A and naming today; its last start and last end read
+--- gate: now <= the round's last start (2026-11-16 14:30 PST)
+--- gate: now + 125 min <= the round's last end (2026-11-16 16:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- launch on aifoundry3 (launch e206 arm A, detached): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | ARM=A; JD=a3-dry-e206; JB=a3-build-e206; DEADLINE=1794875400; LAST_START=2026-11-16\ 14:30\ PST; LAST_END=2026-11-16\ 16:30\ PST
+    | mkdir -p build/q141k/jobs
+    | if [ "$(jobs_live)" -gt 0 ]; then echo "REFUSED: a dry pass of the runbook still runs on $BOX (no session during a dry pass)"; exit 3; fi
+    | if [ "$(ours_live)" -gt 0 ]; then echo "REFUSED: a card session of ours already runs on $BOX (one at a time)"; exit 3; fi
+    | case "$BOX" in   # the firmware identity by continuity, never the firmware-revisions query (look_e164.sh's E82 rule; s14's E69 rule)
+    |   aifoundry1) FWREAD='2026-10-31 13:45:24 PDT'; FWWHO="E82's firmware read" ;;
+    |   aifoundry2) FWREAD='2026-10-27 13:56:26 PDT'; FWWHO="E69's firmware read" ;;
+    |   *) FWREAD="" ;;
+    | esac
+    | if [ -n "$FWREAD" ]; then
+    |   BOOTED=$(uptime -s 2>/dev/null); boot=$(date -d "$BOOTED" +%s 2>/dev/null); fw=$(date -d "$FWREAD" +%s)
+    |   if [ -z "$BOOTED" ] || [ -z "$boot" ] || [ "$boot" -ge "$fw" ]; then
+    |     echo "IDENTITY-STOP: $BOX booted '$BOOTED', not before $FWWHO of $FWREAD: its firmware build is not carried by continuity: nothing launched"; exit 3
+    |   fi
+    |   echo "identity: $BOX booted $BOOTED, before $FWWHO of $FWREAD: ok"
+    | fi
+    | # E206 (Q198, lane kit-e206, Mon 16 Nov 2026, before any E206 datum): THE REST RULE, the lines step 7 (rb/s09_reads_e206.sh, before its
+    | # config read) and step 9 (rb/s11_session_e206.sh, before the launch) send to the arm's box (aifoundry3 for arm A, aifoundry1 for arm B).
+    | # It is E202's rest rule (tools/claims-v3/e202/rb/rest_rule_e202.sh: E195's, E193's and E189's, with fix-e202's activity floor) LINE FOR
+    | # LINE from its first line of code, with three changes: its refusal's words name E206; the activity floor leaves out E206's own folders
+    | # (build/e206, build/e206rgm) where E202's left out E202's; and ONE ADDITION, THE MODEL SESSION'S FOLDERS (Discussion #2.6.2, 11:01:08 PST
+    | # Mon 16 Nov 2026: the model session runs its own matmul sweeps on aifoundry1 and aifoundry2 under the same login, its data in
+    | # ~/claude/work/ee-1116-mmsweep/): the newest write of any regular file under ~/claude/work/ee-*/ counts as a session's end too (over-reading
+    | # only delays a launch). E206.md 6: "each arm's first card command at least 40 minutes after our previous session on that box ended (on
+    | # aifoundry1, either card)". Every card command counts: step 7's config read is a card command, so it too waits for the rest (E192's data
+    | # note 1). It reads every session log of ours on the box, whatever its form:
+    | #   build/eNNN/session.log, build/eNNN/session-*.log, build/eNNN/T<T0>/session.log, build/eNNN/T<T0>/session-*.log
+    | # and energy.sh's output folders in every tree of ours (~/aifoundry, ~/nekko, ~/claude/et-soc1-prototyping), the activity floor (the
+    | # newest write in a T0-named folder of ours under build/, outside the dry paths and E206's own folders and the runbook's build/q141k) and
+    | # the model session's folders. A real block with no "session end" is counted as ended at the latest of its last timestamped line, its log's
+    | # last write and its run's latest write. Dry paths and blocks are skipped; a block opened no device only by "refused, no device opened: ..."
+    | # or "GATE-STOP: ... (no device opened)" at a line's start after its stamp (E206's runner ends such a block with "...: no device opened",
+    | # which is NOT one of those two forms, so E206's own refusals count as sessions here: that only delays a launch).
+    | # Prints "rest: <m> minutes since ...", or "rest: no real session of ours ...", or "REFUSED: <m> minutes since ..." and exits 3 (steps 7
+    | # and 9 then stop with 10, nothing read or launched). Run from the box's tree, under the prelude's set -u; GNU date, find.
+    | # SPDX-License-Identifier: Apache-2.0
+    | latest_write() {  # latest_write <run, e.g. e189>: the newest write (epoch seconds) of a regular file of that run's real paths, or nothing
+    |   local d p=""
+    |   for d in "build/$1" "build/claims-v3/aifoundry3/$1" build/claims-v3/aifoundry3/"$1"-*; do [ -d "$d" ] && p="$p $d"; done
+    |   [ -n "$p" ] || return 0
+    |   find $p -type f ! -path '*-dry*' ! -path '*dry-t*' 2>/dev/null | while IFS= read -r f; do date -r "$f" +%s 2>/dev/null; done | sort -n | tail -n 1
+    | }
+    | last=""; lastw=""; lastt=0; lastkind=""
+    | for L in build/e[0-9]*/session.log build/e[0-9]*/session-*.log build/e[0-9]*/T[0-9]*/session.log build/e[0-9]*/T[0-9]*/session-*.log; do
+    |   [ -f "$L" ] || continue
+    |   case "$L" in *-dry*|*dry-t*) continue ;; esac
+    |   w=$(echo "$L" | cut -d/ -f2)
+    |   mt=$(date -r "$L" +%s 2>/dev/null || echo 0)
+    |   ends=$(awk '
+    |     function flush(final) {
+    |       if (inblk && !dry && !nodev) {
+    |         if (endts != "") print "END 0 " endts
+    |         else if (lastts != "") print "NOEND " final " " lastts
+    |       }
+    |     }
+    |     { m = $0; sub(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [A-Z][A-Z]* /, "", m) }
+    |     /session start/ { flush(0); inblk = 1; dry = 0; nodev = 0; endts = ""; lastts = "" }
+    |     inblk && (m ~ /^DRY[ :]/ || m ~ /^DESK: / || (m ~ /^session start/ && m ~ /( DRY|; DRY\))$/)) { dry = 1 }
+    |     inblk && (m ~ /^refused, no device opened: / || (m ~ /^GATE-STOP: / && m ~ /\(no device opened\)$/)) { nodev = 1 }
+    |     inblk && /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [A-Z][A-Z]* / { lastts = $1 " " $2 " " $3 }
+    |     inblk && /session end( \(T0 [0-9]+\))?$/ && $0 !~ /DRY session end/ { endts = $1 " " $2 " " $3 }
+    |     END { flush(1) }' "$L" 2>/dev/null)
+    |   while read -r kind fin d1 d2 d3; do
+    |     [ -n "$kind" ] || continue
+    |     t=$(date -d "$d1 $d2 $d3" +%s 2>/dev/null) || continue
+    |     ts="$d1 $d2 $d3"
+    |     if [ "$kind" = NOEND ] && [ "$fin" = 1 ] && [ "$mt" -gt "$t" ]; then t=$mt; ts="$(date -d @"$mt" '+%F %T %Z') (the log's last write)"; fi
+    |     if [ "$kind" = NOEND ]; then
+    |       lw=$(latest_write "$w")
+    |       case "$lw" in ''|*[!0-9]*) lw=0 ;; esac
+    |       if [ "$lw" -gt "$t" ]; then t=$lw; ts="$(date -d @"$lw" '+%F %T %Z') (the latest write of E${w#e}'s files outside the dry paths)"; fi
+    |     fi
+    |     if [ -z "$last" ] || [ "$t" -gt "$lastt" ]; then last=$ts; lastt=$t; lastw=E${w#e}; lastkind=$kind; fi
+    |   done <<< "$ends"
+    | done
+    | for T in "$HOME/aifoundry" "$HOME/nekko" "$HOME/claude/et-soc1-prototyping"; do                                   # E189's addition, kept: energy.sh's form
+    |   for F in "$T"/build/sparseparity-energy/*/; do
+    |     [ -d "$F" ] || continue
+    |     case "$F" in *-dry/|*-dry*) continue ;; esac
+    |     lw=$(find "$F" -type f 2>/dev/null | while IFS= read -r f; do date -r "$f" +%s 2>/dev/null; done | sort -n | tail -n 1)
+    |     case "$lw" in ''|*[!0-9]*) continue ;; esac
+    |     if [ -z "$last" ] || [ "$lw" -gt "$lastt" ]; then
+    |       last="$(date -d @"$lw" '+%F %T %Z') (the latest write of an energy.sh run's folder, $(basename "$F"))"; lastt=$lw; lastw="energy.sh"; lastkind=ENERGY
+    |     fi
+    |   done
+    | done
+    | fl=$(find build -path build/e206 -prune -o -path build/e206rgm -prune -o -path build/q141k -prune -o \
+    |   -type f -path '*/T[0-9]*/*' ! -path '*-dry*' ! -path '*dry-t*' -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -n 1)   # fix-e202's floor (E206's own folders left out)
+    | if [ -n "$fl" ]; then
+    |   ft=${fl%%.*}; fp=${fl#* }
+    |   case "$ft" in ''|*[!0-9]*) ft=0 ;; esac
+    |   fw=$(printf '%s\n' "$fp" | tr '/' '\n' | grep -m1 -E '^e[0-9]+' || true)
+    |   if [ "$ft" -gt 0 ] && { [ -z "$last" ] || [ "$ft" -gt $((lastt + 60)) ]; }; then   # more than a minute past the log rule's reading
+    |     last="$(date -d @"$ft" '+%F %T %Z') (the newest write in a session folder of ours: $fp)"; lastt=$ft
+    |     lastw=$( [ -n "$fw" ] && echo "E${fw#e}" || echo "a session of ours" ); lastkind=FLOOR
+    |   fi
+    | fi
+    | for F in "$HOME"/claude/work/ee-*/; do                                                       # E206: the model session's folders
+    |   [ -d "$F" ] || continue
+    |   lw=$(find "$F" -type f -printf '%T@\n' 2>/dev/null | sort -n | tail -n 1)
+    |   lw=${lw%%.*}
+    |   case "$lw" in ''|*[!0-9]*) continue ;; esac
+    |   if [ -z "$last" ] || [ "$lw" -gt "$lastt" ]; then
+    |     last="$(date -d @"$lw" '+%F %T %Z') (the newest write in the model session's folder $(basename "$F"))"; lastt=$lw; lastw="the model session"; lastkind=MODEL
+    |   fi
+    | done
+    | if [ -n "$last" ]; then
+    |   what="session end"; [ "$lastkind" = NOEND ] && what="last real session activity (no 'session end': the latest of its last line and its run's latest write)"
+    |   [ "$lastkind" = ENERGY ] && what="run"
+    |   [ "$lastkind" = FLOOR ] && what="last write (THE ACTIVITY FLOOR: a session folder's newest file, whatever its log's form)"
+    |   [ "$lastkind" = MODEL ] && what="last write (a folder of the model session's own sweeps)"
+    |   [ "$lastkind" = NOEND ] && echo "note: $lastw's last real session block has no 'session end': counted as ended at $last"
+    |   rest=$(( ($(date +%s) - lastt) / 60 ))
+    |   [ "$rest" -ge 40 ] || { echo "REFUSED: $rest minutes since $lastw's $what ($last): E206's first card command comes on a rested card, at least 40 minutes after our last real session there (E206.md 6; the kit)"; exit 3; }
+    |   echo "rest: $rest minutes since $lastw's $what ($last; dry sessions and blocks that opened no device skipped)"
+    | else
+    |   echo "rest: no real session of ours in build/e*/session.log, session-*.log, T*/session*.log, energy.sh's folders, any T0-named folder under build/ or the model session's folders"
+    | fi
+    | hung=$(grep -RhsE --include='*.log' --exclude-dir='*-dry*' --exclude-dir='*dry-t*' \
+    |   '^[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}:[0-9]{2}([^ ]*)( [A-Z]+)? HUNG[: ]' build 2>/dev/null | head -n 3)
+    | [ -z "$hung" ] || { echo "REFUSED: a HUNG marker of ours on the box ($(printf '%s\n' "$hung" | head -n 1 | cut -c1-220)): a device process of ours did not end after its timeout's TERM, so the card may hold a hung hart: stop and report to the owner; only his word and a dated kit amendment lift this"; exit 3; }
+    | echo "hung: no HUNG marker in our session logs on the box"
+    | TODAY=$(TZ=America/Los_Angeles date +%F)
+    | opened=0; nodev=0
+    | for L in build/e206/T*-"$ARM"/session.log; do
+    |   [ -f "$L" ] || continue
+    |   [ "$(TZ=America/Los_Angeles date -r "$L" +%F 2>/dev/null)" = "$TODAY" ] || continue
+    |   if grep -q 'the first card command' "$L"; then opened=$((opened + 1)); else nodev=$((nodev + 1)); fi
+    | done
+    | [ "$opened" -eq 0 ] || { echo "REFUSED: the same-day rule: a session of arm $ARM opened the card earlier today ($opened): not again today"; exit 3; }
+    | [ "$nodev" -lt 2 ] || { echo "REFUSED: the same-day rule: $nodev sessions of arm $ARM that opened no device ran today: a third try is not made"; exit 3; }
+    | echo "same-day: arm $ARM sessions today: $opened that opened the card, $nodev that opened no device"
+    | job_ok_today "$JD" || { echo "REFUSED: E206's dry pass (step 8's job $JD) has not ended rc 0 today"; exit 3; }
+    | echo "dry pass: $JD ended rc 0 today"
+    | fresh "build/q141k/jobs/$JB.out" && grep -q '^RGM-BUILT rc=0' "build/q141k/jobs/$JB.out" ||
+    |   { echo "REFUSED: rgm136 was not built today (step 6's job $JB)"; exit 3; }
+    | mkdir -p build/e206 build/q141k
+    | T0=$(date +%s)
+    | echo "$T0" > "build/q141k/e206$ARM.T0"
+    | E206_T0=$T0 E206_ARM=$ARM E206_DEADLINE_EPOCH="$DEADLINE" setsid nohup bash tools/claims-v3/e206/session_e206.sh > "build/e206/session-$ARM.out" 2>&1 < /dev/null &
+    | sleep 5
+    | echo "LAUNCHED e206 arm $ARM T0 $T0 $(date '+%F %T %Z') (last start $LAST_START, last end $LAST_END; session_e206.sh)"
+    | tail -n 6 "build/e206/T$T0-$ARM/session.log" 2>/dev/null | cut -c1-300
+(exit 0)
+
+################ inside the session (session_e206.sh, detached on aifoundry3): the box and the build (the kernel gate, the harness, the preflight GO), the lock, the holders, THE FIRST CARD COMMAND (the start config and THE IDENTITY GATE), the sampler, THE IDENTITY READ, the smoke (30 s at rest; p001, p046, p021 at 2 s each; the host's card watched; the board's rise) and THEN the stop-path test, the arm's sequence (tie, pass 1, tie, pass 2, tie: each run the die gate, the holders, 10 s at rest, one process under a plain timeout 10, 4 s read), the closing config (never after a HUNG), session end, the manifest last
+
+################ tools/claims-v3/e206/rb/s20_wait_e206.sh A
+=== [s20_wait_e206] dry listing: nothing below is run
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- wait on aifoundry3 (one bounded wait on e206 arm A): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | ARM=A; LIM=520; WANT='DRY'
+    | fresh "build/q141k/e206$ARM.T0" || { echo "RUN-UNKNOWN e206 arm $ARM: not launched today by the runbook (no T0 written today)"; exit 3; }
+    | T0=$(cat "build/q141k/e206$ARM.T0")
+    | [ "$WANT" = DRY ] || [ "$T0" = "$WANT" ] || { echo "RUN-UNKNOWN e206 arm $ARM: the box's last launch T0 $T0 is not this runbook's $WANT"; exit 3; }
+    | SD=build/e206/T$T0-$ARM; L=$SD/session.log
+    | ended() { grep -q 'session end' "$L" 2>/dev/null; }
+    | hung() { grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [A-Z]+ HUNG: ' "$L" 2>/dev/null; }
+    | while ! ended && ! hung && [ "$SECONDS" -lt "$LIM" ]; do
+    |   [ "$(ours_live 'session_e206.sh')" -gt 0 ] || { sleep 2; ended || { echo "RUN-GONE e206 arm $ARM: no session process and no session end"; break; }; }
+    |   sleep 15
+    | done
+    | t=$SECONDS
+    | date '+%F %T %Z'
+    | grep -E 'session start|box and the build|first card command|config|identity|sampler|smoke|stop-path|run [0-9]+-|STOP|HUNG|K1|CRASH|no device opened|session end' "$L" 2>/dev/null | cut -c1-240 | tail -n 40
+    | if hung; then echo "HUNG e206 arm $ARM"; fi
+    | if ended; then
+    |   echo "RUN-ENDED e206 arm $ARM"
+    |   sleep 2
+    |   if [ -s "$SD/MANIFEST.sha256" ]; then echo "MANIFEST-WRITTEN $(grep -c . "$SD/MANIFEST.sha256") files"; else echo "MANIFEST-ABSENT"; fi
+    |   k=0; while [ ! -s "$SD/runner.rc" ] && [ "$k" -lt 10 ]; do sleep 1; k=$((k + 1)); done
+    |   if [ -s "$SD/runner.rc" ]; then echo "RUNNER-RC $(cat "$SD/runner.rc")"; else echo "RUNNER-RC-ABSENT"; fi
+    | else echo "RUN-RUNNING e206 arm $ARM after $t s"; fi
+    | if grep -qE '^[0-9-]+ [0-9:]+ [A-Z]+ (STOP: )?K1: |STOP: K1: ' "$L" 2>/dev/null; then echo "K1-STOPPED e206 arm $ARM"; fi
+    | if grep -qE '^[0-9-]+ [0-9:]+ [A-Z]+ CRASH' "$L" 2>/dev/null; then echo "CRASHED e206 arm $ARM"; fi
+    | if grep -qE 'refused, no device opened|stop-path test failed|smoke gate failed|the gate, no launch|would not start' "$L" 2>/dev/null; then echo "GATE-STOPPED e206 arm $ARM"; fi
+(exit 0)
+
+################ 11 (the card lane's first): 'bash W/onelab.sh collect <lane>' (start the copy-back at least 10 minutes before the last end)
+
+################ tools/claims-v3/e206/rb/s22_collect_e206.sh A
+=== [s22_collect_e206] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E206 arm A and naming today; its last start and last end read
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- read on aifoundry3 (the session ended, its manifest written, no session of ours running): ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 'bash -s' < <the script below>
+    | <the runbook's prelude for aifoundry3, 70 lines: printed once at the top of the listing>
+    | T0=1794800000; ARM=A
+    | SD=build/e206/T$T0-$ARM
+    | [ -f "$SD/session.log" ] || { echo "REFUSED: no session directory $SD on $BOX"; exit 3; }
+    | grep -q 'session end' "$SD/session.log" || { echo "REFUSED: $SD has no 'session end' yet: wait (step 10)"; exit 3; }
+    | [ -s "$SD/MANIFEST.sha256" ] || { echo "REFUSED: $SD has no MANIFEST.sha256 yet: wait (step 10)"; exit 3; }
+    | if [ "$(ours_live 'session_e206*.sh')" -gt 0 ]; then echo "REFUSED: a session_e206.sh of ours still runs on $BOX"; exit 3; fi
+    | echo "BOXHOME $HOME"
+    | echo "FILES $(find "$SD" -type f | wc -l | tr -d ' ')"
+--- gate: now + 10 min <= the round's last end (2026-11-16 16:30 PST)
+--- probe aifoundry3, hard-killed at 15 s: ssh -o BatchMode=yes -o ConnectTimeout=10 aifoundry3 true
+--- copy, run on the Intel (the session directory, copied from the box (read-only there)): rsync -a -e 'ssh -o BatchMode=yes -o ConnectTimeout=10' aifoundry3:aifoundry/build/e206/T1794800000-A/ <RB_OUT>/e206-raw/A/T1794800000-A/
+--- desk, run on the Intel (COPY-BACK EXACT (collect_e206.py copy-check)): /usr/bin/python3 -B tools/claims-v3/e206/collect_e206.py copy-check <RB_OUT>/e206-raw/A/T1794800000-A
+[s22_collect_e206] (dry listing; a real run would say:) arm A copied back exact: <RB_OUT>/e206-raw/A/T1794800000-A; step 12 (s23_data_e206.sh A) makes the data directory
+(exit 0)
+
+################ tools/claims-v3/e206/rb/s23_data_e206.sh A
+=== [s23_data_e206] dry listing: nothing below is run
+--- gate: RB_OUT's window.env written today (Pacific) for E206 arm A and naming today; its last start and last end read
+--- desk, run on the Intel (the data directory: COPY-BACK EXACT again, the scrub, the reducer, SHA256SUMS (collect_e206.py data)): /usr/bin/python3 -B tools/claims-v3/e206/collect_e206.py data 2026-11-16 A '<RB_OUT>/e206-raw/A/T<T0>-A' '<the box home>' '<RB_OUT>/box-login-aifoundry3.txt'
+--- gate: no desk path (the lab clone's, RB_OUT's, a Mac home, a session scratch directory) in <lab clone>/docs/reports/data/2026-11-16-e206-matmul-sweep-aifoundry3, and each of them there
+--- read, run on the Intel (the history check after the collection): /usr/bin/python3 -I -B tools/claims-v3/e206/rb/check_history_e206.py tree
+(exit 0)
+
+################ 12 (the card lane's): the README in DATA-README-FORM-e206.md's form; the public-text scan; LAB_QUIET_HOLD_OWNER=<lane> bash W/commit_lab.sh "<subject>" "<body>" <the collected directory> (new files only; on exit 5 or 6 again); then 'bash W/onelab.sh uncollect <lane>', 'bash W/hold.sh remove <lane>', 'bash W/book.sh release aifoundry3 <lane>'
+
+################ tools/claims-v3/e206/rb/s24_score_e206.sh A
+=== [s24_score_e206] dry listing: nothing below is run
+--- read, run on the Intel (the data directory committed (a commit names it)): git -C <lab clone> log --oneline -1 -- docs/reports/data/2026-11-16-e206-matmul-sweep-aifoundry3
+--- read, run on the Intel (the data directory clean): git -C <lab clone> status --short --untracked-files=all -- docs/reports/data/2026-11-16-e206-matmul-sweep-aifoundry3
+--- read, run on the Intel (the data's SHA256SUMS, every entry), in docs/reports/data/2026-11-16-e206-matmul-sweep-aifoundry3: sha256sum -c SHA256SUMS
+--- read, run on the Intel (the history check): /usr/bin/python3 -I -B tools/claims-v3/e206/rb/check_history_e206.py tree
+--- desk, run on the Intel (the frozen scorer on the committed data): /usr/bin/python3 -I -B tools/claims-v3/e206/score_e206.py docs/reports/data/2026-11-16-e206-matmul-sweep-aifoundry3/data-e206.json --out <RB_OUT>/scores-e206-A.json
+(exit 0)
+
+################ E (every path ends here): 'bash W/onelab.sh undesk <lane>' if inside steps 0-2; 'bash W/onelab.sh uncollect <lane>' if between step 11's collect and the push; then 'bash W/hold.sh remove <lane>' and 'bash W/book.sh release aifoundry3 <lane>'
+
+dry listing: 14 steps listed, 0 exited non-zero, 0 box calls

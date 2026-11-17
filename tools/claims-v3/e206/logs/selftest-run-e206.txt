@@ -1,0 +1,55 @@
+selftest_run_e206 (/usr/bin/python3 3.12.3), 2026-11-16 15:11:55 PST; /dev/et*: none; /run/lock entries: 0
+G1: PASS - rc 0; the smoke [True, True, True] then the stop-path test (lines 9 < 10); 3 runs; 21 smoke launches; the 87 C latch tripped nothing (True); 8 s
+G2: PASS - rc 0; identity {'ids': [1], 'minion_mv': 499, 'runtime_cards': [], 'targets': ['/dev/et1_mgmt'], 'why': ''}; sampler ['/dev/et1_mgmt']; 3 runs
+C1: PASS - rc 16; '['DRY config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 0, "power_state_name": "max_power", "minion_mhz": 600, "minion_mv": 523, "fake": true}: not {\'tdp_w\': 0, ']'
+C2: PASS - rc 16; '['DRY config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519, "fake": true}: the card\'s identi']'
+C3: PASS - rc 16; '['DRY config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 519, "fake": true}: the card\'s identi']'
+C4: PASS - rc 16; '['DRY config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 499, "fake": true}: the card\'s identi']'
+C5: PASS - rc 16; '["DRY config start: config read rc 1, no JSON line: not {'tdp_w': 0, 'temp_threshold_c': 65, 'minion_mhz': 600}: the gate, no launch"]'
+C6: PASS - rc 8; the HUNG line True; the hung double: 'the hung double ended by itself after 16.0 s (pid 3708602); nothing killed it'
+C7: PASS - rc 0; the config read whole past its runtime line
+H1: PASS - rc 16; '['DRY refused, no device opened: a holder or a device process (1 holder line(s) of another login)']'
+H2: PASS - rc 16; '['DRY refused, no device opened: a holder or a device process (1 holder line(s) of ours on card 0 (never two of our sessions on aifoundry1; nothing of ours on card 0))']'
+H3: PASS - rc 16; '["DRY refused, no device opened: a holder or a device process (1 holder line(s) of another login on card 0 (the kit's start rule for arm B))"]'
+H4: PASS - rc 16; '['DRY refused, no device opened: a holder or a device process (et-who unreadable (rc 1))']'
+H5: PASS - rc 16; '['DRY refused, no device opened: a holder or a device process (1 other device process(es) of ours)']'
+H6: PASS - rc 16; '['DRY refused, no device opened: a holder or a device process (1 CI job(s))']'
+L1: PASS - rc 16
+S1: PASS - rc 16
+S2: PASS - rc 16; '["DRY the identity read (the sampler running, before the smoke): no holder line of ours on /dev/et1_mgmt (the sampler's) with the sampler running; 1 holder line(s) of ours off card 1; the sampler (p"]'
+S3: PASS - rc 0; sampler starts 2; runs 3
+S4: PASS - rc 0; sampler starts 2; runs 3
+P1: PASS - ok False; {"board": false, "die": false}
+R1: PASS - rc 16; '["DRY smoke p001: rc 1, 7 launches, check wrong, cycles an op 1355.955 (1.00 of F1's point 1358.0); records: 0 runtime line(s) dropped, 0 unparsed, 0 not its command's; the host's card: its own (stderr ['/dev"]'
+R2: PASS - rc 16; '["DRY smoke p001: rc 134, 3 launches, check None, cycles an op None (- of F1's point 1358.0); records: 0 runtime line(s) dropped, 0 unparsed, 0 not its command's; the host's card: its own (stderr ['/dev/et0_o"]'
+R4: PASS - rc 16; '["DRY smoke p001: rc 0, 7 launches, check approx, cycles an op 1355.955 (1.00 of F1's point 1358.0); records: 0 runtime line(s) dropped, 0 unparsed, 0 not its command's; the host's card: its own (stderr ['/de"]'
+R6: PASS - rc 16; '["DRY smoke p001: rc 0, 0 launches, check approx, cycles an op 1355.955 (1.00 of F1's point 1358.0); records: 0 runtime line(s) dropped, 0 unparsed, 7 not its command's; the host's card: its own (stderr ['/de"]'
+R3: PASS - rc 16; the host stopped by the file True
+R5: PASS - rc 0; p001's records {'runtime_lines': 2, 'unparsed': 0, 'mismatched': 0, 'other': 0}
+K0: PASS - rc 16; the K1 line True; no second smoke process
+K1: PASS - rc 0; runs 1
+HG: PASS - rc 8; the run's process hung [True]; the hung double: 'the hung double ended by itself after 14.0 s (pid 3712551); nothing killed it' (19 s after the session began)
+SA: PASS - rc 0; p045's run: t_gemm None, the host's record {'arm': 'gemmL1x2x1', 'minions': 1024, 'shire_mask': '0x1fffffffe', 'type': 'fp16'}; the scorer set it aside [{'mismatch': {'shire_mask': ['0x1fffffffe', '0xffffffff']}, 'n': 2}]
+TO: PASS - rc 0; the tie's process rc [124]; runs 3
+F2: PASS - rc 0; runs 2
+B1: PASS - rc 0; '['DRY STOP: board 71.0 W above 70 W on 3 samples in a row: nothing further started']'; the host ended by the stop file True
+D1: PASS - rc 0; '["DRY STOP: die 70 C (the shires' mean) at or above 70 C: nothing further started"]'; the host ended by the stop file True
+D2: PASS - rc 0; '["DRY STOP: the hottest sensor's latch rose to 88 C (from 87 C this session), at or above 70 C: nothing further started"]'; the host ended by the stop file True
+D3: PASS - rc 0; 72.0 W on every later sample: no stop (True)
+DG: PASS - rc 0; [('001-tie-p001', True, 'None'), ('002-pass1-p045', False, 'the die gate: 61 C after 3 s (gate 54.0 C)'), ('003-pass1-p017', False, 'the die gate: 61 C after 3 s (gate 54.0 C)')]
+CT: PASS - rc 0; [('001-tie-p001', True, 'None'), ('002-pass1-p045', False, 'the card-time rule: 0.1 card-minutes since the fir'), ('121-tie-p001', False, 'the card-time rule: 0.1 card-minutes since the fir')]
+OP: PASS - rc 0; runs 1; the host ended by the stop file True
+CR: PASS - rc 1; '["DRY CRASH: FileNotFoundError: [Errno 2] No such file or directory: '<W>/out/fix-e20"]'
+SF: PASS - rc 0; runs [('001-tie-p001', True), ('002-pass1-p045', True), ('003-pass1-p017', False)]; the stop "the operator's STOP file (a registered stop: nothing further starts)"; 8 s
+S0: PASS - rc 16; '["DRY refused, no device opened: the operator's STOP file is already in the session's folder (a registered stop; the file is kept, never removed)"]'
+DF: PASS - rc 0; most processes on the stand-in management node at once 1; samplers started 1; left [3717529]; the stop 'the sampler would not stop on SIGTERM (pid(s) [3717529], left running, never killed): no second read'; the deaf double: 'the hung double ended by itself after 110.1 s (pid 3717529); nothing killed it'; 98 s
+RT: PASS - arm B rc 16: '["DRY smoke p001: rc 0, 7 launches, check approx, cycles an op 1355.955 (1.00 of F1's point 1358.0); records: 1 runtime line(s) dropped, 0 unparsed, 0 not its command's; the host"]'; arm A (card 0 its own) rc 0, runs 3
+RT2: PASS - rc 0; runs 1; the stop "identity: the runtime named card(s) ['0'] on the host's stdout of 001-tie-p001 ('Opening device N')"
+RTC: PASS - rc 16; '['DRY config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 3, "power_state_name": "low_power", "minion_mhz": 600, "minion_mv": 499, "fake": true}: the card\'s identity: its stdout\'s run']'
+BN: PASS - 95 W on every other sample, no board reading between: arm A [[], [], [], [], ['stop'], [], []], 'board 95.0 W above 70 W on 3 samples in a row'; arm B [[], [], [], [], ['stop'], [], []]
+OR-A: PASS - rc 0; 241 runs of 241, every key and argv the registered (0 differ); 125 s
+OR-B: PASS - rc 0; 229 runs of 229, every key and argv the registered (0 differ); 119 s
+E2-A: PASS - session rc 0, reduce rc 0, score rc 0; 24 point runs; t_gemm worst 1.08e-06; J over idle against the injected watts x seconds worst 0.67% (24 runs of 3 W or more); rules {"C1.A": "PASS", "R0": "PASS", "S1.A": "PASS", "S2.F1.A": "PASS", "S2.F2.A": "FAIL", "S3.F1.A": "PASS", "S3.F2.A": "FAIL", "S4.F1.A": "PASS", "S4.F2.A": "FAIL", "S6.A": "PASS"}
+E2-B: PASS - session rc 0, reduce rc 0, score rc 0; 24 point runs; t_gemm worst 1.08e-06; J over idle against the injected watts x seconds worst 0.47% (24 runs of 3 W or more); rules {"C1.B": "PASS", "R0": "PASS", "S1.B": "PASS", "S2.F1.B": "FAIL", "S2.F2.B": "FAIL", "S3.F1.B": "FAIL", "S3.F2.B": "FAIL", "S4.F1.B": "PASS", "S4.F2.B": "FAIL", "S6.B": "PASS"}
+RF: PASS - rc 2, 2, 16; the real runner: '["refused, no device opened: the box or the build is not the registered one (this host is 'aifoundry2', not arm B's 'aifoundry1'"]'
+SELFTEST-RUN-E206 53 of 53 PASS

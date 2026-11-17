@@ -1,0 +1,46 @@
+desktest_build_e206: 2026-11-16 15:26:25 PST; riscv gcc: riscv64-unknown-elf-gcc () 15.1.0; c++: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; cmake version 3.28.3; python3 Python 3.12.3
+
+== B1 as arm A (hostname aifoundry3): the real build
+COMPILER kernel: riscv64-unknown-elf-gcc () 15.1.0; host: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+KERNEL aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 (the registered ELF aace138c...); KERNEL OK: .text 61315bf6a449c282... the registered; ELF aace138caf8071cc... the registered (E
+HOST 0dfc58c2bf656308f8f8572b63bddbd4cfa4875cc7a77dd788319756ac9d2605
+HOSTCHECK unknown-option: rc 2, 'unknown option --no-such-option': ok
+HOSTCHECK zero-shires: rc 2, 'bad --shires / --per-shire': ok
+HOSTCHECK no-kernel: rc 1, 'cannot read kernel': ok
+HOSTCHECK unknown-test: rc 2, '--test must be fma, tload, gemv, diverge or spin': ok
+ETDEVICES host no; /opt/et/lib/libdeviceLayer.a no; CMakeCache deviceLayer_DIR from /opt/et yes
+RGM-BUILT rc=0
+record: BUILT build_e206.sh aifoundry3 aace138caf80 KERNEL OK notagate 4
+-> B1 as arm A: BUILT, KERNEL OK on the registered ELF, the host's four refusals, the record: PASS
+
+== B2 as arm B (hostname aifoundry1): the ET_DEVICES gate on this desk's stock device layer
+KERNEL aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 (the registered ELF aace138c...); KERNEL OK: .text 61315bf6a449c282... the registered; ELF aace138caf8071cc... the registered (E
+ETDEVICES host no; /opt/et/lib/libdeviceLayer.a no; CMakeCache deviceLayer_DIR from /opt/et yes
+RGM-BUILD-FAILED: ET_DEVICES: the host has no ET_DEVICES (built against a device layer that ignores it: it would open card 0)
+-> B2 as arm B: refused (ET_DEVICES), the record BUILD-FAILED: PASS
+
+== B3 a changed rgm136 source: refused before the build
+HARNESS DIFFERS: tools/claims-v3/e136/rgm136/host/main.cpp: dcff130859054cac (want f9b2279f838ad304)
+RGM-BUILD-FAILED: rgm136's sources are not harness-e206.json's
+-> B3 a changed source: refused, nothing built: PASS
+
+== B4 the kernel gate on aifoundry3's form (.comment rewritten to '(g1b306039a) 15.1.0')
+      [     0]  GCC: (g1b306039a) 15.1.0
+    ELF 0c66189d5d540b4d017553b7bcb65d66f8f0f1569e710268eb17d0c0af04e2e9; KERNEL OK: .text 61315bf6a449c282... the registered; ELF 0c66189d5d540b4d... not the registered (the difference lies in sections the card never loads); its loadable identity 649d40793e45
+-> B4 aifoundry3's form: its ELF not the pin, its .text and loadable identity the pinned: KERNEL OK: PASS
+
+== B5 one byte of .rodata changed; B6 one byte of .text changed
+    .rodata at 0x37a0, .text at 0x1000: one byte flipped in each copy
+    KERNEL FAILED: .text the registered, but the ELF cccddf4cb4d812df8503574a755184250ff1b69b6b12d98cf54431ae89603508 is not the registered and its loadable identity 15617b8dc3cdaaf0c047a5dbbcabfae015b548e94257dba9b888ec516d90c196 is not th
+    KERNEL FAILED: .text sha256 a0fd6e924db1f0a48fa1f391b280c74659e55ba0ee357691e92f23c84eb3c056 is not the registered 61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763 (kernel-e206.json); ELF bd88bbfec04cd6b42f8ced0a46f005d3
+-> B5 a .rodata byte: refused by the identity; B6 a .text byte: refused by the .text: PASS
+
+== B7 on another box (hostname aifoundry2)
+RGM-BUILD-FAILED: the box is 'aifoundry2': E206 builds on aifoundry3 (arm A) and aifoundry1 (arm B) only
+-> B7 another box: refused before anything is built: PASS
+
+== B8 the runner (no --dry) on B1's tree as arm A: its box check
+2026-11-16 15:26:32 PST refused, no device opened: the box or the build is not the registered one (build/ettelem/ettelem: sha256 None, want 16037641ab75bdbe1209f323641e269c9b897468091243173bfaaaf0b21686e2)
+-> B8 the runner's box check: the build, the kernel and the host pass; it stops at the reader's pin, no device opened: PASS
+
+DESKTEST-BUILD-E206 7 of 7 PASS

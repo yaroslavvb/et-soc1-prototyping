@@ -1,0 +1,24 @@
+E206 kit: the quick set, 2026-11-16 15:39:39 PST, /usr/bin/python3 3.12.3, on aifoundry2 (desk; fix-e206's bytes)
+== e206_common.py: E206-COMMON SELF-CHECK PASS
+== e206_ident.py: E206-IDENT SELF-CHECK PASS
+== check_e206.py --check: CHECK PASS
+== check_e206.py --box: HARNESS OK: 46 files at harness-e206.json's sha256
+== the registration's points_e206.py --check: PASS
+== the registration's forecast_e206.py --check: PASS
+== the registration's plan_e206.py --check: PASS
+== the registration's desk/kernel_e206.py --check: PASS
+== score_e206.py --selftest-standins: PASS
+== score_e206.py --selftest-e190: PASS
+== the registration's list: 25 of 25 OK
+== the preflight: dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+== bash -n of every shell file of the kit: 21 files, 0 with a syntax error
+== every line of the kit's code naming 'timeout -k', 'kill -9', SIGKILL or .kill() (a reader checks each is prose: a comment, a docstring or a message; no call):
+   e206_common.py:35:    `timeout 10 <host> <the point's host_args> --kernel <ELF> --stop-file <STOP>`, never `timeout -k`;
+   plan_e206.py:11:`--seconds 6 --budget 7.5` under a plain `timeout 10` (never -k: no SIGKILL is sent or arranged to a device process), the 4 s tail. The planned
+   run_e206.py:5:  - NO SIGKILL ANYWHERE (W/out/orch/kill-rule.txt; AGENT.md "never kill -9"): every process this runner starts that can open a device is
+   run_e206.py:402:        """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s; each wait ends CLOSE_S / 2 before the end bound but lasts
+   run_e206.py:421:            self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+   run_e206.py:569:                 f"at {C.HOST_TIMEOUT_S} s: nothing kills it (no SIGKILL, ever); the stop file is touched, nothing further starts and no "
+   build_e206.sh:6:#   2. cmake against the box's /opt/et into build/e206rgm (nice 10, -j2), each call under a plain `timeout 300` (never -k: no SIGKILL
+   rb/rb_e206.sh:7:# runs under the runner's plain `timeout 10` and nothing of E206's ever sends it a SIGKILL), and changes only:
+== calls that could send a kill in the kit's own code (subprocess .kill(), os.kill, signal.SIGKILL, 'kill -9', 'timeout -k' outside prose): 0
