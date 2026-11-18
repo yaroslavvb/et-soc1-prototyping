@@ -22,7 +22,7 @@ REPO_URL = "https://github.com/yaroslavvb/et-soc1-prototyping"
 HERE = "docs/reports/data/2026-11-17-matmul-model"
 TITLE = "The lab's matmul model, MM1"
 DESC = ("MM1, the lab's matmul model for the ET-SoC-1: a GEMM's cycles, joules and transistor switches from its sizes, format and data, "
-        "tested blind on five card days, with the timing simulation and the switch count checked against the card.")
+        "tested blind on five card days, with the timing simulation checked against the card and the switch count checked through energy.")
 
 CSS = """
 :root{--ink:#1d1d1b;--ink2:#52514e;--muted:#6f6e69;--rule:#e1e0d9;--acc:#2a78d6;--bg:#ffffff;--soft:#f6f6f4;color-scheme:light}

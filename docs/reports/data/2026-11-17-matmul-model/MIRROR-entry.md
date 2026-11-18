@@ -4,7 +4,7 @@
 for one row a page in its mirrored tables, with the space's uuid from `spacesheep list --json` and the page's file here; the uuid exists only
 after the first deploy, so the row waits in this file, ready to paste. The page is not deployed by this commit.*
 
-**The page:** `docs/reports/2026-11-17-matmul-model/index.html` (sha256 `663f805a9d757aecedd403f27cf7f2142042a5a4fd784026471a8c15d690b5d9`), one self-contained file built by
+**The page:** `docs/reports/2026-11-17-matmul-model/index.html` (sha256 `fe0b6eebd65db4ffaa23ca716ac5f684680f0bd589b4915dd5e8aea057b99401`), one self-contained file built by
 [`build_page.py`](build_page.py) from this folder's `README.md` and figures (`build_page.py --check` exits 0 while it equals what the
 build writes). The proposed slug is `et-soc1-matmul-model`, public, as MIRROR.md's rule for a new report page asks.
 

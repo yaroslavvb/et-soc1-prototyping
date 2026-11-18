@@ -54,6 +54,8 @@ D210 = "docs/reports/data/2026-11-17-e210-switch-test-aifoundry3/README.md"
 N210 = "docs/reports/data/2026-11-17-e210-switch-test-aifoundry3/README.md.dated-note-1.md"
 D211 = "docs/reports/data/2026-11-17-e211-second-kernel-aifoundry3/README.md"
 S211 = "docs/reports/data/2026-11-17-e211-second-kernel-aifoundry3/scores-e211-A.txt"
+S211J = "docs/reports/data/2026-11-17-e211-second-kernel-aifoundry3/scores-e211-A.json"
+S207J = "docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/scores-e207-A.json"
 DA = "docs/reports/data/2026-11-16-e206-matmul-sweep-aifoundry3/README.md"
 DB = "docs/reports/data/2026-11-17-e206-matmul-sweep-aifoundry1-c1/README.md"
 SA = "docs/reports/data/2026-11-16-e206-matmul-sweep-aifoundry3/scores-e206-A.json"
@@ -103,7 +105,14 @@ def checks(cfg):
     add("against **17.1 to 23.0%**", ("N", ["blind_summary.F1_cyc_min", "blind_summary.F1_cyc_max"], "{:.1f}", ["17.1", "23.0"]))
     add("**18.4 to 31.0%** for F1", ("N", ["blind_summary.F1_jo3_min", "blind_summary.F1_jo3_max"], "{:.1f}", ["18.4", "31.0"]))
     add("**52.7 to 82.0%** for F2", ("N", ["blind_summary.F2_jo3_min", "blind_summary.F2_jo3_max"], "{:.1f}", ["52.7", "82.0"]))
-    add("MM1's cycles error rose from 3-4% on the old kernel to 8-9% on the new one", ("F", "e211_span", ["3-4", "8-9"]))
+    add("MM1's cycles error rose from 3-4% on the old kernel to 8-9% on the variant", ("F", "e211_span", ["3-4", "8-9"]))
+    # report-fix (Q215): the summary's new or reworded numbers
+    add("E211's controls show the compiled code alone moves the cycles by 3-6%", ("F", "e211_controls_span", ["3-6"]))
+    add("the registered comparison was UNDECIDED (5 cases)", ("T", N210, ["**UNDECIDED** (4 to 0, 1 tie)", "R2 forecasts 5 test cases"], ["5"]))
+    add("for E207's four such points and passed, -6.0% to +7.1%", ("F", "e207_b49_b52_span", ["-6.0", "+7.1"]))
+    add("MM1-v2 prices no energy for a tile kind without a resident price on that card", ("T", V2S, "Its energy is NOT FORECAST at b49-b52 (the blind4 and blind3 kinds)", []))
+    add("*Unread*: scored on data that existed before the forecast but that the model never read", ("T", V2, "*Unread*: scored on data that existed but that the model never read", []),
+        "the lab's own definition (MM1-v2's README)")
     add("The low end in cycles, 4.7%, is arm B", ("N", f"{b}.E206B.models.v1.cyc_mean.rms_pct", "{:.1f}", ["4.7"]))
     add("MM1-v2 read 5.0% and MM1-v1 5.9%", ("N", [f"{b}.E207.models.v2.cyc_mean.rms_pct", f"{b}.E207.models.v1.cyc_mean.rms_pct"], "{:.1f}", ["5.0", "5.9"]))
     add("to **1.9%** of the data-dependent power", ("N", "switch.routes.R1.rms_over_D_pct", "{:.1f}", ["1.9"]))
@@ -227,10 +236,10 @@ def checks(cfg):
         pre = {"2d1413f5": "Mon ", "eb2f7ac2": "Mon ", "e35a06cb": "Mon ", "25d2e74e": "Mon ", "4e518735": "Tue ", "3ca4b717": "Tue ", "1393a649": "Tue ",
                "89aa0c94": "Tue "}.get(c_, "")
         add(f"`{c_}` ({pre}{t_})", ("GT", c_, t_))
-    add("| Mon 16 Nov 16:53:22 |", ("T", DA, "session 16:53:22-18:22:16 PST", []))
-    add("| Tue 17 Nov 00:13:26 |", ("T", DB, "session 00:13:26-01:38:14 PST", []))
-    add("| Tue 17 Nov 07:06:44 |", ("T", D207, "session 07:06:44-07:53:54 PST", []))
-    add("| Tue 17 Nov 10:30:44 |", ("T", D209, "T0 2026-11-17 10:30:44 PST", []))
+    add("| Mon 16 Nov 16:53:08 |", ("T", DA, "step 7's config read at 16:53:08, reported apart", []))
+    add("| Tue 17 Nov 00:13:12 |", ("T", DB, "Step 7's config read at 00:13:12 is reported apart from the session's card time", []))
+    add("| Tue 17 Nov 07:06:30 |", ("T", D207, "step 7's config read at 07:06:30, reported apart", []))
+    add("| Tue 17 Nov 10:30:44 |", ("T", D209, "the day's first card command, stamped 10:30:44 PST", []))
     add("| Tue 17 Nov 13:21:20 |", ("T", V2S11, "| **E211's first card command** (step 7's config read, read only) | **13:21:20** |", []))
     # ---------------------------------------------------------------- 4: the big table, every cell
     for t_, mods in (("E206A", ("v0", "F1", "F2")), ("E206B", ("v0", "v1", "F1", "F2")), ("E207", ("v1", "v2", "F1", "F2")),
@@ -274,6 +283,19 @@ def checks(cfg):
                                              ["24", "6.2", "7.1"]))
     add("On the 85 points never run on card 1, MM1-v1 read 4.7% in cycles and 15.5% in joules over idle (n 77)",
         ("T", NB, "| never run on card 1 before arm B | 10.0 / 4.7 / 18.5 (85) | 16.4 / 15.5 (77) / 23.2 (85) / 82.6 (81) |", ["85", "4.7", "15.5", "77"]))
+    # report-fix (Q215): the same subset rebuilt by make_figures.py (arm B's README, item 8's list), its committed figures first, then at >= 3 W
+    add("XREF: never on card 1 before arm B, rebuilt: 85 points, MM1-v1 4.7 in cycles, 15.5 (n 77) in J over idle on every point",
+        ("N", [f"{b}.E206B.subsets.never_card1_before_armB.n", f"{b}.E206B.subsets.never_card1_before_armB.models.v1.cyc_mean.rms_pct",
+               f"{b}.E206B.subsets.never_card1_before_armB.models.v1.jo_g.rms_pct", f"{b}.E206B.subsets.never_card1_before_armB.models.v1.jo_g.n"],
+         ["{:d}", "{:.1f}", "{:.1f}", "{:d}"], ["85", "4.7", "15.5", "77"]), "equals arm B's dated note 1 (the check above)")
+    add("its joules over idle read 12.7% (n 71; desk)", ("N", [f"{b}.E206B.subsets.never_card1_before_armB.models.v1.jo_g3.rms_pct",
+                                                            f"{b}.E206B.subsets.never_card1_before_armB.models.v1.jo_g3.n"], ["{:.1f}", "{:d}"], ["12.7", "71"]))
+    add("with the seconds forecast (F1's), it read 43.7% on E209 (82.2% as the scorer's rms of ln: it under-forecasts) and 30.8% on E211",
+        ("N", [f"{b}.E209.models.F2.jo_f3.rms_pct", f"{b}.E209.registered_summaries_ln.F2 J over idle.rms_ln_pct", f"{b}.E211.sets.rgm211_12.F2.jo_f3.rms_pct"],
+         "{:.1f}", ["43.7", "82.2", "30.8"]))
+    add("(E209's data README, item 6)", ("T", D209, ["6. **(e) The never-run search, repeated**", "E206 arms A and B\n   (e30's shape; aifoundry3 card 0 and aifoundry1 card 1)"],
+                                         ["6"]), "e30 (gemmL2x8x4 int8) = E206's p016 (points-e206.json)")
+    add("leaves E206's 119 points out as one fold", ("T", V2, "| LOEO, E206 (its fold, 119) |", ["119"]))
     add("MM1-v0 already carried an awake power of 3.660 W for it", ("T", V0, "aifoundry1 card 1 3.660 W", ["0", "3.660"]))
     add("its 53 points never ran on any card before MM1-v1 and MM1-v2 were frozen", ("T", V1, "53 points on aifoundry3 card 0, every one never run anywhere",
                                                                                      ["53"]))
@@ -302,7 +324,8 @@ def checks(cfg):
                                                            "(sign test p 4.4e-12: MM1-v1 BETTER; families 8/0/0: MM1-v1 BETTER)"], ["7", "0", "8"]))
     add("closer at 24 cases against 18, p 0.44", ("T", V2S, "| MM1-v2 vs MM1-v1 | cycles, the wall | 24 | 18 | 5 | 0.441 | NOT DECIDED |", ["24", "18", "0.44"]))
     add("(30 against 11, p 0.0043)", ("T", V2S, "| MM1-v2 vs MM1-v1 | J at rest, t forecast | 30 | 11 | 8 | 0.00432 | MM1-v2 BETTER |", ["30", "11", "0.0043"]))
-    add("but the family-level check does not confirm it (TOO FEW; NOT DECIDED)", ("T", V2S, "but the family-level check does not confirm it (TOO FEW; NOT DECIDED)", []))
+    add("but the family-level check does not confirm it (families 5 / 0 / 3: NOT DECIDED)",
+        ("T", V2S, "| MM1-v2 vs MM1-v1 | J at rest, t forecast | 30 | 11 | 8 | 0.00432 | MM1-v2 BETTER | +0.0065 | 5 / 0 / 3: NOT DECIDED |", ["5", "0", "3"]))
     # E209
     add("62 of 62 runs in 26.16 card-minutes", ("T", D209, ["| runs | 62 of 62 ran; not run: none |", "**26.16 card-minutes**"], ["62", "26.16"]))
     add("first card command 10:30:44 PST, 8 h 46 min after", ("T", N15, "MM1-v2's forecasts (`3ca4b717`) precede T0 by 8 h 46 min", ["8", "46"]))
@@ -359,6 +382,8 @@ def checks(cfg):
     add("(the two controls differ by 0.031 in ln)", ("T", V2S11, "the two controls differ by 0.031 in ln", ["0.031"]))
     add("W1, the ratio rule, reads FAIL 5/10", ("T", cfg["S211"], "W1: FAIL (5/10)", ["1", "5", "10"]), cfg["S211_note"])
     add("MM1 BETTER (10/1/1, p 0.0117)", ("R", cfg["S211"], "H5: MM1 BETTER (10/1/1, p 0.01171875)", "0.01171875", "{:.4f}", "0.0117"), cfg["S211_note"])
+    add('W2 (the direction) PASS, with the same words, "the controls did not pass: not a model test"', ("F", "e211_w2_caveat", []),
+        "scores-e211-A.json rules.W2: verdict and caveat")
     add("(frozen 5 h 8 min before the first card command;", ("T", V2S11, "5 h 8 min 23 s before E211's first card command", ["5", "8"]))
     add("its wall cycles read **8.9%** rms (+4.0), MM1-v1 8.1%, F1 14.5%, NC 23.5%",
         ("N", [f"{b}.E211.sets.rgm211_12.v2.cyc_wall.rms_pct", f"{b}.E211.sets.rgm211_12.v2.cyc_wall.bias_pct", f"{b}.E211.sets.rgm211_12.v1.cyc_wall.rms_pct",
@@ -384,6 +409,13 @@ def checks(cfg):
     add("XREF: 85 of 105 / 99 of 105 (committed)", ("T", NB, "| J over idle, given the measured seconds | 83/105 | 85/105 | 66/105 | 101/105 | 99/105 |", []))
     add("MM1-v1 was closer than MM1-v0 at 69 of 113 in cycles", ("N", [f"{b}.E206B.h2h.v1<v0:cyc_mean.closer", f"{b}.E206B.h2h.v1<v0:cyc_mean.n"], "{:d}",
                                                                  ["69", "113"]))
+    # report-fix (Q215): the same head-to-head joule counts on E207's footing (points of 3 W and above)
+    add("On E207's footing, the points of 3 W and above: closer than F1 at 91 of 101 and than F2 at 99 of 101",
+        ("N", [f"{b}.E206A.h2h.v0<F1:jo_g3.closer", f"{b}.E206A.h2h.v0<F1:jo_g3.n", f"{b}.E206A.h2h.v0<F2:jo_g3.closer", f"{b}.E206A.h2h.v0<F2:jo_g3.n"],
+         "{:d}", ["91", "101", "99", "101"]))
+    add("At the points of 3 W and above: closer than F1 at 81 of 98 and than F2 at 95 of 98 (desk)",
+        ("N", [f"{b}.E206B.h2h.v1<F1:jo_g3.closer", f"{b}.E206B.h2h.v1<F1:jo_g3.n", f"{b}.E206B.h2h.v1<F2:jo_g3.closer", f"{b}.E206B.h2h.v1<F2:jo_g3.n"],
+         "{:d}", ["81", "98", "95", "98"]))
     # the repeat floor
     add("The same 85-run schedule", ("T", REPR, "RAN FULL (85 of 85 runs)", ["85"]))
     add("repeated to **0.41%** rms in cycles an op", ("N", "repeat.E208.cyc_op_mean.rms_pct", "{:.2f}", ["0.41"]))
@@ -399,7 +431,14 @@ def checks(cfg):
     # the separate session's sweeps and seals
     add("rgm136 unchanged, 74 arms on three cards", ("T", E208, "over 74 arms", ["74"]))
     add("221 arms and an anchor in 10 sessions", ("T", E212, "over 221 arms and an anchor in 10 sessions", ["221", "10"]))
-    add("is in progress: seven of ten sessions are committed", ("F", "e212_sessions", ["seven"]))
+    add("is in progress: as of `724e8f39`, nine of its ten sessions are committed (`d2ece7e8`, `5601b6a7`, `7726e127`, `a90105da`, `7dfba40b`, "
+        "`ebe552fe`, `d8de38b0`, `58f01105`, `724e8f39`)",
+        ("F", "e212_sessions_at", ["nine", "d2ece7e8", "5601b6a7", "7726e127", "a90105da", "7dfba40b", "ebe552fe", "d8de38b0", "58f01105", "724e8f39"]),
+        "the E212 data folders in the tree of 724e8f39, each with the commit that added it")
+    add("`8f2df483`, was sealed at 12:58:15 PST, 3 min 50 s before the first session it covers (a1c1-S2) made its first card command",
+        ("T", "docs/reports/data/2026-11-17-e212-mmsweep2-a1c1-S2/README.md",
+         "was sealed by #11.7.1 (12:58:15 PST, sha256 `8f2df48375701d3b6304e233d3d8c09e2ba9ee85ef431c9faabdc258094d010d`), 3 min 50 s before this "
+         "session's first card command", ["12:58:15", "3", "50"]))
     add("XREF: every sealed sha256 in its registration", ("F", "seals", []), "each sha256 prefix of the table found in the file that registers it")
     # ---------------------------------------------------------------- 5
     add("nine fp32 operand patterns never run in a GEMM, at two shapes", ("T", E210, "for nine fp32 operand patterns never run in a GEMM", []))
@@ -435,6 +474,11 @@ def checks(cfg):
                                                                        ["10.13", "9.15"]))
     add("and MM1-v1's 14.2-42.1%", ("T", V1, "| W over idle, LOCO aifoundry3 / card 1 / aifoundry2 | 21.2% / 14.2% / 42.1% |", ["14.2", "42.1"]))
     add("missed the int8 saving by 6 points", ("F", "kinds_gap", ["6"]))
+    # report-fix (Q215): MM1-v1 on E207's b49-b52 (the verification's medium finding)
+    add("E207's real and designed tiles b49-b52 were NOT FORECAST in energy by MM1-v2", ("T", V2S, "Its energy is NOT FORECAST at b49-b52 (the blind4 and blind3 kinds)", []))
+    add('("blind4: M6; blind3: M5"', ("T", V1, "(blind4: M6; blind3: M5)", []), "MM1-v1's rule for a kind with no ledger row")
+    add("given the measured seconds read -5.4%, -6.0%, +4.2% and +7.1% at b49-b52, with E1 and E2 PASS at all four",
+        ("F", "e207_b49_b52", ["-5.4", "-6.0", "+4.2", "+7.1"]), "scores-e207-A.json points b49-b52: MM1-v1's given J over idle / measured - 1; rules E1, E2")
     add("On arm B's 14 all-zero points", ("N", f"{b}.E206B.classes.data kind: zeros.n", "{:d}", ["14"]))
     add("joules over idle **27.8%** rms (**+25.7%** bias)", ("N", [f"{b}.E206B.classes.data kind: zeros.jo_g.v1.rms_pct",
                                                                    f"{b}.E206B.classes.data kind: zeros.jo_g.v1.bias_pct"], "{:.1f}", ["27.8", "25.7"]))
@@ -461,7 +505,8 @@ def checks(cfg):
     add("int8 at one K block ran 1.158 times MM1-v2's wall cycles on E209 (e07)", ("T", N15, "measured **x1.158**", ["1.158"]))
     add("and -14.0% on E207 (n01)", ("T", V2S, "against MM1-v2's 741.2 (-14.0%", ["14.0"]))
     add("-18.4% (E207's n02, int8) and -13.6% (n03, fp32)", ("T", V2S, "n02 (int8) -18.4% for MM1-v2 (MM1-v1 -19.9%) and n03 (fp32) -13.6%", ["18.4", "13.6"]))
-    add("int8 inside the L3 ran 6.3 to 6.6% more cycles than fp32", ("T", V2S, "the card ran 6.3-6.6% more cycles an op on the wall", ["6.3", "6.6"]))
+    add("int8 inside the L3 ran 6.3 to 6.5% more cycles than fp32", ("F", "e207_int8_l3_span", ["6.3", "6.5"]),
+        "scores-e207-A.json cases: measured wall cycles, int8 / fp32 - 1, at 1x3x2, 2x3x2, 3x2x2 and 1x4x3 (score-e207.md rounds the top to 6.6)")
     add("rgm211's controls ran 3-6% fast, and MM1's cycles error there was 8-9%", ("F", "e211_controls_and_hi", ["3-6", "8-9"]))
     add("(e44, 788.9 MHz measured against 764.1 forecast)", ("T", N15, "it measured 788.9 MHz against the forecast's 764.1", ["788.9", "764.1"]))
     add("two of 55 runs whose capped state MM1-v2 read wrong", ("T", N15, "MM1-v2's capped forecast agrees with 53 of 55 kept runs'", ["55"]), "55 - 53 = 2")
@@ -692,11 +737,45 @@ def run_f(name, repo, N):
         if r["R0"]["verdict"] != "PASS":
             bad.append("R0")
         return ([] if not bad else ["MISMATCH " + ",".join(bad)]), "scored-e209.json rules and head_to_head"
-    if name == "e212_sessions":
-        d = os.path.join(repo, "docs/reports/data")
-        n = sorted(x for x in os.listdir(d) if x.startswith("2026-11-17-e212-mmsweep2-"))
+    if name == "e212_sessions_at":
+        # report-fix (Q215): the count dated at a named commit, so that the check reads the same at any later HEAD
+        at = "724e8f39"
+        ls = subprocess.run(["git", "-C", repo, "ls-tree", "--name-only", at, "docs/reports/data/"], capture_output=True, text=True, timeout=60).stdout.split()
+        dirs = [x for x in ls if x.startswith("docs/reports/data/2026-11-17-e212-mmsweep2-")]
+        added = []
+        for d_ in dirs:
+            lg = subprocess.run(["git", "-C", repo, "log", "--diff-filter=A", "--format=%ct %h", "--abbrev=8", at, "--", d_], capture_output=True, text=True,
+                                timeout=60).stdout.split("\n")
+            lg = [x.split() for x in lg if x.strip()]
+            t_, h_ = min((int(x[0]), x[1]) for x in lg)
+            added.append((t_, h_[:8], d_.rsplit("-", 2)[-2] + "-" + d_.rsplit("-", 1)[-1]))
+        added.sort()
         words = {5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten"}
-        return [words.get(len(n), str(len(n)))], "docs/reports/data/2026-11-17-e212-mmsweep2-* (" + ", ".join(x.rsplit("-", 2)[-2] + "-" + x.rsplit("-", 1)[-1] for x in n) + ")"
+        return [words.get(len(dirs), str(len(dirs)))] + [h for _, h, _ in added], (f"git ls-tree {at} docs/reports/data/ (" +
+                                                                                    ", ".join(f"{s} {h}" for _, h, s in added) + ")")
+    if name in ("e207_b49_b52", "e207_b49_b52_span"):
+        # report-fix (Q215): MM1-v1's blind J over idle given the measured seconds at E207's four kinds points, from the frozen scorer's output
+        S = json.load(open(os.path.join(repo, S207J)))
+        errs, ok = [], True
+        for pid in ("b49", "b50", "b51", "b52"):
+            p = S["points"][pid]
+            errs.append(p["mm1_v1"]["given"]["J_over"] / p["measured"]["j_over"] - 1.0)
+            ok &= all(S["rules"][r]["cells"][pid] == "PASS" for r in ("E1", "E2"))
+        if not ok:
+            return ["E1 or E2 NOT PASS at b49-b52"], S207J
+        out = [f"{100 * e:+.1f}" for e in errs]
+        if name == "e207_b49_b52":
+            return out, f"{S207J} points b49-b52 (mm1_v1.given.J_over / measured.j_over - 1; E1 and E2 cells PASS)"
+        return [f"{100 * min(errs):+.1f}", f"{100 * max(errs):+.1f}"], f"{S207J} points b49-b52"
+    if name == "e207_int8_l3_span":
+        C = json.load(open(os.path.join(repo, S207J)))["cases"]
+        r = [100 * (C[f"{sh}|int8|0xffffffff"]["measured"]["cyc_wall"] / C[f"{sh}|fp32|0xffffffff"]["measured"]["cyc_wall"] - 1.0)
+             for sh in ("gemmL1x3x2", "gemmL2x3x2", "gemmL3x2x2", "gemmL1x4x3")]
+        return [f"{min(r):.1f}", f"{max(r):.1f}"], f"{S207J} cases ({', '.join(f'{x:.3f}' for x in r)}%)"
+    if name == "e211_w2_caveat":
+        w2 = json.load(open(os.path.join(repo, S211J)))["rules"]["W2"]
+        good = w2.get("verdict") == "PASS" and w2.get("caveat") == "the controls did not pass: not a model test"
+        return ([] if good else [f"MISMATCH {w2.get('verdict')} / {w2.get('caveat')}"]), f"{S211J} rules.W2"
     if name == "e42_margin":
         r = json.load(open(os.path.join(repo, N15J)))["C_margins_POST_HOC"]["rules"]["T2m"]
         band, v = r["band"], r["failing"]["gemmL6x6x6|int8|0xf000"]

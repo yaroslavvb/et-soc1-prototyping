@@ -5,12 +5,15 @@ command, no simulator run. It finishes the draft of round Q209 with every findin
 filled in. Every number is traced to its committed source and label in the section that gives it;
 [`readme_numbers.py`](readme_numbers.py) finds each one in its committed file and writes [`readme-numbers.txt`](readme-numbers.txt). The figures
 and every desk number are computed from committed files only by [`make_figures.py`](make_figures.py), which writes [`numbers.json`](numbers.json).
-Every desk number: `/usr/bin/python3` 3.12.3, run `-I -B`, at GitHub main `8f44b380`.*
+Every desk number: `/usr/bin/python3` 3.12.3, run `-I -B`, at GitHub main `8f44b380`. Corrected the same day by the round's lane
+`report-fix` (Q215) after the report's verification, at GitHub main `724e8f39` with the same pinned inputs; what changed is in the changelog
+at the end.*
 
 **Labels.** *Measured*: a card's committed reading. *Registered*: a forecast or a rule committed before its data existed. *Blind*: scored on
 data that did not exist when the forecast was committed and pushed. *Shape-blind*: blind, and no point had run on any card before the freeze.
 *Card-transfer*: blind at shapes the model was fitted on at another card, run on this card for the first time. *Held out*: left out of a fit (one
-experiment or one card at a time); held out is not blind. *Post hoc*: read or fitted after the data. *Desk*: arithmetic on committed files
+experiment or one card at a time); held out is not blind. *Unread*: scored on data that existed before the forecast but that the model
+never read. *Post hoc*: read or fitted after the data. *Desk*: arithmetic on committed files
 (this folder's scripts, or the lane named). *REPORTED*: a figure beside the registered rules that decides nothing. *NOT RUN*: a check nobody
 ran. Error = forecast / measured - 1; "rms (bias)" is the quadratic mean and the mean of that error, in %.
 
@@ -27,31 +30,42 @@ The joules compare models and cards with each other, not with another lab's mete
 
 ## On one screen
 
-- **The question** (section 1): a model that predicts a matmul's clock cycles, energy and transistor switches from the matrix sizes and the
-  operations, and a check of how well the timing simulation and the energy match the card.
+**In short.** The lab built MM1, a model that predicts how many clock cycles and joules a matrix multiplication (a GEMM) takes on an
+ET-SoC-1 card, and how many transistors switch, from the matrix sizes, the number format, the data and the card; on the way it checked the
+lab's timing simulation and energy models against the cards (section 1 has the owner's question). Frozen before each blind test and scored on
+GEMMs mostly new to the card, MM1's errors were well below those of the lab's earlier routes, but still several times larger than the card's
+own run-to-run scatter. *E206 to E212 are the lab's numbered experiments (E208 and E212 are a separate modelling session's sweeps); MM1-v0,
+MM1-v1 and MM1-v2 are successive versions of the model, each frozen before a test; F1 is the lab's earlier GEMM route and F2 the lab's
+energy ledger.*
+
 - **The model** (section 2): MM1 takes M, N and K on the lab's GEMM kernel's grid, the number format, the data kind, the shire mask, the card
   and its clock, and gives cycles, seconds, joules over idle and with the card at rest, and transistor switches. It prices each tile op by
   where its 192 cache lines come from: the L2, the L3, or fresh from DRAM.
 - **The timing simulation** (section 3): the lab's instruction-level simulator has no clock: on 265 blind GEMM points the card took 8 to 34
   times the simulator's step count (median 24; the counts come from a law fitted to 11 simulator runs). The RTL bench of the tensor unit is
-  exact for the tensor op with its operands resident (12 micro-loop configurations, 18 registered readings within 2 cycles, one card). The
-  gap is the memory path: the tensor unit's own op filled 17 to 99% of each op (median 39%).
+  exact for the tensor op with its operands resident (12 micro-loop configurations, 18 registered readings within 2 cycles, one card). MM1
+  reads the gap as the memory path: the tensor unit's own op filled 17 to 99% of each op (median 39%); but E211's controls show the compiled
+  code alone moves the cycles by 3-6%.
 - **Blind** (section 4): five tests on three cards, every forecast committed before the test's first card command. The newest MM1 frozen
-  before each test read **4.7 to 9.5%** rms in cycles and **3.2 to 11.9%** in joules over idle (points of 3 W and above), against **17.1 to
-  23.0%** and **18.4 to 31.0%** for F1, the lab's earlier GEMM route, and **52.7 to 82.0%** for F2, the energy ledger. The low end in cycles,
-  4.7%, is arm B, a card-transfer test; on E207, the one test whose every point was new to every card, MM1-v2 read 5.0% and MM1-v1 5.9%, and
-  MM1-v1 passed every registered rule and beat F1 and F2 on all four head-to-head rules. On aifoundry2's governed card (E209) MM1-v2 passed
-  every band and beat F1 and F2; its registered win over MM1-v1 rests on the mean and is not confirmed case by case. On a second kernel (E211)
-  MM1-v1 passed its absolute bands, the ratio rule could not be read (its controls failed), and MM1's cycles error rose from 3-4% on the old
-  kernel to 8-9% on the new one.
-- **The switch count** (section 5): E210 changed only the data and found the card's energy follows MM1's counted switches above an ungated
-  base to **1.9%** of the data-dependent power, against 16 to 47% for the bit-flip prices and 20% for the nearest measured kind.
+  before each test read **4.7 to 9.5%** rms in cycles and **3.2 to 11.9%** in joules over idle (given the measured seconds, at the points of
+  3 W and above), against **17.1 to 23.0%** and **18.4 to 31.0%** for F1, the lab's earlier GEMM route, and **52.7 to 82.0%** for F2, the
+  energy ledger, on the three tests where F2 has a given-seconds figure (E206's arms and E207; the note under figure 3 gives E209 and E211).
+  The low end in cycles, 4.7%, is arm B, a card-transfer test; on E207, the one test whose every point was new to every card, MM1-v2 read
+  5.0% and MM1-v1 5.9%, and MM1-v1 passed every registered rule and beat F1 and F2 on all four head-to-head rules. On aifoundry2's governed
+  card (E209) MM1-v2 passed every band and beat F1 and F2; its registered win over MM1-v1 rests on the mean and is not confirmed case by
+  case. On a variant of the kernel (E211: the same kernel with its C-block walk swapped, recompiled) MM1-v1 passed its absolute bands, the
+  ratio rule could not be read (its controls failed), and MM1's cycles error rose from 3-4% on the old kernel to 8-9% on the variant.
+- **The switch count, through energy** (section 5): E210 changed only the data (nine fp32 operand patterns at two shapes on one card) and
+  found the card's energy follows the signal-net part of MM1's counted switches above an ungated base, with one constant per shape, to
+  **1.9%** of the data-dependent power (REPORTED), against 16 to 47% for the bit-flip prices and 20% for the nearest measured kind; against
+  MM1-v1's own kind term the registered comparison was UNDECIDED (5 cases).
 - **The card repeats itself** to about **0.4%** in cycles and **1.2%** in joules over idle, so model error, not noise, dominates.
 - **What the blind tests do not show** (section 6): MM1 has no operations input: it covers one kernel (rgm136) on its grid, with no epilogue;
-  every measured GEMM is warm and repeated; its energy needs a measured GEMM anchor on each card; it prices no energy for a tile kind it has not
-  seen; nothing measures transistor switches (E210 tests their signal-net part through energy only).
-- **Still wrong** (section 6): all-zero data on aifoundry1 card 1, narrow shire masks, the stride step at NB 8, int8 at one K block, and a
-  second kernel's code path.
+  every measured GEMM is warm and repeated; its energy needs a measured GEMM anchor on each card; MM1-v2 prices no energy for a tile kind
+  without a resident price on that card (MM1-v1 borrowed frozen per-tile predictions for E207's four such points and passed, -6.0% to
+  +7.1%); nothing measures transistor switches (E210 tests their signal-net part through energy only).
+- **Still wrong** (section 6): all-zero data on aifoundry1 card 1, narrow shire masks, the stride step at NB 8, int8 at one K block, and the
+  kernel variant's code path.
 
 ## 1. The question
 
@@ -170,19 +184,21 @@ So four numbers describe the fp32 tensor op: **546** (E101's resident loop, the 
 read from E101's loop with B through the tile buffer (measured on the card, not the RTL bench; [`v0/README.md`](../../../../tools/matmul/mm1/v0/README.md)
 section 6). In int8 the same roles are taken by 318, 292 and 270.
 
-**The gap is the memory path.** Over the floor with B through the tile buffer (529 or 270 cycles), the tensor unit's own op filled **17 to
-99%** of each op on the card, **median 39%**, over **285 blind points** (desk, from the same committed points). Over E206's registered floor
+**MM1 reads the gap as the memory path.** Over the floor with B through the tile buffer (529 or 270 cycles), the tensor unit's own op filled
+**17 to 99%** of each op on the card, **median 39%**, over **285 blind points** (desk, from the same committed points). Over E206's registered floor
 (546 or 318 cycles, the scorers' registered readings) it filled 21 to 101%, median 40%, over 265 points; 12 of them ran faster than that
 resident floor. Near 99% sit the ops whose tiles stay in the L2; the lowest are int8 GEMMs with a long K, fed from DRAM. No simulator the lab
 has models the memory path (a counted simulator run "gives instructions and bytes, never the level that served a line",
-[`v0/README.md`](../../../../tools/matmul/mm1/v0/README.md) section 3); that is the part MM1's line map and stream terms fit.
+[`v0/README.md`](../../../../tools/matmul/mm1/v0/README.md) section 3); that is the part MM1's line map and stream terms fit. It is MM1's
+reading, not a measurement of the memory path: the code path moves the cycles too (E211's controls, above).
 
 **Today's energy models, before MM1** (blind, section 4's table). F1, the lab's earlier GEMM route (E190's, widened: seconds from a line-cost
 law at the point's lines, watts from E136's power law), read joules over idle **18.4 to 31.0%** rms at the points of 3 W and above. Its miss
 is a scale, not a shape: about a quarter low in every family on E207 ([`v2/score-e207.md`](../../../../tools/matmul/mm1/v2/score-e207.md)
 section 6, `030ffa42`), and it reads a shire subset's lines from E206's masked map, which lost to MM1-v1's full-chip lines on every fold
 ([`v1/README.md`](../../../../tools/matmul/mm1/v1/README.md) section 4.1). F2, the lab's energy ledger (ledger v3's tensor terms with F1's
-seconds), read **52.7 to 82.0%** rms, and on E207 its error grew with the lines fetched from DRAM: "+94% to +160% at the long-K points ...
+seconds), read **52.7 to 82.0%** rms given the measured seconds, on E206's arms and E207 (the tests that give F2 that figure), and on E207
+its error grew with the lines fetched from DRAM: "+94% to +160% at the long-K points ...
 against -19% to -42% at one K block"; part of that growth is its byte convention, which counts every shire's request (same section). With the
 card at rest, where the idle draw dominates, the same models read 6.5 to 10.1% (F1) and 16.4 to 18.3% (F2).
 
@@ -193,15 +209,19 @@ the frozen scorer ran only after the data commit. A separate modelling session (
 among them) also sealed forecasts before most of these days; the lab registers each by its sha256 and does not score them, and none of their
 numbers is here (the list is at the end of this section).
 
-| test | card | points (never run before the freeze) | MM1's footing and label | forecasts frozen (commit, PST) | first card command (PST) | data / scores |
+| test | card | points (never run before the freeze) | MM1's footing and label | forecasts frozen (commit, PST) | first card command (PST; step 7's read, at or before the session's start) | data / scores |
 |---|---|---|---|---|---|---|
-| E206 arm A | aifoundry3 card 0, 600 MHz | 119 (108 never on this card, 95 never on any) | MM1-v0: blind; REPORTED (E206 registered no MM1 rule) | MM1-v0 `2d1413f5` (Mon 13:35:10); F1, F2 `eb2f7ac2` (Mon 16:01:50) | Mon 16 Nov 16:53:22 | `d7e4f35e` / `50476f31` |
-| E206 arm B | aifoundry1 card 1, 600 MHz | 113 (85 never on this card) | MM1-v0: blind; MM1-v1: card-transfer (fitted on arm A's shapes at aifoundry3); REPORTED | MM1-v0 `e35a06cb` (Mon 20:13:57); MM1-v1 `d3f031d1` (21:18:46); F1, F2 `eb2f7ac2` | Tue 17 Nov 00:13:26 | `79340bfa` / `f155c8ca` |
-| E207 | aifoundry3 card 0, 600 MHz | 53, 47 distinct cases (all never run on any card at both freezes) | MM1-v1: shape-blind, registered rules; MM1-v2: shape-blind, REPORTED | MM1-v1, F1, F2 `25d2e74e` (Mon 21:14:55); MM1-v2 `4e518735` (Tue 02:06:29) | Tue 17 Nov 07:06:44 | `867f6a3f` / `f5c53145`, `030ffa42` |
+| E206 arm A | aifoundry3 card 0, 600 MHz | 119 (108 never on this card, 95 never on any) | MM1-v0: blind; REPORTED (E206 registered no MM1 rule) | MM1-v0 `2d1413f5` (Mon 13:35:10); F1, F2 `eb2f7ac2` (Mon 16:01:50) | Mon 16 Nov 16:53:08 | `d7e4f35e` / `50476f31` |
+| E206 arm B | aifoundry1 card 1, 600 MHz | 113 (85 never on this card) | MM1-v0: blind; MM1-v1: card-transfer (fitted on arm A's shapes at aifoundry3); REPORTED | MM1-v0 `e35a06cb` (Mon 20:13:57); MM1-v1 `d3f031d1` (21:18:46); F1, F2 `eb2f7ac2` | Tue 17 Nov 00:13:12 | `79340bfa` / `f155c8ca` |
+| E207 | aifoundry3 card 0, 600 MHz | 53, 47 distinct cases (all never run on any card at both freezes) | MM1-v1: shape-blind, registered rules; MM1-v2: shape-blind, REPORTED | MM1-v1, F1, F2 `25d2e74e` (Mon 21:14:55); MM1-v2 `4e518735` (Tue 02:06:29) | Tue 17 Nov 07:06:30 | `867f6a3f` / `f5c53145`, `030ffa42` |
 | E209 | aifoundry2 card 0, its governor | 45, 41 time cases (all never on this card) | MM1-v2: blind, registered rules (fitted on E208's sessions on this card) | MM1-v2, MM1-v1, F1@800, F2@800 `3ca4b717` (Tue 01:44:45) | Tue 17 Nov 10:30:44 | `ea3fa3ce` / `15870c53` |
 | E211 | aifoundry3 card 0, 600 MHz | 26 (rgm211's 12 never run on any card) | MM1-v1: blind, registered rules; MM1-v2: blind, REPORTED | MM1-v1, F1, F2, NC `1393a649` (Tue 07:59:17); MM1-v2 `89aa0c94` (Tue 08:12:53) | Tue 17 Nov 13:21:20 | `38aaf004` / `8f44b380`, `d38f148c` |
 
 ![Figure 3](fig-3-blind.svg)
+
+*Figure 3 marks F2 only where it has a figure given the measured seconds (E206's arms and E207). On E209 and E211 the frozen scores read
+F2 only with the seconds forecast, so it has no mark there; with the seconds forecast (F1's), it read 43.7% on E209 (82.2% as the scorer's rms
+of ln: it under-forecasts) and 30.8% on E211 (the table below).*
 
 **Every model on every test** (blind; rms (bias) in %; joules over idle on E207's footing, at the points of 3 W over idle and above):
 
@@ -252,13 +272,17 @@ score (`d38f148c`), every point above 3 W; F2 has no frozen function of the seco
 - **E206 arm B** is, for MM1-v1, a card-transfer test: its shapes are arm A's, which MM1-v1 was fitted on at aifoundry3, run on card 1 for
   the first time (card 1 itself was in its fit through earlier experiments: MM1-v0 already carried an awake power of 3.660 W for it,
   [`v0/README.md`](../../../../tools/matmul/mm1/v0/README.md) section 2). On the 85 points never run on card 1, MM1-v1 read 4.7% in cycles
-  and 15.5% in joules over idle (n 77), as its note gives them (`f155c8ca`). MM1-v0 had seen none of either arm.
+  and 15.5% in joules over idle (n 77), as its note gives them on every point (`f155c8ca`); on E207's footing, the points of 3 W and above,
+  its joules over idle read 12.7% (n 71; desk). MM1-v0 had seen none of either arm.
 - **E207** is the shape-blind test: its 53 points never ran on any card before MM1-v1 and MM1-v2 were frozen. One configuration, b50's, then
   ran on aifoundry1 in the separate session's sweep at 05:30 and 06:16 PST, before E207's card day and after both freezes
   ([`v2/score-e207.md`](../../../../tools/matmul/mm1/v2/score-e207.md) section 1).
 - **E209** tests MM1-v2 on a card it was fitted on (E208's two sessions there), at 45 points never run on that card, under its governor.
-- **E211**'s rgm211 is a kernel no card had run, forecast through a desk map of its tile order; its 12 rgm136 twins are the old kernel at the
-  same shapes (4 of them in both models' fit, 3 run in E207 before the freeze, 5 never run).
+  One of them, e30 (`gemmL2x8x4` int8), had run in E206's arms on the other two cards (E209's data README, item 6), and E206 is in MM1-v2's
+  fit (its held-out table leaves E206's 119 points out as one fold, [`v2/README.md`](../../../../tools/matmul/mm1/v2/README.md) section 3),
+  so for MM1-v2 that point is card-transfer.
+- **E211**'s rgm211 is a variant of the kernel that no card had run, forecast through a desk map of its tile order; its 12 rgm136 twins are
+  the old kernel at the same shapes (4 of them in both models' fit, 3 run in E207 before the freeze, 5 never run).
 
 ### E207: the shape-blind day (registered)
 
@@ -269,7 +293,7 @@ rest ([`E207.md`](../../../../tools/claims-v3/e207/E207.md) section 7). T1 45/47
 as independent), H2 on the counter's mean 45 to 2, H3 and H4 against F2 on joules over idle 47 to 2 each; the family-level check that E207's
 amendment asks to be read beside each verdict agrees (7/0/0 against F1, 8/0/0 against F2). **MM1-v2 against MM1-v1** (`030ffa42`; REPORTED):
 NOT DECIDED in time and in joules over idle (wall cycles closer at 24 cases against 18, p 0.44). On joules at rest with the seconds forecast
-the sign test favours MM1-v2 (30 against 11, p 0.0043), but the family-level check does not confirm it (TOO FEW; NOT DECIDED).
+the sign test favours MM1-v2 (30 against 11, p 0.0043), but the family-level check does not confirm it (families 5 / 0 / 3: NOT DECIDED).
 
 ### E209: aifoundry2's governed card (registered)
 
@@ -294,30 +318,33 @@ E4c 41/44; K1 (the clock forecast) PASS 44/45; H1-H3 MM1-v2 BETTER, H4 NOT DECID
   measured 1.297 against MM1-v2's 1.187; int8 at one K block (e07) ran 1.158 times MM1-v2's wall cycles; real int8 tiles saved 9.0% of the
   joules against MM1-v2's 2.7%.
 
-### E211: a second kernel (registered)
+### E211: a variant of the kernel (registered)
 
 **The day** (data `38aaf004`): 38 of 38 runs and the smoke in 17.99 card-minutes on aifoundry3 card 0. rgm211 is rgm136 with its C-block walk
-swapped; MM1-v1 forecast it through a desk map of the new tile order, beside F1 and NC, a null that prices the chip's lines alone. **The bands**
+swapped and recompiled, so the evidence is one kernel family and one variant of it; MM1-v1 forecast it through a desk map of the new tile
+order, beside F1 and NC, a null that prices the chip's lines alone. **The bands**
 are E207's (13%, 16% and 13% in cycles and seconds; 15%, 16%, 5% and 13% in joules), PASS at 90% of rgm211's 12 points
 ([`E211.md`](../../../../tools/claims-v3/e211/E211.md) section 7). **The registered verdicts** (the frozen scorer's printed lines, `scores-e211-A.txt`, committed beside the data in `8f44b380`): R0 and S6 PASS; **T1 11/12, T2
 12/12, T3 11/12, E1 12/12, E2 12/12, E3 11/12, E4 12/12: PASS**; **T4 FAIL**: the controls, where both walks are one op stream and every model
 says 1, ran 2.9% and 5.8% fewer wall cycles on rgm211 (tolerance 0.01 in ln): there the only difference is the recompiled kernel's
 instruction stream (section 3); amendment A1 did not apply (the two controls differ by 0.031 in ln), so W1, the ratio rule, reads FAIL 5/10 and "not a
-model test"; W2 (the direction) PASS; H5, MM1 against NC on the wall, MM1 BETTER (10/1/1, p 0.0117); H1-H4 and H6 NOT DECIDED.
+model test"; W2 (the direction) PASS, with the same words, "the controls did not pass: not a model test"; H5, MM1 against NC on the wall,
+MM1 BETTER (10/1/1, p 0.0117); H1-H4 and H6 NOT DECIDED.
 
 - **MM1-v2 blind** (frozen 5 h 8 min before the first card command; `d38f148c`, REPORTED): on rgm211's 12 points its wall cycles read
   **8.9%** rms (+4.0), MM1-v1 8.1%, F1 14.5%, NC 23.5%; on the 12 rgm136 twins MM1-v2 read 2.9% and MM1-v1 3.7%. Joules over idle given the
   seconds stayed at about **3%** on rgm211 (3.2% for both versions; F1 18.4%). The ratio rgm211 / rgm136 over 10 pairs, rms of ln: MM1-v2
   0.074, MM1-v1 0.065, F1 0.128, NC 0.126, N0 (no walk effect) 0.135; MM1-v2 against MM1-v1 decided no time quantity.
-- **Reading:** on a kernel it never saw, MM1 kept joules to about 3%, but its cycles error rose from 3-4% to 8-9%, and the walk's own effect
+- **Reading:** on a kernel variant it never saw, MM1 kept joules to about 3%, but its cycles error rose from 3-4% to 8-9%, and the walk's own effect
   cannot be separated from the code difference the controls show.
 
 ### E206: the two arms (REPORTED: E206 registered no MM1 rule)
 
 - **Arm A:** MM1-v0 closer than F1 at **89 of 119** points in cycles and **96 of 109** in joules over idle; closer than F2 at **104 of 109**
-  (desk).
+  (desk; joules on every point). On E207's footing, the points of 3 W and above: closer than F1 at 91 of 101 and than F2 at 99 of 101.
 - **Arm B:** MM1-v1 closer than F1 at **87 of 113** in cycles and **85 of 105** in joules over idle; closer than F2 at **99 of 105**
-  (`f155c8ca`). MM1-v1 was closer than MM1-v0 at 69 of 113 in cycles.
+  (`f155c8ca`; joules on every point). At the points of 3 W and above: closer than F1 at 81 of 98 and than F2 at 95 of 98 (desk). MM1-v1 was
+  closer than MM1-v0 at 69 of 113 in cycles.
 
 ### The card's repeat floor
 
@@ -333,10 +360,12 @@ sets the score.**
 - **E208** (the separate session's matmul sweep: rgm136 unchanged, 74 arms on three cards; registered `d005dc53`) is complete: six sessions
   and a seventh that repeated the first, all committed (`e99209a5`, `eed9624f`, `d40b6fe8`, `76fb5344`, `7693a23c`, `c2d6536c`; `5d99fe17`).
   MM1-v2 was fitted on it, so it is not a blind test of MM1-v2.
-- **E212** (its second sweep: 221 arms and an anchor in 10 sessions; registered `c83a29d1`) is in progress: seven of ten sessions are
-  committed (`d2ece7e8`, `5601b6a7`, `7726e127`, `a90105da`, `7dfba40b`, `ebe552fe`, `d8de38b0`).
-- **Its sealed forecasts**, each registered by sha256 before the data it covers (the contents stay sealed; theirs to score, and the lab
-  scores none):
+- **E212** (its second sweep: 221 arms and an anchor in 10 sessions; registered `c83a29d1`) is in progress: as of `724e8f39`, nine of its ten
+  sessions are committed (`d2ece7e8`, `5601b6a7`, `7726e127`, `a90105da`, `7dfba40b`, `ebe552fe`, `d8de38b0`, `58f01105`, `724e8f39`).
+- **Its sealed forecasts**, each registered by its sha256 (the contents stay sealed; theirs to score, and the lab scores none). Each was
+  posted before the first card command of the runs it covers, except E209's (after the session, before its data commit). E212's second,
+  `8f2df483`, was sealed at 12:58:15 PST, 3 min 50 s before the first session it covers (a1c1-S2) made its first card command; the lab first
+  named it in that session's data commit, `7dfba40b`, after the session:
 
 | test | sha256 (first 8) | registered in |
 |---|---|---|
@@ -389,9 +418,12 @@ against 1.6733 × 10^16; S2 1.6235 against 1.6367 × 10^16). With the pattern as
 - **A GEMM anchor on every card.** The awake power does not carry across cards: held out a card at a time, MM1-v2's energy reads 10.13%
   against 9.15% for MM1-v1's form ([`v2/README.md`](../../../../tools/matmul/mm1/v2/README.md) section 0), and MM1-v1's 14.2-42.1%
   ([`v1/README.md`](../../../../tools/matmul/mm1/v1/README.md) section 5).
-- **No energy for an unseen tile kind.** MM1 prices random, zeros, ones and the real tiles it was fitted on, and nothing else: E207's real
-  and designed tiles b49-b52 were NOT FORECAST in energy, and on E209 MM1-v2's desk transfer of real tiles from another card missed the int8
-  saving by 6 points.
+- **An unseen tile kind's energy only from a borrowed price.** MM1-v2 prices random, zeros, ones and the real tiles it was fitted on; it
+  prices no tile kind that lacks a resident price on that card: E207's real and designed tiles b49-b52 were NOT FORECAST in energy by MM1-v2
+  ([`v2/score-e207.md`](../../../../tools/matmul/mm1/v2/score-e207.md) section 0), and on E209 its desk transfer of real tiles from another
+  card missed the int8 saving by 6 points. MM1-v1, the registered model on E207, took those four from committed per-tile frozen predictions
+  ("blind4: M6; blind3: M5", [`v1/README.md`](../../../../tools/matmul/mm1/v1/README.md) section 2) and passed: blind, its joules over idle
+  given the measured seconds read -5.4%, -6.0%, +4.2% and +7.1% at b49-b52, with E1 and E2 PASS at all four (`f5c53145`).
 - **Switches are estimates.** Counted on a stand-in netlist for the tensor unit, estimated for the rest; E210 checked the counted signal-net
   difference through energy on one card in fp32.
 
@@ -405,13 +437,14 @@ against 1.6733 × 10^16; S2 1.6235 against 1.6367 × 10^16). With the pattern as
   2.78 W over idle) read -0.05 to +0.39 W off, MM1-v1 high at 6 of them, and its four one-shire points sit +0.18 to +0.22 W high, which a
   relative error shows as +62% and +43% at the two smallest (`f155c8ca`). On E207, MM1-v1's two 1x2x2 subset cases
   read -14.0% (mask 0x3) and -10.2% (0xfff) in wall cycles; MM1-v2's contention on the DRAM stream alone moved them to -0.5% and -0.9%, and
-  its worst E207 case was 3x6x4 fp32 on 12 shires (0xfff), +13.3%: on that mask the shape ran faster than on 2 or on 24 shires, which no
+  its worst subset case on E207 was 3x6x4 fp32 on 12 shires (0xfff), +13.3%: on that mask the shape ran faster than on 2 or on 24 shires, which no
   model forecast ([`v2/score-e207.md`](../../../../tools/matmul/mm1/v2/score-e207.md) section 6, `030ffa42`). On E209 the one shire 0x80000000
   ran 24% over MM1-v2 (above), while MM1-v2 was closer than MM1-v1 at 6 of the 9 subset points.
 - **The stride step and one K block.** E209's step at NB 8 measured 1.297 against MM1-v2's 1.187; int8 at one K block ran 1.158 times
   MM1-v2's wall cycles on E209 (e07) and -14.0% on E207 (n01); joules over idle at one K block read -18.4% (E207's n02, int8) and -13.6% (n03,
-  fp32); int8 inside the L3 ran 6.3 to 6.6% more cycles than fp32 at the same shapes on E207, which both MM1 versions forecast equal.
-- **The second kernel's code path** (E211, above): rgm211's controls ran 3-6% fast, and MM1's cycles error there was 8-9%.
+  fp32); int8 inside the L3 ran 6.3 to 6.5% more cycles than fp32 at the same shapes on E207 (wall cycles at its four such shapes;
+  `f5c53145`), which both MM1 versions forecast equal.
+- **The kernel variant's code path** (E211, above): rgm211's controls ran 3-6% fast, and MM1's cycles error there was 8-9%.
 - **The governor's clock**: K1's one miss (e44, 788.9 MHz measured against 764.1 forecast) and two of 55 runs whose capped state MM1-v2
   read wrong (note 15).
 
@@ -450,7 +483,7 @@ OMP_NUM_THREADS=1 /usr/bin/python3 -I -B tools/claims-v3/e209/score_e209.py <dir
 /usr/bin/python3 -I -B tools/matmul/mm1/v2/score_v2_e211.py --config tools/matmul/mm1/v2/score-e211-config.json --out <file>    # MM1-v2 on E211
 /usr/bin/python3 -I -B docs/reports/data/2026-11-17-matmul-model/make_figures.py --repo . --out <dir>    # numbers.json and the five figures
 /usr/bin/python3 -I -B docs/reports/data/2026-11-17-matmul-model/readme_numbers.py --repo . --numbers <dir>/numbers.json
-/usr/bin/python3 -I -B docs/reports/data/2026-11-17-matmul-model/build_page.py --repo . --out <file>    # the page, from this README and the figures
+/usr/bin/python3 -I -B docs/reports/data/2026-11-17-matmul-model/build_page.py --out <file>    # the page, from this README and the figures
 ```
 
 `make_figures.py` checks every input's sha256 first and stops (exit 4) if one changed; `readme_numbers.py` finds every number of this README
@@ -466,5 +499,23 @@ in its committed file and prints one line a number with its file and the commit 
 | `numbers.json` | every number the figures draw and every desk number here, with the inputs' sha256 |
 | `readme_numbers.py`, `readme-numbers.txt` | the check list: every number of this README against its committed file |
 | `build_page.py` | the page `docs/reports/2026-11-17-matmul-model/index.html`, built from this README and the figures |
+
+## Changelog
+
+- **2026-11-17 (Tue, week 47), lane `report-fix` (Q215)**: the verification's findings answered (`report-verify`: SOUND WITH FIXES, one
+  medium finding, ten low, nine nits). No error figure changed; the added figures are desk readings of the same committed data, and the check
+  list gained a check for each new or reworded number.
+  - **Unseen tile kinds** (the medium finding): it is MM1-v2 that leaves E207's b49-b52 NOT FORECAST in energy; MM1-v1 priced them from
+    frozen per-tile predictions and passed (the summary and section 6).
+  - **Footings named:** F2's range is its given-seconds figure on three tests, with a note under figure 3 for E209 and E211; arm B's
+    never-on-card-1 joules and E206's head-to-head joule counts are also given at 3 W and above (`make_figures.py` gained that subset).
+  - **Labels and scope:** the switch result labelled REPORTED, with its scope and the undecided comparison; E211 called a variant of the
+    kernel; E211's W2 carries the scorer's words; the memory-path gap called MM1's reading; *unread* defined; E209's e30 card-transfer for
+    MM1-v2.
+  - **Corrections:** "its worst subset case on E207"; the int8-over-fp32 range on E207; E207's family count; the first-card-command column
+    now step 7's read for every test; when each sealed forecast was posted; E212's session count dated; section 7's `build_page.py` command.
+  - **The page:** a plain lede opens the summary (with what E206-E212, MM1-v0 to MM1-v2, F1 and F2 are) in place of the question bullet;
+    figure 5's subset bar reads "shire subsets"; figure 2's tooltips give exact bin edges; the page's description says the switch count was
+    checked through energy.
 
 SPDX-License-Identifier: Apache-2.0

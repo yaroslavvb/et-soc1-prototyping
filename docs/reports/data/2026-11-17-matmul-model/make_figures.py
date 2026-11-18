@@ -40,6 +40,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import statistics
 import sys
 
@@ -57,6 +58,7 @@ PINS = {
     "tools/claims-v3/e207/points-e207.json": None,
     D206A + "scores-e206-A.json": None,
     D206B + "scores-e206-B.json": None,
+    D206B + "README.md": None,
     D206A + "data-e206.json": None,
     D206B + "data-e206.json": None,
     D207 + "data-e207.json": "e89d4149b95fa2b3ef5172e8f8dadf7eb0266fff63a7d9e4c7b906fb31ee5d35",
@@ -137,8 +139,22 @@ def quantiles(v):
 
 # ---------------------------------------------------------------- E206
 
-def score_e206(R, arm, models):
-    """E206 arm A or B on arm B's dated note 1's footing. models: {name: (csv rows by id, A-rule)}."""
+def ran_card1_before_armB(txt):
+    """Arm B's README, item 8's never-run search re-run (REPORTED): the 28 of arm B's 113 points that had run on card 1 before arm B, 25 by
+    E208's sweep (listed by path) and p055-p057 by an earlier lab run (E190); the other 85 are arm B's points never run on card 1, the subset
+    of arm B's dated note 1 ("never run on card 1 before arm B"). Added by report-fix (Q215) for that subset at 3 W and above."""
+    m = re.search(r"\(by path: ((?:p\d{3} )*p\d{3})\) and p055-p057 by an earlier lab run", txt)
+    if not m:
+        raise SystemExit("arm B's README: the list of points run on card 1 before arm B is not found")
+    ids = set(m.group(1).split()) | {"p055", "p056", "p057"}
+    if len(ids) != 28:
+        raise SystemExit(f"arm B's README: {len(ids)} points run on card 1 before arm B, not 28")
+    return ids
+
+
+def score_e206(R, arm, models, ran_c1=None):
+    """E206 arm A or B on arm B's dated note 1's footing. models: {name: (csv rows by id, A-rule)}. ran_c1: arm B's points run on card 1
+    before arm B (its never-on-card-1 subset is the rest)."""
     P = {p["id"]: p for p in R["points"]["points"]}
     NR = {p["id"]: p for p in R["neverrun"]["points"]}
     FC = R["forecast"]
@@ -185,7 +201,7 @@ def score_e206(R, arm, models):
             e[mod] = em
         recs[pid] = {"meas": meas, "fc": fc, "class": shape_class(pt), "e": e, "W": Wm, "never_any": NR[pid]["never_any_card"],
                      "never_a3": NR[pid]["never_aifoundry3"], "never_c1": NR[pid]["never_card1"], "mask": pt["shire_mask"], "arm": pt["arm"],
-                     "fmt": pt["format"], "kind": pt["kind"]}
+                     "fmt": pt["format"], "kind": pt["kind"], "pid": pid}
     names = list(models) + ["F1", "F2"]
     out = {"n_points": len(recs), "models": {}, "h2h": {}, "classes": {}, "subsets": {}, "under_3W": {}}
     for mod in names:
@@ -212,6 +228,8 @@ def score_e206(R, arm, models):
                               "cyc_mean": {mod: agg([r["e"].get(mod, {}).get("cyc_mean") for r in sel]) for mod in names}}
     subs = {"never_any_card": lambda r: r["never_any"], "ran_before_any_card": lambda r: not r["never_any"],
             "never_this_card": (lambda r: r["never_a3"]) if arm == "A" else (lambda r: r["never_c1"])}
+    if ran_c1 is not None:
+        subs["never_card1_before_armB"] = lambda r: r["pid"] not in ran_c1
     for sname, sel in subs.items():
         rs = [r for r in recs.values() if sel(r)]
         out["subsets"][sname] = {"n": len(rs), "models": {mod: {q: agg([r["e"].get(mod, {}).get(q) for r in rs]) for q in ("cyc_mean", "jo_g", "jo_g3")}
@@ -576,8 +594,10 @@ def fig1(N):
     return "\n".join(head + body + ["</svg>"]) + "\n"
 
 
-def hist_panel(vals, x0, y0, w, h, lo, hi, step, fmt, label, median, accent_label, tick_every=1):
-    """A single-series histogram (one colour, no legend), with the median marked. Refuses a value outside [lo, hi)."""
+def hist_panel(vals, x0, y0, w, h, lo, hi, step, fmt, label, median, accent_label, tick_every=1, tipfmt=None):
+    """A single-series histogram (one colour, no legend), with the median marked. Refuses a value outside [lo, hi). tipfmt: the bins'
+    tooltip edges (default fmt), so that a 2.5-wide bin's tooltip is not rounded (report-fix, Q215)."""
+    tipfmt = tipfmt or fmt
     bins = int(round((hi - lo) / step))
     counts = [0] * bins
     for v in vals:
@@ -600,7 +620,7 @@ def hist_panel(vals, x0, y0, w, h, lo, hi, step, fmt, label, median, accent_labe
         r = min(4.0, bh / 2)
         x1, x2, yb, yt = bx, bx + bw - 2, y0 + h, y0 + h - bh
         out.append(f'<path class="acc" d="M {x1:.1f} {yb:.1f} L {x1:.1f} {yt + r:.1f} Q {x1:.1f} {yt:.1f} {x1 + r:.1f} {yt:.1f} L {x2 - r:.1f} {yt:.1f} '
-                   f'Q {x2:.1f} {yt:.1f} {x2:.1f} {yt + r:.1f} L {x2:.1f} {yb:.1f} Z"><title>{esc(fmt(lo + i * step))} to {esc(fmt(lo + (i + 1) * step))}: '
+                   f'Q {x2:.1f} {yt:.1f} {x2:.1f} {yt + r:.1f} L {x2:.1f} {yb:.1f} Z"><title>{esc(tipfmt(lo + i * step))} to {esc(tipfmt(lo + (i + 1) * step))}: '
                    f'{c} points</title></path>')
     out.append(f'<line class="base" x1="{x0}" y1="{y0 + h}" x2="{x0 + w}" y2="{y0 + h}"/>')
     for i in range(0, bins + 1, tick_every):
@@ -624,7 +644,7 @@ def fig2(N):
     body, y = title_block(title, sub)
     body.append(text(16, y + 4, "Card cycles per simulator step (number of points)", "t2 ink", extra='font-weight="600"'))
     body += hist_panel(sr["values"], 52, y + 18, 300, 96, 5, 35, 2.5, lambda v: f"{v:.0f}x", "card cycles a GEMM / simulator steps a GEMM",
-                       a["median"], f"median {a['median']:.1f}x", tick_every=2)
+                       a["median"], f"median {a['median']:.1f}x", tick_every=2, tipfmt=lambda v: f"{v:g}x")
     y += 18 + 96 + 52
     body.append(text(16, y + 4, "The tensor unit's share of each op (number of points)", "t2 ink", extra='font-weight="600"'))
     body += hist_panel([100 * v for v in ts["values"]], 52, y + 18, 300, 96, 10, 100, 5, lambda v: f"{v:.0f}%",
@@ -794,7 +814,7 @@ def fig5(N):
             order.append((a["rms_pct"], a["bias_pct"], k, a["n"], (v["jo_g3"].get("F1") or {}).get("rms_pct"), v["n_under_3W"],
                           v["w_lo_g"].get("v1")))
     order.sort(reverse=True)
-    short = {"data kind: zeros": "all-zero data", "subset (mask < 32 shires)": "1-16 shires", "law arms (gemmc1/c8s/c16s)": "calibration arms",
+    short = {"data kind: zeros": "all-zero data", "subset (mask < 32 shires)": "shire subsets", "law arms (gemmc1/c8s/c16s)": "calibration arms",
              "past the L3 (> 70 MB)": "past the L3", "the knee (33-70 MB)": "the knee", "inside the L3 (<= 32 MB)": "inside the L3",
              "stride pair (1x15x4 / 1x16x4)": "stride pair"}
     title = "MM1's largest energy miss on card 1 is all-zero data"
@@ -870,7 +890,8 @@ def main():
          "interpreter": f"{sys.executable} {sys.version.split()[0]}", "inputs_sha256": got}
     N["timing"] = timing(R)
     bA, _ = score_e206(R, "A", {"v0": (v0A, lambda r, n: paw_a3 * n / 1024.0)})
-    bB, _ = score_e206(R, "B", {"v0": (v0B, lambda r, n: paw_c1 * n / 1024.0), "v1": (v1B, lambda r, n: fnum(r["W_affine_A_W"]))})
+    ranB = ran_card1_before_armB(open(os.path.join(a.repo, D206B + "README.md")).read())
+    bB, _ = score_e206(R, "B", {"v0": (v0B, lambda r, n: paw_c1 * n / 1024.0), "v1": (v1B, lambda r, n: fnum(r["W_affine_A_W"]))}, ranB)
     N["blind"] = {"E206A": bA, "E206B": bB, "E207": e207(R), "E209": e209(R), "E211": e211(R)}
     N["switch"] = e210(R)
     N["repeat"] = {"E208": e208_repeat(R), "within_day": within_day(R)}
