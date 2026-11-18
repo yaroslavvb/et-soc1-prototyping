@@ -1,0 +1,3788 @@
+{
+ "schema": "mm1-v3.1-declaration/1",
+ "title": "MM1-v3.1: every form, input, bound, start, fold, rule and reported figure, declared before any E213 datum (the machine-readable half; DECLARED-v31.md is the text)",
+ "written": {
+  "date": "2026-11-18 (Wed, week 47)",
+  "zone": "PST (Pacific)",
+  "round": "Q217",
+  "lane": "v31-declare",
+  "where": "aifoundry2's desk",
+  "started_pst": "04:40",
+  "final": "the time this file's sha256 was final is in the round's record and the coordination-thread post that gives its sha256 (its freeze line); the file cannot hold its own hash",
+  "corrected": {
+   "lane": "fix-v31decl",
+   "round": "Q217",
+   "where": "aifoundry2's desk",
+   "started_pst": "05:39",
+   "why": "verify-v31decl's findings (3 medium, 6 low, 1 nit) on the file of 05:09:42 PST (sha256 7a6d36b6...)",
+   "final": "the time this corrected file's sha256 was final is in the lane's result, the round's record and the coordination-thread post that gives its sha256 (its freeze line); the file cannot hold its own hash",
+   "no_e213_datum": "no E213 data file or data folder existed or was opened; names and times only were listed, at 05:40:37 and 06:09:12 PST: at both, no E213 data folder in the lab clone or at GitHub main 6efdb002; at 05:40:37 no E213 card lane and no booking; by 06:09:12 E213's two card lanes had started (their lane folders existed; none was opened) and both cards were held for the sealed forecast since 05:52:24",
+   "rests_on": "each change rests on its finding and on MM1-v3's own files alone (tools/matmul/mm1/v3 at b1493082) and E213's registration"
+  }
+ },
+ "labels": {
+  "registered": "declared here before any E213 datum: a form, bound, start, rule or threshold",
+  "desk": "arithmetic or a computation from committed files, made at a desk (no card, no simulator)",
+  "post hoc": "fitted or read after its data existed",
+  "held out": "left out of the fit that scores it; not blind",
+  "blind": "scored on data that did not exist when the forecast was frozen",
+  "REPORTED": "printed beside a rule, never deciding it",
+  "NOT RUN": "a check that did not run"
+ },
+ "interpreter": "/usr/bin/python3 3.12.3 with numpy 1.26.4 and scipy 1.11.4, -I -B, single-threaded (OMP/OPENBLAS/MKL/NUMEXPR threads 1)",
+ "no_e213_datum": "Written from about 04:40 PST Wed 18 Nov 2026, before E213's first card command (its arms hold their bookings for a sealed forecast until 07:30 PST at the earliest). No E213 data file was opened; E213's points were read from its registration (tools/claims-v3/e213/points-e213.csv, sha256 8bab9165...).",
+ "builds_on": {
+  "github_main_read": "6efdb0024cc5a44b46c4d11f71047bc1d12f611c (E213 kit), which holds MM1-v3 (b1493082) and E213 registration A1 (291c8201)",
+  "mm1_v3": {
+   "commit": "b149308280a73396516937304037af57a5563c16",
+   "SHA256SUMS": "c24efc149110d0cb3d1c8603f0bb7ee83db85eebf9af7ba4254d267c7c85dc74",
+   "params": "1fdc07496a39a5398021c2da0e60f157a2e7f693d845e039f8dc661f6aa325db",
+   "census-v3.json": "cad5250ccc2324c724fe2230093146aa6216779cf0c64003228b88fbd59d974f",
+   "engine_v3.py": "da6213460e6c90dcfc304d53d096f7bbe2634baa81ab5309ee354b412a4ff898",
+   "energy_v3.py": "49a577bc0c3743e3289052501d75b24ecff740ff3d2d304eae9b7c59c17e2abe",
+   "DECLARED-v3.md": "read at b1493082",
+   "AMENDMENT-A2.md": "read at b1493082"
+  },
+  "e213": {
+   "registration_A1": "291c8201",
+   "kit": "6efdb002",
+   "points-e213.csv": "8bab916516e74e3d23f9aff29bf105d1bd9e7ece73ee5aa765de2c007633ad82",
+   "rules-e213.json": "43963ca6b358e2136d62ecf253280f112ed27970039979242fa4fd2440deccc3"
+  },
+  "energy_manual_memory_reads": {
+   "path": "docs/reports/data/2026-09-23-energy-manual/manual.json (memory_reads.rows; measured 18 Sep 2026)",
+   "l2_pj_per_byte": 4.051473150823622,
+   "l3_pj_per_byte": 10.849004250245388
+  }
+ },
+ "base": "MM1-v3 as landed (b1493082): time form v3+T5r (19 constants), energy form v3 (26 constants, lambda pinned 0.0048), every input as vendored there, the census as amended by item 6; v3.1 changes only what items 1-8 declare.",
+ "items": [
+  {
+   "id": 1,
+   "name": "the energy split: the L2 line energy against the per-op base",
+   "v3": "b2 -88.9 and d2 -291.7 pJ a line (no bound), xi 0.000 at its lower bound; the L2 lines an op are nearly constant across the L2-served shapes (KB <= 2 and the c-arms; none at KB >= 3), so b2 + d2 phi trades with Eub, the gate and the data term",
+   "forms": {
+    "E1u": {
+     "role": "reference (MM1-v3 as declared)",
+     "b2": "free, unbounded",
+     "d2": "free, unbounded",
+     "free_energy_constants": 26
+    },
+    "E1b": {
+     "role": "the bound (primary)",
+     "b2": "free in [0, +inf)",
+     "d2": "free in [0, +inf)",
+     "free_energy_constants": 26,
+     "reading": "no line costs negative energy; at the bound the L2 line is priced inside the per-op base"
+    },
+    "E1t": {
+     "role": "the tie to zero",
+     "b2": "pinned 0",
+     "d2": "pinned 0",
+     "free_energy_constants": 24
+    },
+    "E1m": {
+     "role": "the tie to the energy manual",
+     "b2": "r_L2 x b3",
+     "d2": "r_L2 x d3",
+     "free_energy_constants": 24,
+     "r_L2": 0.373442,
+     "r_L2_label": "desk: the energy manual's committed per-byte read prices, L2 4.051 over L3 10.849 pJ a byte over idle (memory_reads rows, measured 18 Sep 2026 on aifoundry2), a priori to every matmul fit"
+    }
+   },
+   "unchanged_in_every_form": "xi free in [0, 1] (pinned 1 with no governed card in a fold), every other energy constant and pin as v3",
+   "rule": [
+    "fit E1u, E1b, E1t and E1m on all the data and on every LOEO fold (and E210's), on the final time form's lines and op times, from the energy starts of item 5",
+    "score each by LOEO W over idle given the measured op time, rms of forecast / measured - 1 over the points all four price at 3 W or more, configuration twins excluded",
+    "among E1b, E1t, E1m: the candidates are the forms whose score lies within 0.10 points of the lowest of the three; of the candidates the form with the fewest free constants wins (E1t and E1m 24, E1b 26); at equal constants E1t before E1m",
+    "that winner enters v3.1 unless E1u's score is lower than the winner's by more than 0.30 points; then E1u enters and the split is reported as not identified (as in v3), the winner's figures beside"
+   ],
+   "not_wanted_if": "E1b's all-data fit puts b2 and d2 at their bound 0 (then E1b equals E1t and E1t wins by the constant count)",
+   "reported": [
+    "all four forms LOEO and LOCO (both routes of item 2), with and without twins",
+    "b2, d2, xi per fold and their bound activity",
+    "the joules by class (L2 share) at E213 points"
+   ]
+  },
+  {
+   "id": 2,
+   "name": "the energy scale of a card left out",
+   "v3": "kc is each card's factor on the per-op energy (aifoundry3 = 1); with aifoundry3 held out the training kc and the per-op constants trade exactly; AMENDMENT-A2 (post hoc) pins the training cards' mean kc to 1; a held-out card otherwise takes kc 1 and the training cards' mean awake power Pa",
+   "anchor": {
+    "configuration": {
+     "kernel": "rgm136",
+     "loop": "gemmL",
+     "arm": "gemmL1x1x4",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "clock": "the card's own (600 MHz on the pinned cards; the measured governed clock on aifoundry2 card 0 and aifoundry1 card 0)",
+     "why": "registered (chosen before any E213 datum and without scoring the route): of the three rgm136 int8 random configurations at KB >= 3 whose energy is committed on all four cards (gemmL1x1x4, 1x1x8, 1x1x16), the one with the smallest footprint (14 MB, against 26 and 50): KB >= 3, so its L2 line count is 0 (independent of item 1); far inside the L3's first edge (about 37 MB), so its lines are L3-served at any fitted retention; random data, so the kc-multiplied per-op term carries most of its W"
+    },
+    "points_per_card": {
+     "aifoundry3 card 0": [
+      "E206 arm A point p035 (docs/reports/data/2026-11-16-e206-matmul-sweep-aifoundry3, data commit d7e4f35e)"
+     ],
+     "aifoundry1 card 1": [
+      "E206 arm B point p035 (docs/reports/data/2026-11-17-e206-matmul-sweep-aifoundry1-c1, data commit 79340bfa)",
+      "E208 a1c1-S1 run 035 and a1c1-S2 run 053, arm '1x1x4-int8-rnd' (docs/reports/data/2026-11-16-e208-mmsweep-a1c1-S1, -S2)",
+      "E212 a1c1-S1's scored runs of arm '1x1x4-int8-rnd' (docs/reports/data/2026-11-17-e212-mmsweep2-a1c1-S1)"
+     ],
+     "aifoundry2 card 0": [
+      "E208 a2c0-S1 run 032, a2c0-S2 run 055 and the repeat a2c0-S1r run 032, arm '1x1x4-int8-rnd' (docs/reports/data/2026-11-16-e208-mmsweep-a2c0-S1, -S2; docs/reports/data/2026-11-17-e208-mmsweep-a2c0-S1r)",
+      "E212 a2c0-S1's scored runs of arm '1x1x4-int8-rnd' (docs/reports/data/2026-11-17-e212-mmsweep2-a2c0-S1)"
+     ],
+     "aifoundry1 card 0": [
+      "E208 a1c0-S1 run 019, arm '1x1x4-int8-rnd' (docs/reports/data/2026-11-16-e208-mmsweep-a1c0-S1)",
+      "E212 a1c0-S1's scored runs of arm '1x1x4-int8-rnd' (docs/reports/data/2026-11-17-e212-mmsweep2-a1c0-S1)"
+     ]
+    },
+    "point_definition": "scored runs only (the sessions' smoke processes of that arm are not points); as v3.1's data loader reads them (v3's data_v3 extended): one energy point a (experiment, card, configuration), the mean of its runs; MM1-v3's table names them E206|p035, E206B|p035, E208|c1|..., E212|c1|..., E208|a2|..., E212|a2|..., E208|c0|..., E212|c0|... (gemmL1x1x4|int8|random|0xffffffff): aifoundry3 1, card 1 3, aifoundry2 2, card 0 2 points; a scored run of that configuration committed at GitHub main before the fit's start joins its card's anchor set",
+    "kc_from_anchor": "W_i = D_i (R0_i + kc K1_i) at each anchor point i of the held-out card, its measured op time, volts and die (D_i the die factor, K1_i the kc-multiplied per-op term at kc 1, R0_i every other term with Pa = the training cards' mean); kc = sum w_i^2 D_i K1_i (W_i - D_i R0_i) / sum w_i^2 D_i^2 K1_i^2, w_i = 1 / max(W_i, 3 W): the energy fit's own weighted least squares, closed form, from the anchor alone",
+    "validity": "kc inside [0.5, 2] and the kc-multiplied term's share of the predicted W at the solved kc, kc K1_i / (R0_i + kc K1_i), averaging at least 25% over the anchor points; otherwise that fold uses the fallback and is flagged",
+    "scoring": "the held-out card's anchor points are left out of that fold's scored set under both routes (both routes scored on the same points); with them, REPORTED beside",
+    "a2_rescale_first": "in the fold without aifoundry3 the forecast R0 + kc K1 is the same anywhere on the flat line but the solved kc is not, so that fold's fitted point is first rescaled exactly as AMENDMENT-A2.md does (the training cards' mean kc set to 1: every kc / s and the per-op constants Eub, a_op, a_lane, a8 and b0 x s, s the training cards' mean kc as fitted); only then is the held-out card's kc solved and the validity test applied, at that scale"
+   },
+   "fallback": "MM1-v3's declared rule (a held-out card takes the training cards' mean Pa and kc 1) with AMENDMENT-A2's pin in the fold without aifoundry3 (the training cards' mean kc set to 1 by the exact rescaling of A2)",
+   "rule": [
+    "v3.1's held-out-card energy route is the anchor route; the fallback applies in a fold where the held-out card has no anchor point or the validity test fails",
+    "every LOCO energy figure is computed and reported under both routes, for v3.1 and for v3 refitted",
+    "acceptance rule 2 (item 9) reads the anchor route for both models; the fallback's figures are printed beside"
+   ],
+   "not_wanted_if": "the anchor route's pooled LOCO W given t is higher than the fallback's (reported; the route stays as declared)",
+   "reported": [
+    "per LOCO fold: kc from the anchor, kc under the fallback, the anchor points' residuals, both routes' rms and bias"
+   ]
+  },
+  {
+   "id": 3,
+   "name": "gamma (the path's exposure) and T_coop (the cooperation cost)",
+   "v3": "both pinned 0; D_A, D_B = the census path of the loop less rgm136 gemmL's (cycles / f), no fitted constant",
+   "definitions": {
+    "dT_path": "the census's D_A_cycles_vs_rgm136, D_B_cycles_vs_rgm136 (rgm136 gemmL 0/0; gemmLnc -12.5/-22.0; rgm211 gemmL -10.5/-13.75; rgm211 gemmLn -37.0/-49.75)",
+    "place": "the operand's place in each op class of the map: L2, L3 or F (fresh); D enters per op class",
+    "dcoop": "(coop_X(loop) - coop_X(rgm136 gemmL)) with coop_X = 1 when the loop loads operand X with tensor_coop groups (8 minions for A, 4 for B), else 0: -1 for gemmLnc, 0 for rgm136 gemmL, rgm211 gemmL and rgm211 gemmLn",
+    "units": "gamma dimensionless; T_coop in cycles of the minion clock, added to D (divided by f)"
+   },
+   "forms": {
+    "G0": {
+     "D_X[p]": "dT_path,X",
+     "constants": [],
+     "role": "the null (v3)"
+    },
+    "Gplace": {
+     "D_X[p]": "dT_path,X (1 + gamma_p) + dcoop_X T_coop,p",
+     "gamma_L2": "pinned 0",
+     "constants": [
+      "gamma_3",
+      "gamma_F",
+      "Tcoop_2",
+      "Tcoop_3",
+      "Tcoop_F"
+     ],
+     "role": "primary"
+    },
+    "Goperand": {
+     "D_X[p]": "dT_path,X (1 + gamma_X [p != L2]) + dcoop_X T_coop,p",
+     "constants": [
+      "gamma_A",
+      "gamma_B",
+      "Tcoop_2",
+      "Tcoop_3",
+      "Tcoop_F"
+     ],
+     "role": "alternative (exposure by operand)"
+    },
+    "Gcoop": {
+     "D_X[p]": "dT_path,X + dcoop_X T_coop,p",
+     "constants": [
+      "Tcoop_2",
+      "Tcoop_3",
+      "Tcoop_F"
+     ],
+     "role": "alternative (cooperation only)"
+    }
+   },
+   "bounds": {
+    "gamma_*": [
+     -1,
+     3
+    ],
+    "Tcoop_*": [
+     -300,
+     600
+    ]
+   },
+   "pin_sets": {
+    "gamma_3 / gamma_A / gamma_B (L3 part)": "training points of a loop with dT_path != 0 (rgm211 gemmLn, rgm211 gemmL, gemmLnc) at footprint <= 48 MB",
+    "gamma_F / gamma_A / gamma_B (fresh part)": "training points of such a loop at footprint > 32 MB",
+    "Tcoop_2": "training gemmLnc points with KB <= 2",
+    "Tcoop_3": "training gemmLnc points at footprint <= 48 MB",
+    "Tcoop_F": "training gemmLnc points at footprint > 32 MB",
+    "rule": "a constant whose set is empty in a fold is pinned at 0 there and printed with the fold (gamma_A, gamma_B need both parts empty)"
+   },
+   "identified_by": "E213 family P (as training data once scores-e213 is committed): at each of four one-stream shapes (3x1x3 inside the L3, 1x6x5 and 4x1x6 at the knee, 1x1x44 past the L3) one map and four codes - rgm136 gemmL (path to B 77.75 cycles), rgm211 gemmL (64.0), rgm211 gemmLn (28.0), gemmLnc (55.75, no cooperation) - so ln(T_loop / T_rgm136 gemmL) at a shape is the code-side term alone: rgm211 gemmL and gemmLn give the exposure by regime (gamma), gemmLnc against rgm211 gemmL (similar paths, cooperation on and off) gives T_coop by regime; a087 against a088 (gemmLnc / gemmL 1x1x1 int8) the L2 place; arm B's gemmLnc points k37-k40 against their gemmL twins the same on card 1; E211's rgm211 points and controls and its c01, c02 already in the data",
+   "rule": [
+    "fit G0, Gplace, Goperand and Gcoop on all the data and on every LOEO fold of the time data (item 9), each from the starts of item 5",
+    "score: LOEO wall-cycle rms over the touched points (every point of a loop other than rgm136 gemmL: rgm211 gemmLn, rgm211 gemmL, gemmLnc), configuration twins excluded",
+    "the lowest score wins; within 0.25 points the form with fewer constants (G0 0, Gcoop 3, Gplace and Goperand 5); Gplace before Goperand at equal constants",
+    "guard: the winner's pooled LOEO wall rms over all points must not exceed G0's by more than 0.05 points, else G0"
+   ],
+   "not_wanted_if": "G0 wins the rule, or every constant of the winner sits within 1% of 0 in the all-data fit (reported as not identified)",
+   "reported": [
+    "each form's constants per fold",
+    "the per-shape ratios ln(T_loop / T_rgm136) of E211 and E213, measured beside each form"
+   ]
+  },
+  {
+   "id": 4,
+   "name": "the subset layout: T7, the masked walk, its trace check, its fallback T7L",
+   "v3": "no layout model; T7L (the fallback) lost v3's rule (4.64% against the primary form's 4.67%: within 0.05 points at equal constants, the primary kept); spread masks held out 6.74% vs v2form's 5.40%; E213 family M tests the gap",
+   "T7": {
+    "inputs": [
+     "the mask (32 bits; shire s in row group s >> 2 of 8 and column group s & 3 of 4)",
+     "the shape (MB, NB, KB)",
+     "the kernel's C-block walk (mn: rgm136 gemmL, gemmLnc, rgm211 gemmL; nm: rgm211 gemmLn at MB, NB >= 2)"
+    ],
+    "computes": "the chip's lock-step request stream with only the mask's shires: at every step (C block in the walk's order, row half r, kb, k < 32) each active shire of row group g and column group c asks the A tiles 2 (4 g + d) + r (d < 4) and the B tiles 8 c + p (p < 8) of that step, as map_e211.shire_ops numbers them; the step's distinct A and B tiles are the union over the active shires (an A tile shared by its row group's active shires, a B tile by its column group's); the C TensorStores are the active shires' C tiles of each half block. Exact LRU stack distances (map_e211's Fenwick method, second pass) give each request's distance; the fold's retention (r_A, r_B two-edge) gives each step's place shares; Q0, Q1 = the mean over steps of outer(pA, pB) per row half with the L2 model's hit shares (each shire's own line stream, unchanged by the mask); n_eff,3 and n_eff,F = the masked stream's L3-served and fresh distinct lines a step over the full chip's at the same shape and retention; X3 = 1 - chi3 (1 - n_eff,3), XF = 1 - chiF (1 - n_eff,F), each clipped at 0.05 as in v3; MM1-v3's row-imbalance term (eta) unchanged (steps 3 and 4 exactly as steps_3_4_exact states and frozen_code implements)",
+    "fitted_constants": 0,
+    "applies_to": "subset points (mask != 0xffffffff) of the gemmL family (gemmL, gemmLn, gemmLnc arms); full-chip points and run_gemm's c-arms keep v3's map and n/32 exactly",
+    "desk_precondition": {
+     "rule": "at mask 0xffffffff the walk's stream equals map_e211.chip_steps for both walks, request for request; a failed precondition makes the trace check NOT RUN (T7 stays out); v3.1's fit lane re-runs t7_v31.py --check at its start with every subset shape of its data (--extra-shapes), a failure there being a failed precondition",
+     "desk_run": {
+      "when_pst": "2026-11-18 06:10:04 to 06:11:05",
+      "interpreter": "/usr/bin/python3 3.12.3, numpy 1.26.4",
+      "verdict": "CHECK PASS",
+      "precondition": {
+       "pass": true,
+       "shapes": 36,
+       "shape_walks": 72
+      },
+      "distances_equal_map_e211_at_full_mask": {
+       "pass": true,
+       "shape_walks": 10
+      },
+      "nm_walk_equals_engine_v3_WalkShape": {
+       "pass": true,
+       "worst_abs_diff": 0.0,
+       "shapes": 4
+      },
+      "op_time_equals_TimeEngine_predict_with_nothing_replaced": {
+       "pass": true,
+       "forms": {
+        "v3": {
+         "max_rel_diff": 0.0,
+         "points": 131
+        },
+        "v3+T5r": {
+         "max_rel_diff": 0.0,
+         "points": 131
+        }
+       }
+      },
+      "n_eff_of_full_chip_walk_is_1": true,
+      "REPORTED_cross_check_v31_trace_walk": {
+       "verdict": "EQUAL",
+       "cases": 8,
+       "walk_v31_sha256": "87736da2a24b0f0b22157cbee5e39d5cfa54d1af7e32f28edaf5c506790f839e"
+      }
+     }
+    },
+    "steps_3_4_exact": [
+     "3: engine_v3's procedure for rgm211 gemmLn (engine_v3.WalkShape.Qhalves) on the masked stream: per step each operand's mean retention over the step's requests (r_A one edge, r_B two edges at the fold's theta; each tile weighted by the number of active shires that ask it, the plain mean at every product mask); B's mean x zeta in row half 1 where NB is a power of two >= 4 and the full-chip footprint passes 32 MB (v3's rule); pA = [hA, (1 - hA) mA, (1 - hA)(1 - mA)], pB alike, hA and hB the L2 model's hit shares of that row half (map_e211.l2_model, unchanged by the mask), x r2 under T5r exactly where engine_v3 applies r2 at that arm's full-chip map (walk mn, KB <= 2, MB x NB >= 2; never on the nm walk); Q0, Q1 = the mean over the half's steps of outer(pA, pB)",
+     "4: n_eff,3 and n_eff,F = the masked stream's L3-served and fresh distinct lines a step (16 x (1 - h) x the sum over the step's distinct tiles of r(d), and of 1 - r(d); zeta and r2 as in step 3), averaged over the steps, over the same code's average at mask 0xffffffff (same shape, walk and theta), each min(1, ratio), 1 where the full-chip average is 0; X3 = 1 - chi3 (1 - n_eff,3), XF = 1 - chiF (1 - n_eff,F), each at least 0.05, replace v3's n/32; the row-imbalance term, T_C (at the full-chip footprint) and the rest of the op time unchanged; item 3's forms change only D_A, D_B per op class and compose with T7 unchanged"
+    ],
+    "frozen_code": {
+     "file": "tools/matmul/mm1/v3.1/t7_v31.py",
+     "sha256": "893ae962174678fcd1560dfc423722361e706319a188687f8f572a4e3ca89242",
+     "final_pst": "2026-11-18 06:11:05",
+     "role": "T7's only implementation; v3.1's fit imports it unchanged: T7Bank(points).arrays(theta, form) gives Q0, Q1, n_eff,3, n_eff,F at each T7 point in place of v3's Q0, Q1 and n/32 in X3 and XF; op_time = TimeEngine.predict with exactly those replacements (G0)",
+     "pins_inside": {
+      "tools/matmul/mm1/v3/engine_v3.py": "da6213460e6c90dcfc304d53d096f7bbe2634baa81ab5309ee354b412a4ff898",
+      "tools/matmul/mm1/v3/inputs/e211/map_e211.py": "36319654d3e8a7954baabfafb5932dedbb46026a9b3998b49ce2f1d2b13bd01b",
+      "tools/matmul/mm1/v3/mm1_core_v3.py": "acebc705d06be133845b78ed85a7787a6792838fcca95f75dfc03fba41ea43c2"
+     },
+     "evaluated_on_measured_values": false
+    }
+   },
+   "trace_check": {
+    "data": "lane v31-trace's sys_emu traces on aifoundry3 of two masks of one E212 layout pair (equal shire count, different layout) at a shape E212 ran, for each kernel it can trace, and verify-v31trace's verdict",
+    "pass_rule": [
+     "(a) over the logged harts, with a minimum log set: the walk enables hart 0 of all 32 minions of every shire in the mask (hart 1 enters and returns; no other shire is launched); at each mask the traces log at least (i) every hart (all 64) of every shire the mask enables and (ii) every hart (all 64) of at least one shire it does not enable (one run per mask logging every hart of the chip also meets this); (a) holds when, at both masks, every logged hart 0 of an enabled shire issues tensor loads, no logged hart 1 issues one, and no logged hart of a shire outside the mask retires a U-mode instruction; a log set below the minimum leaves (a) undecided",
+     "(b) for every traced minion (a minion whose hart 0 is logged), the ordered sequence of its tensor-load requests (operand, tile index relative to the operand's base) over the traced window equals the walk's for that minion: zero mismatches",
+     "(c) per traced minion, the request counts by operand equal the walk's",
+     "PASS = (a), (b) and (c) at both masks, and verify-v31trace HOLDS (or HOLDS WITH FIXES with its fixes applied and the check re-run); FAIL = any mismatch; NOT RUN = the traces cannot show (a)-(c) (v31-trace NOT TRACED, TRACED WITH GAPS that leave one of them undecided, or a log set below (a)'s minimum), or T7's desk precondition failed"
+    ]
+   },
+   "T7L": {
+    "as_v3_declared": "n/32 replaced by n_eff = (64 R/8 + 128 C/4) / 192 (R of 8 row groups, C of 4 column groups active; an A tile shared by a row group's shires, a B tile by a column group's) in X3 and XF, the map at the full chip's lines, no new constant"
+   },
+   "layout_classes": {
+    "rule": "for subset points only (a full-chip point, mask 0xffffffff, is in no class): n = 1: other; compact if n = 4 R (every active row group whole); else spread if R = min(8, n) (the shires in as many row groups as they can be); else other",
+    "e213_family_M": {
+     "compact": [
+      "0xf0000",
+      "0xf0f",
+      "0xfff",
+      "0xf0f0f0f"
+     ],
+     "spread": [
+      "0x11",
+      "0x1010101",
+      "0x22222222",
+      "0x55555555"
+     ],
+     "other": [
+      "0x3",
+      "0x3030303",
+      "0x7070707"
+     ]
+    },
+    "v3_sets_agree": "v3's compact (0xf, 0xff, 0xffff, 0xffffff) and spread (0x1111, 0x11111111, 0x33333333, 0x77777777) sets fall in the same classes",
+    "v3_other_reclassified": "8 of MM1-v3's 37 'other' subset points (masks 0xf000, 0xfff, 0xf0f0f0f, 0xf0f0f0f0, 0xffff0000) are compact under this rule (desk: compact 104, spread 37, other 29 of v3's 170 subset points); v3.1 and v3 refitted are scored on the same classes; v3's own LOLO sets REPORTED beside"
+   },
+   "rule": [
+    "if the trace check is PASS: fit T7, T7L and v3's n/32 form on all the data and on every LOEO and LOLO fold; T7 enters v3.1 if its LOLO wall rms over all subset points is lower than both others' and its pooled LOEO wall rms is not more than 0.05 points above the best of the three; otherwise the next step decides",
+    "if FAIL or NOT RUN (or T7 lost the step above): T7 stays out; T7L against n/32 by v3's declared time rule (lower pooled LOEO wall rms over all points; within 0.05 points the fewer constants; equal constants, n/32)"
+   ],
+   "not_wanted_if": "the rule keeps n/32",
+   "reported": [
+    "family M's measured spread among masks of one shire count beside each form",
+    "LOLO by class for all three forms"
+   ]
+  },
+  {
+   "id": 5,
+   "name": "the time fit: starts, seeds, basins, tolerance",
+   "v3": "six declared starts a fold; one start reached the lower (global) basin in 27 of 30 folds; ftol = xtol = gtol = 1e-8 stopped three folds short",
+   "starts_per_fit": 18,
+   "starts": {
+    "S0-S5": "MM1-v3's six declared starts (fit_v3.STARTS) for its names, the new names' six declared values (below)",
+    "S6-S17": "12 draws, numpy.random.default_rng(20261118).uniform over each constant's start box, names in sorted() order, one draw a name a start; recorded below as numbers (the fit uses the recorded numbers; re-drawing is a check)",
+    "same_for_every_fold_and_form": true,
+    "a_form_takes": "the names it has; a pinned constant takes its pinned value",
+    "S6-S17_draw_order": "start-major: S6's value for each of the 27 names of the box table in sorted() order (every name, whatever a form uses), then S7's, and so on to S17; each value rounded to 6 decimals"
+   },
+   "bounds_and_boxes": {
+    "c3": {
+     "bounds": [
+      -3000,
+      3000
+     ],
+     "start_box": [
+      100,
+      700
+     ],
+     "neutral": null
+    },
+    "m3": {
+     "bounds": [
+      -5,
+      10
+     ],
+     "start_box": [
+      0.3,
+      1.5
+     ],
+     "neutral": null
+    },
+    "cF": {
+     "bounds": [
+      -3000,
+      3000
+     ],
+     "start_box": [
+      100,
+      700
+     ],
+     "neutral": null
+    },
+    "mF": {
+     "bounds": [
+      -5,
+      10
+     ],
+     "start_box": [
+      1.0,
+      2.6
+     ],
+     "neutral": null
+    },
+    "kA": {
+     "bounds": [
+      0,
+      3
+     ],
+     "start_box": [
+      0.7,
+      1.3
+     ],
+     "neutral": 1.0
+    },
+    "F2": {
+     "bounds": [
+      0,
+      1000
+     ],
+     "start_box": [
+      150,
+      500
+     ],
+     "neutral": 0.0
+    },
+    "T2": {
+     "bounds": [
+      0,
+      2
+     ],
+     "start_box": [
+      0.0,
+      0.6
+     ],
+     "neutral": 0.0
+    },
+    "x1": {
+     "bounds": [
+      20,
+      120
+     ],
+     "start_box": [
+      30,
+      48
+     ],
+     "neutral": null
+    },
+    "w1": {
+     "bounds": [
+      0.3,
+      40
+     ],
+     "start_box": [
+      1.0,
+      8.0
+     ],
+     "neutral": null
+    },
+    "pB": {
+     "bounds": [
+      0,
+      0.95
+     ],
+     "start_box": [
+      0.05,
+      0.7
+     ],
+     "neutral": 0.0
+    },
+    "x2": {
+     "bounds": [
+      30,
+      400
+     ],
+     "start_box": [
+      50,
+      140
+     ],
+     "neutral": 1000000.0
+    },
+    "w2": {
+     "bounds": [
+      0.3,
+      80
+     ],
+     "start_box": [
+      3,
+      30
+     ],
+     "neutral": 1.0
+    },
+    "zeta": {
+     "bounds": [
+      0,
+      1
+     ],
+     "start_box": [
+      0.3,
+      1.0
+     ],
+     "neutral": 1.0
+    },
+    "piF0": {
+     "bounds": [
+      -0.5,
+      3
+     ],
+     "start_box": [
+      -0.1,
+      0.6
+     ],
+     "neutral": 0.0
+    },
+    "chi3": {
+     "bounds": [
+      -2,
+      0.95
+     ],
+     "start_box": [
+      -0.2,
+      0.4
+     ],
+     "neutral": 0.0
+    },
+    "chiF": {
+     "bounds": [
+      -2,
+      0.95
+     ],
+     "start_box": [
+      -0.2,
+      0.4
+     ],
+     "neutral": 0.0
+    },
+    "eta": {
+     "bounds": [
+      0,
+      2
+     ],
+     "start_box": [
+      0.0,
+      0.3
+     ],
+     "neutral": 0.0
+    },
+    "d8": {
+     "bounds": [
+      0,
+      0.2
+     ],
+     "start_box": [
+      0.0,
+      0.12
+     ],
+     "neutral": 0.0
+    },
+    "tC": {
+     "bounds": [
+      0,
+      400
+     ],
+     "start_box": [
+      0,
+      120
+     ],
+     "neutral": 0.0
+    },
+    "r2": {
+     "bounds": [
+      0,
+      1
+     ],
+     "start_box": [
+      0.2,
+      1.0
+     ],
+     "neutral": 1.0
+    },
+    "gamma_3": {
+     "bounds": [
+      -1,
+      3
+     ],
+     "start_box": [
+      -0.8,
+      1.5
+     ],
+     "neutral": 0.0
+    },
+    "gamma_F": {
+     "bounds": [
+      -1,
+      3
+     ],
+     "start_box": [
+      -0.8,
+      1.5
+     ],
+     "neutral": 0.0
+    },
+    "gamma_A": {
+     "bounds": [
+      -1,
+      3
+     ],
+     "start_box": [
+      -0.8,
+      1.5
+     ],
+     "neutral": 0.0
+    },
+    "gamma_B": {
+     "bounds": [
+      -1,
+      3
+     ],
+     "start_box": [
+      -0.8,
+      1.5
+     ],
+     "neutral": 0.0
+    },
+    "Tcoop_2": {
+     "bounds": [
+      -300,
+      600
+     ],
+     "start_box": [
+      -100,
+      300
+     ],
+     "neutral": 0.0
+    },
+    "Tcoop_3": {
+     "bounds": [
+      -300,
+      600
+     ],
+     "start_box": [
+      -100,
+      300
+     ],
+     "neutral": 0.0
+    },
+    "Tcoop_F": {
+     "bounds": [
+      -300,
+      600
+     ],
+     "start_box": [
+      -100,
+      400
+     ],
+     "neutral": 0.0
+    }
+   },
+   "start_values": [
+    {
+     "F2": 350.0,
+     "T2": 0.6,
+     "Tcoop_2": 0.0,
+     "Tcoop_3": 0.0,
+     "Tcoop_F": 0.0,
+     "c3": 391.6,
+     "cF": 278.6,
+     "chi3": 0.0,
+     "chiF": 0.0,
+     "d8": 0.06,
+     "eta": 0.0,
+     "gamma_3": 0.0,
+     "gamma_A": 0.0,
+     "gamma_B": 0.0,
+     "gamma_F": 0.0,
+     "kA": 1.0,
+     "m3": 0.776,
+     "mF": 1.88,
+     "pB": 0.3,
+     "piF0": 0.3,
+     "r2": 0.5,
+     "tC": 40.0,
+     "w1": 4.5,
+     "w2": 10.0,
+     "x1": 40.0,
+     "x2": 90.0,
+     "zeta": 0.5
+    },
+    {
+     "F2": 250.0,
+     "T2": 0.3,
+     "Tcoop_2": 10.0,
+     "Tcoop_3": 10.0,
+     "Tcoop_F": 50.0,
+     "c3": 195.8,
+     "cF": 417.9,
+     "chi3": 0.1,
+     "chiF": 0.1,
+     "d8": 0.03,
+     "eta": 0.1,
+     "gamma_3": -0.3,
+     "gamma_A": -0.3,
+     "gamma_B": 0.3,
+     "gamma_F": 0.3,
+     "kA": 1.2,
+     "m3": 1.164,
+     "mF": 1.41,
+     "pB": 0.2,
+     "piF0": 0.15,
+     "r2": 0.3,
+     "tC": 20.0,
+     "w1": 3.0,
+     "w2": 6.0,
+     "x1": 36.0,
+     "x2": 70.0,
+     "zeta": 0.8
+    },
+    {
+     "F2": 450.0,
+     "T2": 0.1,
+     "Tcoop_2": 30.0,
+     "Tcoop_3": 30.0,
+     "Tcoop_F": 150.0,
+     "c3": 587.4,
+     "cF": 209.0,
+     "chi3": -0.1,
+     "chiF": -0.1,
+     "d8": 0.09,
+     "eta": 0.0,
+     "gamma_3": 0.3,
+     "gamma_A": 0.3,
+     "gamma_B": -0.3,
+     "gamma_F": -0.3,
+     "kA": 0.9,
+     "m3": 0.582,
+     "mF": 2.35,
+     "pB": 0.4,
+     "piF0": 0.5,
+     "r2": 0.7,
+     "tC": 80.0,
+     "w1": 6.0,
+     "w2": 15.0,
+     "x1": 44.0,
+     "x2": 110.0,
+     "zeta": 0.3
+    },
+    {
+     "F2": 150.0,
+     "T2": 0.4,
+     "Tcoop_2": 0.0,
+     "Tcoop_3": 20.0,
+     "Tcoop_F": 100.0,
+     "c3": 100.0,
+     "cF": 600.0,
+     "chi3": 0.2,
+     "chiF": 0.4,
+     "d8": 0.0,
+     "eta": 0.2,
+     "gamma_3": -0.6,
+     "gamma_A": -0.6,
+     "gamma_B": 0.8,
+     "gamma_F": 0.8,
+     "kA": 1.0,
+     "m3": 1.0,
+     "mF": 1.0,
+     "pB": 0.1,
+     "piF0": 0.1,
+     "r2": 0.1,
+     "tC": 10.0,
+     "w1": 2.0,
+     "w2": 4.0,
+     "x1": 38.0,
+     "x2": 60.0,
+     "zeta": 0.6
+    },
+    {
+     "F2": 380.0,
+     "T2": 0.0,
+     "Tcoop_2": 60.0,
+     "Tcoop_3": 60.0,
+     "Tcoop_F": 250.0,
+     "c3": 600.0,
+     "cF": 150.0,
+     "chi3": 0.0,
+     "chiF": 0.3,
+     "d8": 0.12,
+     "eta": 0.05,
+     "gamma_3": 0.6,
+     "gamma_A": 0.6,
+     "gamma_B": 1.2,
+     "gamma_F": 1.2,
+     "kA": 1.3,
+     "m3": 0.5,
+     "mF": 2.2,
+     "pB": 0.5,
+     "piF0": 0.6,
+     "r2": 0.9,
+     "tC": 120.0,
+     "w1": 8.0,
+     "w2": 20.0,
+     "x1": 46.0,
+     "x2": 130.0,
+     "zeta": 0.9
+    },
+    {
+     "F2": 320.0,
+     "T2": 0.2,
+     "Tcoop_2": 20.0,
+     "Tcoop_3": 5.0,
+     "Tcoop_F": 120.0,
+     "c3": 0.0,
+     "cF": 300.0,
+     "chi3": -0.2,
+     "chiF": 0.0,
+     "d8": 0.05,
+     "eta": 0.3,
+     "gamma_3": 0.0,
+     "gamma_A": 0.0,
+     "gamma_B": 0.5,
+     "gamma_F": 0.5,
+     "kA": 1.05,
+     "m3": 1.2,
+     "mF": 1.6,
+     "pB": 0.25,
+     "piF0": 0.3,
+     "r2": 0.5,
+     "tC": 60.0,
+     "w1": 5.0,
+     "w2": 8.0,
+     "x1": 42.0,
+     "x2": 80.0,
+     "zeta": 0.5
+    },
+    {
+     "F2": 275.891671,
+     "T2": 0.324094,
+     "Tcoop_2": 54.825201,
+     "Tcoop_3": -79.862347,
+     "Tcoop_F": 34.8244,
+     "c3": 483.033932,
+     "cF": 179.95228,
+     "chi3": -0.172151,
+     "chiF": 0.246902,
+     "d8": 0.117951,
+     "eta": 0.158454,
+     "gamma_3": 0.808924,
+     "gamma_A": -0.510684,
+     "gamma_B": 0.628664,
+     "gamma_F": 0.794836,
+     "kA": 1.112346,
+     "m3": 0.403401,
+     "mF": 2.593137,
+     "pB": 0.237303,
+     "piF0": -0.059906,
+     "r2": 0.760179,
+     "tC": 118.290205,
+     "w1": 1.40543,
+     "w2": 19.133615,
+     "x1": 36.713487,
+     "x2": 137.119524,
+     "zeta": 0.451537
+    },
+    {
+     "F2": 371.604057,
+     "T2": 0.281936,
+     "Tcoop_2": 187.968033,
+     "Tcoop_3": -79.817001,
+     "Tcoop_F": 149.401116,
+     "c3": 337.385039,
+     "cF": 616.036184,
+     "chi3": 0.038608,
+     "chiF": -0.179655,
+     "d8": 0.014308,
+     "eta": 0.129871,
+     "gamma_3": 0.583296,
+     "gamma_A": 0.448775,
+     "gamma_B": 0.596616,
+     "gamma_F": 1.466714,
+     "kA": 1.058955,
+     "m3": 0.484276,
+     "mF": 1.110298,
+     "pB": 0.553157,
+     "piF0": -0.048823,
+     "r2": 0.865662,
+     "tC": 42.153058,
+     "w1": 3.859184,
+     "w2": 15.173049,
+     "x1": 42.272181,
+     "x2": 51.495988,
+     "zeta": 0.585253
+    },
+    {
+     "F2": 416.223064,
+     "T2": 0.222311,
+     "Tcoop_2": -8.366094,
+     "Tcoop_3": 264.997743,
+     "Tcoop_F": 330.773627,
+     "c3": 486.337475,
+     "cF": 468.53544,
+     "chi3": 0.20571,
+     "chiF": 0.193776,
+     "d8": 0.117901,
+     "eta": 0.269163,
+     "gamma_3": -0.532082,
+     "gamma_A": -0.21846,
+     "gamma_B": 1.267169,
+     "gamma_F": -0.296846,
+     "kA": 0.923599,
+     "m3": 1.14531,
+     "mF": 1.464979,
+     "pB": 0.381937,
+     "piF0": 0.281936,
+     "r2": 0.400905,
+     "tC": 36.643499,
+     "w1": 7.557542,
+     "w2": 3.354797,
+     "x1": 35.180382,
+     "x2": 76.304184,
+     "zeta": 0.919221
+    },
+    {
+     "F2": 310.408868,
+     "T2": 0.019627,
+     "Tcoop_2": 25.151237,
+     "Tcoop_3": 245.49644,
+     "Tcoop_F": 135.177843,
+     "c3": 688.663504,
+     "cF": 370.105499,
+     "chi3": 0.241099,
+     "chiF": 0.311488,
+     "d8": 0.06504,
+     "eta": 0.157048,
+     "gamma_3": 0.574166,
+     "gamma_A": 0.339531,
+     "gamma_B": -0.48245,
+     "gamma_F": -0.496651,
+     "kA": 0.843969,
+     "m3": 0.614071,
+     "mF": 1.754984,
+     "pB": 0.621264,
+     "piF0": 0.502529,
+     "r2": 0.804504,
+     "tC": 35.549168,
+     "w1": 2.979376,
+     "w2": 9.530087,
+     "x1": 38.155104,
+     "x2": 83.597759,
+     "zeta": 0.690952
+    },
+    {
+     "F2": 390.871426,
+     "T2": 0.561352,
+     "Tcoop_2": 132.849433,
+     "Tcoop_3": 203.026392,
+     "Tcoop_F": 155.227043,
+     "c3": 408.838324,
+     "cF": 297.823607,
+     "chi3": -0.184971,
+     "chiF": 0.274775,
+     "d8": 0.046645,
+     "eta": 0.124483,
+     "gamma_3": 0.522187,
+     "gamma_A": 1.318543,
+     "gamma_B": 0.715001,
+     "gamma_F": -0.56603,
+     "kA": 0.702965,
+     "m3": 1.177487,
+     "mF": 1.784509,
+     "pB": 0.347269,
+     "piF0": 0.463685,
+     "r2": 0.431642,
+     "tC": 82.673528,
+     "w1": 7.944854,
+     "w2": 22.506373,
+     "x1": 30.117985,
+     "x2": 94.801674,
+     "zeta": 0.892267
+    },
+    {
+     "F2": 388.081559,
+     "T2": 0.147293,
+     "Tcoop_2": 260.415373,
+     "Tcoop_3": -73.278194,
+     "Tcoop_F": 158.674137,
+     "c3": 231.664618,
+     "cF": 589.875185,
+     "chi3": 0.033256,
+     "chiF": 0.269642,
+     "d8": 0.052412,
+     "eta": 0.261001,
+     "gamma_3": 0.853225,
+     "gamma_A": -0.766332,
+     "gamma_B": -0.179841,
+     "gamma_F": 0.277312,
+     "kA": 0.982709,
+     "m3": 0.525148,
+     "mF": 1.765853,
+     "pB": 0.116653,
+     "piF0": 0.350646,
+     "r2": 0.822593,
+     "tC": 95.745304,
+     "w1": 2.814803,
+     "w2": 11.519391,
+     "x1": 30.374409,
+     "x2": 99.040714,
+     "zeta": 0.686938
+    },
+    {
+     "F2": 182.142656,
+     "T2": 0.427531,
+     "Tcoop_2": 250.053791,
+     "Tcoop_3": -88.397142,
+     "Tcoop_F": -35.439014,
+     "c3": 516.920096,
+     "cF": 308.79951,
+     "chi3": -0.093291,
+     "chiF": -0.198776,
+     "d8": 0.08345,
+     "eta": 0.287117,
+     "gamma_3": 1.197972,
+     "gamma_A": 1.038386,
+     "gamma_B": 0.518205,
+     "gamma_F": 0.33345,
+     "kA": 0.806894,
+     "m3": 0.951134,
+     "mF": 2.235009,
+     "pB": 0.256404,
+     "piF0": 0.038421,
+     "r2": 0.47369,
+     "tC": 106.20738,
+     "w1": 5.419484,
+     "w2": 23.813086,
+     "x1": 37.207575,
+     "x2": 107.834924,
+     "zeta": 0.626808
+    },
+    {
+     "F2": 495.83454,
+     "T2": 0.318205,
+     "Tcoop_2": 247.77981,
+     "Tcoop_3": -79.541297,
+     "Tcoop_F": 203.469719,
+     "c3": 152.875953,
+     "cF": 207.90714,
+     "chi3": 0.321909,
+     "chiF": -0.036058,
+     "d8": 0.00294,
+     "eta": 0.060757,
+     "gamma_3": -0.556081,
+     "gamma_A": 1.345637,
+     "gamma_B": -0.130744,
+     "gamma_F": 1.367388,
+     "kA": 1.205694,
+     "m3": 1.29366,
+     "mF": 2.318613,
+     "pB": 0.26331,
+     "piF0": 0.119868,
+     "r2": 0.649714,
+     "tC": 75.244967,
+     "w1": 4.358772,
+     "w2": 24.408467,
+     "x1": 47.937639,
+     "x2": 78.81759,
+     "zeta": 0.445805
+    },
+    {
+     "F2": 247.479333,
+     "T2": 0.259557,
+     "Tcoop_2": 202.667102,
+     "Tcoop_3": 253.717395,
+     "Tcoop_F": 158.210473,
+     "c3": 690.806305,
+     "cF": 376.390463,
+     "chi3": 0.295367,
+     "chiF": 0.27452,
+     "d8": 0.064081,
+     "eta": 0.149014,
+     "gamma_3": 1.327665,
+     "gamma_A": -0.733096,
+     "gamma_B": 0.082878,
+     "gamma_F": -0.609607,
+     "kA": 1.171924,
+     "m3": 1.004647,
+     "mF": 2.007891,
+     "pB": 0.665408,
+     "piF0": 0.416791,
+     "r2": 0.913204,
+     "tC": 71.807595,
+     "w1": 4.98503,
+     "w2": 20.675609,
+     "x1": 40.561793,
+     "x2": 81.211475,
+     "zeta": 0.595066
+    },
+    {
+     "F2": 336.75945,
+     "T2": 0.447106,
+     "Tcoop_2": 36.221883,
+     "Tcoop_3": -44.546666,
+     "Tcoop_F": 1.242927,
+     "c3": 632.114606,
+     "cF": 698.084644,
+     "chi3": 0.298117,
+     "chiF": 0.347149,
+     "d8": 0.072411,
+     "eta": 0.168935,
+     "gamma_3": 0.184139,
+     "gamma_A": -0.581363,
+     "gamma_B": 0.184654,
+     "gamma_F": -0.108507,
+     "kA": 1.188217,
+     "m3": 1.371696,
+     "mF": 2.596674,
+     "pB": 0.56855,
+     "piF0": 0.57065,
+     "r2": 0.88541,
+     "tC": 22.923371,
+     "w1": 6.253993,
+     "w2": 26.921335,
+     "x1": 41.675785,
+     "x2": 138.548862,
+     "zeta": 0.69796
+    },
+    {
+     "F2": 435.536484,
+     "T2": 0.501637,
+     "Tcoop_2": 11.024323,
+     "Tcoop_3": 73.75962,
+     "Tcoop_F": 106.237557,
+     "c3": 244.37266,
+     "cF": 383.723137,
+     "chi3": 0.069282,
+     "chiF": -0.187641,
+     "d8": 0.0914,
+     "eta": 0.18623,
+     "gamma_3": 0.94779,
+     "gamma_A": -0.041911,
+     "gamma_B": -0.197547,
+     "gamma_F": 1.399426,
+     "kA": 1.146594,
+     "m3": 0.914787,
+     "mF": 2.424981,
+     "pB": 0.474694,
+     "piF0": 0.183556,
+     "r2": 0.506332,
+     "tC": 72.602733,
+     "w1": 4.789565,
+     "w2": 17.747173,
+     "x1": 35.302045,
+     "x2": 72.62921,
+     "zeta": 0.864032
+    },
+    {
+     "F2": 302.694391,
+     "T2": 0.591861,
+     "Tcoop_2": -2.808349,
+     "Tcoop_3": 204.224582,
+     "Tcoop_F": 112.716796,
+     "c3": 477.570299,
+     "cF": 168.023085,
+     "chi3": -0.1869,
+     "chiF": 0.234876,
+     "d8": 0.074605,
+     "eta": 0.138655,
+     "gamma_3": 0.183438,
+     "gamma_A": 1.281428,
+     "gamma_B": 1.005299,
+     "gamma_F": -0.296831,
+     "kA": 1.2465,
+     "m3": 0.36066,
+     "mF": 2.349057,
+     "pB": 0.07313,
+     "piF0": 0.416959,
+     "r2": 0.881276,
+     "tC": 71.39838,
+     "w1": 3.240238,
+     "w2": 8.355114,
+     "x1": 44.42386,
+     "x2": 120.227132,
+     "zeta": 0.370475
+    }
+   ],
+   "optimizer": {
+    "phase_1": "scipy least_squares on forecast / measured - 1 of the wall op time, every training point weight 1, x_scale 'jac', diff_step 1e-4, ftol = xtol = gtol = 1e-8, at most 4,000 evaluations, each of the 18 starts",
+    "phase_2": "the three lowest phase-1 costs continued from their end points at ftol = xtol = gtol = 1e-12, at most 4,000 evaluations a leg, restarted from the last point while the cost falls by more than 1e-9 relative, at most 5 legs",
+    "winner": "the lowest phase-2 training cost; ties within 1e-9 relative to the lower start index",
+    "basins": "two continued solutions share a basin when their costs agree within 1e-6 relative; reported per fold: every start's phase-1 cost, status and evaluations, the three continued costs and held-out rms, the winner's start, and how many of the 18 phase-1 costs lie within 1e-3 relative of the winner's; a fold whose winner one start alone reached is flagged (no change of rule)"
+   },
+   "energy_fit": {
+    "starts": "9: MM1-v3's three (the linear solve at kc 1, xi 1, m 1, eC 1, then kc / xi / m 1.05 / 0.5 / 1.2 and 0.95 / 0.9 / 2.0) and 6 draws numpy.random.default_rng(20261119).uniform over the boxes below; each start's linear constants from the linear solve at its nonlinear values, clipped into bounds (E1b's b2, d2 to >= 0)",
+    "boxes": {
+     "eC": {
+      "bounds": [
+       0,
+       10
+      ],
+      "start_box": [
+       0,
+       8
+      ]
+     },
+     "kc|aifoundry1 card 0": {
+      "bounds": [
+       0.5,
+       2
+      ],
+      "start_box": [
+       0.8,
+       1.25
+      ]
+     },
+     "kc|aifoundry1 card 1": {
+      "bounds": [
+       0.5,
+       2
+      ],
+      "start_box": [
+       0.8,
+       1.25
+      ]
+     },
+     "kc|aifoundry2 card 0": {
+      "bounds": [
+       0.5,
+       2
+      ],
+      "start_box": [
+       0.8,
+       1.25
+      ]
+     },
+     "m|fp16": {
+      "bounds": [
+       0.2,
+       5
+      ],
+      "start_box": [
+       0.5,
+       2.0
+      ]
+     },
+     "m|int8": {
+      "bounds": [
+       0.2,
+       5
+      ],
+      "start_box": [
+       1.0,
+       5.0
+      ]
+     },
+     "xi": {
+      "bounds": [
+       0,
+       1
+      ],
+      "start_box": [
+       0,
+       1
+      ]
+     }
+    },
+    "start_values": [
+     {
+      "eC": 1.0,
+      "kc|aifoundry1 card 0": 1.0,
+      "kc|aifoundry1 card 1": 1.0,
+      "kc|aifoundry2 card 0": 1.0,
+      "m|fp16": 1.0,
+      "m|int8": 1.0,
+      "xi": 1.0
+     },
+     {
+      "eC": 1.0,
+      "kc|aifoundry1 card 0": 1.05,
+      "kc|aifoundry1 card 1": 1.05,
+      "kc|aifoundry2 card 0": 1.05,
+      "m|fp16": 1.2,
+      "m|int8": 1.2,
+      "xi": 0.5
+     },
+     {
+      "eC": 1.0,
+      "kc|aifoundry1 card 0": 0.95,
+      "kc|aifoundry1 card 1": 0.95,
+      "kc|aifoundry2 card 0": 0.95,
+      "m|fp16": 2.0,
+      "m|int8": 2.0,
+      "xi": 0.9
+     },
+     {
+      "eC": 0.730591,
+      "kc|aifoundry1 card 0": 0.930821,
+      "kc|aifoundry1 card 1": 1.056661,
+      "kc|aifoundry2 card 0": 0.908257,
+      "m|fp16": 0.954612,
+      "m|int8": 3.042909,
+      "xi": 0.9895
+     },
+     {
+      "eC": 5.470172,
+      "kc|aifoundry1 card 0": 0.969508,
+      "kc|aifoundry1 card 1": 1.220346,
+      "kc|aifoundry2 card 0": 0.814914,
+      "m|fp16": 1.041508,
+      "m|int8": 4.96735,
+      "xi": 0.121807
+     },
+     {
+      "eC": 5.743294,
+      "kc|aifoundry1 card 0": 1.16107,
+      "kc|aifoundry1 card 1": 0.830189,
+      "kc|aifoundry2 card 0": 0.888028,
+      "m|fp16": 1.296253,
+      "m|int8": 1.566403,
+      "xi": 0.239964
+     },
+     {
+      "eC": 5.765871,
+      "kc|aifoundry1 card 0": 0.938748,
+      "kc|aifoundry1 card 1": 1.242492,
+      "kc|aifoundry2 card 0": 1.182461,
+      "m|fp16": 0.555917,
+      "m|int8": 1.196366,
+      "xi": 0.304091
+     },
+     {
+      "eC": 6.245537,
+      "kc|aifoundry1 card 0": 1.017019,
+      "kc|aifoundry1 card 1": 0.948549,
+      "kc|aifoundry2 card 0": 1.003434,
+      "m|fp16": 1.804304,
+      "m|int8": 1.47585,
+      "xi": 0.664183
+     },
+     {
+      "eC": 4.293042,
+      "kc|aifoundry1 card 0": 0.887746,
+      "kc|aifoundry1 card 1": 0.922728,
+      "kc|aifoundry2 card 0": 0.964711,
+      "m|fp16": 1.545437,
+      "m|int8": 1.1215,
+      "xi": 0.824131
+     }
+    ],
+    "optimizer": "least_squares on (W - W_meas) / max(W_meas, 3 W), ftol = xtol = gtol = 1e-12, at most 3,000 evaluations; the lowest cost wins",
+    "time_inputs": "each energy fold reads its own time fold's phase-2 winner (lines, op times, retention)",
+    "draw_order": "start-major: E3's value for each of the seven names in sorted() order, then E4's, to E8; each rounded to 6 decimals"
+   },
+   "cost_estimate_desk": "MM1-v3's record: one form, 32 fits x 6 starts in about 25 minutes on one core (about 8 s a start); so 18 starts plus phase 2 is about 2.5 minutes a fit, about 50 minutes for LOEO (20 fits) and 90 minutes for every fold of one form"
+  },
+  {
+   "id": 6,
+   "name": "the census's gemmLnc instruction energy",
+   "v3": "census-v3.json gives gemmLnc -45.66 pJ a minion-op relative to rgm136 gemmL (the two removed tensor_coop issue slots not credited)",
+   "correction": {
+    "rule": "the census's own stated rule applied to every class: dE = sum over classes dn_c (e_c - cpi p_awake), tensor CSRs priced e_c = 0, so a removed CSR issue slot returns its awake share cpi p_awake",
+    "awake_share_per_issue_slot_pJ": 3.008668,
+    "loops": {
+     "rgm136 gemmL": {
+      "census_v3_pJ": 0.0,
+      "v3_1_pJ": 0.0,
+      "changes": false,
+      "dn": {}
+     },
+     "rgm136 gemmLnc": {
+      "census_v3_pJ": -45.6567,
+      "v3_1_pJ": -39.6393,
+      "changes": true,
+      "dn": {
+       "csr_tensor_coop": -2,
+       "ld_stack": -4,
+       "sd_stack": -1
+      }
+     },
+     "rgm211 gemmL": {
+      "census_v3_pJ": -62.448,
+      "v3_1_pJ": -62.448,
+      "changes": false,
+      "dn": {
+       "alu": 1,
+       "ld_stack": -4,
+       "sd_stack": -3
+      }
+     },
+     "rgm211 gemmLn": {
+      "census_v3_pJ": -142.07,
+      "v3_1_pJ": -142.07,
+      "changes": false,
+      "dn": {
+       "alu": 1,
+       "ld_stack": -12,
+       "sd_stack": -4
+      }
+     }
+    },
+    "label": "desk arithmetic from census-v3.json (sha256 cad5250c...); no fit"
+   },
+   "rule": "v3.1 reads census-v3.1.json = census-v3.json with gemmLnc's dE_instr_pJ_per_minion_op_vs_rgm136 set to -39.6393 and a note; the time paths (D_A, D_B) and every other loop unchanged; its sha256 recorded by the fit lane",
+   "size": "about +6.0 pJ a minion-op, about 4 mW at 1,024 minions and a 1.5 us op (desk)"
+  },
+  {
+   "id": 7,
+   "name": "the new switch counts (lane v31-counts)",
+   "inputs_only": "each count enters as S(fmt, kind, KB) (signal fin edges an op, lo, zero delay) and v (valid share) exactly as MM1-v3's counts do (energy_v3.counts), never fitted or adjusted",
+   "source": "v31-counts' committed count tables (tools/matmul/mm1/v3.1/counts/), entering only if its re-count of two committed points matched and verify-v31counts HOLDS (or its fixes are applied); their sha256 recorded, from the committed counts/ folder at GitHub main, in v3.1's README inputs table and in its fit record at the fit's start, before any v3.1 residual on those kinds is read",
+   "footings": {
+    "fp32": "counted at GEMM accumulator states (gate level)",
+    "fp16": "estimated: RTL toggles x the fp32 gate/RTL ratio",
+    "int8": "counted around the arithmetic only (m_int8 carries the rest: a reading, not a count)"
+   },
+   "energy_calibrated_constant": "b0 (J a fin edge), with m_fp16 and m_int8, fitted jointly with the other energy constants on every energy point whose kind has a committed count, as v3: one b0 for every card and kind; kappa = 1 / (m b0) reported",
+   "not_forecast": "a kind with no committed count stays NOT FORECAST in energy (time forecast); never a nearest-kind guess",
+   "new_fit_data": "E212's switch-pattern arms and plan and real tiles enter v3.1's energy fit once counted; E213's zeros, ones, sparse50 points as counted kinds",
+   "phi_precedence": [
+    "MM1-v3's energy_v3.phi_of where it gives a value (zeros 0, random 1, ones, sparse50 and E210's kinds, unchanged)",
+    "else the mean of kinds_v3.phi over the kind's committed tile files (the tiles its runs delivered)",
+    "else kinds_v3.phi's generator law, only for a law it defines (randn, sparse50, sparse25, e37)",
+    "else no phi: the kind is NOT FORECAST in energy"
+   ]
+  },
+  {
+   "id": 8,
+   "name": "the one-K-block term: T5r against tC, decided by E213 family C",
+   "v3": "T5r (r2 = 0.641) beat tC by 0.14 points of LOEO (4.53 vs 4.67%); E146's store rungs, never trained, read T5r 5.29% vs tC 3.57%",
+   "frozen_forecasts": {
+    "T5r": "MM1-v3 as frozen (out/mm1_v3_e213.csv; tools/claims-v3/e213/forecast-e213b-v3.csv)",
+    "tC": "MM1-v3's primary form with its frozen all-data constants (out/fits/time_v3.json theta_all, landed b1493082), engine_v3.TimeEngine at E213's registered points, 600 MHz; computed by this lane before any E213 datum (desk); the same harness reproduced the frozen T5r forecasts at all 131 points to 9.9e-07",
+    "cases": [
+     "a037",
+     "a038",
+     "a039",
+     "a040",
+     "a041",
+     "a042",
+     "a043",
+     "a044",
+     "a045",
+     "a046",
+     "a047",
+     "a048",
+     "k20",
+     "k21",
+     "k22",
+     "k23",
+     "k24",
+     "k25",
+     "k26",
+     "k27"
+    ],
+    "wall_cycles": {
+     "a037": {
+      "arm_token": "gemmL3x2x1",
+      "format": "int8",
+      "T5r": 888.514,
+      "tC": 856.766545
+     },
+     "a038": {
+      "arm_token": "gemmL3x2x1",
+      "format": "fp32",
+      "T5r": 856.997,
+      "tC": 834.492332
+     },
+     "a039": {
+      "arm_token": "gemmL4x5x1",
+      "format": "int8",
+      "T5r": 972.443,
+      "tC": 925.96736
+     },
+     "a040": {
+      "arm_token": "gemmL4x5x1",
+      "format": "fp32",
+      "T5r": 954.79,
+      "tC": 928.052453
+     },
+     "a041": {
+      "arm_token": "gemmL7x3x1",
+      "format": "int8",
+      "T5r": 1045.555,
+      "tC": 1010.918269
+     },
+     "a042": {
+      "arm_token": "gemmL7x3x1",
+      "format": "fp32",
+      "T5r": 1030.946,
+      "tC": 1012.785589
+     },
+     "a043": {
+      "arm_token": "gemmL9x7x1",
+      "format": "int8",
+      "T5r": 945.933,
+      "tC": 895.138738
+     },
+     "a044": {
+      "arm_token": "gemmL9x7x1",
+      "format": "fp32",
+      "T5r": 927.355,
+      "tC": 897.822486
+     },
+     "a045": {
+      "arm_token": "gemmL10x10x1",
+      "format": "int8",
+      "T5r": 938.976,
+      "tC": 884.554006
+     },
+     "a046": {
+      "arm_token": "gemmL10x10x1",
+      "format": "fp32",
+      "T5r": 920.535,
+      "tC": 888.687823
+     },
+     "a047": {
+      "arm_token": "gemmL14x12x1",
+      "format": "int8",
+      "T5r": 1020.568,
+      "tC": 962.192456
+     },
+     "a048": {
+      "arm_token": "gemmL14x12x1",
+      "format": "fp32",
+      "T5r": 1007.817,
+      "tC": 973.605249
+     },
+     "k20": {
+      "arm_token": "gemmL2x3x1",
+      "format": "int8",
+      "T5r": 881.299,
+      "tC": 837.163539
+     },
+     "k21": {
+      "arm_token": "gemmL2x3x1",
+      "format": "fp32",
+      "T5r": 853.008,
+      "tC": 823.284481
+     },
+     "k22": {
+      "arm_token": "gemmL4x4x1",
+      "format": "int8",
+      "T5r": 970.977,
+      "tC": 896.329307
+     },
+     "k23": {
+      "arm_token": "gemmL4x4x1",
+      "format": "fp32",
+      "T5r": 951.513,
+      "tC": 892.512622
+     },
+     "k24": {
+      "arm_token": "gemmL7x3x1",
+      "format": "int8",
+      "T5r": 1045.555,
+      "tC": 1010.918269
+     },
+     "k25": {
+      "arm_token": "gemmL7x3x1",
+      "format": "fp32",
+      "T5r": 1030.946,
+      "tC": 1012.785589
+     },
+     "k26": {
+      "arm_token": "gemmL4x3x2",
+      "format": "int8",
+      "T5r": 1077.1,
+      "tC": 1087.837467
+     },
+     "k27": {
+      "arm_token": "gemmL4x3x2",
+      "format": "fp32",
+      "T5r": 1047.652,
+      "tC": 1053.630168
+     }
+    }
+   },
+   "rule": [
+    "after scores-e213 is committed: per case of arm A's family C (a037-a048) and arm B's BK (k20-k27), 20 cases (a case per arm), d = |ln(m / F_T5r)| - |ln(m / F_tC)| with m the measured wall cycles an op as E213's frozen scorer reports it; tie |d| <= 0.005",
+    "exact two-sided sign test on the untied cases at alpha 0.05: tC enters if it is closer significantly, T5r if T5r is",
+    "NOT DECIDED or fewer than 10 untied cases: both forms refitted on v3.1's data (E213 included) on every LOEO fold, with the other terms as decision steps 3 and 4 chose them; the lower pooled LOEO wall rms over all points wins, within 0.05 points T5r (the incumbent, equal constants)"
+   ],
+   "r2_reading": "if T5r stays: as MM1-v3's code applies it, to the closed-form map's L2 hits only, never to E211's exact walk map for rgm211's gemmLn (the reading v3 was frozen under); the literal reading REPORTED beside; at a subset point mapped by T7, r2 multiplies T7's L2 hit shares exactly where it would multiply the closed form's at that arm (item 4, step 3)",
+   "reported": [
+    "E146's store rungs (never trained) under both forms",
+    "family C's rms and bias by format under both frozen forms"
+   ]
+  },
+  {
+   "id": 9,
+   "name": "the data, the folds, the scores, the acceptance rules",
+   "data": {
+    "time": "every committed matmul point MM1-v3 read (1,737 points: E105-E190, E206 A and B, E207, E208's seven sessions, E209, E211, E212's eight sessions) plus E212 a2c0-S4 (committed 724e8f39) and E213 arms A and B, and any further committed session of E206-E213 at GitHub main when the fit starts; a new matmul experiment enters only by a dated amendment before the fit",
+    "energy": "MM1-v3's energy points (with E210) plus those sessions' energy points and E213's, the switch-pattern kinds once counted (item 7)",
+    "e213_gate": "E213 enters only after scores-e213's commit is on GitHub main; v3.1's fit starts after it (or after E213 is recorded as not run: then v3.1 is fitted without it, item 8 takes its step 3, and the README says so) and reads GitHub main at its start (named in the README)",
+    "e146_store_rungs": "in no training set, scored apart (as v3)",
+    "e212_a2c0_S3": "NOT RUN by the crash; included only if re-run and committed before the fit starts",
+    "one_point": "one time point a (card, case), the mean of its runs; energy a (experiment, card, configuration, kind)"
+   },
+   "folds": {
+    "LOEO": [
+     "E105",
+     "E107",
+     "E119",
+     "E126",
+     "E136",
+     "E146",
+     "E158",
+     "E159",
+     "E168",
+     "E169",
+     "E190",
+     "E206",
+     "E207",
+     "E208",
+     "E209",
+     "E211",
+     "E212",
+     "E213"
+    ],
+    "sub_folds": [
+     "E212 by card (a1c1, a1c0, a2c0)",
+     "E213 by arm (A aifoundry3 card 0, B aifoundry1 card 1)"
+    ],
+    "energy_only": [
+     "E210"
+    ],
+    "LOCO": [
+     "aifoundry3 card 0",
+     "aifoundry1 card 1",
+     "aifoundry2 card 0",
+     "aifoundry1 card 0"
+    ],
+    "LOCO_energy_routes": "both routes of item 2",
+    "LOKO": [
+     "rgm211 gemmLn",
+     "rgm211 gemmL",
+     "rgm136 gemmLnc",
+     "run_gemm"
+    ],
+    "leave_rgm211_out": "every rgm211 point (gemmLn and gemmL) in one fold",
+    "LOLO": [
+     "compact",
+     "spread",
+     "other (item 4 classes)"
+    ],
+    "every_fold": "every constant refitted from the 18 starts; the pin rule (v3's sets plus item 3's); the energy folds on their own time folds"
+   },
+   "twins": "a scored point is a twin when its card, kernel, arm, format, mask and clock (to 25 MHz) are in the training set that priced it (energy adds the kind); headline figures exclude twins, figures with them are printed beside. E213's 127 points (role 'point' in points-e213.csv, 117 cases) are configurations never run on their card, so none of them is a twin; its four references (a088, a089, a090 on arm A, k41 on arm B: rgm136 gemmL1x1x1 and gemmL4x8x8 int8 random) ran before on those cards, so they are twins wherever those runs are in training and leave headline figures like any twin",
+   "scores": "wall cycles, the counter's mean, seconds, J over idle given t and with t forecast, J at rest both ways; per case (time) and per point (energy), rms and bias of forecast / measured - 1; J over idle at 3 W and above, watts below",
+   "baseline": "v3 refitted: MM1-v3's forms (time v3+T5r, energy v3 = E1u, b2 and d2 unbounded) refitted on exactly v3.1's inputs (census-v3.1.json of item 6, item 7's counts and phi rule, the same data, folds, twins and pins) by item 5's procedure (the same starts, seeds and tolerances), its LOCO energy scored under both routes of item 2 as v3.1's is",
+   "acceptance": [
+    {
+     "rule": 1,
+     "what": "LOEO wall cycles (no twin) and LOEO W over idle given t (no twin, >= 3 W, points both price) both lower than v3 refitted's"
+    },
+    {
+     "rule": 2,
+     "what": "LOCO wall cycles (every point) and LOCO W over idle given t (anchor route for both models, the held-out card's anchor points excluded) not worse than v3 refitted's by more than 0.30 points in either; the fallback route's figures beside"
+    },
+    {
+     "rule": 3,
+     "what": "leave rgm211 out: wall rms at or under 8.0% over its points, and at least 7 of E211's 10 W pairs inside 0.05 in ln (E213's rgm211 / rgm136 pairs REPORTED)"
+    },
+    {
+     "rule": 4,
+     "what": "(a) the E212 fold under MM1-v2's unread error on the same E212 case records, decided by comparator_4a_v31.py; (b) the E213 fold (both arms) under MM1-v3's blind error on the same E213 points in the same unit (per case wall cycles, per point W over idle given t at 3 W and above), on E213's 127 points (117 cases; the four references excluded, REPORTED beside), from scores-e213's committed outputs",
+     "a_comparator": {
+      "file": "tools/matmul/mm1/v3.1/comparator_4a_v31.py",
+      "sha256": "17b336e10b9f4b0a521c0cb83630575f9f54b5d1d993436677aedefdcf38f960",
+      "frozen": "before v3.1's fit, with this declaration",
+      "records": "the (card, case) means over the runs of E212's nine committed sessions (MM1-v3's data_v3.cases; a case run in two sessions is one record: 27 such cases); MM1-v2 called on each record as MM1-v3's unread_v2_e212.py calls it",
+      "time": "per case wall cycles an op, over every record v3.1's E212 fold scores",
+      "energy": "per record W over idle given t, where both models price W at a measured 3 W or more",
+      "excluded": "a v3.1 record with another measured value (a session the script does not read) leaves the comparison and is listed",
+      "twins": "included, as MM1-v3's rule 4 was scored; without v3.1's twins REPORTED",
+      "pass": "v3.1's rms lower than MM1-v2's in both",
+      "desk_v2_unread_nine_session_records": {
+       "when_pst": "2026-11-18 05:58",
+       "wall": {
+        "bias_pct": -3.309,
+        "n": 456,
+        "rms_pct": 6.645
+       },
+       "W_given_t_ge3W": {
+        "bias_pct": 1.984,
+        "n": 389,
+        "rms_pct": 7.597
+       }
+      },
+      "REPORTED_beside": {
+       "eight_sessions_committed": {
+        "wall": {
+         "n": 427,
+         "rms_pct": 6.65
+        },
+        "W_given_t_ge3W": {
+         "n": 362,
+         "rms_pct": 7.76
+        },
+        "reproduced_by_the_same_code_to": 5e-07
+       },
+       "a2c0_S4_alone_committed": {
+        "wall": {
+         "n": 56,
+         "rms_pct": 5.8
+        },
+        "W_given_t_ge3W": {
+         "n": 54,
+         "rms_pct": 5.14
+        }
+       }
+      }
+     }
+    }
+   ],
+   "if_a_rule_fails": "v3.1 is still frozen as built and the verdict names the rule that failed; v3's record and MM1-v3's blind E213 score beside",
+   "e213_fold_label": "held out for every constant; post hoc for the form choices E213 decides (item 8, and items 1, 3, 4 whose rules include the E213 fold)",
+   "term_not_wanted": "a term stays out when its declared rule picks the form without it; a term in v3.1 whose every constant sits within 1% of its neutral value (or at a bound that makes it neutral) in the all-data fit is reported as not identified",
+   "identification_report": "for every constant of the final fit: its all-data value, bound activity and relative standard error from the Jacobian; above 100% it is reported as not identified (eta and T2 in v3), no change of the fit",
+   "ledger_form": "v3-ledger refitted on v3.1's data, LOEO and LOKO energy REPORTED beside, never chosen (v3's energy decision stands)"
+  },
+  {
+   "id": 10,
+   "name": "v3.1's own blind day (a later experiment)",
+   "when": "registered after v3.1 lands, with its number the next free one then; forecasts of v3.1 and v3 (both frozen) and MM1-v2 beside",
+   "cards": "aifoundry3 card 0 (arm A) and aifoundry1 card 1 (arm B) at 600 MHz, as the lab's bookings and the model session's claims allow; aifoundry2 card 0 is not an arm of that day (its host went down on 13 and 17 Nov 2026 with no stated cause); adding it takes a dated amendment to that registration",
+   "families": {
+    "L": {
+     "tests": "the layout term (T7 or its fallback)",
+     "quota": [
+      20,
+      8
+     ],
+     "grid": "rgm136 gemmL fp32 zeros and random at shapes of 40-160 MB (MB, NB, KB up to 16) whose full-chip configuration ran on the arm's card; masks {4 g + c : g in G, c in C} for every row-group set G and column-group set C with n from 2 to 28"
+    },
+    "P": {
+     "tests": "the path and cooperation terms (item 3's winner)",
+     "quota": [
+      12,
+      6
+     ],
+     "grid": "rgm211 gemmLn, rgm211 gemmL, gemmLnc and rgm136 gemmL, fp32 random (int8 at KB <= 2), at one-stream shapes (MB = 1 or NB = 1, the other up to 16), 5-200 MB, KB 1-48"
+    },
+    "C": {
+     "tests": "the one-K-block form (item 8's winner)",
+     "quota": [
+      10,
+      6
+     ],
+     "grid": "rgm136 gemmL, KB 1-2, MB x NB >= 2, MB, NB <= 16, int8 and fp32 random"
+    },
+    "R": {
+     "tests": "the two-edge retention",
+     "quota": [
+      10,
+      6
+     ],
+     "grid": "rgm136 gemmL, MB, NB <= 4, 36-140 MB, fp32 and int8 random"
+    },
+    "S": {
+     "tests": "the switch route on newly counted kinds",
+     "quota": [
+      8,
+      6
+     ],
+     "grid": "kinds counted by v31-counts never run in a GEMM on that card, at gemmL3x1x3 fp32 (and int8 if counted), each beside random in A B B A blocks"
+    }
+   },
+   "point_rule": [
+    "candidates = the family grid less every token found by E213's shape-level never-run scan (every committed data folder and lane folder; any card for arm A, the arm's card for arm B), re-run at the registration",
+    "score each candidate by |ln(F_v3.1 / F_v3)| of the wall cycles (family S: of W over idle, where F_v3 is MM1-v3's energy form at its landed constants with the new kinds' counts from item 7's verified tables as inputs and phi by item 7's rule; a candidate either model cannot price leaves family S's grid)",
+    "take ceil(q/2) of the quota by descending score (ties by the sorted token), the rest by random.Random('v3.1-blind|<arm>|<family>').sample of the remaining candidates sorted by token (ascending, as E213's never-run scan spells it)",
+    "a family with fewer candidates than its quota takes all of them",
+    "cap: arm A at most 70 card-minutes, arm B 48 (E213's caps), by the registration's plan in E213's run form; over the cap, drop from the random half first, in reverse draw order"
+   ],
+   "rules": "bands twice v3.1's no-twin LOEO error per quantity (E213's form), head to head v3.1 against v3 by the exact sign test per arm and pooled, MM1-v2 beside"
+  }
+ ],
+ "decision_order": [
+  "1. item 8: family C decides T5r or tC from the frozen forecasts (no fit) after scores-e213; NOT DECIDED moves the choice to step 4",
+  "2. item 4: the trace check read from v31-trace / verify-v31trace (PASS, FAIL or NOT RUN)",
+  "3. item 3: G0, Gplace, Goperand, Gcoop on the time form from step 1 (T5r if step 1 is NOT DECIDED), LOEO",
+  "4. item 4: the layout forms on the form from step 3, LOEO and LOLO; then, if step 1 was NOT DECIDED, item 8's step 3 on that form",
+  "5. the final time form fitted on every fold (item 5), with v3 refitted beside",
+  "6. item 1: the energy split on the final time form's folds (item 7's counts and item 6's census as inputs)",
+  "7. item 2: both LOCO routes scored on the final energy form; acceptance (item 9)"
+ ],
+ "deferred": [
+  {
+   "what": "T5r or tC",
+   "decided_by": "item 8's rule on E213's measured family C and BK",
+   "when": "after scores-e213 is committed"
+  },
+  {
+   "what": "T7 enters or not",
+   "decided_by": "item 4's trace check (v31-trace, verify-v31trace) then item 4's fit rule",
+   "when": "at v3.1's fit"
+  },
+  {
+   "what": "which kinds have counts",
+   "decided_by": "v31-counts' verified, committed tables (item 7)",
+   "when": "at v3.1's fit start"
+  },
+  {
+   "what": "the data set",
+   "decided_by": "GitHub main at v3.1's fit start, after scores-e213's commit (item 9)",
+   "when": "at v3.1's fit start"
+  },
+  {
+   "what": "v3.1's blind-day points",
+   "decided_by": "item 10's point rule on v3.1's and v3's frozen forecasts and a fresh never-run scan",
+   "when": "at that registration"
+  },
+  {
+   "what": "T8 (address conflicts) and a_row (DRAM row locality)",
+   "decided_by": "not built until a committed run logs the pools' device addresses (then a dated amendment before any fit)",
+   "when": "not in v3.1"
+  },
+  {
+   "what": "run_gemm's census and E202's kernel as a fourth kernel out",
+   "decided_by": "a counted census of their loops (none committed): until then run_gemm path 0, E202 NOT RUN",
+   "when": "not in v3.1"
+  },
+  {
+   "what": "card 0 awake power against its governed base",
+   "decided_by": "a card-0 run at two clocks (none committed); v3's confound stands",
+   "when": "not in v3.1"
+  },
+  {
+   "what": "a census path (gemmLnc, rgm211 gemmL, rgm211 gemmLn are desk; only rgm136 gemmL was checked against a counted run)",
+   "decided_by": "the comparison the census made for rgm136 gemmL (census-v3.json check_against_counted_run): the PCs hart 0 ran at least 60 times in a committed counted simulator run of that loop against the census's steady path for it, the same set and the same length; if they differ, a dated amendment before any v3.1 fit replaces that loop's entry; made by v3.1's fit lane as its first step, from committed runs only; with no such run at the fit's start the census entry stands and the README says so",
+   "when": "before v3.1's fit"
+  }
+ ],
+ "not_built_in_v3_1": [
+  "T6A (lost in v3)",
+  "T8",
+  "a_row",
+  "lambda fitted (pinned 0.0048)",
+  "the scalar classes' own kappa (one kappa, an assumption, stated)",
+  "tensor-queue blocking and the second hart (not modelled, as in v3)"
+ ],
+ "embedded_desk_tables": {
+  "frozen_time_forms_at_E213_points": {
+   "made_by": "this lane's tc_e213_frozen.py (desk, before any E213 datum)",
+   "interpreter": "3.12.3",
+   "numpy": "1.26.4",
+   "T5r_check": {
+    "points_checked": 131,
+    "worst_relative_difference": 9.920654306938559e-07
+   },
+   "inputs_sha256": {
+    "SHA256SUMS (v3)": "c24efc149110d0cb3d1c8603f0bb7ee83db85eebf9af7ba4254d267c7c85dc74",
+    "census-v3.json": "cad5250ccc2324c724fe2230093146aa6216779cf0c64003228b88fbd59d974f",
+    "engine_v3.py": "da6213460e6c90dcfc304d53d096f7bbe2634baa81ab5309ee354b412a4ff898",
+    "forecast-e213b-v3.csv": "e529bbb24de26bc68c50279945c31a0da384e1f6c01cddc1f510cd2e1c0c4ed0",
+    "mm1_core_v3.py": "acebc705d06be133845b78ed85a7787a6792838fcca95f75dfc03fba41ea43c2",
+    "mm1_v3_e213.csv": "01a2fdaef0b506b218fad1975dacf397a2c728010a595c8b4dadcbf569c07a49",
+    "points-e213.csv": "8bab916516e74e3d23f9aff29bf105d1bd9e7ece73ee5aa765de2c007633ad82",
+    "time_v3+T5r.json": "62a5d9e1ad77bfd412786f786f991a5979d8e82c9f7644eba3e52de0c5640665",
+    "time_v3.json": "ec3ee68b0f254ce0b1b5510c7d7e827ff0643aa3ff4c6760fa0909f22caf10b9"
+   },
+   "source_table_sha256": "bb59797dcabcb2fdd7502a3fd2edc2be622c7bc7bbafb713537310b194738ccc",
+   "points": [
+    {
+     "id": "a001",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x1x2",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 927.518,
+     "wall_cycles_tC_frozen_constants": 933.24372
+    },
+    {
+     "id": "a002",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x1x2",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 885.758,
+     "wall_cycles_tC_frozen_constants": 885.021369
+    },
+    {
+     "id": "a003",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x1x2",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 928.473,
+     "wall_cycles_tC_frozen_constants": 934.300703
+    },
+    {
+     "id": "a004",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x1x2",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 886.797,
+     "wall_cycles_tC_frozen_constants": 886.18254
+    },
+    {
+     "id": "a005",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x3",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 945.551,
+     "wall_cycles_tC_frozen_constants": 954.27271
+    },
+    {
+     "id": "a006",
+     "arm": "A",
+     "family": "A:I+P",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x3",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 903.31,
+     "wall_cycles_tC_frozen_constants": 905.389168
+    },
+    {
+     "id": "a007",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x7",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 960.797,
+     "wall_cycles_tC_frozen_constants": 969.106279
+    },
+    {
+     "id": "a008",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x7",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 919.621,
+     "wall_cycles_tC_frozen_constants": 921.604569
+    },
+    {
+     "id": "a009",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x11",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1367.058,
+     "wall_cycles_tC_frozen_constants": 1367.640382
+    },
+    {
+     "id": "a010",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x11",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1359.242,
+     "wall_cycles_tC_frozen_constants": 1358.469984
+    },
+    {
+     "id": "a011",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x2x7",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1204.124,
+     "wall_cycles_tC_frozen_constants": 1212.762089
+    },
+    {
+     "id": "a012",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x2x7",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1184.536,
+     "wall_cycles_tC_frozen_constants": 1190.180793
+    },
+    {
+     "id": "a013",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x9",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1188.43,
+     "wall_cycles_tC_frozen_constants": 1194.354454
+    },
+    {
+     "id": "a014",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x9",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1164.117,
+     "wall_cycles_tC_frozen_constants": 1166.808836
+    },
+    {
+     "id": "a015",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x3x6",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1194.038,
+     "wall_cycles_tC_frozen_constants": 1201.2125
+    },
+    {
+     "id": "a016",
+     "arm": "A",
+     "family": "A:I",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x3x6",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1171.611,
+     "wall_cycles_tC_frozen_constants": 1175.61516
+    },
+    {
+     "id": "a017",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x18",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1447.296,
+     "wall_cycles_tC_frozen_constants": 1449.411477
+    },
+    {
+     "id": "a018",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x22",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1494.597,
+     "wall_cycles_tC_frozen_constants": 1488.373193
+    },
+    {
+     "id": "a019",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x26",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1502.205,
+     "wall_cycles_tC_frozen_constants": 1494.260105
+    },
+    {
+     "id": "a020",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x30",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1510.405,
+     "wall_cycles_tC_frozen_constants": 1500.041644
+    },
+    {
+     "id": "a021",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x34",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1520.227,
+     "wall_cycles_tC_frozen_constants": 1506.72146
+    },
+    {
+     "id": "a022",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x13",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1449.056,
+     "wall_cycles_tC_frozen_constants": 1449.505515
+    },
+    {
+     "id": "a023",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x18",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1487.676,
+     "wall_cycles_tC_frozen_constants": 1480.872707
+    },
+    {
+     "id": "a024",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x22",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1520.43,
+     "wall_cycles_tC_frozen_constants": 1506.358302
+    },
+    {
+     "id": "a025",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x1x8",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1386.203,
+     "wall_cycles_tC_frozen_constants": 1394.386514
+    },
+    {
+     "id": "a026",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x1x10",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1406.871,
+     "wall_cycles_tC_frozen_constants": 1417.966892
+    },
+    {
+     "id": "a027",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x6",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1403.306,
+     "wall_cycles_tC_frozen_constants": 1414.827805
+    },
+    {
+     "id": "a028",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x7",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1406.064,
+     "wall_cycles_tC_frozen_constants": 1417.827715
+    },
+    {
+     "id": "a029",
+     "arm": "A",
+     "family": "A:R",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x9",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1406.66,
+     "wall_cycles_tC_frozen_constants": 1417.975266
+    },
+    {
+     "id": "a030",
+     "arm": "A",
+     "family": "A:R+P",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x1x6",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1405.913,
+     "wall_cycles_tC_frozen_constants": 1418.034203
+    },
+    {
+     "id": "a031",
+     "arm": "A",
+     "family": "A:E",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x40",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1549.897,
+     "wall_cycles_tC_frozen_constants": 1527.057265
+    },
+    {
+     "id": "a032",
+     "arm": "A",
+     "family": "A:E",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x40",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1549.897,
+     "wall_cycles_tC_frozen_constants": 1527.057265
+    },
+    {
+     "id": "a033",
+     "arm": "A",
+     "family": "A:E",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x2x44",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1554.286,
+     "wall_cycles_tC_frozen_constants": 1529.958
+    },
+    {
+     "id": "a034",
+     "arm": "A",
+     "family": "A:E",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x2x44",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1554.286,
+     "wall_cycles_tC_frozen_constants": 1529.958
+    },
+    {
+     "id": "a035",
+     "arm": "A",
+     "family": "A:E",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x4x36",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1589.681,
+     "wall_cycles_tC_frozen_constants": 1591.613131
+    },
+    {
+     "id": "a036",
+     "arm": "A",
+     "family": "A:E",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x4x36",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1589.681,
+     "wall_cycles_tC_frozen_constants": 1591.613131
+    },
+    {
+     "id": "a037",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x2x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 888.514,
+     "wall_cycles_tC_frozen_constants": 856.766545
+    },
+    {
+     "id": "a038",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x2x1",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 856.997,
+     "wall_cycles_tC_frozen_constants": 834.492332
+    },
+    {
+     "id": "a039",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x5x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 972.443,
+     "wall_cycles_tC_frozen_constants": 925.96736
+    },
+    {
+     "id": "a040",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x5x1",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 954.79,
+     "wall_cycles_tC_frozen_constants": 928.052453
+    },
+    {
+     "id": "a041",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL7x3x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1045.555,
+     "wall_cycles_tC_frozen_constants": 1010.918269
+    },
+    {
+     "id": "a042",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL7x3x1",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1030.946,
+     "wall_cycles_tC_frozen_constants": 1012.785589
+    },
+    {
+     "id": "a043",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL9x7x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 945.933,
+     "wall_cycles_tC_frozen_constants": 895.138738
+    },
+    {
+     "id": "a044",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL9x7x1",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 927.355,
+     "wall_cycles_tC_frozen_constants": 897.822486
+    },
+    {
+     "id": "a045",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL10x10x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 938.976,
+     "wall_cycles_tC_frozen_constants": 884.554006
+    },
+    {
+     "id": "a046",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL10x10x1",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 920.535,
+     "wall_cycles_tC_frozen_constants": 888.687823
+    },
+    {
+     "id": "a047",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL14x12x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1020.568,
+     "wall_cycles_tC_frozen_constants": 962.192456
+    },
+    {
+     "id": "a048",
+     "arm": "A",
+     "family": "A:C",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL14x12x1",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1007.817,
+     "wall_cycles_tC_frozen_constants": 973.605249
+    },
+    {
+     "id": "a049",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1383.309,
+     "wall_cycles_tC_frozen_constants": 1382.111779
+    },
+    {
+     "id": "a050",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x3",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1293.916,
+     "wall_cycles_tC_frozen_constants": 1288.651318
+    },
+    {
+     "id": "a051",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x11",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1293.916,
+     "wall_cycles_tC_frozen_constants": 1288.651318
+    },
+    {
+     "id": "a052",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x1010101",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1299.876,
+     "wall_cycles_tC_frozen_constants": 1294.882016
+    },
+    {
+     "id": "a053",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xf0000",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1299.876,
+     "wall_cycles_tC_frozen_constants": 1294.882016
+    },
+    {
+     "id": "a054",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xf0f",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1311.795,
+     "wall_cycles_tC_frozen_constants": 1307.343411
+    },
+    {
+     "id": "a055",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x22222222",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1311.795,
+     "wall_cycles_tC_frozen_constants": 1307.343411
+    },
+    {
+     "id": "a056",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x3030303",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1311.795,
+     "wall_cycles_tC_frozen_constants": 1307.343411
+    },
+    {
+     "id": "a057",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xfff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1323.714,
+     "wall_cycles_tC_frozen_constants": 1319.804805
+    },
+    {
+     "id": "a058",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x7070707",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1323.714,
+     "wall_cycles_tC_frozen_constants": 1319.804805
+    },
+    {
+     "id": "a059",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xf0f0f0f",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1335.633,
+     "wall_cycles_tC_frozen_constants": 1332.2662
+    },
+    {
+     "id": "a060",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x8x8",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x55555555",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1335.633,
+     "wall_cycles_tC_frozen_constants": 1332.2662
+    },
+    {
+     "id": "a061",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1432.796,
+     "wall_cycles_tC_frozen_constants": 1430.408133
+    },
+    {
+     "id": "a062",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x3",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1331.113,
+     "wall_cycles_tC_frozen_constants": 1323.957454
+    },
+    {
+     "id": "a063",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x11",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1331.113,
+     "wall_cycles_tC_frozen_constants": 1323.957454
+    },
+    {
+     "id": "a064",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x1010101",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1337.892,
+     "wall_cycles_tC_frozen_constants": 1331.054166
+    },
+    {
+     "id": "a065",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xf0000",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1337.892,
+     "wall_cycles_tC_frozen_constants": 1331.054166
+    },
+    {
+     "id": "a066",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xf0f",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1351.45,
+     "wall_cycles_tC_frozen_constants": 1345.24759
+    },
+    {
+     "id": "a067",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x22222222",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1351.45,
+     "wall_cycles_tC_frozen_constants": 1345.24759
+    },
+    {
+     "id": "a068",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x3030303",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1351.45,
+     "wall_cycles_tC_frozen_constants": 1345.24759
+    },
+    {
+     "id": "a069",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xfff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1365.008,
+     "wall_cycles_tC_frozen_constants": 1359.441014
+    },
+    {
+     "id": "a070",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x7070707",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1365.008,
+     "wall_cycles_tC_frozen_constants": 1359.441014
+    },
+    {
+     "id": "a071",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xf0f0f0f",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1378.565,
+     "wall_cycles_tC_frozen_constants": 1373.634437
+    },
+    {
+     "id": "a072",
+     "arm": "A",
+     "family": "A:M",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x12",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0x55555555",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1378.565,
+     "wall_cycles_tC_frozen_constants": 1373.634437
+    },
+    {
+     "id": "a073",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm211 gemmLn",
+     "arm_token": "gemmLn3x1x3",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 853.602,
+     "wall_cycles_tC_frozen_constants": 855.684623
+    },
+    {
+     "id": "a074",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm211 gemmL",
+     "arm_token": "gemmL3x1x3",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 889.571,
+     "wall_cycles_tC_frozen_constants": 891.650755
+    },
+    {
+     "id": "a075",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm136 gemmLnc",
+     "arm_token": "gemmLnc3x1x3",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 881.342,
+     "wall_cycles_tC_frozen_constants": 883.423037
+    },
+    {
+     "id": "a076",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x6x5",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1100.551,
+     "wall_cycles_tC_frozen_constants": 1106.155582
+    },
+    {
+     "id": "a077",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm211 gemmLn",
+     "arm_token": "gemmLn1x6x5",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1050.802,
+     "wall_cycles_tC_frozen_constants": 1056.406721
+    },
+    {
+     "id": "a078",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm211 gemmL",
+     "arm_token": "gemmL1x6x5",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1086.802,
+     "wall_cycles_tC_frozen_constants": 1092.405873
+    },
+    {
+     "id": "a079",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm136 gemmLnc",
+     "arm_token": "gemmLnc1x6x5",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1078.552,
+     "wall_cycles_tC_frozen_constants": 1084.15643
+    },
+    {
+     "id": "a080",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm211 gemmLn",
+     "arm_token": "gemmLn4x1x6",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1368.787,
+     "wall_cycles_tC_frozen_constants": 1380.868572
+    },
+    {
+     "id": "a081",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm211 gemmL",
+     "arm_token": "gemmL4x1x6",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1395.381,
+     "wall_cycles_tC_frozen_constants": 1407.491983
+    },
+    {
+     "id": "a082",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm136 gemmLnc",
+     "arm_token": "gemmLnc4x1x6",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1393.319,
+     "wall_cycles_tC_frozen_constants": 1405.410791
+    },
+    {
+     "id": "a083",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x44",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1544.369,
+     "wall_cycles_tC_frozen_constants": 1522.760229
+    },
+    {
+     "id": "a084",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm211 gemmLn",
+     "arm_token": "gemmLn1x1x44",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1496.203,
+     "wall_cycles_tC_frozen_constants": 1474.509341
+    },
+    {
+     "id": "a085",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm211 gemmL",
+     "arm_token": "gemmL1x1x44",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1531.023,
+     "wall_cycles_tC_frozen_constants": 1509.392356
+    },
+    {
+     "id": "a086",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm136 gemmLnc",
+     "arm_token": "gemmLnc1x1x44",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1523.549,
+     "wall_cycles_tC_frozen_constants": 1501.877215
+    },
+    {
+     "id": "a087",
+     "arm": "A",
+     "family": "A:P",
+     "role": "point",
+     "loop": "rgm136 gemmLnc",
+     "arm_token": "gemmLnc1x1x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 367.784,
+     "wall_cycles_tC_frozen_constants": 369.180911
+    },
+    {
+     "id": "a088",
+     "arm": "A",
+     "family": "A:P",
+     "role": "reference",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 389.784,
+     "wall_cycles_tC_frozen_constants": 391.180911
+    },
+    {
+     "id": "a089",
+     "arm": "A",
+     "family": "A:E",
+     "role": "reference",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x8x8",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1396.675,
+     "wall_cycles_tC_frozen_constants": 1398.341944
+    },
+    {
+     "id": "a090",
+     "arm": "A",
+     "family": "A:E",
+     "role": "reference",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x8x8",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1396.675,
+     "wall_cycles_tC_frozen_constants": 1398.341944
+    },
+    {
+     "id": "k01",
+     "arm": "B",
+     "family": "BI",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x1x2",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 927.518,
+     "wall_cycles_tC_frozen_constants": 933.24372
+    },
+    {
+     "id": "k02",
+     "arm": "B",
+     "family": "BI",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x1x2",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 885.758,
+     "wall_cycles_tC_frozen_constants": 885.021369
+    },
+    {
+     "id": "k03",
+     "arm": "B",
+     "family": "BI",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x1x2",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 928.473,
+     "wall_cycles_tC_frozen_constants": 934.300703
+    },
+    {
+     "id": "k04",
+     "arm": "B",
+     "family": "BI",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x1x2",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 886.797,
+     "wall_cycles_tC_frozen_constants": 886.18254
+    },
+    {
+     "id": "k05",
+     "arm": "B",
+     "family": "BI",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x3",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 945.551,
+     "wall_cycles_tC_frozen_constants": 954.27271
+    },
+    {
+     "id": "k06",
+     "arm": "B",
+     "family": "BI",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x3",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 903.31,
+     "wall_cycles_tC_frozen_constants": 905.389168
+    },
+    {
+     "id": "k07",
+     "arm": "B",
+     "family": "BI",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x7",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 960.797,
+     "wall_cycles_tC_frozen_constants": 969.106279
+    },
+    {
+     "id": "k08",
+     "arm": "B",
+     "family": "BI",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x7",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 919.621,
+     "wall_cycles_tC_frozen_constants": 921.604569
+    },
+    {
+     "id": "k09",
+     "arm": "B",
+     "family": "BI",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x11",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1367.058,
+     "wall_cycles_tC_frozen_constants": 1367.640382
+    },
+    {
+     "id": "k10",
+     "arm": "B",
+     "family": "BI",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x2x11",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1359.242,
+     "wall_cycles_tC_frozen_constants": 1358.469984
+    },
+    {
+     "id": "k11",
+     "arm": "B",
+     "family": "BR",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x1x8",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1386.203,
+     "wall_cycles_tC_frozen_constants": 1394.386514
+    },
+    {
+     "id": "k12",
+     "arm": "B",
+     "family": "BR",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x7",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1406.064,
+     "wall_cycles_tC_frozen_constants": 1417.827715
+    },
+    {
+     "id": "k13",
+     "arm": "B",
+     "family": "BR",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x18",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1447.296,
+     "wall_cycles_tC_frozen_constants": 1449.411477
+    },
+    {
+     "id": "k14",
+     "arm": "B",
+     "family": "BR",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x1x6",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1405.913,
+     "wall_cycles_tC_frozen_constants": 1418.034203
+    },
+    {
+     "id": "k15",
+     "arm": "B",
+     "family": "BR",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x9",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1406.66,
+     "wall_cycles_tC_frozen_constants": 1417.975266
+    },
+    {
+     "id": "k16",
+     "arm": "B",
+     "family": "BR",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x9",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1406.66,
+     "wall_cycles_tC_frozen_constants": 1417.975273
+    },
+    {
+     "id": "k17",
+     "arm": "B",
+     "family": "BR",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x26",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1502.205,
+     "wall_cycles_tC_frozen_constants": 1494.260105
+    },
+    {
+     "id": "k18",
+     "arm": "B",
+     "family": "BR",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x26",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1502.205,
+     "wall_cycles_tC_frozen_constants": 1494.260105
+    },
+    {
+     "id": "k19",
+     "arm": "B",
+     "family": "BR",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x34",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1520.227,
+     "wall_cycles_tC_frozen_constants": 1506.72146
+    },
+    {
+     "id": "k20",
+     "arm": "B",
+     "family": "BK",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x3x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 881.299,
+     "wall_cycles_tC_frozen_constants": 837.163539
+    },
+    {
+     "id": "k21",
+     "arm": "B",
+     "family": "BK",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x3x1",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 853.008,
+     "wall_cycles_tC_frozen_constants": 823.284481
+    },
+    {
+     "id": "k22",
+     "arm": "B",
+     "family": "BK",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x4x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 970.977,
+     "wall_cycles_tC_frozen_constants": 896.329307
+    },
+    {
+     "id": "k23",
+     "arm": "B",
+     "family": "BK",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x4x1",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 951.513,
+     "wall_cycles_tC_frozen_constants": 892.512622
+    },
+    {
+     "id": "k24",
+     "arm": "B",
+     "family": "BK",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL7x3x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1045.555,
+     "wall_cycles_tC_frozen_constants": 1010.918269
+    },
+    {
+     "id": "k25",
+     "arm": "B",
+     "family": "BK",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL7x3x1",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1030.946,
+     "wall_cycles_tC_frozen_constants": 1012.785589
+    },
+    {
+     "id": "k26",
+     "arm": "B",
+     "family": "BK",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x3x2",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1077.1,
+     "wall_cycles_tC_frozen_constants": 1087.837467
+    },
+    {
+     "id": "k27",
+     "arm": "B",
+     "family": "BK",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL4x3x2",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1047.652,
+     "wall_cycles_tC_frozen_constants": 1053.630168
+    },
+    {
+     "id": "k28",
+     "arm": "B",
+     "family": "BE",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x40",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1549.897,
+     "wall_cycles_tC_frozen_constants": 1527.057265
+    },
+    {
+     "id": "k29",
+     "arm": "B",
+     "family": "BE",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x3x40",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1549.897,
+     "wall_cycles_tC_frozen_constants": 1527.057265
+    },
+    {
+     "id": "k30",
+     "arm": "B",
+     "family": "BE",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x2x44",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1554.286,
+     "wall_cycles_tC_frozen_constants": 1529.958
+    },
+    {
+     "id": "k31",
+     "arm": "B",
+     "family": "BE",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL2x2x44",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1554.286,
+     "wall_cycles_tC_frozen_constants": 1529.958
+    },
+    {
+     "id": "k32",
+     "arm": "B",
+     "family": "BS",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x3",
+     "format": "fp32",
+     "kind": "zeros",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 903.31,
+     "wall_cycles_tC_frozen_constants": 905.389168
+    },
+    {
+     "id": "k33",
+     "arm": "B",
+     "family": "BS",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x3",
+     "format": "fp32",
+     "kind": "ones",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 903.31,
+     "wall_cycles_tC_frozen_constants": 905.389168
+    },
+    {
+     "id": "k34",
+     "arm": "B",
+     "family": "BS",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x3",
+     "format": "fp32",
+     "kind": "sparse50",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 903.31,
+     "wall_cycles_tC_frozen_constants": 905.389168
+    },
+    {
+     "id": "k35",
+     "arm": "B",
+     "family": "BS",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x3",
+     "format": "int8",
+     "kind": "zeros",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 945.551,
+     "wall_cycles_tC_frozen_constants": 954.27271
+    },
+    {
+     "id": "k36",
+     "arm": "B",
+     "family": "BS",
+     "role": "point",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL3x1x3",
+     "format": "int8",
+     "kind": "ones",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 945.551,
+     "wall_cycles_tC_frozen_constants": 954.27271
+    },
+    {
+     "id": "k37",
+     "arm": "B",
+     "family": "BP",
+     "role": "point",
+     "loop": "rgm136 gemmLnc",
+     "arm_token": "gemmLnc3x1x3",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 881.342,
+     "wall_cycles_tC_frozen_constants": 883.423037
+    },
+    {
+     "id": "k38",
+     "arm": "B",
+     "family": "BP",
+     "role": "point",
+     "loop": "rgm136 gemmLnc",
+     "arm_token": "gemmLnc1x2x7",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 897.672,
+     "wall_cycles_tC_frozen_constants": 899.657603
+    },
+    {
+     "id": "k39",
+     "arm": "B",
+     "family": "BP",
+     "role": "point",
+     "loop": "rgm136 gemmLnc",
+     "arm_token": "gemmLnc4x1x6",
+     "format": "fp32",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 1393.319,
+     "wall_cycles_tC_frozen_constants": 1405.410791
+    },
+    {
+     "id": "k40",
+     "arm": "B",
+     "family": "BP",
+     "role": "point",
+     "loop": "rgm136 gemmLnc",
+     "arm_token": "gemmLnc1x1x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 367.784,
+     "wall_cycles_tC_frozen_constants": 369.180911
+    },
+    {
+     "id": "k41",
+     "arm": "B",
+     "family": "BP",
+     "role": "reference",
+     "loop": "rgm136 gemmL",
+     "arm_token": "gemmL1x1x1",
+     "format": "int8",
+     "kind": "random",
+     "mask": "0xffffffff",
+     "f_mhz": 600.0,
+     "wall_cycles_T5r_frozen": 389.784,
+     "wall_cycles_tC_frozen_constants": 391.180911
+    }
+   ]
+  },
+  "census_energy_fix": {
+   "made_by": "this lane's census_energy_fix.py (desk)",
+   "source_sha256": "cad5250ccc2324c724fe2230093146aa6216779cf0c64003228b88fbd59d974f",
+   "table_sha256": "14f4f73836e8454b17281ecb1f280141feb991674b2e4ef255496c48aae30562"
+  }
+ },
+ "frozen_code": {
+  "t7_v31.py": {
+   "path": "tools/matmul/mm1/v3.1/t7_v31.py",
+   "sha256": "893ae962174678fcd1560dfc423722361e706319a188687f8f572a4e3ca89242",
+   "final_pst": "2026-11-18 06:11:05",
+   "item": 4,
+   "check": "python3 -I -B t7_v31.py --check [--repo <checkout with MM1-v3>] [--extra-shapes ...]: CHECK PASS at 06:11:05"
+  },
+  "comparator_4a_v31.py": {
+   "path": "tools/matmul/mm1/v3.1/comparator_4a_v31.py",
+   "sha256": "17b336e10b9f4b0a521c0cb83630575f9f54b5d1d993436677aedefdcf38f960",
+   "final_pst": "2026-11-18 05:58",
+   "item": 9,
+   "check": "python3 -I -B comparator_4a_v31.py --desk: eight sessions reproduce the committed table (5e-07)"
+  }
+ },
+ "corrections": [
+  {
+   "finding": 1,
+   "severity": "medium",
+   "where": "item 9 acceptance rule 4(a)",
+   "change": "the comparator is MM1-v2's unread per-case error on the same nine-session case records (comparator_4a_v31.py); desk 6.645% / 7.597%; the eight-session 6.65% / 7.76% beside"
+  },
+  {
+   "finding": 2,
+   "severity": "medium",
+   "where": "item 4 trace_check",
+   "change": "(a) restated over the logged harts with a minimum log set (every hart of every enabled shire and of at least one shire outside the mask, at both masks); below it NOT RUN; traced minion defined"
+  },
+  {
+   "finding": 3,
+   "severity": "medium",
+   "where": "item 4 T7; item 8 r2_reading",
+   "change": "T7 frozen as t7_v31.py: engine_v3's WalkShape procedure named, n_eff's denominator the same walk at 0xffffffff, r2's and zeta's reach stated; a failed desk precondition makes the trace check NOT RUN; desk checks recorded"
+  },
+  {
+   "finding": 4,
+   "severity": "low",
+   "where": "item 2 anchor",
+   "change": "A2's rescale applied before the anchor kc is solved and tested"
+  },
+  {
+   "finding": 5,
+   "severity": "low",
+   "where": "item 1 rule",
+   "change": "candidates within 0.10 points of the lowest; fewest constants; at equal constants E1t before E1m"
+  },
+  {
+   "finding": 6,
+   "severity": "low",
+   "where": "item 9 baseline",
+   "change": "v3 refitted takes exactly v3.1's inputs (census-v3.1, item 7's counts and phi rule, data, folds, twins, pins, starts)"
+  },
+  {
+   "finding": 7,
+   "severity": "low",
+   "where": "item 4 layout_classes",
+   "change": "the classes are for subset points; a full-chip point is in no class"
+  },
+  {
+   "finding": 8,
+   "severity": "low",
+   "where": "item 9 twins and rule 4(b)",
+   "change": "reworded; rule 4(b) on E213's 127 points (117 cases), the four references REPORTED"
+  },
+  {
+   "finding": 9,
+   "severity": "low",
+   "where": "item 10 point_rule",
+   "change": "F_v3 for family S defined (v3's landed energy form with item 7's counts as inputs); sampled candidates sorted by token"
+  },
+  {
+   "finding": 10,
+   "severity": "nit",
+   "where": "items 5, 7, 10 and deferred",
+   "change": "seeded draws start-major; the counts' sha256 recorded in the README inputs table and fit record; phi's precedence; aifoundry2 not an arm of v3.1's blind day without a dated amendment; the census-path check's comparison and lane"
+  }
+ ]
+}
