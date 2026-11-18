@@ -1,0 +1,225 @@
+{
+ "data_commit": "58f01105196435599a07c062cd1aa2dfdab39b1c",
+ "energy": {
+  "form": "v3",
+  "governed_base_w": [
+   [
+    600.0,
+    25.456
+   ],
+   [
+    700.0,
+    28.243
+   ],
+   [
+    800.0,
+    33.61
+   ]
+  ],
+  "lambda_per_C": 0.0048,
+  "theta": {
+   "Eub|fp16": 10.337873128708306,
+   "Eub|fp32": 10.334661566175097,
+   "Eub|int8": 3.1846120603948687,
+   "Pa|aifoundry1 card 0": 0.9106877553227178,
+   "Pa|aifoundry1 card 1": 1.2209030496243323,
+   "Pa|aifoundry2 card 0": 1.4690076356538557,
+   "Pa|aifoundry3 card 0": 0.7402367460363718,
+   "Pm": 0.2519541896882171,
+   "a8": 1.5069641354045105,
+   "a_lane": 3.2385427997266256,
+   "a_op": 7.987422752917927,
+   "b0": 6.325471702078139,
+   "b2": -88.88234827394768,
+   "b3": 339.0503665741624,
+   "bF": 981.423347003908,
+   "d2": -291.7191536071228,
+   "d3": 571.2674362312213,
+   "dF": 678.9777232137175,
+   "eC": 4.072783173894816,
+   "g": 0.75922802271168,
+   "kc|aifoundry1 card 0": 1.076997596385039,
+   "kc|aifoundry1 card 1": 1.0284969395588284,
+   "kc|aifoundry2 card 0": 1.0679836650210122,
+   "m|fp16": 1.090878532354191,
+   "m|int8": 3.7472237330851135,
+   "xi": 3.726999083591926e-36
+  },
+  "units": "Pa at 1,024 minions, Pm at u = 1, g a share of the governed base (W); Eub, a_op, a_lane, a8: nJ an op; b0: 1e-17 J a fin edge; b, d: pJ a line; kc, m, xi, eC dimensionless",
+  "volts": {
+   "aifoundry1 card 0": [
+    [
+     600.0,
+     0.517
+    ],
+    [
+     700.0,
+     0.5605
+    ],
+    [
+     800.0,
+     0.604
+    ]
+   ],
+   "aifoundry2 card 0": [
+    [
+     600.0,
+     0.517
+    ],
+    [
+     700.0,
+     0.568
+    ],
+    [
+     800.0,
+     0.618
+    ]
+   ],
+   "pinned": {
+    "aifoundry1 card 1": 0.517,
+    "aifoundry3 card 0": 0.522
+   }
+  }
+ },
+ "imbalance_source": "MM1-v2's counter-mean imbalance (fitted on E206's four gemmL4x8x4 subset points; the same points here, so the same numbers)",
+ "interpreter": "/usr/bin/python3 3.12.3, numpy 1.26.4",
+ "model": "MM1-v3",
+ "rest_law": {
+  "aifoundry1 card 0": {
+   "T0_forecast_c": 50.0,
+   "a": 0.0,
+   "b": 0.15941852908421528,
+   "c": 11.10393453737073,
+   "on_E208_rests": {
+    "mean_W": 0.0,
+    "n": 45,
+    "rms_W": 0.081
+   },
+   "source": "a line through E208 a1c0-S1 rests against the start die (45 runs; post hoc)"
+  },
+  "aifoundry1 card 1": {
+   "T0_forecast_c": 55.0,
+   "a": 0.01016842856255774,
+   "b": -0.7038226670865997,
+   "c": 39.707665367843745,
+   "on_E208_rests": {
+    "mean_W": 0.277,
+    "n": 195,
+    "rms_W": 0.312
+   },
+   "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+  },
+  "aifoundry2 card 0": {
+   "T0_forecast_c": 51.0,
+   "a": 0.005804086519119737,
+   "b": -0.3351545020373176,
+   "c": 25.186366251351085,
+   "on_E208_rests": {
+    "mean_W": 0.135,
+    "n": 137,
+    "rms_W": 0.179
+   },
+   "source": "ledger v2 frozen idle law aifoundry2 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry2_idle.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+  },
+  "aifoundry3 card 0": {
+   "T0_forecast_c": 54.4,
+   "T0_how": "E206 arm A's median start die (MM1-v1's)",
+   "a": 0.005899869459451479,
+   "b": -0.33346324533196703,
+   "c": 25.421568539272126,
+   "on_E208_rests": null,
+   "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+  }
+ },
+ "rest_law_source": "MM1-v2's rest law per card, carried unchanged (tools/matmul/mm1/v2/out/mm1_v2_params.json; REPORTED)",
+ "time": {
+  "c1_law": {
+   "fp16": [
+    527.48,
+    0.0176
+   ],
+   "fp32": [
+    527.48,
+    0.0176
+   ],
+   "int8": [
+    283.03,
+    0.0146
+   ]
+  },
+  "census_sha256": "cad5250ccc2324c724fe2230093146aa6216779cf0c64003228b88fbd59d974f",
+  "floor_cycles": {
+   "fp16": 529.0,
+   "fp32": 529.0,
+   "int8": 270.0
+  },
+  "form": {
+   "census": true,
+   "d8": true,
+   "free_A": false,
+   "layout": "n32",
+   "ret": "v3",
+   "tc": "r2"
+  },
+  "form_name": "v3+T5r",
+  "imbalance_mean": {
+   "eta_m": 0.21366131750175743,
+   "fitted_on": [
+    {
+     "id": "p096",
+     "mask": "0xf",
+     "wall_over_mean": 1.2132
+    },
+    {
+     "id": "p097",
+     "mask": "0xf",
+     "wall_over_mean": 1.2141
+    },
+    {
+     "id": "p098",
+     "mask": "0xff",
+     "wall_over_mean": 1.0692
+    },
+    {
+     "id": "p099",
+     "mask": "0xff",
+     "wall_over_mean": 1.0833
+    }
+   ],
+   "gamma": 2.540196550325052,
+   "how": "MM1-v1's term on the same four E206 points (post hoc); v2 applies it only when MB >= 2 (E208's MB = 1 subsets read none)"
+  },
+  "rho_wall_over_mean": {
+   "c4s": 1.143,
+   "c8s": 1.143,
+   "inside": 1.126,
+   "one_block": 1.006,
+   "past": 1.011,
+   "stream": 1.001
+  },
+  "theta": {
+   "F2": 382.7606579218124,
+   "T2": 0.011706178239966395,
+   "c3": 401.8320738682156,
+   "cF": 358.41333018346063,
+   "chi3": 0.0666028018331719,
+   "chiF": 0.10005543518528912,
+   "d8": 0.047560815619025414,
+   "eta": 4.7725403305615856e-14,
+   "kA": 0.8977842286885535,
+   "m3": 0.825528041059166,
+   "mF": 2.0096883631723683,
+   "pB": 0.4967711224378132,
+   "piF0": 0.050079313335197224,
+   "r2": 0.6405345326416249,
+   "tC": 0.0,
+   "w1": 1.9188297315711933,
+   "w2": 15.205972548639515,
+   "x1": 37.416456767074315,
+   "x2": 72.29470899196198,
+   "zeta": 0.706819006793624
+  },
+  "units": "c3, cF, F2, tC: cycles (tC a line); m3, mF, T2: us; x1, w1, x2, w2, xA, wA: MB; others dimensionless"
+ },
+ "what": "MM1-v3: MM1-v2 with the operations census as an input, the int8 L3 factor, the C store, the two-edge L3 retention and the switch-route energy (desk fits on everything committed at GitHub main 58f01105; post hoc as an act)"
+}
