@@ -1,0 +1,123 @@
+{
+ "name": "proc",
+ "argv": [
+  "~/aifoundry/build/e213rgm/rgm211/host/sparsity_host",
+  "--test",
+  "fma",
+  "--type",
+  "fp32",
+  "--pattern",
+  "none",
+  "--values",
+  "gemmLn2x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+  "--shires",
+  "0xffffffff",
+  "--per-shire",
+  "32",
+  "--seconds",
+  "2",
+  "--budget",
+  "3.5",
+  "--seed",
+  "1",
+  "--kernel",
+  "~/aifoundry/build/e213rgm/rgm211/kernel/sparsity.elf",
+  "--stop-file",
+  "~/aifoundry/build/e213/T1795012628-A/STOP"
+ ],
+ "rc": 0,
+ "hung": false,
+ "t0_ms": 1795012662453,
+ "t1_ms": 1795012665377,
+ "n_launch": 7,
+ "runtime_other_cards": [],
+ "family": "rgm211 gemmLn",
+ "host": "rgm211",
+ "kernel": "rgm211",
+ "gate": "GATE OK: rgm211 gemmLn: rgm211, .text 82c7980716a0f0ca... the pinned one; ELF 70c066e830883d51... not the desk build's (sections the card never loads differ), its loadable identity 1351a569e4a200cb... the pinned one",
+ "walk_ok": true,
+ "walk_words": "walk nm on every launch, walk_ok true, walk_launches_bad 0",
+ "walk": {
+  "want": "nm",
+  "names": [
+   "nm",
+   "nm",
+   "nm",
+   "nm",
+   "nm",
+   "nm",
+   "nm"
+  ],
+  "ok": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "tagged": [
+   1024,
+   1024,
+   1024,
+   1024,
+   1024,
+   1024,
+   1024
+  ],
+  "check_walk": "nm",
+  "launches_bad": 0
+ },
+ "tensor_errors": 0,
+ "launches_ok": true,
+ "check": "approx",
+ "check_ok": true,
+ "check_cycles_per_op": 754.505,
+ "counted_cycles_per_op": 754.505,
+ "stopped_by_file": false,
+ "k1": false,
+ "records": {
+  "runtime_lines": 0,
+  "unparsed": 0,
+  "mismatched": 0,
+  "other": 0
+ },
+ "launch_window_ms": [
+  1795012662691,
+  1795012665284
+ ],
+ "ident": {
+  "stderr_targets": [
+   "/dev/et0_ops"
+  ],
+  "stderr_ids": [
+   0
+  ],
+  "nodes_held": [
+   "/dev/et0_ops"
+  ],
+  "wrong": [],
+  "right": true,
+  "polls": 31,
+  "tripped": null
+ },
+ "cycles_band": [
+  200.0,
+  4000.0
+ ],
+ "cycles_band_is": "R0's: the smoke's counter mean 200-4,000 cycles an op (E213.md 7), read on the median over the process's counted launches (the scorer's reading)",
+ "cycles_in_band": true,
+ "identity_ok": true,
+ "kernel_stop": "",
+ "board_rise": {
+  "ok": true,
+  "rise_w": 26.59,
+  "samples": 26,
+  "rest_w": 22.68,
+  "min_w": 2.0
+ },
+ "good": true,
+ "a1_family_dropped": null,
+ "a1_session_level": ""
+}
