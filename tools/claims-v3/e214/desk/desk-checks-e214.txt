@@ -1,0 +1,248 @@
+# E214 desk checks on the registered source (run Wed 18 Nov 2026 12:47:06 PST)
+# interpreter: /usr/bin/python3 3.12.3 -I -B; no device opened, no simulator
+
+## 1. sha256sum -c src/SRC-SHA256SUMS
+OK 73 of 73 listed files; files in src/: 74 (the list and the 73 it names)
+sha256 of src/SRC-SHA256SUMS: 1ef427f4be9d61b1dc1a5ad701714da54dbc085f48148fd6aac1d65f625e7171
+
+## 2. src/check_mms.py --check
+src/SRC-SHA256SUMS re-made: equal
+CHECK PASS
+rc 0
+
+## 3. src/make_schedule2.py --check (plan.json beside src/: absent)
+MAKE CHECK FAIL: no plan.json beside src/, but src/ holds what a plan made: ['arms.json', 'sched/a1c0-S1.json', 'sched/a1c0-S2.json', 'sched/a1c0-S3.json', 'sch
+rc 1
+
+## 4. src/mms_common.py (self-check)
+MMS-COMMON SELF-CHECK PASS
+rc 0
+
+## 5. src/mms_ident.py (self-check)
+MMS-IDENT SELF-CHECK PASS
+rc 0
+
+## 6. src/tiles_gen.py --check (plan.json beside src/: absent)
+tiles: 9 of the lab's, 0 of the plan's (no plan.json beside src/)
+TILES CHECK FAIL: src/tiles/fp32/ar_e5.bin: neither the lab's nor the plan's; src/tiles/fp32/bh3_e3.bin: neither the lab's nor the plan's; src/tiles/fp32/hi_all
+rc 1
+
+## 7. the lab's device-command audit on the session's files
+audit tool: tools/claims-v3/dmcmd_audit.py, sha256 f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e; src/dmcmd/dmcmd_audit.py f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e
+dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+src/guard_ettelem.sh:33: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      2 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      2 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+rc 0
+
+## 8. the copied files against the lab's committed files (the mapping of src/README.md), and the plan tiles already the lab's
+EQUAL 123ef6e4ac1572d31914b6049fa700b30af1338c13cc96ec850cd047966dfcfd src/rgm136/CMakeLists.txt = tools/claims-v3/e136/rgm136/CMakeLists.txt
+EQUAL 52815705cbea14c0aea28c81a9e094bbe9e16a04280cb67db5a975aa35d5f8ef src/rgm136/README.md = tools/claims-v3/e136/rgm136/README.md
+EQUAL a7e0144ef468dec18ed2d20ec150688a825d6482f17fa7be4dc23c7d17a15332 src/rgm136/sparsity_args.h = tools/claims-v3/e136/rgm136/sparsity_args.h
+EQUAL 6b6c1c80139ec0eadc8940bb93c264806412ab93ae90779d9ec6ad13d88a0477 src/rgm136/host/CMakeLists.txt = tools/claims-v3/e136/rgm136/host/CMakeLists.txt
+EQUAL c464f57f54f0efd6d5659483c9121a0299bf86d82eacacc66938c8226f7ceebb src/rgm136/host/Constants.h.in = tools/claims-v3/e136/rgm136/host/Constants.h.in
+EQUAL f9b2279f838ad30444748f2a5abad5dd646df631735fc029a6ac01f9036e2fda src/rgm136/host/main.cpp = tools/claims-v3/e136/rgm136/host/main.cpp
+EQUAL 061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948 src/rgm136/kernel/CMakeLists.txt = tools/claims-v3/e136/rgm136/kernel/CMakeLists.txt
+EQUAL dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4 src/rgm136/kernel/crt.S = tools/claims-v3/e136/rgm136/kernel/crt.S
+EQUAL b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09 src/rgm136/kernel/sections.ld = tools/claims-v3/e136/rgm136/kernel/sections.ld
+EQUAL 4be70db597aa2120b9c9904643ff9fc6108ef5eb1f4fb17ac844f9e037619f74 src/rgm136/kernel/sparsity.c = tools/claims-v3/e136/rgm136/kernel/sparsity.c
+EQUAL a6cf931b2a123e88699c046eb45f438b06d1648cabb86fc114577a32ec153377 src/ettelem/ettelem.cpp = tools/ettelem/ettelem.cpp
+EQUAL 64793f7eeeea9d7371cd36680e2c8324b1ba6b9547fd1815fd04a0dec9f7ad39 src/ettelem/CMakeLists.txt = tools/ettelem/CMakeLists.txt
+EQUAL f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e src/dmcmd/dmcmd_audit.py = tools/claims-v3/dmcmd_audit.py
+EQUAL 50168632931fd8c1fab40794cbaaac6aca3d31f01d4367d8a21fcf69c0bdc638 src/dmcmd/dmcmd_table.json = tools/claims-v3/dmcmd_table.json
+EQUAL 34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa src/tiles/fp32/randn.bin = tools/claims-v3/kinds/tiles/fp32/randn.bin
+EQUAL e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad src/tiles/fp32/zeros.bin = tools/claims-v3/kinds/tiles/fp32/zeros.bin
+EQUAL fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1 src/tiles/fp32/ones.bin = tools/claims-v3/kinds/tiles/fp32/ones.bin
+EQUAL 2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974 src/tiles/fp16/randn.bin = tools/claims-v3/kinds/tiles/fp16/randn.bin
+EQUAL e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad src/tiles/fp16/zeros.bin = tools/claims-v3/kinds/tiles/fp16/zeros.bin
+EQUAL c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8 src/tiles/fp16/ones.bin = tools/claims-v3/kinds/tiles/fp16/ones.bin
+EQUAL f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9 src/tiles/int8/full.bin = tools/claims-v3/kinds/tiles/int8/full.bin
+EQUAL e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad src/tiles/int8/zeros.bin = tools/claims-v3/kinds/tiles/int8/zeros.bin
+EQUAL 7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2 src/tiles/int8/ones.bin = tools/claims-v3/kinds/tiles/int8/ones.bin
+EQUAL 23 of 23 (the README's copies)
+EQUAL 43ababfe5f3fed0963600a119a5ec805b433636594616042cac4fbab1fd69530 src/tiles/fp32/sparse50f.bin = tools/claims-v3/kinds/tiles/fp32/sparse50.bin
+EQUAL e235ed609c58b069f36412099d8d2fa890cae07bf5599f77b65904b6802d38a8 src/tiles/int8/sparse50i.bin = tools/claims-v3/kinds/tiles/int8/sparse50.bin
+EQUAL 2 of 2 (plan tiles whose bytes are the lab's kinds tiles); plan tiles: 23, new to the lab's kinds tiles: 21
+the kit's own files: 28; tile files: 32
+
+## 9. arms past the first sweep's largest K (fp32 16,384, fp16 8,192, int8 32,768): a process's time inside timeout 10 is unmeasured there
+28 arm(s): 1x16x11-fp16-rnd (K 11264), 1x16x12-fp16-rnd (K 12288), 1x4x20-int8-sparse50i (K 40960), 1x6x12-fp16-sparse50h-s8 (K 12288), 2x16x14-fp16-ones (K 14336), 2x2x20-int8-rnd (K 40960), 2x3x40-fp32-zeros (K 20480), 2x5x10-fp16-zeros (K 10240), 2x5x13-fp16-ones-m77777777 (K 13312), 3x10x16-fp16-sparse50h (K 16384), 3x11x14-fp16-zeros (K 14336), 3x1x24-int8-zeros (K 49152), 3x2x48-fp32-ones (K 24576), 3x8x12-fp16-zeros-m33333333 (K 12288), 4x16x11-fp16-zeros (K 11264), 4x9x16-fp16-rnd (K 16384), 4x9x9-fp16-zeros (K 9216), 5x10x14-fp16-ones (K 14336), 5x1x9-fp16-sparse50h (K 9216), 5x4x14-fp16-rnd (K 14336), 5x7x16-fp16-zeros (K 16384), 6x10x10-fp16-rnd (K 10240), 6x3x13-fp16-rnd-s24 (K 13312), 6x3x16-fp16-ones (K 16384), 7x12x13-fp16-zeros (K 13312), 7x6x11-fp16-rnd (K 11264), 7x8x13-fp16-zeros (K 13312), 8x11x9-fp16-sparse50h (K 9216)
+
+## 10. the plan's sparse50 arms against E206's committed points (tools/claims-v3/e206/points-e206.csv): the same arm, format, kind, mask, gen and tile bytes
+10x4x3-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+12x4x1-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+1x12x4-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+1x1x1-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+1x1x1-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): E206 p116 gemmL1x1x1.fp32.sparse50 (arm A True, arm B True)
+1x1x1-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): E206 p118 gemmL1x1x1.int8.sparse50 (arm A True, arm B True)
+1x1x1-int8-sparse50i-s16 (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+1x4x20-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+1x6x10-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+1x6x12-fp16-sparse50h-s8 (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+1x7x1-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+1x9x7-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+2x1x2-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+2x2x4-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+2x2x4-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+2x2x4-int8-sparse50i-s16 (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+2x3x14-fp32-sparse50f-m77777777 (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+2x5x2-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+2x7x1-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+3x10x16-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+3x12x16-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+3x5x16-int8-sparse50i-m33333333 (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+3x5x16-int8-sparse50i-s16 (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+4x10x16-fp32-sparse50f-mff00 (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+4x14x6-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+4x2x1-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+4x6x2-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+4x9x12-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+5x1x9-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+6x3x1-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+6x4x12-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+6x7x13-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+7x11x8-int8-sparse50i-m11111111 (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+7x1x1-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+8x11x9-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+8x1x11-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+8x4x1-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+
+## 11. the pair check on the 23 plan tiles' files, without counted switches (src/tiles_gen.py --pairs --file NAME:TYPE:PATH)
+tile                      type  pooled  total    A      B      per lane (A + B bits a micro-op)              switches
+h_ka_m9                   fp16   0.562   4.500  0.562  0.000   0.56  0.56  0.56  0.56  0.56  0.56  0.56  0.56  -
+h_ar_e3                   fp16   3.000  24.000  3.000  0.000   3.00  3.00  3.00  3.00  3.00  3.00  3.00  3.00  -
+h_bh_sm2                  fp16   6.250  50.000  0.250  6.000   6.25  6.25  6.25  6.25  6.25  6.25  6.25  6.25  -
+sparse50h                 fp16  17.863 142.902  5.977 11.886  18.09 17.51 18.72 16.91 18.50 16.02 18.56 18.59  -
+h_hi_s11a5                fp16  26.656 213.246  4.996 21.660  26.65 26.66 26.64 26.65 26.64 26.64 26.67 26.68  -
+h_hi_all16a8              fp16  39.538 316.305  7.883 31.655  39.55 39.53 39.54 39.54 39.54 39.54 39.53 39.54  -
+kb_s5m                    fp32   0.188   1.500  0.000  0.188   0.19  0.19  0.19  0.19  0.19  0.19  0.19  0.19  -
+ka_e3m8                   fp32   0.344   2.750  0.344  0.000   0.34  0.34  0.34  0.34  0.34  0.34  0.34  0.34  -
+bh3_e3                    fp32   1.125   9.000  0.000  1.125   3.00  0.00  0.00  3.00  0.00  0.00  3.00  0.00  -
+sp_ar4                    fp32   1.625  13.000  1.625  0.000   1.62  1.62  1.62  1.62  1.62  1.62  1.62  1.62  -
+ar_e5                     fp32   2.500  20.000  2.500  0.000   2.50  2.50  2.50  2.50  2.50  2.50  2.50  2.50  -
+sparse50f                 fp32  18.201 145.605  6.340 11.861  19.49 16.28 17.32 19.44 16.72 20.41 18.57 17.37  -
+hi_m23a7                  fp32  26.304 210.430  3.652 22.651  26.33 26.28 26.28 26.30 26.30 26.29 26.31 26.32  -
+hi_s24a20                 fp32  33.447 267.574  9.816 23.630  33.43 33.45 33.45 33.45 33.46 33.42 33.45 33.46  -
+hi_e3s27a20               fp32  36.381 291.047  9.758 26.623  36.35 36.35 36.42 36.41 36.38 36.35 36.39 36.40  -
+hi_all32a25               fp32  43.954 351.629 12.328 31.625  43.99 43.96 43.98 43.94 43.96 43.93 43.96 43.91  -
+i8_ar_d13                 int8   6.500  52.000  6.500  0.000   6.50  6.50  6.50  6.50  6.50  6.50  6.50  6.50  -
+i8_bh_lo11                int8  11.000  88.000  0.000 11.000  11.00 11.00 11.00 11.00 11.00 11.00 11.00 11.00  -
+i8_bh_hi12                int8  14.000 112.000  2.000 12.000  14.00 14.00 14.00 14.00 14.00 14.00 14.00 14.00  -
+sparse50i                 int8  18.685 149.480  6.137 12.548  19.09 19.79 16.55 19.12 18.68 18.61 19.48 18.16  -
+i8_hi_b28                 int8  28.117 224.934  0.484 27.632  28.11 28.11 28.10 28.12 28.11 28.12 28.09 28.16  -
+i8_sp_bh                  int8  30.000 240.000  0.000 30.000  30.00 30.00 30.00 30.00 30.00 30.00 30.00 30.00  -
+i8_hi_b32a8               int8  35.734 285.871  4.242 31.492  35.75 35.76 35.69 35.73 35.73 35.75 35.70 35.76  -
+pair (one type)                                  toggles a / b     apart    switches a / b       verdict
+h_hi_all16a8 / h_hi_s11a5                         39.538 /  26.656  32.58 %          - / -         apart
+h_hi_s11a5 / sparse50h                            26.656 /  17.863  32.99 %          - / -         apart
+h_ar_e3 / h_bh_sm2                                 3.000 /   6.250  52.00 %          - / -         apart
+h_hi_all16a8 / sparse50h                          39.538 /  17.863  54.82 %          - / -         apart
+h_bh_sm2 / sparse50h                               6.250 /  17.863  65.01 %          - / -         apart
+h_bh_sm2 / h_hi_s11a5                              6.250 /  26.656  76.55 %          - / -         apart
+h_ar_e3 / h_ka_m9                                  3.000 /   0.562  81.25 %          - / -         apart
+h_ar_e3 / sparse50h                                3.000 /  17.863  83.21 %          - / -         apart
+h_bh_sm2 / h_hi_all16a8                            6.250 /  39.538  84.19 %          - / -         apart
+h_ar_e3 / h_hi_s11a5                               3.000 /  26.656  88.75 %          - / -         apart
+h_bh_sm2 / h_ka_m9                                 6.250 /   0.562  91.00 %          - / -         apart
+h_ar_e3 / h_hi_all16a8                             3.000 /  39.538  92.41 %          - / -         apart
+h_ka_m9 / sparse50h                                0.562 /  17.863  96.85 %          - / -         apart
+h_hi_s11a5 / h_ka_m9                              26.656 /   0.562  97.89 %          - / -         apart
+h_hi_all16a8 / h_ka_m9                            39.538 /   0.562  98.58 %          - / -         apart
+hi_e3s27a20 / hi_s24a20                           36.381 /  33.447   8.06 %          - / -         apart
+hi_all32a25 / hi_e3s27a20                         43.954 /  36.381  17.23 %          - / -         apart
+hi_m23a7 / hi_s24a20                              26.304 /  33.447  21.36 %          - / -         apart
+hi_all32a25 / hi_s24a20                           43.954 /  33.447  23.90 %          - / -         apart
+hi_e3s27a20 / hi_m23a7                            36.381 /  26.304  27.70 %          - / -         apart
+bh3_e3 / sp_ar4                                    1.125 /   1.625  30.77 %          - / -         apart
+hi_m23a7 / sparse50f                              26.304 /  18.201  30.81 %          - / -         apart
+ar_e5 / sp_ar4                                     2.500 /   1.625  35.00 %          - / -         apart
+hi_all32a25 / hi_m23a7                            43.954 /  26.304  40.16 %          - / -         apart
+ka_e3m8 / kb_s5m                                   0.344 /   0.188  45.45 %          - / -         apart
+hi_s24a20 / sparse50f                             33.447 /  18.201  45.58 %          - / -         apart
+hi_e3s27a20 / sparse50f                           36.381 /  18.201  49.97 %          - / -         apart
+ar_e5 / bh3_e3                                     2.500 /   1.125  55.00 %          - / -         apart
+hi_all32a25 / sparse50f                           43.954 /  18.201  58.59 %          - / -         apart
+bh3_e3 / ka_e3m8                                   1.125 /   0.344  69.44 %          - / -         apart
+ka_e3m8 / sp_ar4                                   0.344 /   1.625  78.85 %          - / -         apart
+bh3_e3 / kb_s5m                                    1.125 /   0.188  83.33 %          - / -         apart
+ar_e5 / ka_e3m8                                    2.500 /   0.344  86.25 %          - / -         apart
+ar_e5 / sparse50f                                  2.500 /  18.201  86.26 %          - / -         apart
+kb_s5m / sp_ar4                                    0.188 /   1.625  88.46 %          - / -         apart
+ar_e5 / hi_m23a7                                   2.500 /  26.304  90.50 %          - / -         apart
+sp_ar4 / sparse50f                                 1.625 /  18.201  91.07 %          - / -         apart
+ar_e5 / kb_s5m                                     2.500 /   0.188  92.50 %          - / -         apart
+ar_e5 / hi_s24a20                                  2.500 /  33.447  92.53 %          - / -         apart
+ar_e5 / hi_e3s27a20                                2.500 /  36.381  93.13 %          - / -         apart
+bh3_e3 / sparse50f                                 1.125 /  18.201  93.82 %          - / -         apart
+hi_m23a7 / sp_ar4                                 26.304 /   1.625  93.82 %          - / -         apart
+ar_e5 / hi_all32a25                                2.500 /  43.954  94.31 %          - / -         apart
+hi_s24a20 / sp_ar4                                33.447 /   1.625  95.14 %          - / -         apart
+hi_e3s27a20 / sp_ar4                              36.381 /   1.625  95.53 %          - / -         apart
+bh3_e3 / hi_m23a7                                  1.125 /  26.304  95.72 %          - / -         apart
+hi_all32a25 / sp_ar4                              43.954 /   1.625  96.30 %          - / -         apart
+bh3_e3 / hi_s24a20                                 1.125 /  33.447  96.64 %          - / -         apart
+bh3_e3 / hi_e3s27a20                               1.125 /  36.381  96.91 %          - / -         apart
+bh3_e3 / hi_all32a25                               1.125 /  43.954  97.44 %          - / -         apart
+ka_e3m8 / sparse50f                                0.344 /  18.201  98.11 %          - / -         apart
+hi_m23a7 / ka_e3m8                                26.304 /   0.344  98.69 %          - / -         apart
+kb_s5m / sparse50f                                 0.188 /  18.201  98.97 %          - / -         apart
+hi_s24a20 / ka_e3m8                               33.447 /   0.344  98.97 %          - / -         apart
+hi_e3s27a20 / ka_e3m8                             36.381 /   0.344  99.06 %          - / -         apart
+hi_all32a25 / ka_e3m8                             43.954 /   0.344  99.22 %          - / -         apart
+hi_m23a7 / kb_s5m                                 26.304 /   0.188  99.29 %          - / -         apart
+hi_s24a20 / kb_s5m                                33.447 /   0.188  99.44 %          - / -         apart
+hi_e3s27a20 / kb_s5m                              36.381 /   0.188  99.48 %          - / -         apart
+hi_all32a25 / kb_s5m                              43.954 /   0.188  99.57 %          - / -         apart
+i8_hi_b28 / i8_sp_bh                              28.117 /  30.000   6.28 %          - / -         apart
+i8_hi_b32a8 / i8_sp_bh                            35.734 /  30.000  16.05 %          - / -         apart
+i8_hi_b28 / i8_hi_b32a8                           28.117 /  35.734  21.32 %          - / -         apart
+i8_bh_hi12 / i8_bh_lo11                           14.000 /  11.000  21.43 %          - / -         apart
+i8_bh_hi12 / sparse50i                            14.000 /  18.685  25.07 %          - / -         apart
+i8_hi_b28 / sparse50i                             28.117 /  18.685  33.54 %          - / -         apart
+i8_sp_bh / sparse50i                              30.000 /  18.685  37.72 %          - / -         apart
+i8_ar_d13 / i8_bh_lo11                             6.500 /  11.000  40.91 %          - / -         apart
+i8_bh_lo11 / sparse50i                            11.000 /  18.685  41.13 %          - / -         apart
+i8_hi_b32a8 / sparse50i                           35.734 /  18.685  47.71 %          - / -         apart
+i8_bh_hi12 / i8_hi_b28                            14.000 /  28.117  50.21 %          - / -         apart
+i8_bh_hi12 / i8_sp_bh                             14.000 /  30.000  53.33 %          - / -         apart
+i8_ar_d13 / i8_bh_hi12                             6.500 /  14.000  53.57 %          - / -         apart
+i8_bh_hi12 / i8_hi_b32a8                          14.000 /  35.734  60.82 %          - / -         apart
+i8_bh_lo11 / i8_hi_b28                            11.000 /  28.117  60.88 %          - / -         apart
+i8_bh_lo11 / i8_sp_bh                             11.000 /  30.000  63.33 %          - / -         apart
+i8_ar_d13 / sparse50i                              6.500 /  18.685  65.21 %          - / -         apart
+i8_bh_lo11 / i8_hi_b32a8                          11.000 /  35.734  69.22 %          - / -         apart
+i8_ar_d13 / i8_hi_b28                              6.500 /  28.117  76.88 %          - / -         apart
+i8_ar_d13 / i8_sp_bh                               6.500 /  30.000  78.33 %          - / -         apart
+i8_ar_d13 / i8_hi_b32a8                            6.500 /  35.734  81.81 %          - / -         apart
+pairs: 81 of one type over 23 tiles; 0 at equal input toggles (within 5 %), 0 refused
+PAIRS PASS
+rc 0 (3 = a pair at equal input toggles without the plan's counted switches, which are not in src/)
+
+## 12. the two host-rule changes the README names, as lines of code
+58:nice -n 10 cmake --build build/rgm -j1 > build/rgm-build.log 2>&1 || fail "the rgm build (build/rgm-build.log)"
+60:nice -n 10 cmake --build build/ettelem -j1 > build/ettelem-build.log 2>&1 || fail "the ettelem build (build/ettelem-build.log)"
+7:# The looks: the host; uptime; the box's one-minute load (/proc/loadavg, recorded in run/preflight-load.txt: 6 or more is a
+31:LOAD1=$(cut -d ' ' -f 1 /proc/loadavg 2>/dev/null)
+32:echo "load (one minute, /proc/loadavg): ${LOAD1:-unread} (NO-GO at 6 or more)"
+34:echo "$(date +%s) $CARD ${LOAD1:-unread}" >> run/preflight-load.txt
+35:if [ -z "$LOAD1" ]; then nogo "the box's one-minute load is unread (/proc/loadavg)"
+36:elif awk -v l="$LOAD1" 'BEGIN { exit !(l + 0 >= 6) }'; then nogo "the box's one-minute load is $LOAD1 (6 or more: the lab's host rule)"; fi
+preflight NO-GO lines on the load: 2
