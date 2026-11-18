@@ -1,0 +1,38 @@
+E213 kit: the quick set, 2026-11-18 03:27:17 PST, /usr/bin/python3 3.12.3, on aifoundry2 (desk), in fix-e213's scratch clone (GitHub main ee0356d9 with the registration with Amendment A1 and the kit as local commits)
+== e213_common.py: rc 0, E213-COMMON SELF-CHECK PASS (0 s)
+== e213_ident.py: rc 0, E213-IDENT SELF-CHECK PASS (0 s)
+== ident_e213.py --check: rc 0, CHECK PASS (0 s)
+== check_e213.py --check: rc 0, CHECK PASS (0 s)
+== check_e213.py --box: rc 0, HARNESS OK: 48 files at harness-e213.json's sha256 (0 s)
+== the registration's points_e213.py candidates --check: rc 0, points_e213 candidates --check: desk/candidates-e213.json rebuilt == committed: True (0 s)
+== the registration's points_e213.py --check: rc 0, PASS (0 s)
+== the registration's forecast_e213b.py --check: rc 0, PASS (2 s)
+== the registration's rules_e213.py --check: rc 0, PASS (60 s)
+== the registration's plan_e213.py --check: rc 0, PASS (0 s)
+== the registration's desk/kernel_e213.py --check: rc 0, PASS (0 s)
+== the preflight (preflight_e213.sh): rc 0, dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none) (0 s)
+== score_e213.py --selftest-standins: rc 0, 'score_e213 --selftest-standins: PASS (every day as stated: True; every rule seen PASS and FAIL: True; every he', the JSON byte-identical to the committed selftest-standins.json: yes (38 s)
+== score_e213.py --selftest-real: rc 0, '  E206 arm B: 104 points, worst relative difference 2.2e-16 (equal True); not compared []', the JSON byte-identical to the committed selftest-real.json: yes (0 s)
+== score_e213.py --forecasts: rc 0, its print byte-identical to the committed forecasts-e213.txt: yes
+== the registration's list: 27 of 27 OK; its own sha256 96e5d1682a237c4d... (step 2's REGPIN: 27 entries, 96e5d1682a237c4d...)
+== the registration commit (the commit that added E213.md) 5814897b1125: its tools/claims-v3/e213 subtree 75778ad39efc1ed1... (step 0's REG_SUB 75778ad39efc1ed1...)
+== bash -n of every shell file of the kit: 23 files, 0 with a syntax error
+== python3 parse of every Python file of the kit (in memory, no __pycache__ written): 13 files, 0 that do not parse
+== every line of the kit's own code naming 'timeout -k', 'kill -9', SIGKILL or .kill() (a reader checks each is prose: a comment, a docstring or a message; no call):
+   build_e213.sh:12: #      under a plain `timeout 300` (never -k: no SIGKILL anywhere in E213's kit), the compilers recorded;
+   e213_common.py:41:     `timeout -k`; the smoke (arm A s01-s04, arm B s11-s14) the runner's own, first;
+   rb/rb_e213.sh:8: # process on a box runs under the runner's plain `timeout 10` and nothing of E213's ever sends it a SIGKILL), and changes only:
+   run_e213.py:37: NO SIGKILL ANYWHERE (W/out/orch/kill-rule.txt; AGENT.md "never kill -9"): every device process runs under a plain `timeout 10`; a host whose
+   run_e213.py:435:         """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s; each wait ends CLOSE_S / 2 before the end bound but lasts
+   run_e213.py:454:             self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+   run_e213.py:603:                  f"at {C.HOST_TIMEOUT_S} s: nothing kills it (no SIGKILL, ever); the stop file is touched, nothing further starts and no "
+== calls that could send a kill in the kit's own code (subprocess .kill(), os.kill, signal.SIGKILL, 'kill -9', 'timeout -k' outside prose): 0
+== the desk tests' own stand-in kills (the tests end THEIR OWN helper processes, never a device process):
+   desk/realpath_e213.py:335: holder.terminate()          # the stand-in holder (a sleep under flock, no device), by SIGTERM
+   desk/realpath_e213.py:351: dp.terminate()              # the decoy (a copy of sleep named sys_emu, no device), by SIGTERM
+   desk/realpath_e213.py:563: holder.terminate()          # the stand-in (a python sleep holding a stand-in node file, no device), by SIGTERM
+   rb/selftest_rb_e213.sh:299: kill "$p1" "$p2" 2>/dev/null
+   rb/selftest_rb_e213.sh:404: kill "$p3" 2>/dev/null
+   selftest_run_e213.py:141: p.send_signal(signal.SIGTERM)
+   selftest_run_e213.py:329: holder.terminate()          # the stand-in holder (a sleep under flock, no device), by SIGTERM
+QUICK-SET-E213 PASS: 0 not as stated (100 s)
