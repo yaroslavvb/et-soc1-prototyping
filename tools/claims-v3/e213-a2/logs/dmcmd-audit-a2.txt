@@ -1,0 +1,13 @@
+(copied by fix-a2e213 from its final run; this session's scratch paths masked as <scratch>)
+dmcmd_audit_v2 over Amendment A2's files and fwgate.py (fix-a2e213, Q219), 2026-11-18 12:43:09 PST, aifoundry2 (desk), /usr/bin/python3 3.12.3; HEAD 985d5fa88cae (fixa2)
+dmcmd_audit_v2.py sha256 9977f214bb1afcfeaef06717086c7ab0ab0722e6389c4f575e26613e6bc473d4; dmcmd_table_v2.json sha256 72c9e5a6cec8e75011102272a4c27d20f8d168b42836f428741607259f8a19c6
+dmcmd_audit: GO (1 send site(s), 0 disallowed; allow-list: none)
+tools/claims-v3/fwgate/fwgate.py:69: name: GET_MODULE_FIRMWARE_REVISIONS [READ, pmic read] ok
+summary:
+  GET_MODULE_FIRMWARE_REVISIONS              READ         pmic read      1 site(s)  ok
+rc=0
+--- the same with --deny-pmic-read (the query is a PMIC read: refused there, as fwgate's README says)
+NO-GO tools/claims-v3/fwgate/fwgate.py:69: name: GET_MODULE_FIRMWARE_REVISIONS: PMIC read denied (--deny-pmic-read)
+dmcmd_audit: NO-GO (1 send site(s), 1 disallowed; allow-list: none)
+tools/claims-v3/fwgate/fwgate.py:69: name: GET_MODULE_FIRMWARE_REVISIONS [READ, pmic read] NO-GO: PMIC read denied (--deny-pmic-read)
+rc=3

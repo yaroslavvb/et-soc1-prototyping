@@ -1,0 +1,104 @@
+(copied by fix-a2e213 from its final run; this session's scratch paths masked as <scratch>)
+A2's desk test (tools/claims-v3/e213-a2/desk/selftest_a2_e213.sh), run by fix-a2e213 (Q219), 2026-11-18 12:41:48 PST, aifoundry2 (desk), /usr/bin/python3 3.12.3, in the round's slot
+and nodev.sh (bubblewrap: no card node, an empty /run/lock), then its own private PID namespace; the lab clone's HEAD 985d5fa88caefa536f906abde7710824fe97b113
+(GitHub main 5a75e212d59d66907713af50fdb6ba8e61aaa30b with 16 files of A2 and 0 of A3 committed on it);
+the quiet-desk flag absent at the start; scratch outside the repository and outside the round's lane folders
+(A2's runbook test: re-run in a private PID namespace, so that no other lane's process on this desk is read as a session of ours)
+scratch repository: a shared sparse clone of the lab clone at HEAD 985d5fa88cae (A2's files committed in it)
+
+== NE: NEEDS-READ, then EQUAL (the box booted after E82's read)
+-> PASS ([s05_look_a2_e213] aifoundry1 FREE (k6's holder rule) and card 1's firmware identity shown on this boot (Amendment A2): EQUAL fwgate-aifoundry1-c1-20261118-124150.json; the read's folder copied back exact (3 files in RB_OUT/e213-a2-fwgate-B/), SCRUB-CHECK CLEAN; evidence: fwgate's ledger aifoundry1-)
+
+== NE-EV: step 4's evidence of the one call (fix-a2e213): this boot's ledger and attempt-log lines in RB_OUT, read only
+-> PASS (2026-11-18 12:41:50 PST step=s05_look_a2_e213 A2-EVIDENCE-B: evidence: fwgate's ledger aifoundry1-c1.jsonl: 2 line(s) of this boot (SENT 1, END 1: EQUAL); the kit's attempt log a2-fwgate-attempts-aifoundry1-c1.jsonl: 2 line(s) of this boot (ATTEMPT 1, END 1: EQUAL): one call on this boot, ended EQUA)
+
+== NC: step 4 again on the same boot the same day: CONTINUITY by this boot's EQUAL of today, no second read
+-> PASS (A2-LOOK: CONTINUITY: aifoundry1 card 1 booted 2026-11-17 16:46:32 PST; its newest firmware read of record is the firmware read of 2026-11-18 12:41:50 PST (fwgate-aifoundry1-c1-20261118-124150.json), a)
+
+== NC-EV: the evidence captured again after CONTINUITY: the same one call
+-> PASS (2026-11-18 12:41:51 PST step=s05_look_a2_e213 A2-EVIDENCE-B: evidence: fwgate's ledger aifoundry1-c1.jsonl: 2 line(s) of this boot (SENT 1, END 1: EQUAL); the kit's attempt log a2-fwgate-attempts-aifo)
+
+== NL: step 9 after NE: the guard reads this boot's EQUAL read and the launch goes on
+-> PASS (identity: aifoundry1 card 1 booted 2026-11-17 16:46:32 PST, before the firmware read of 2026-11-18 12:41:50 PST (fwgate-aifoundry1-c1-20261118-124150.json): ok)
+
+== EVX: the helper's evidence alone (read only) on a copy of NE's ledger and attempt log (fix-a2e213)
+-> PASS (A2-EVIDENCE: NOT READ: --box aifoundry2 is not this host (aifoundry1))
+
+== CT: a boot BEFORE E82's read: CONTINUITY, no read; step 9 launches
+-> PASS (A2-LOOK: CONTINUITY: aifoundry1 card 1 booted 2026-10-26 15:18:24 PDT; its newest firmware read of record is E82's firmware read of 2026-10-31 13:45:24 PDT, after the boot: identity carried; no read n; identity: aifoundry1 card 1 booted 2026-10-26 15:18:24 PDT, before E82's firmware read of 2026-10-31 13:45:24 PDT: ok)
+
+== CT-EV: the evidence on a continuity day: no line of this boot in either file
+-> PASS (2026-11-18 12:41:57 PST step=s05_look_a2_e213 A2-EVIDENCE-B: evidence: fwgate's ledger aifoundry1-c1.jsonl: 0 line(s) of this boot (SENT 0, END 0: -); the kit's attempt log a2-fwgate-attempts-aifoundry1-c1.jsonl: 0 line(s) of this boot (ATT)
+
+== EV: the evidence call fails on the box (a stand-in box python3 refusing the 'evidence' subcommand alone): never a gate (fix-a2e213)
+-> PASS (2026-11-18 12:42:03 PST step=s05_look_a2_e213 A2-EVIDENCE-B: evidence NOT CAPTURED by this call (exit 1: no A2-EVIDENCE line): fwgate's ledger and the kit's attempt log stay on the box)
+
+== DF: DIFFERENT (card 0's PMIC in the answer)
+-> PASS (step 4: [s05_look_a2_e213] STOP: the one firmware read did not end EQUAL (exit 16): A2-STOP: the one read ended DIFFERENT (fwgate exit 16: IDENTITY-STOP: DIFFERENT: aifoundry1 card 1 at 2026-11-18 12:42:09 PST against E82's read of 2026-1; again: [s05_look_a2_e213] STOP: fwgate's look says stop (exit 16): A2-LOOK: STOP: a read attempt of this boot did not end EQUAL (2026-11-18 12:42:09 PST ended DIFFEREN; step 9: [s11_session_a2_e213] STOP: IDENTITY-STOP: aifoundry1 card 1 booted '2026-11-17 16:46:32 PST': a firmware read on this boot did not end EQUAL, DIFFERENT (build/e213/fwgate-B-2026-11-18/fwgate-aifoundr)
+-> PASS (the record and the attempt log)
+
+== UR: UNREADABLE (no success line)
+-> PASS (step 4: [s05_look_a2_e213] STOP: the one firmware read did not end EQUAL (exit 16): A2-STOP: the one read ended UNREADABLE (fwgate exit 16: IDENTITY-STOP: UNREADABLE: aifoundry1 card 1 at 2026-11-18 12:42:11 PST against E82's read of 2026; again: [s05_look_a2_e213] STOP: fwgate's look says stop (exit 16): A2-LOOK: STOP: a read attempt of this boot did not end EQUAL (2026-11-18 12:42:11 PST ended UNREADAB; step 9: [s11_session_a2_e213] STOP: IDENTITY-STOP: aifoundry1 card 1 booted '2026-11-17 16:46:32 PST': a firmware read on this boot did not end EQUAL, UNREADABLE (build/e213/fwgate-B-2026-11-18/fwgate-aifound)
+-> PASS (the record and the attempt log)
+
+== CS: a cut-off SENT in fwgate's ledger (this boot, no END)
+-> PASS (step 4: [s05_look_a2_e213] STOP: fwgate's look says stop (exit 16): A2-LOOK: STOP: fwgate's look exited 16: STOPPED: a firmware read of aifoundry1 card 1 on this boot (booted 2026-11-17 16:46:32 PST) did not end EQUAL: SENT (<scratch>; again: [s05_look_a2_e213] STOP: fwgate's look says stop (exit 16): A2-LOOK: STOP: fwgate's look exited 16: STOPPED: a firmware read of aifoundry1 card 1 on this boot (; step 9: [s11_session_a2_e213] STOP: IDENTITY-STOP: aifoundry1 card 1 booted '2026-11-17 16:46:32 PST': a firmware read on this boot did not end EQUAL, SENT (<scratch>)
+-> PASS (fwgate's look read the cut-off SENT; no attempt made)
+
+== BL: a BUSY LOCK (card 0's lock held by another process during the read)
+-> PASS (step 4: [s05_look_a2_e213] STOP: the one firmware read did not end EQUAL (exit 16): A2-STOP: the one read ended NOT-SENT-17 (fwgate exit 17: the card lock <scratch>; again, the lock free: [s05_look_a2_e213] STOP: fwgate's look says stop (exit 16): A2-LOOK: STOP: a read attempt of this boot did not end EQUAL (2026-11-18 12:42:13 PST ended NOT-SENT)
+
+== BW: a BUSY et-who (et-who --check rc 1)
+-> PASS (step 4: [s05_look_a2_e213] STOP: the one firmware read did not end EQUAL (exit 16): A2-STOP: the one read ended NOT-SENT-17 (fwgate exit 17: HELD: the card is held or the check failed: nothing sent (call again); no record in DIR): no laun; again: [s05_look_a2_e213] STOP: fwgate's look says stop (exit 16): A2-LOOK: STOP: a read attempt of this boot did not end EQUAL (2026-11-18 12:42:14 PST ended NOT-SENT; step 9: [s11_session_a2_e213] STOP: IDENTITY-STOP: aifoundry1 card 1 booted '2026-11-17 16:46:32 PST', not before E82's firmware read of 2026-10-31 13:45:24 PDT: its firmware build is not carried by continuit)
+-> PASS (fwgate's read: HELD, nothing sent)
+
+== ML: a MISSING LOCK FILE (card 0's)
+-> PASS (step 4: [s05_look_a2_e213] STOP: the one firmware read did not end EQUAL (exit 16): A2-STOP: the one read ended NOT-SENT-17 (fwgate exit 17: the card lock <scratch>; again: [s05_look_a2_e213] STOP: fwgate's look says stop (exit 16): A2-LOOK: STOP: a read attempt of this boot did not end EQUAL (2026-11-18 12:42:15 PST ended NOT-SENT; step 9: [s11_session_a2_e213] STOP: IDENTITY-STOP: aifoundry1 card 1 booted '2026-11-17 16:46:32 PST', not before E82's firmware read of 2026-10-31 13:45:24 PDT: its firmware build is not carried by continuit)
+-> PASS (fwgate never makes a lock file)
+
+== NG: the guard with NO EQUAL OF THIS BOOT (no read made; a forced look file)
+-> PASS ([s11_session_a2_e213] STOP: IDENTITY-STOP: aifoundry1 card 1 booted '2026-11-17 16:46:32 PST', not before E82's firmware read of 2026-10-31 13:45:24 PDT: its firmware build is not carried by continuity (fwgate.py read re)
+
+== SB: A STALE EQUAL OF AN EARLIER BOOT (NE's read, then the box booted again)
+-> PASS ([s11_session_a2_e213] STOP: IDENTITY-STOP: aifoundry1 card 1 booted '2026-11-18 04:00:00 PST', not before E82's firmware read of 2026-10-31 13:45:24 PDT: its firmware build is not carried by continuity (fwgate.py read re)
+
+== SD: A STALE EQUAL OF AN EARLIER DAY on the same boot (fwgate's clock a day on)
+-> PASS ([s11_session_a2_e213] STOP: IDENTITY-STOP: aifoundry1 card 1 booted '2026-11-17 16:46:32 PST', not before E82's firmware read of 2026-10-31 13:45:24 PDT: its firmware build is not carried by continuity (fwgate.py read re)
+
+== RS: THE REST RULE before the read (a session of ours ended 10 minutes ago), then rested (50 minutes)
+-> PASS ([s05_look_a2_e213] STOP: refused on the box: REFUSED: 10 minutes since E199's session end (2026-11-18 12:32:17 PST): E213's first card command comes on a rested card, at least 40 minutes after our las; rested: A2-READ: EQUAL fwgate-aifoundry1-c1-20261118-124218.json (fwgate exit 0: aifoundry1 card 1 at 2026-11-18 12:42:18 PST ma)
+
+== BH: both cards held before the read (the box's et-who --check reads held for the whole wait): 17, nothing read, no attempt
+-> PASS (A2-HELD: et-who --check has not read free on aifoundry1 (either card) after 30 s (last exit 1): nothing read (31 s; the desk test's wait 25 s))
+-> PASS (freed: A2-READ: EQUAL fwgate-aifoundry1-c1-20261118-124249.json (fwgate exit 0: aifoundry1 card 1 at 2026-11-18 12:42:49 PST matches E82's read of 2026-10-31 13:45:24 )
+
+== PB: fwgate.py changed on the box after step 4: the launch guard's pins stop it
+-> PASS ([s11_session_a2_e213] STOP: IDENTITY-STOP: A2's box files are not at their pinned sha256 on aifoundry1 (tools/claims-v3/fwgate/fwgate.py: FAILED;sha256sum: WARNING: 1 computed checksum did NOT match;): fwgate's guard can)
+
+== PD: A2's helper changed (uncommitted) in the lab clone: step 4 stops before any call reaches the box
+-> PASS ([s05_look_a2_e213] STOP: A2's box files have uncommitted changes in the lab clone: nothing is synced or read)
+
+== AA: arm A is refused by A2's three steps
+-> PASS ([s05_look_a2_e213] STOP: Amendment A2 is E213 arm B's alone (aifoundry1 card 1); arm A runs the kit's own steps as landed)
+
+== DT: step 12's addition (data_e213a2.py) on a stand-in data directory
+-> PASS (A2-DATA ADDED fwgate/: 3 files from step 4's copy (1 masked by the kit's scrub: the record's ledger path's home -> '~'), the record fwgate-aifoundry1-c1-20261118-124150.json (EQUAL, aifoundry1 card 1, read 2026-11-18 12:41:50 PST, both locks ['etsoc-shire0.loc)
+-> PASS (A2-DATA CONTINUITY: step 4 read no firmware (the box booted before the newest committed record of card 1): nothing added; SHA256SUMS as the kit made it (3 entries))
+-> PASS (A2-DATA REFUSED: step 4's copy is not the box's folder any more: differs fwgate-aifoundry1-c1-20261118-124150.stderr)
+-> PASS (A2-DATA REFUSED: THE SCRUB left a home path, the login or another login's holder line in fwgate/, fwgate/note.txt)
+-> PASS (A2-DATA REFUSED: docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry3 is not E213 arm B's data directory or gate stop's record)
+
+== DT f-h: step 12's addition with step 4's evidence of the one call (fix-a2e213): added after the scrub, or left out and said, never a refusal
+-> PASS (A2-DATA ADDED fwgate/: 3 files from step 4's copy (1 masked by the kit's scrub: the record's ledger path's home -> '~'), the record fwgate-aifoundry1-c1-20261118-124150.json (EQUAL, aifoundry1 card 1, read 2026-11-18 12:41:50 PST, both locks ['etsoc-shire0.lock', 'etsoc-shire1.lock'], et-who --check)
+-> PASS (A2-DATA ADDED fwgate/: 3 files from step 4's copy (1 masked by the kit's scrub: the record's ledger path's home -> '~'), the record fwgate-aifoundry1-c1-20261118-124150.json (EQUAL, aifoundry1 card 1, read 2026-11-18 12:41:50 PST, both locks ['etsoc-shire0.lock', 'etsoc-shire1.lock'], et-who --check)
+-> PASS (A2-DATA ADDED fwgate/: 3 files from step 4's copy (1 masked by the kit's scrub: the record's ledger path's home -> '~'), the record fwgate-aifoundry1-c1-20261118-124150.json (EQUAL, aifoundry1 card 1, read 2026-11-18 12:41:50 PST, both locks ['etsoc-shire0.lock', 'etsoc-shire1.lock'], et-who --check)
+
+== DRY: A2's dry listing (arm B as amended)
+-> PASS (dry listing (A2, arm B): 15 steps listed, 0 exited non-zero, 0 box calls)
+
+== Z: no process of this test left running
+-> PASS (processes left: 0)
+
+the stand-ins' calls: 156 ssh, 29 rsync (all to the stand-in aifoundry1)
+SELFTEST-A2-E213 39 of 39 PASS
+rc=0 (65 s)

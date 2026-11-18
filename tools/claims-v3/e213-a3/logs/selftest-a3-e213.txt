@@ -1,0 +1,54 @@
+(copied by fix-a2e213 from its final run; this session's scratch paths masked as <scratch>)
+A3's desk test (tools/claims-v3/e213-a3/desk/selftest_a3_e213.sh), run by fix-a2e213 (Q219), 2026-11-18 12:50:44 PST, aifoundry2 (desk), /usr/bin/python3 3.12.3, in the round's slot
+and nodev.sh (bubblewrap: no card node, an empty /run/lock), then its own private PID namespace; the lab clone's HEAD 827130566f767796cb2b7e49a538ef8dbc9ab4a3
+(GitHub main 5a75e212d59d66907713af50fdb6ba8e61aaa30b with 16 files of A2 and 18 of A3 committed on it);
+the quiet-desk flag absent at the start; scratch outside the repository and outside the round's lane folders
+(A3's desk test: re-run in a private PID namespace, so that no other lane's process on this desk is read as a session of ours)
+scratch repository: a shared sparse clone of the lab clone at HEAD 827130566f76 (A2's and A3's files committed in it)
+
+== PART 1: A3's order, its wrapper, the runner through it and the scorer (desk/selftest_order_a3_e213.py, from the scratch repository)
+O1: PASS - rc 0; A3-ORDER OK: arm B 85 runs, the registered multiset of (block, point); ties at runs 1, 39, 77; the 'rgm136 gemmLnc' runs last (78:k40 79:k37 80:k38 81:k39 82:k39 83:k38 84:k37 85:k40); sequence-B-a3.j
+O2: PASS - rc 0; 85 run lines; last eight k40 k37 k38 k39 k39 k38 k37 k40; ["A3-ORDER: 85 runs; the same multiset of (block, point) as the registered 85 runs: yes; the 'rgm136 gemmLnc' runs at [78, 79, 80, 81, 82, 83, 84, 85] (registered at [39, 40, 41, 42, 44, 45, 46, 47])"]
+O3: PASS - file == re-derived: True; moved ['k37', 'k38', 'k39', 'k40']; ties at [1, 39, 77]; last eight ['k40', 'k37', 'k38', 'k39', 'k39', 'k38', 'k37', 'k40']; the 77 others in registered order: True; registered_n a bijection naming each run's place: True; same multiset: True
+O4: PASS - (a) refused rc 3; (b) refused rc 3; (c) refused rc 3; (d) refused rc 2; (e) refused rc 3
+O5: PASS - arm B 85 runs with registered names True; arm A the kit's True; arm C KeyError True; the kit's self-check: E213-COMMON SELF-CHECK PASS
+R1: PASS - rc 0; 85 runs, in A3's order with every key, argv and gate the registered point's (0 differ); the log's run lines in A3's order: True; runner.out first line A3-ORDER OK: True; runs 78-85: pass1-k40 pass1-k37 pass1-k38 pass1-k39 pass2-k39 pass2-k38 pass2-k37 pass2-k40
+R2: PASS - sessions rc 0 (A3) / 0 (registered); reduce and score rc [(0, 0), (0, 0)]; A3's runs in A3's order True, the registered session's in the registered order True; 41 points, 2 runs each in both True; cycles and seconds equal at every point True; W over idle within 0.0350 W, rest within 0.0150 W (the doubles' sample noise); cells' passes equal True; verdicts equal True ({'E1': 'PASS', 'E2': 'PASS', 'E3': 'PASS', 'E4': 'PASS', 'H1': 'MM1-v3 BETTER', 'H2': 'MM1-v3 BETTER', 'H3': 'MM1-v3 BETTER', 'H4': 'MM1-v3 BETTER', 'H5': 'MM1-v3 BETTER', 'R0': 'PASS', 'S6': 'PASS', 'T1': 'PASS', 'T2': 'PASS', 'T3': 'PASS'}); counts equal True; head-to-head {'H1': 'MM1-v3 BETTER', 'H2': 'MM1-v3 BETTER', 'H3': 'MM1-v3 BETTER', 'H4': 'MM1-v3 BETTER', 'H5': 'MM1-v3 BETTER'} equal True
+S1: PASS - 85 runs renumbered to their registered places (the moved points then at [39, 40, 41, 42, 44, 45, 46, 47]) and, again, reversed with each point's runs listed backwards: the frozen scorer's output equal to the A3 data's (0 and 0 differences once run numbers in messages are masked); rc 0, 0
+SELFTEST-ORDER-A3 8 of 8 PASS
+
+== PART 2: arm B's runbook as amended by A2 and A3, on stand-in aifoundry1 boxes
+
+== Y: the window, A2's step 4 (CONTINUITY), the kit's step 5, then A3's row 5b
+-> PASS ([s07b_sync_a3_e213] A3's box files synced to aifoundry1:nekko/ and checked there: A3-PINS OK 3 of 3; A3-ORDER OK: arm B 85 runs, the registered multiset of (block, point); ties at runs 1, 39, 77; the 'rgm136 gemmLnc' runs last (78:k40 79:k37 80:k38 81:k39 82:k)
+
+== L9: A3's step 9 launches the REAL A3 session_e213.sh, run_e213_a3.py and run_e213.py, which stop at the runner's box check; step 10 reads the gate
+-> PASS (2026-11-18 13:02:43 PST refused, no device opened: the box or the build is not the registered one (this host is 'aifoundry2', not arm B's 'aifoundry1'))
+
+== W10: the kit's steps 10 and 11 count A3's wrapper by its name (session_e213.sh under tools/claims-v3/e213-a3/)
+-> PASS (running: RUN-RUNNING e213 arm B after 15 s; step 11: REFUSED: a session_e213.sh of ours still runs on aifoundry1; ended: RUN-ENDED e213 arm B)
+
+== P9: A3's sequence file changed on the box after row 5b: A3's step 9 stops with nothing launched
+-> PASS ([s11_session_a3_e213] STOP: A3-STOP: A3's box files are not at their pinned sha256 on aifoundry1 (tools/claims-v3/e213-a3/sequence-B-a3.json: FAILED;sha256sum: WARNING: 1 computed checksum did NOT match;): nothing launched (Amendment A3's o)
+
+== OB: the box's points-e213.json changed after the kit's step 5: row 5b's order check on the box stops it
+-> PASS ([s07b_sync_a3_e213] STOP: A3-STOP: A3's order check on aifoundry1 exited 3 (points-e213.json is not the registered file (sha256 d7eacdc3d47a, want f122b62500ce)): no session until row 5b passes (Amendment A3): no session today until row 5b )
+
+== NS: A3's step 9 with no row 5b today in RB_OUT: refused before any call reaches the box
+-> PASS ([s11_session_a3_e213] STOP: A3's row 5b has not passed today in this RB_OUT (RB_OUT/e213-a3-sync-B.txt): run s07b_sync_e213_a3.sh B first)
+
+== PD: A3's wrapper changed (uncommitted) in the lab clone: row 5b stops before any call reaches the box
+-> PASS ([s07b_sync_a3_e213] STOP: A3's box files have uncommitted changes in the lab clone: nothing is synced)
+
+== AA: arm A is refused by A3's two steps
+-> PASS ([s07b_sync_a3_e213] STOP: Amendment A3 is E213 arm B's alone (aifoundry1 card 1); arm A runs the kit's own steps as landed (its day has run))
+
+== DRY: A3's dry listing (arm B as amended by A2 and A3)
+-> PASS (dry listing (A2 and A3, arm B): 16 steps listed, 0 exited non-zero, 0 box calls; the order under A3: exit 0)
+
+== Z: no process of this test left running
+-> PASS (processes left: 0)
+
+the stand-ins' calls: 60 ssh, 10 rsync (all to the stand-in aifoundry1)
+SELFTEST-A3-E213 18 of 18 PASS
+rc=0 (755 s)

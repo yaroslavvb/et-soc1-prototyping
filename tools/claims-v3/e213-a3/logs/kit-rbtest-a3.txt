@@ -1,0 +1,66 @@
+(copied by fix-a2e213 from its final run; this session's scratch paths masked as <scratch>)
+the kit's runbook desk test (tools/claims-v3/e213/rb/selftest_rb_e213.sh, unchanged) with A2 (as fix-a2e213 left it) and A3, run by fix-a2e213 (Q219), 2026-11-18 13:08:17 PST,
+aifoundry2 (desk), /usr/bin/python3 3.12.3, in the round's slot and nodev.sh; a scratch clone holding only 8e91dda6 (GitHub main before arm A's data)
+with A2's and A3's folders committed on it (HEAD b174e9f8369d; branches: kitbase );
+A2's and A3's folders equal to the first clone's HEAD (827130566f76): 0 diff lines; arm A's data commit in
+the history: 0; status lines: 0. Case lines only, shape tokens masked as <shape>; the full log in the lane's session scratch.
+== A: the dry listing, arm A; AB: arm B
+-> PASS (dry listing: 15 steps listed, 0 exited non-zero, 0 box calls; dry listing: 15 steps listed, 0 exited non-zero, 0 box calls)
+== K: step 2 with no window
+-> PASS ([s03_desk_e213] STOP: no window in RB_OUT: run s02_window_e213.sh A with the day, last start and last end first)
+== W1: a window written for the other arm; W2: a window written for another runbook; W3: step 1 for another day; W4: step 1 with an unknown arm
+-> PASS ([s03_desk_e213] STOP: RB_OUT's window was written for E213 arm B, not arm A: one RB_OUT per arm; [s03_desk_e213] STOP: RB_OUT's window was written for e211, not E213: one RB_OUT per runbook; [s02_window_e213] STOP: the first word is the arm: A (aifoundry3 card 0) or B (aifoundry1 )
+== G: step 2 without RB_GITLOCK
+-> PASS ([s03_desk_e213] STOP: RB_GITLOCK is not set (the lab-git lock every commit to the shared lab clone t)
+== N: step 2 inside the lab-git lock (nested)
+-> PASS ([s03_desk_e213] STOP: the desk check failed: pull pull(rc 14; a nested lab-git lock exits 75))
+== P1: step 2 on the scratch repository, arm A; P1B: arm B
+-> PASS ([s03_desk_e213] desk check: the window written today for E213 arm A; pulled under the lab-git lock, HEAD 377e8a8cb2e7 descends from the registration 291c8201ae4b (subtree 75778ad3), the kit 377e8a8cb2e7 and MM1-v3's land b149308280a7, the paths clean, HISTORY )
+== P2: in one step-2 run: the registration's list one line short, the kit's list one line short, a desk test's log without its PASS line
+-> PASS ([s03_desk_e213] STOP: the desk check failed: status history SHA256SUMS-e213-registration(26 OK of 26; pinned 27; its own bytes differ from the pin) SHA256SUMS-e213-kit(47 OK of 48; pinned 49; its own bytes differ from th)
+== H1: a committed edit of a registration file; H2: a committed shadowing addition (tools/claims-v3/e213/json.py)
+-> PASS ([s03_desk_e213] STOP: the desk check failed: history SHA256SUMS-e213-registration(26 OK of 27; pinned 27); HISTORY FAIL: a shadowing addition (a standard-library module's name): tools/claims-v3/e213/json.py)
+== DA: arm A's data committed: step 2 refuses arm A and goes on for arm B; GS: a gate stop's record and a FILE named *e213* under docs/reports/data (E175's form): reported, no datum, 0
+-> PASS (arm A: [s03_desk_e213] STOP: the desk check failed: E213-arm-A-has-data(1 commit(s)); arm B goes on; a gate stop and E175's file: rc 0, the other arm's data commits: 0; E213 gate-stop commits: 1)
+== S0: THE STEP-0 CHECKS on the scratch repository (a stand-in GitHub main = its HEAD)
+-> PASS (no record: STEP0-E213 arm A: 5 of 5 as stated (HEAD 377e8a8cb2e7, GitHub main 377; a registered seal: S1 as stated: sealed 1 of 1: every sealed sha256 the round's; an unregistered one: S1 NOT AS STATED: sealed 1 of 2: the record lists fedcba987654, which the note a; main before the registration: F1 NOT AS STATED: arm B's freeze line, the registration commit 291c8201ae4b, is )
+== O: the look on each stand-in box (k6's s05)
+-> PASS (aifoundry3: HOLDER-RULE: FREE after 0 s of polls; aifoundry1: HOLDER-RULE: FREE after 0 s of polls)
+== OL: E213's ours_live counts a session_e213.sh by its own script, never by a command string
+-> PASS (before: 0 0; a script whose arguments and text name session_e213.sh: 0 0; a session_e213.sh run as a script: 1 1; after it ended: 0 0)
+== SY: step 5 on aifoundry3; SYB: on aifoundry1
+-> PASS ([s07_sync_e213] synced to aifoundry3:aifoundry/ (49 paths); the rsync sent 49 files' contents there; HARNESS OK on the b; [s07_sync_e213] synced to aifoundry1:nekko/ (49 paths); the rsync sent 49 files' contents there; HARNESS OK on the box)
+== L1: a login link on a read (step 5's first read); L2: a read that hangs (the read class's bound 3 s for this call)
+-> PASS ([s07_sync_e213] STOP: a login check is needed on aifoundry3 (appended to the lock file; the link is in RB_LINKS): approv; [s07_sync_e213] STOP: a call to aifoundry3 ran past its bound and was killed: run this step again)
+== T: NO-THIRD-BUILD on aifoundry3
+-> PASS ([s08_build_e213] STOP: NO-THIRD-BUILD: 2 builds were started on aifoundry3 today (Pacific): no E213 session today)
+== BA: step 6 on aifoundry3: the real build; BB: step 6 on aifoundry1: the real build stops at the ET_DEVICES gate (this desk's device layer)
+-> PASS ([s08_build_e213] built today on aifoundry3 (arm A): rgm136 and rgm211 into build/e213rgm (THE KERNEL GATE: KERNEL OK on each; the hosts read; arm B: [s08_build_e213] STOP: rgm136 and rgm211 did not build on aifoundry1 (the lines above): run start on)
+== NR: step 6n, the never-run search repeated (the registration's scanner over the scratch repository and a stand-in lanes folder)
+-> PASS (NEVER-RUN-E213 arm A: 83 of 87 scored points never ran on any card (scan b22aab899e54, 3343 files); ran before the freeze line (MM1-v3's land b1493082), labelled: a039 a040; ran after it (REPORTED, kept): a003 a004; NEVER-RUN-E213 arm B: 38 of 40 scored points never ran on aifoundry1 card 1 (scan 11d429d2652e, 3343 files); ran before the freeze line (the registration commit 291c8201), labelled: none; ran after it)
+== R7: STEP 7 needs a fresh never-run report and the rest (arm A); R7B: arm B's card-1 read
+-> PASS (no report: [s09_reads_e213] STOP: no never-run report (RB_OUT/e213-neverrun-A.txt): run ste; 31 min: [s09_reads_e213] STOP: the never-run report is 31 minutes old (more than 30): ru; 10 min after a session: [s09_reads_e213] STOP: the rest has not run: REFUSED: 10 minutes since E185's se (reader calls 0); arm B: [s09_reads_e213] aifoundry1 card 1: config TDP 65 W / 65 C / 600 MHz, minion_mv 499; identity /dev/e)
+== D: step 8 on aifoundry3 (the dry pass and THE SCRUB CHECK); DB: on aifoundry1; DS: the scrub check refusing another home's path
+-> PASS (E213-DRY-DIR build/e213/T1795037069-A-dry; SCRUB-CHECK CLEAN: 53 files, 12 held a home path or the login and were masked; none left (; arm B: SCRUB-CHECK CLEAN: 53 files, 12 held a home path or the login and were masked; n; another home: [s10_dry_e213] STOP: the scrub check on the dry pass's records did not read CLEA)
+== HG: a HUNG marker in a session log of ours on aifoundry3: step 9 refuses
+-> PASS (REFUSED: a HUNG marker of ours on the box (2026-11-18 10:25:14 PST HUNG: a device process did not end after its timeout TERM (desk test)): a)
+== SD: the same-day rule: an E213 arm A session that opened the card earlier today
+-> PASS (REFUSED: the same-day rule: an E213 session opened the card earlier today (1): not again today)
+== LS: THE LAST START passed (the window's last end still far): step 9 refuses (16) before anything is sent
+-> PASS ([s11_session_e213] STOP: past the round's last start (2026-11-18 23:58 PST): no new card session; box calls 0)
+== NS: no never-run report from today in RB_OUT: step 9 refuses (10) before anything is sent
+-> PASS ([s11_session_e213] STOP: no never-run report from today in RB_OUT (step 6n, then step 7, come before the session); box calls 0)
+== LA: step 9 launches the REAL session_e213.sh, which stops at its box check (the desk's own hostname); step 10 reads the gate
+-> PASS (2026-11-18 13:25:14 PST refused, no device opened: the box or the build is not the registered one (this host is 'aifoundry2', not arm A's 'aifoundry3'))
+== W10: step 10's readings on stand-in logs (a running session, none, HUNG, K1, CRASH, an ended session with a STOP line)
+-> PASS (running 17, gone 14, HUNG 16, K1 16, CRASH 16, ended with a STOP line 0)
+== C: step 11 on LA's session, step 12 (the gate stop's record), step 13 refuses it; C2: a byte changed after the manifest
+-> PASS (COLLECTED-GATE-STOP docs/reports/gate-stops/2026-11-18-e213-blind-matmul-T1795037114-aifoundry3; step 13: [s24_score_e213] STOP: docs/reports/gate-stops/2026-11-18-e213-blind-matmul-T1795037114-aifoundry3 i)
+-> PASS ([s22_collect_e213] STOP: the copy is not exact (the lines above): commit nothing; copy again into a new RB_OUT/e213-raw/A)
+== CD: arm A's session that ran (step 8's dry session copied as a session): steps 11, 12 and, after a stand-in data commit, 13 WITH step 6n's labels; CDB: arm B's
+-> PASS (COLLECTED docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry3; [s24_score_e213] scored arm A: RB_OUT/scores-e213-A.json and .txt (the scorer's ; labels applied: {'A': {'ran_before_cases': ['rgm136 gemmL|<shape>|fp32|0xffffffff', 'rgm136 g)
+-> PASS (COLLECTED docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry1-c1; [s24_score_e213] scored arm B: RB_OUT/scores-e213-B.json and .txt (the scorer's )
+== Z: nothing of this test left running
+-> PASS (processes whose working directory is under the scratch directory (the stand-in boxes' jobs, sessions, builds))
+SELFTEST-RB-E213 30 of 30 PASS
+rc=0 (1052 s)
