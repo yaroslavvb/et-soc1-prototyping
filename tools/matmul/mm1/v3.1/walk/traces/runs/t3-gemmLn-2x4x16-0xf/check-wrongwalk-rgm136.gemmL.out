@@ -1,0 +1,158 @@
+{
+ "kernel": "rgm136.gemmL",
+ "shape": "2x4x16",
+ "mask": "0xf",
+ "verdict": "DIFFERS",
+ "bases": {
+  "A": "0x8006b3b000",
+  "B": "0x800ab3b000",
+  "C": "0x8005b3b000"
+ },
+ "base_agreement": {
+  "A": 0.768192048012003,
+  "B": 0.768192048012003,
+  "C": 1.0
+ },
+ "working_harts_traced": 32,
+ "exact_harts": 0,
+ "diff_harts": 32,
+ "diff_positions_total": 328064,
+ "side_field_problems": {},
+ "lines_ok": true,
+ "chip_sharing": {
+  "checked": true,
+  "op_steps": 8192,
+  "steps_unequal": 6144
+ },
+ "sysemu_interleaving": {
+  "ops": 8192,
+  "spread_steps_median": 7.0,
+  "spread_steps_max": 7,
+  "ops_out_of_order_across_harts": 0,
+  "first_op_step": 25457264,
+  "last_op_step": 25719064
+ },
+ "host_records": {
+  "present": true,
+  "iters_ops_a_minion": 8192,
+  "walk_ops_a_minion": 8192,
+  "minions": 128,
+  "walk_minions": 128,
+  "walk_tag": "nm",
+  "walk_tagged": 128,
+  "walk_ok": true,
+  "ok": true,
+  "check": "exact",
+  "check_ok": true,
+  "cycles_per_op_sim_steps": 31.98,
+  "agrees": false
+ },
+ "selected_harts": 162,
+ "selected_harts_missing_from_log": [],
+ "stray_unselected_harts": {
+  "n": 98,
+  "with_instructions": 0,
+  "with_tensor_events": 0,
+  "killed_lines": 110
+ },
+ "log_lines": 387710180,
+ "log_bytes": 36813824954,
+ "warn": {},
+ "shires": {
+  "0": {
+   "coverage_complete": true,
+   "steps_unequal": 6144
+  },
+  "1": {
+   "coverage_complete": true,
+   "steps_unequal": 6144
+  },
+  "2": {
+   "coverage_complete": true,
+   "steps_unequal": 6144
+  },
+  "3": {
+   "coverage_complete": true,
+   "steps_unequal": 6144
+  }
+ },
+ "harts_not_ok": [
+  "0",
+  "8",
+  "18",
+  "26",
+  "36",
+  "44",
+  "54",
+  "62",
+  "64",
+  "72"
+ ],
+ "first_bad": {
+  "shire": 0,
+  "minion": 0,
+  "thread": 0,
+  "outside_tensor": {
+   "TensorIMA8A32": 2,
+   "TensorLoad": 3
+  },
+  "expect": "the walk's events",
+  "n_trace": 24592,
+  "n_walk": 24592,
+  "equal": false,
+  "n_diff_positions": 10252,
+  "first_diff": {
+   "index": 3073,
+   "trace": [
+    "LA",
+    33554432,
+    0,
+    1,
+    130816,
+    16,
+    64,
+    0
+   ],
+   "walk": [
+    "LA",
+    0,
+    0,
+    1,
+    130816,
+    16,
+    64,
+    0
+   ]
+  },
+  "counts_trace": {
+   "LA": 8192,
+   "LB": 8192,
+   "F": 8192,
+   "S": 16
+  },
+  "counts_walk": {
+   "LA": 8192,
+   "LB": 8192,
+   "F": 8192,
+   "S": 16
+  },
+  "side_field_problems": 0,
+  "leader_ok": true,
+  "leaderA": {
+   "0": 8192
+  },
+  "leaderB": {
+   "0": 8192
+  },
+  "lines_read": 262144,
+  "lines_written": 1024,
+  "line_mismatch": 0,
+  "pa_minus_va": {
+   "0": 262144
+  },
+  "lines_ok": true,
+  "walk_sha256": "44ed4ef0c2cf92db5dbb51535c18c172112600739ddd2eb7fb274a06cec4b0c7",
+  "trace_sha256": "1533604fc705973c45691df2b0e3ee1675d1ff4d1f10b881b6bc62ba1fa7e797",
+  "ok": false
+ }
+}

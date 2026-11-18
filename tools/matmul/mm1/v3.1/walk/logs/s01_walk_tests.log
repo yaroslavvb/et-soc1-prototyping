@@ -1,0 +1,12 @@
+PASS T1 minions a mask enables: 0x1 32; 0xf 128; 0x1111 128; 0xff 256; 0x11111111 256; 0xffff 512; 0x33333333 512; 0xffffff 768; 0x77777777 768; 0xffffffff 1024; 0x3 64; 0xf0f0f0f0 512; per_shire 16 refused
+PASS T2 per-minion counts: 144 (kernel, shape, minion) lists: FMAs = A loads = B loads = 64 MB NB KB, stores = 2 MB NB
+PASS T3 the two walks: equal at MB = 1 or NB = 1 (7 shapes, 2 minions); differ in order, equal as multisets at 2x2x1, 2x3x2; rgm211.gemmL = rgm136.gemmL
+PASS T4 gemmLnc = gemmL without cooperation: same addresses and order at 3 shapes; coop 0 and tcoop 0 on every gemmLnc load
+PASS T5 mm-timing's counted run: 32 working harts (ids = the walk's), 0 with counts other than the walk's 64/64/64/2 (+128 coop, 66 waits)
+PASS T6 kit-e211's simulator records: 11 cases from 11 files: ops a minion = 64 MB NB KB, walk tags as the walk
+PASS T7 the shire's stream = E136's shire_ops: 16 (shape, shire) streams equal op for op; each minion's loads are its entries
+PASS T8 the masked L3 = E206's l3_model_masked; full mask = map_e211: 84 (shape, mask, cap) shares equal to 4 decimals; 4 (shape, walk) distance arrays equal
+PASS T9 footprint = MM1-v1's masked closed form: 72 (shape, mask) equal
+PASS T10 the sharing: 0xffffffff A{'4': 32} B{'8': 32}; 0xf A{'4': 4} B{'1': 32}; 0x1111 A{'1': 16} B{'4': 8}; 0xff A{'4': 8} B{'2': 32}; 0x11111111 A{'1': 32} B{'8': 8}; 0x33333333 A{'2': 32} B{'8': 16}
+PASS T11 per-minion levels = the summary's shares; L2 per read = per op: 1x2x2 0xf A 1.0000/1.0000 B 1.0000/1.0000; 2x2x2 0x1111 A 1.0000/1.0000 B 1.0000/1.0000; 1x16x4 0xf A 1.0000/1.0000 B 0.5000/0.5000; 1x2x1 0xffffffff A 1.0000/1.0000 B 1.0000/1.0000
+WALK TESTS 11 of 11 PASS (python 3.12.3)

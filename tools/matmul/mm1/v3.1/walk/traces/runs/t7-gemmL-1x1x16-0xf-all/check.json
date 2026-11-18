@@ -1,0 +1,8405 @@
+{
+ "kernel": "rgm136.gemmL",
+ "shape": "1x1x16",
+ "mask": "0xf",
+ "fmt": "fp32",
+ "verdict": "EXACT",
+ "bases": {
+  "A": "0x8005d3a000",
+  "B": "0x8007d3a000",
+  "C": "0x8005b3a000"
+ },
+ "base_agreement": {
+  "A": 1.0,
+  "B": 1.0,
+  "C": 1.0
+ },
+ "base_candidates": {
+  "A": 1,
+  "B": 1,
+  "C": 1
+ },
+ "working_harts_traced": 128,
+ "exact_harts": 128,
+ "diff_harts": 0,
+ "diff_positions_total": 0,
+ "side_field_problems": {},
+ "lines_ok": true,
+ "leaderA_all": {
+  "0": 32768,
+  "1": 32768,
+  "2": 32768,
+  "3": 32768
+ },
+ "leaderB_all": {
+  "0": 131072
+ },
+ "shires": {
+  "0": {
+   "coverage_complete": true,
+   "dim1_traced": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "dim0_traced": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "op_steps": 1024,
+   "steps_unequal": 0,
+   "steps_with_tile_outside_walk": null
+  },
+  "1": {
+   "coverage_complete": true,
+   "dim1_traced": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "dim0_traced": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "op_steps": 1024,
+   "steps_unequal": 0,
+   "steps_with_tile_outside_walk": null
+  },
+  "2": {
+   "coverage_complete": true,
+   "dim1_traced": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "dim0_traced": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "op_steps": 1024,
+   "steps_unequal": 0,
+   "steps_with_tile_outside_walk": null
+  },
+  "3": {
+   "coverage_complete": true,
+   "dim1_traced": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "dim0_traced": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "op_steps": 1024,
+   "steps_unequal": 0,
+   "steps_with_tile_outside_walk": null
+  }
+ },
+ "chip_sharing": {
+  "checked": true,
+  "op_steps": 1024,
+  "steps_unequal": 0
+ },
+ "sysemu_interleaving": {
+  "ops": 1024,
+  "spread_steps_median": 7.0,
+  "spread_steps_max": 7,
+  "ops_out_of_order_across_harts": 0,
+  "first_op_step": 25452471,
+  "last_op_step": 25500151
+ },
+ "host_records": {
+  "present": true,
+  "iters_ops_a_minion": 1024,
+  "walk_ops_a_minion": 1024,
+  "minions": 128,
+  "walk_minions": 128,
+  "walk_tag": null,
+  "walk_tagged": null,
+  "walk_ok": null,
+  "ok": true,
+  "check": "exact",
+  "check_ok": true,
+  "cycles_per_op_sim_steps": 46.763,
+  "agrees": true
+ },
+ "selected_harts": 258,
+ "selected_harts_missing_from_log": [],
+ "stray_unselected_harts": {
+  "n": 5,
+  "with_instructions": 0,
+  "with_tensor_events": 0,
+  "killed_lines": 17
+ },
+ "per_hart": {
+  "0": {
+   "shire": 0,
+   "minion": 0,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 621,
+    "S": 1030,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "d333fadd37b2248905d1abf04c9e473b62acfea4b785ba73ac4e9f86957469f3",
+   "trace_sha256": "d333fadd37b2248905d1abf04c9e473b62acfea4b785ba73ac4e9f86957469f3",
+   "ok": true
+  },
+  "1": {
+   "shire": 0,
+   "minion": 0,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 425,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "2": {
+   "shire": 0,
+   "minion": 1,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 549,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "164c391baa5220b86f86914f471f5208da3b200302247e4be6dc72535b90f067",
+   "trace_sha256": "164c391baa5220b86f86914f471f5208da3b200302247e4be6dc72535b90f067",
+   "ok": true
+  },
+  "3": {
+   "shire": 0,
+   "minion": 1,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 452,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "4": {
+   "shire": 0,
+   "minion": 2,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 543,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "3eadde8d8f20789fca474c8901e9befc977309f6682f1ff9d0d61accc1299167",
+   "trace_sha256": "3eadde8d8f20789fca474c8901e9befc977309f6682f1ff9d0d61accc1299167",
+   "ok": true
+  },
+  "5": {
+   "shire": 0,
+   "minion": 2,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 446,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "6": {
+   "shire": 0,
+   "minion": 3,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 549,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "3a00a89a44ee00c22e1568539677530be849b0261d789b511a459b80cb885014",
+   "trace_sha256": "3a00a89a44ee00c22e1568539677530be849b0261d789b511a459b80cb885014",
+   "ok": true
+  },
+  "7": {
+   "shire": 0,
+   "minion": 3,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 452,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "8": {
+   "shire": 0,
+   "minion": 4,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 532,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "e643b8459f92561a97e1e2366572b22c71d5111cb89e9f185f61a3cd7bd61ef3",
+   "trace_sha256": "e643b8459f92561a97e1e2366572b22c71d5111cb89e9f185f61a3cd7bd61ef3",
+   "ok": true
+  },
+  "9": {
+   "shire": 0,
+   "minion": 4,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 434,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "10": {
+   "shire": 0,
+   "minion": 5,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 537,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "c073add5a73dcb636984025e68b42bd506f96e84f6407306c6a3057dc06e6e06",
+   "trace_sha256": "c073add5a73dcb636984025e68b42bd506f96e84f6407306c6a3057dc06e6e06",
+   "ok": true
+  },
+  "11": {
+   "shire": 0,
+   "minion": 5,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 440,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "12": {
+   "shire": 0,
+   "minion": 6,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 535,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "bacee324efd0593705a6f8cf617d79d2855b8d80cb75d97442d86a5475a1d3e1",
+   "trace_sha256": "bacee324efd0593705a6f8cf617d79d2855b8d80cb75d97442d86a5475a1d3e1",
+   "ok": true
+  },
+  "13": {
+   "shire": 0,
+   "minion": 6,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 418,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "14": {
+   "shire": 0,
+   "minion": 7,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 515,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "085ba28f70b4185bb25151b868d9b6a5e0153dd7d9e8f1ac9ef1596c8716f775",
+   "trace_sha256": "085ba28f70b4185bb25151b868d9b6a5e0153dd7d9e8f1ac9ef1596c8716f775",
+   "ok": true
+  },
+  "15": {
+   "shire": 0,
+   "minion": 7,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 418,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "16": {
+   "shire": 0,
+   "minion": 8,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 579,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "f53844c1ea45d7ba7f3500ae4b1d86803a2a401773c38cebb2d164e8bece7c93",
+   "trace_sha256": "f53844c1ea45d7ba7f3500ae4b1d86803a2a401773c38cebb2d164e8bece7c93",
+   "ok": true
+  },
+  "17": {
+   "shire": 0,
+   "minion": 8,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 425,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "18": {
+   "shire": 0,
+   "minion": 9,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 549,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "65a6e429ed200560fef9c53fed400b6b304bad11f33972fa41cb4bcd31c1f474",
+   "trace_sha256": "65a6e429ed200560fef9c53fed400b6b304bad11f33972fa41cb4bcd31c1f474",
+   "ok": true
+  },
+  "19": {
+   "shire": 0,
+   "minion": 9,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 452,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "20": {
+   "shire": 0,
+   "minion": 10,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 543,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "65a029db455ea1916fd99b35dc409c1098566461832afb7ae8e8e26fceb7d8e5",
+   "trace_sha256": "65a029db455ea1916fd99b35dc409c1098566461832afb7ae8e8e26fceb7d8e5",
+   "ok": true
+  },
+  "21": {
+   "shire": 0,
+   "minion": 10,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 446,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "22": {
+   "shire": 0,
+   "minion": 11,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 549,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "1a94ddb113afb907300f3bc329b159eeb4158a3e1d1008a71b1f1f7df058002d",
+   "trace_sha256": "1a94ddb113afb907300f3bc329b159eeb4158a3e1d1008a71b1f1f7df058002d",
+   "ok": true
+  },
+  "23": {
+   "shire": 0,
+   "minion": 11,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 452,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "24": {
+   "shire": 0,
+   "minion": 12,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 532,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "6d81a8da6c32a726389a8814aa47caab530aead7e408e9e32281723d8b93bfb4",
+   "trace_sha256": "6d81a8da6c32a726389a8814aa47caab530aead7e408e9e32281723d8b93bfb4",
+   "ok": true
+  },
+  "25": {
+   "shire": 0,
+   "minion": 12,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 434,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "26": {
+   "shire": 0,
+   "minion": 13,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 537,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "86ae24d0ba76c00296d1accac8a312f602d5d5eed8f7bc381f80b945881bf52c",
+   "trace_sha256": "86ae24d0ba76c00296d1accac8a312f602d5d5eed8f7bc381f80b945881bf52c",
+   "ok": true
+  },
+  "27": {
+   "shire": 0,
+   "minion": 13,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 440,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "28": {
+   "shire": 0,
+   "minion": 14,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 535,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "45c6e9928678be2b541268c2e3489ec4b9c4679c3232f29731c82cd03b735f30",
+   "trace_sha256": "45c6e9928678be2b541268c2e3489ec4b9c4679c3232f29731c82cd03b735f30",
+   "ok": true
+  },
+  "29": {
+   "shire": 0,
+   "minion": 14,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 418,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "30": {
+   "shire": 0,
+   "minion": 15,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 515,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "2867429d32e0dccd5cd9b827ec012c9df0fb386965cb21279567787cb1b80508",
+   "trace_sha256": "2867429d32e0dccd5cd9b827ec012c9df0fb386965cb21279567787cb1b80508",
+   "ok": true
+  },
+  "31": {
+   "shire": 0,
+   "minion": 15,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 418,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "32": {
+   "shire": 0,
+   "minion": 16,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 579,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "9061a2a08a877191e37ea7c23232b2c964a69370a3e188ca61b8ef77fb413c15",
+   "trace_sha256": "9061a2a08a877191e37ea7c23232b2c964a69370a3e188ca61b8ef77fb413c15",
+   "ok": true
+  },
+  "33": {
+   "shire": 0,
+   "minion": 16,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 425,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "34": {
+   "shire": 0,
+   "minion": 17,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 549,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "97e110a8bcdf49d2f828e0d01581d266e4b7125e02f760e7e0d975f30d38cb1e",
+   "trace_sha256": "97e110a8bcdf49d2f828e0d01581d266e4b7125e02f760e7e0d975f30d38cb1e",
+   "ok": true
+  },
+  "35": {
+   "shire": 0,
+   "minion": 17,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 452,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "36": {
+   "shire": 0,
+   "minion": 18,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 543,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "9254df8bbbedccf95dffd8d941cca788ff6a6b0a2c698f65a22bccfbddc653b3",
+   "trace_sha256": "9254df8bbbedccf95dffd8d941cca788ff6a6b0a2c698f65a22bccfbddc653b3",
+   "ok": true
+  },
+  "37": {
+   "shire": 0,
+   "minion": 18,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 446,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "38": {
+   "shire": 0,
+   "minion": 19,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 549,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "cf58262ffc77a8a35dd6df3a984799c2c04b620a36ab6b52ccb5a0b80f7672b1",
+   "trace_sha256": "cf58262ffc77a8a35dd6df3a984799c2c04b620a36ab6b52ccb5a0b80f7672b1",
+   "ok": true
+  },
+  "39": {
+   "shire": 0,
+   "minion": 19,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 452,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "40": {
+   "shire": 0,
+   "minion": 20,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 532,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "e32338b806a9d547c094058e3570261cc9f5b6964b90916283177ab38cfa00fa",
+   "trace_sha256": "e32338b806a9d547c094058e3570261cc9f5b6964b90916283177ab38cfa00fa",
+   "ok": true
+  },
+  "41": {
+   "shire": 0,
+   "minion": 20,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 434,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "42": {
+   "shire": 0,
+   "minion": 21,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 537,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "8fa2945c4a71e705aaf4d1b33a299d72597f717c5805687a78d46f348639e05f",
+   "trace_sha256": "8fa2945c4a71e705aaf4d1b33a299d72597f717c5805687a78d46f348639e05f",
+   "ok": true
+  },
+  "43": {
+   "shire": 0,
+   "minion": 21,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 440,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "44": {
+   "shire": 0,
+   "minion": 22,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 535,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "ad30f2e4c5db1f0e78336d90c7a8fe71aa51b1b10a98017007fd722819c8bcbc",
+   "trace_sha256": "ad30f2e4c5db1f0e78336d90c7a8fe71aa51b1b10a98017007fd722819c8bcbc",
+   "ok": true
+  },
+  "45": {
+   "shire": 0,
+   "minion": 22,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 418,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "46": {
+   "shire": 0,
+   "minion": 23,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 515,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "647b32c7c7efc1c05a5136c875d5848d402b4a17d04416ee387ae73c55705bf9",
+   "trace_sha256": "647b32c7c7efc1c05a5136c875d5848d402b4a17d04416ee387ae73c55705bf9",
+   "ok": true
+  },
+  "47": {
+   "shire": 0,
+   "minion": 23,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 418,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "48": {
+   "shire": 0,
+   "minion": 24,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 582,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "792fc729c715315160c920481fb9bbda01c2b864278ffe76eb07fe5bbdc928a2",
+   "trace_sha256": "792fc729c715315160c920481fb9bbda01c2b864278ffe76eb07fe5bbdc928a2",
+   "ok": true
+  },
+  "49": {
+   "shire": 0,
+   "minion": 24,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 428,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "50": {
+   "shire": 0,
+   "minion": 25,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 555,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "360045f3bd2bcf07dde68fad9bef8f50a406c5d1a31e50f380c5bd462b933db3",
+   "trace_sha256": "360045f3bd2bcf07dde68fad9bef8f50a406c5d1a31e50f380c5bd462b933db3",
+   "ok": true
+  },
+  "51": {
+   "shire": 0,
+   "minion": 25,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 458,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "52": {
+   "shire": 0,
+   "minion": 26,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 549,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "269dff4f813b42395c79e044b191c254381a6fa36f7063ffe028608d7c98efe9",
+   "trace_sha256": "269dff4f813b42395c79e044b191c254381a6fa36f7063ffe028608d7c98efe9",
+   "ok": true
+  },
+  "53": {
+   "shire": 0,
+   "minion": 26,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 452,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "54": {
+   "shire": 0,
+   "minion": 27,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 555,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "6f2df22f67e912c35645bf02df263e6542aacce4437a9d56aa9a1d59b37df302",
+   "trace_sha256": "6f2df22f67e912c35645bf02df263e6542aacce4437a9d56aa9a1d59b37df302",
+   "ok": true
+  },
+  "55": {
+   "shire": 0,
+   "minion": 27,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 458,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "56": {
+   "shire": 0,
+   "minion": 28,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 538,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "e51149c7c9f2bb1df3f1282fc8ef3c8d92104958728a80011be2642b0f563538",
+   "trace_sha256": "e51149c7c9f2bb1df3f1282fc8ef3c8d92104958728a80011be2642b0f563538",
+   "ok": true
+  },
+  "57": {
+   "shire": 0,
+   "minion": 28,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 440,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "58": {
+   "shire": 0,
+   "minion": 29,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 543,
+    "S": 1042,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "856df2470324b7704368721711570b51e9b95c6b722668766ad5c83db4bfe377",
+   "trace_sha256": "856df2470324b7704368721711570b51e9b95c6b722668766ad5c83db4bfe377",
+   "ok": true
+  },
+  "59": {
+   "shire": 0,
+   "minion": 29,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 446,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "60": {
+   "shire": 0,
+   "minion": 30,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 541,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "36548cf9f0b9e286dd6b2ad3297ed0badddbfffd17539fbdfb1e27a65f5ab202",
+   "trace_sha256": "36548cf9f0b9e286dd6b2ad3297ed0badddbfffd17539fbdfb1e27a65f5ab202",
+   "ok": true
+  },
+  "61": {
+   "shire": 0,
+   "minion": 30,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 424,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "62": {
+   "shire": 0,
+   "minion": 31,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 1069,
+    "S": 1917,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "efde3345202f0aafe4647f98592736f3677fd52467fc7babc568646489a54289",
+   "trace_sha256": "efde3345202f0aafe4647f98592736f3677fd52467fc7babc568646489a54289",
+   "ok": true
+  },
+  "63": {
+   "shire": 0,
+   "minion": 31,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 424,
+    "S": 1051,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "64": {
+   "shire": 1,
+   "minion": 0,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 615,
+    "S": 1900,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "d11ad12d163eb19685bd52779bb612182b35e6709c45dadccbf811a63199e8a3",
+   "trace_sha256": "d11ad12d163eb19685bd52779bb612182b35e6709c45dadccbf811a63199e8a3",
+   "ok": true
+  },
+  "65": {
+   "shire": 1,
+   "minion": 0,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "66": {
+   "shire": 1,
+   "minion": 1,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "e02fbeaab6cb7e4c21599fcc205d6caeb8083fa21b0671d46a8e92fb0cf03030",
+   "trace_sha256": "e02fbeaab6cb7e4c21599fcc205d6caeb8083fa21b0671d46a8e92fb0cf03030",
+   "ok": true
+  },
+  "67": {
+   "shire": 1,
+   "minion": 1,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "68": {
+   "shire": 1,
+   "minion": 2,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "2d65acdb75b8b39972eae0194d73214adcf1f045e28996493a4878e85c386c37",
+   "trace_sha256": "2d65acdb75b8b39972eae0194d73214adcf1f045e28996493a4878e85c386c37",
+   "ok": true
+  },
+  "69": {
+   "shire": 1,
+   "minion": 2,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "70": {
+   "shire": 1,
+   "minion": 3,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "5d5d628c69cc5ae1ec2edf327f5f313c82e3f0df6b8cc0224db0f808838416ba",
+   "trace_sha256": "5d5d628c69cc5ae1ec2edf327f5f313c82e3f0df6b8cc0224db0f808838416ba",
+   "ok": true
+  },
+  "71": {
+   "shire": 1,
+   "minion": 3,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "72": {
+   "shire": 1,
+   "minion": 4,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "f303d9618407cae017430f9f283856bafc65295932e0a70e0fb507feacbdd869",
+   "trace_sha256": "f303d9618407cae017430f9f283856bafc65295932e0a70e0fb507feacbdd869",
+   "ok": true
+  },
+  "73": {
+   "shire": 1,
+   "minion": 4,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "74": {
+   "shire": 1,
+   "minion": 5,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "7abdadc35c6e9bf2334b7b08ef0d737c09fe68c8aa8fadb362fe1a21725ffff1",
+   "trace_sha256": "7abdadc35c6e9bf2334b7b08ef0d737c09fe68c8aa8fadb362fe1a21725ffff1",
+   "ok": true
+  },
+  "75": {
+   "shire": 1,
+   "minion": 5,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "76": {
+   "shire": 1,
+   "minion": 6,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "52c7d71e84bad8eed122acd68a697f48394d2f823c784fc2878138e00eaaf260",
+   "trace_sha256": "52c7d71e84bad8eed122acd68a697f48394d2f823c784fc2878138e00eaaf260",
+   "ok": true
+  },
+  "77": {
+   "shire": 1,
+   "minion": 6,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "78": {
+   "shire": 1,
+   "minion": 7,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 508,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "4226e630ecd39f0debdf6b904e4c7619c5ecc7308948ef54f112117942152a4a",
+   "trace_sha256": "4226e630ecd39f0debdf6b904e4c7619c5ecc7308948ef54f112117942152a4a",
+   "ok": true
+  },
+  "79": {
+   "shire": 1,
+   "minion": 7,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "80": {
+   "shire": 1,
+   "minion": 8,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 573,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "e9d56246b78950446ff78ebe83d56a2bd55e21e0924183df3da19a1a421cd905",
+   "trace_sha256": "e9d56246b78950446ff78ebe83d56a2bd55e21e0924183df3da19a1a421cd905",
+   "ok": true
+  },
+  "81": {
+   "shire": 1,
+   "minion": 8,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "82": {
+   "shire": 1,
+   "minion": 9,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "d7f8d62adb44a4ae5a7a21234acf9eff6aa9b66ff7454c435065072c653eb125",
+   "trace_sha256": "d7f8d62adb44a4ae5a7a21234acf9eff6aa9b66ff7454c435065072c653eb125",
+   "ok": true
+  },
+  "83": {
+   "shire": 1,
+   "minion": 9,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "84": {
+   "shire": 1,
+   "minion": 10,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "4ff690a96e652f098295de4fd7734d155395e88b2a4855f51d165df08512a09f",
+   "trace_sha256": "4ff690a96e652f098295de4fd7734d155395e88b2a4855f51d165df08512a09f",
+   "ok": true
+  },
+  "85": {
+   "shire": 1,
+   "minion": 10,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "86": {
+   "shire": 1,
+   "minion": 11,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "e940da56860abe23d652b480191735364a6081a4cf108c4a20c9f7b48fba3142",
+   "trace_sha256": "e940da56860abe23d652b480191735364a6081a4cf108c4a20c9f7b48fba3142",
+   "ok": true
+  },
+  "87": {
+   "shire": 1,
+   "minion": 11,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "88": {
+   "shire": 1,
+   "minion": 12,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "7d6ab2f2edc16b09dc852480200c5fe74ae6caeb82ad2323c529f5bbd528bc57",
+   "trace_sha256": "7d6ab2f2edc16b09dc852480200c5fe74ae6caeb82ad2323c529f5bbd528bc57",
+   "ok": true
+  },
+  "89": {
+   "shire": 1,
+   "minion": 12,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "90": {
+   "shire": 1,
+   "minion": 13,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "60a2a054d26d57528484c0674c64816eb617dc4a3e71b712e84db7ec348265e6",
+   "trace_sha256": "60a2a054d26d57528484c0674c64816eb617dc4a3e71b712e84db7ec348265e6",
+   "ok": true
+  },
+  "91": {
+   "shire": 1,
+   "minion": 13,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "92": {
+   "shire": 1,
+   "minion": 14,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "3a4d85de81ec7723a5d59f946a55d3cee92cbcdb7f8dd1c98eca636bc10576df",
+   "trace_sha256": "3a4d85de81ec7723a5d59f946a55d3cee92cbcdb7f8dd1c98eca636bc10576df",
+   "ok": true
+  },
+  "93": {
+   "shire": 1,
+   "minion": 14,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "94": {
+   "shire": 1,
+   "minion": 15,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 508,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "d3257329eb6573875b2d99a4f18a75aa36ce90be9ed51eeb88897303556d7314",
+   "trace_sha256": "d3257329eb6573875b2d99a4f18a75aa36ce90be9ed51eeb88897303556d7314",
+   "ok": true
+  },
+  "95": {
+   "shire": 1,
+   "minion": 15,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "96": {
+   "shire": 1,
+   "minion": 16,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 573,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "be28e85d0dae5aa36f448c29ccb44f72a59d2140ea4db8c7505581af81f0ae44",
+   "trace_sha256": "be28e85d0dae5aa36f448c29ccb44f72a59d2140ea4db8c7505581af81f0ae44",
+   "ok": true
+  },
+  "97": {
+   "shire": 1,
+   "minion": 16,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "98": {
+   "shire": 1,
+   "minion": 17,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "8456b8f67bfae6d123ecb6ad4e2014f7c5f2d84a946429751db169a6ecbbb06d",
+   "trace_sha256": "8456b8f67bfae6d123ecb6ad4e2014f7c5f2d84a946429751db169a6ecbbb06d",
+   "ok": true
+  },
+  "99": {
+   "shire": 1,
+   "minion": 17,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "100": {
+   "shire": 1,
+   "minion": 18,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "91895b8103d40160e7a8001a329f85b1d5ae59a283587d4bf805215bb71d0ed9",
+   "trace_sha256": "91895b8103d40160e7a8001a329f85b1d5ae59a283587d4bf805215bb71d0ed9",
+   "ok": true
+  },
+  "101": {
+   "shire": 1,
+   "minion": 18,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "102": {
+   "shire": 1,
+   "minion": 19,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "5146bf63a7843188cd0f540b378569d74b7cbd2cb2a18fd439c50a1650ac381f",
+   "trace_sha256": "5146bf63a7843188cd0f540b378569d74b7cbd2cb2a18fd439c50a1650ac381f",
+   "ok": true
+  },
+  "103": {
+   "shire": 1,
+   "minion": 19,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "104": {
+   "shire": 1,
+   "minion": 20,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "98e510c4e5a220fc0f89b57664561b07c70b1223e9ff7dddecc7c87455b60437",
+   "trace_sha256": "98e510c4e5a220fc0f89b57664561b07c70b1223e9ff7dddecc7c87455b60437",
+   "ok": true
+  },
+  "105": {
+   "shire": 1,
+   "minion": 20,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "106": {
+   "shire": 1,
+   "minion": 21,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "fb36871909b2c8c217fe0d52eccdf5ace7a403a304b80ecb6e031d8a23f35459",
+   "trace_sha256": "fb36871909b2c8c217fe0d52eccdf5ace7a403a304b80ecb6e031d8a23f35459",
+   "ok": true
+  },
+  "107": {
+   "shire": 1,
+   "minion": 21,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "108": {
+   "shire": 1,
+   "minion": 22,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "c490ee0cfe71fdb1dcd669a28aeb3027955741debc366a6ec35678b983a34669",
+   "trace_sha256": "c490ee0cfe71fdb1dcd669a28aeb3027955741debc366a6ec35678b983a34669",
+   "ok": true
+  },
+  "109": {
+   "shire": 1,
+   "minion": 22,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "110": {
+   "shire": 1,
+   "minion": 23,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 508,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "3acef7dc65d79415a7684615ef6ab2694be21cdb0b4ce464e0d3580666d30828",
+   "trace_sha256": "3acef7dc65d79415a7684615ef6ab2694be21cdb0b4ce464e0d3580666d30828",
+   "ok": true
+  },
+  "111": {
+   "shire": 1,
+   "minion": 23,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "112": {
+   "shire": 1,
+   "minion": 24,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 573,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "c2c9e2c1e362329dec5460680a2a2ef965c1d8594b7adfa56f7c869fb9a64630",
+   "trace_sha256": "c2c9e2c1e362329dec5460680a2a2ef965c1d8594b7adfa56f7c869fb9a64630",
+   "ok": true
+  },
+  "113": {
+   "shire": 1,
+   "minion": 24,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "114": {
+   "shire": 1,
+   "minion": 25,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "907a0dc1e466ff6a3eb06665b33146e23c20e3bd60cd5abc359a9dd2e053cae5",
+   "trace_sha256": "907a0dc1e466ff6a3eb06665b33146e23c20e3bd60cd5abc359a9dd2e053cae5",
+   "ok": true
+  },
+  "115": {
+   "shire": 1,
+   "minion": 25,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "116": {
+   "shire": 1,
+   "minion": 26,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "ffd1f3c72328c7b51289fcab0036aadd8b74e92927bfbfc5457ebe7e54036233",
+   "trace_sha256": "ffd1f3c72328c7b51289fcab0036aadd8b74e92927bfbfc5457ebe7e54036233",
+   "ok": true
+  },
+  "117": {
+   "shire": 1,
+   "minion": 26,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "118": {
+   "shire": 1,
+   "minion": 27,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "ceb6c869ed17af97f63a09d661097ec706f3973751e1fd399d2a0a82e6b0c563",
+   "trace_sha256": "ceb6c869ed17af97f63a09d661097ec706f3973751e1fd399d2a0a82e6b0c563",
+   "ok": true
+  },
+  "119": {
+   "shire": 1,
+   "minion": 27,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "120": {
+   "shire": 1,
+   "minion": 28,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "026ec96ebdc4c869e92b804be2211e7a1c3cff09deb43ac025ca9ae961ae55c0",
+   "trace_sha256": "026ec96ebdc4c869e92b804be2211e7a1c3cff09deb43ac025ca9ae961ae55c0",
+   "ok": true
+  },
+  "121": {
+   "shire": 1,
+   "minion": 28,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "122": {
+   "shire": 1,
+   "minion": 29,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1042,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "7289bf4712f84c7fad70b299d933726b5d627913c4313e91cbbe979a65685f93",
+   "trace_sha256": "7289bf4712f84c7fad70b299d933726b5d627913c4313e91cbbe979a65685f93",
+   "ok": true
+  },
+  "123": {
+   "shire": 1,
+   "minion": 29,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "124": {
+   "shire": 1,
+   "minion": 30,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "07ad0142ccbf3a7c9d2c0ce1519a387ed5cfcc08de0bb80a3bd3fc228ea0056e",
+   "trace_sha256": "07ad0142ccbf3a7c9d2c0ce1519a387ed5cfcc08de0bb80a3bd3fc228ea0056e",
+   "ok": true
+  },
+  "125": {
+   "shire": 1,
+   "minion": 30,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "126": {
+   "shire": 1,
+   "minion": 31,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 582,
+    "S": 1055,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "2c5000d5a8e4edf3ab000c17dfe6f8e4078973697080551e943cbe8f5433a1da",
+   "trace_sha256": "2c5000d5a8e4edf3ab000c17dfe6f8e4078973697080551e943cbe8f5433a1da",
+   "ok": true
+  },
+  "127": {
+   "shire": 1,
+   "minion": 31,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1051,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "128": {
+   "shire": 2,
+   "minion": 0,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 615,
+    "S": 1900,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "d170cac8427cf0457f39887e532ee89db1a3ced7d1862d95745b236df179cce3",
+   "trace_sha256": "d170cac8427cf0457f39887e532ee89db1a3ced7d1862d95745b236df179cce3",
+   "ok": true
+  },
+  "129": {
+   "shire": 2,
+   "minion": 0,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "130": {
+   "shire": 2,
+   "minion": 1,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "59344f54978c008b056ddab12f1683cc03ea020b317fcdbab417dd1227e56231",
+   "trace_sha256": "59344f54978c008b056ddab12f1683cc03ea020b317fcdbab417dd1227e56231",
+   "ok": true
+  },
+  "131": {
+   "shire": 2,
+   "minion": 1,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "132": {
+   "shire": 2,
+   "minion": 2,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "dc79dbee7bf024a619e010280ea710622eae29df253d2ac197a9164cddb4ed2e",
+   "trace_sha256": "dc79dbee7bf024a619e010280ea710622eae29df253d2ac197a9164cddb4ed2e",
+   "ok": true
+  },
+  "133": {
+   "shire": 2,
+   "minion": 2,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "134": {
+   "shire": 2,
+   "minion": 3,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "3a169b8873dcf187dcf64b0011f4a50eab96335e77dd712c1089a42fc6f13e0a",
+   "trace_sha256": "3a169b8873dcf187dcf64b0011f4a50eab96335e77dd712c1089a42fc6f13e0a",
+   "ok": true
+  },
+  "135": {
+   "shire": 2,
+   "minion": 3,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "136": {
+   "shire": 2,
+   "minion": 4,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "2c537c0f767712136aa5b3158a055d66b777320e5e02fb089cbbe443ca96d100",
+   "trace_sha256": "2c537c0f767712136aa5b3158a055d66b777320e5e02fb089cbbe443ca96d100",
+   "ok": true
+  },
+  "137": {
+   "shire": 2,
+   "minion": 4,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "138": {
+   "shire": 2,
+   "minion": 5,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "0ab269f53c07219a5cb48251038c644cd52ac3be93a943efa9d6bf9bbdb5f5b9",
+   "trace_sha256": "0ab269f53c07219a5cb48251038c644cd52ac3be93a943efa9d6bf9bbdb5f5b9",
+   "ok": true
+  },
+  "139": {
+   "shire": 2,
+   "minion": 5,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "140": {
+   "shire": 2,
+   "minion": 6,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "e0fad1eb4800999cc2db4ddc91e810c124bfb9cb94aaceffb02857aa2d62804a",
+   "trace_sha256": "e0fad1eb4800999cc2db4ddc91e810c124bfb9cb94aaceffb02857aa2d62804a",
+   "ok": true
+  },
+  "141": {
+   "shire": 2,
+   "minion": 6,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "142": {
+   "shire": 2,
+   "minion": 7,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 508,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "2909d660896aceca05aef24ea6556315c835618036eb05105d0934e1351ede2c",
+   "trace_sha256": "2909d660896aceca05aef24ea6556315c835618036eb05105d0934e1351ede2c",
+   "ok": true
+  },
+  "143": {
+   "shire": 2,
+   "minion": 7,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "144": {
+   "shire": 2,
+   "minion": 8,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 573,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "2741cc7c97d3c4f732287ffa0b69713ac84c110f3e29aac470bbf0ad8015eb7f",
+   "trace_sha256": "2741cc7c97d3c4f732287ffa0b69713ac84c110f3e29aac470bbf0ad8015eb7f",
+   "ok": true
+  },
+  "145": {
+   "shire": 2,
+   "minion": 8,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "146": {
+   "shire": 2,
+   "minion": 9,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "4dca23b38d6060e96732f6cfb840dc46f7b42a11b5a1ab97c7141b9731313956",
+   "trace_sha256": "4dca23b38d6060e96732f6cfb840dc46f7b42a11b5a1ab97c7141b9731313956",
+   "ok": true
+  },
+  "147": {
+   "shire": 2,
+   "minion": 9,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "148": {
+   "shire": 2,
+   "minion": 10,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "0d612b102e074343b36bfa02653a2fd9b6c01717c3c7f930c2a7184c50c24a33",
+   "trace_sha256": "0d612b102e074343b36bfa02653a2fd9b6c01717c3c7f930c2a7184c50c24a33",
+   "ok": true
+  },
+  "149": {
+   "shire": 2,
+   "minion": 10,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "150": {
+   "shire": 2,
+   "minion": 11,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "173b3a9e2c8b146ae1d58755e5100897650f9cdeb4124d165f0790aa7b7a0061",
+   "trace_sha256": "173b3a9e2c8b146ae1d58755e5100897650f9cdeb4124d165f0790aa7b7a0061",
+   "ok": true
+  },
+  "151": {
+   "shire": 2,
+   "minion": 11,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "152": {
+   "shire": 2,
+   "minion": 12,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "397f1f72d7fef872e4cae43ac6270bfc7bc1684a1dd839e9e3e30e595b88a510",
+   "trace_sha256": "397f1f72d7fef872e4cae43ac6270bfc7bc1684a1dd839e9e3e30e595b88a510",
+   "ok": true
+  },
+  "153": {
+   "shire": 2,
+   "minion": 12,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "154": {
+   "shire": 2,
+   "minion": 13,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "228270e7e268db748bb34bd02250089bc1cb8955921b8438122c4f99a1b6fae1",
+   "trace_sha256": "228270e7e268db748bb34bd02250089bc1cb8955921b8438122c4f99a1b6fae1",
+   "ok": true
+  },
+  "155": {
+   "shire": 2,
+   "minion": 13,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "156": {
+   "shire": 2,
+   "minion": 14,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "21eb21f01a43a4457dd2884f2050822b4b8b20f9949f641115a8169b0b754c07",
+   "trace_sha256": "21eb21f01a43a4457dd2884f2050822b4b8b20f9949f641115a8169b0b754c07",
+   "ok": true
+  },
+  "157": {
+   "shire": 2,
+   "minion": 14,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "158": {
+   "shire": 2,
+   "minion": 15,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 508,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "9f2a0b4516fff9c397eb4257f3ceebcee4441bf72c2c8aba45f0650763952b99",
+   "trace_sha256": "9f2a0b4516fff9c397eb4257f3ceebcee4441bf72c2c8aba45f0650763952b99",
+   "ok": true
+  },
+  "159": {
+   "shire": 2,
+   "minion": 15,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "160": {
+   "shire": 2,
+   "minion": 16,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 573,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "541d08d77f99bc19d976b5236e5f80c66ebdfc60ed2e8b3b3fa8e833028b30d7",
+   "trace_sha256": "541d08d77f99bc19d976b5236e5f80c66ebdfc60ed2e8b3b3fa8e833028b30d7",
+   "ok": true
+  },
+  "161": {
+   "shire": 2,
+   "minion": 16,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "162": {
+   "shire": 2,
+   "minion": 17,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "8137b96c7836e743a9a50d3ed9fcce221a641a26086c61eba7c78493d6f8c9bb",
+   "trace_sha256": "8137b96c7836e743a9a50d3ed9fcce221a641a26086c61eba7c78493d6f8c9bb",
+   "ok": true
+  },
+  "163": {
+   "shire": 2,
+   "minion": 17,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "164": {
+   "shire": 2,
+   "minion": 18,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "26a07f441cd0d44bc4af458daf5c9aca243e85e1f669a0abf95310a06847ec6e",
+   "trace_sha256": "26a07f441cd0d44bc4af458daf5c9aca243e85e1f669a0abf95310a06847ec6e",
+   "ok": true
+  },
+  "165": {
+   "shire": 2,
+   "minion": 18,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "166": {
+   "shire": 2,
+   "minion": 19,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "2270774c066d065c86e916414f1fe99fbe3bb278948199460e4f4d9774df47ec",
+   "trace_sha256": "2270774c066d065c86e916414f1fe99fbe3bb278948199460e4f4d9774df47ec",
+   "ok": true
+  },
+  "167": {
+   "shire": 2,
+   "minion": 19,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "168": {
+   "shire": 2,
+   "minion": 20,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "cd3e736d233469780167c069d41f755e423a1c4d63f43929c0c0c154141b7201",
+   "trace_sha256": "cd3e736d233469780167c069d41f755e423a1c4d63f43929c0c0c154141b7201",
+   "ok": true
+  },
+  "169": {
+   "shire": 2,
+   "minion": 20,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "170": {
+   "shire": 2,
+   "minion": 21,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "1316770735de2240186518a84a93494fa54dd407edc1d565d55857fcefc14fce",
+   "trace_sha256": "1316770735de2240186518a84a93494fa54dd407edc1d565d55857fcefc14fce",
+   "ok": true
+  },
+  "171": {
+   "shire": 2,
+   "minion": 21,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "172": {
+   "shire": 2,
+   "minion": 22,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "97ef68539d8b7a01dc49cb8aafcfc849a24c311a5b700b10e02b0ef8eae95892",
+   "trace_sha256": "97ef68539d8b7a01dc49cb8aafcfc849a24c311a5b700b10e02b0ef8eae95892",
+   "ok": true
+  },
+  "173": {
+   "shire": 2,
+   "minion": 22,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "174": {
+   "shire": 2,
+   "minion": 23,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 508,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "07dc6158516ecc19163686c7addcf375b69f2bcff857019002f517fae4e7f116",
+   "trace_sha256": "07dc6158516ecc19163686c7addcf375b69f2bcff857019002f517fae4e7f116",
+   "ok": true
+  },
+  "175": {
+   "shire": 2,
+   "minion": 23,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "176": {
+   "shire": 2,
+   "minion": 24,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 573,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "435ac9d8e47f311a8e0f09bb661d193b3e9fd7dc7dd01317cab4bedd24559301",
+   "trace_sha256": "435ac9d8e47f311a8e0f09bb661d193b3e9fd7dc7dd01317cab4bedd24559301",
+   "ok": true
+  },
+  "177": {
+   "shire": 2,
+   "minion": 24,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "178": {
+   "shire": 2,
+   "minion": 25,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "db056522cbeae65cb9dc2b3641abdc650a0b518a5170e9401e39a8d88549ef30",
+   "trace_sha256": "db056522cbeae65cb9dc2b3641abdc650a0b518a5170e9401e39a8d88549ef30",
+   "ok": true
+  },
+  "179": {
+   "shire": 2,
+   "minion": 25,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "180": {
+   "shire": 2,
+   "minion": 26,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "f02837a78f966f185685b5b6ce1e9dae73bb0e3ae310e83829447bdee755c5e4",
+   "trace_sha256": "f02837a78f966f185685b5b6ce1e9dae73bb0e3ae310e83829447bdee755c5e4",
+   "ok": true
+  },
+  "181": {
+   "shire": 2,
+   "minion": 26,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "182": {
+   "shire": 2,
+   "minion": 27,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1028,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "5304daf0e475562bec7898e059cf41d193738ef88adf9a85afc3c4062ec5f7ef",
+   "trace_sha256": "5304daf0e475562bec7898e059cf41d193738ef88adf9a85afc3c4062ec5f7ef",
+   "ok": true
+  },
+  "183": {
+   "shire": 2,
+   "minion": 27,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "184": {
+   "shire": 2,
+   "minion": 28,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "d5ea9400f331929a5622226e1dcba863d3cece51aeaadfdf337bc276283b463c",
+   "trace_sha256": "d5ea9400f331929a5622226e1dcba863d3cece51aeaadfdf337bc276283b463c",
+   "ok": true
+  },
+  "185": {
+   "shire": 2,
+   "minion": 28,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "186": {
+   "shire": 2,
+   "minion": 29,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1042,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "5035a41aefc3609afd5b3e3c4753e3b85b7bf6b6b0a4080b35c14a30b3b51122",
+   "trace_sha256": "5035a41aefc3609afd5b3e3c4753e3b85b7bf6b6b0a4080b35c14a30b3b51122",
+   "ok": true
+  },
+  "187": {
+   "shire": 2,
+   "minion": 29,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "188": {
+   "shire": 2,
+   "minion": 30,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1044,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "23459e3f7a9efe57b14ca715811c8bb10702861dfd56aa05c88f01de220793f5",
+   "trace_sha256": "23459e3f7a9efe57b14ca715811c8bb10702861dfd56aa05c88f01de220793f5",
+   "ok": true
+  },
+  "189": {
+   "shire": 2,
+   "minion": 30,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1050,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "190": {
+   "shire": 2,
+   "minion": 31,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 582,
+    "S": 1055,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "f80529d25d0ae8a2d03ae874391be068573c734d156ee18e6dd708f3e41aac77",
+   "trace_sha256": "f80529d25d0ae8a2d03ae874391be068573c734d156ee18e6dd708f3e41aac77",
+   "ok": true
+  },
+  "191": {
+   "shire": 2,
+   "minion": 31,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1051,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "192": {
+   "shire": 3,
+   "minion": 0,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 615,
+    "S": 1910,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "cc33308cad77749242222fff92d7242ea0fee5ff6ddeb47eea2ad9a8661fb26b",
+   "trace_sha256": "cc33308cad77749242222fff92d7242ea0fee5ff6ddeb47eea2ad9a8661fb26b",
+   "ok": true
+  },
+  "193": {
+   "shire": 3,
+   "minion": 0,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1059,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "194": {
+   "shire": 3,
+   "minion": 1,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "e1bc9e874eca561e309267a6a5abcb955cb8efab1e151fd631fc2be528414920",
+   "trace_sha256": "e1bc9e874eca561e309267a6a5abcb955cb8efab1e151fd631fc2be528414920",
+   "ok": true
+  },
+  "195": {
+   "shire": 3,
+   "minion": 1,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "196": {
+   "shire": 3,
+   "minion": 2,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "c294f2314a9d788ef4f8a574ec016b8f46c7548f5ba48ebf05d215255572fd71",
+   "trace_sha256": "c294f2314a9d788ef4f8a574ec016b8f46c7548f5ba48ebf05d215255572fd71",
+   "ok": true
+  },
+  "197": {
+   "shire": 3,
+   "minion": 2,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "198": {
+   "shire": 3,
+   "minion": 3,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "7db8307462d1c372b98ab33c3e5ff3d2a10cb530c2557fedff7a7762498a0daa",
+   "trace_sha256": "7db8307462d1c372b98ab33c3e5ff3d2a10cb530c2557fedff7a7762498a0daa",
+   "ok": true
+  },
+  "199": {
+   "shire": 3,
+   "minion": 3,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "200": {
+   "shire": 3,
+   "minion": 4,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1040,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "54e451765cee467408dfebe87737417de94e6967ec65feb9899cf1cf2ba385c6",
+   "trace_sha256": "54e451765cee467408dfebe87737417de94e6967ec65feb9899cf1cf2ba385c6",
+   "ok": true
+  },
+  "201": {
+   "shire": 3,
+   "minion": 4,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1046,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "202": {
+   "shire": 3,
+   "minion": 5,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "8a7b660dd6c3d82f1615a51dac50b13f83746537aba3fafe48eace92db2c5257",
+   "trace_sha256": "8a7b660dd6c3d82f1615a51dac50b13f83746537aba3fafe48eace92db2c5257",
+   "ok": true
+  },
+  "203": {
+   "shire": 3,
+   "minion": 5,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "204": {
+   "shire": 3,
+   "minion": 6,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1048,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "82b59c95b6a624bdf95acf61dd5a884ff80d38884bbcaf3316e695a748129216",
+   "trace_sha256": "82b59c95b6a624bdf95acf61dd5a884ff80d38884bbcaf3316e695a748129216",
+   "ok": true
+  },
+  "205": {
+   "shire": 3,
+   "minion": 6,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1054,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "206": {
+   "shire": 3,
+   "minion": 7,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 508,
+    "S": 1048,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "0": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "78dd07c316751497f20e9023412e2ca99248b6285eb478f20b72281805ef0722",
+   "trace_sha256": "78dd07c316751497f20e9023412e2ca99248b6285eb478f20b72281805ef0722",
+   "ok": true
+  },
+  "207": {
+   "shire": 3,
+   "minion": 7,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1054,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "208": {
+   "shire": 3,
+   "minion": 8,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 573,
+    "S": 1048,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "d33f407fd74607a201bda7373ab46c16362066e5485311fad0b162bf325112bb",
+   "trace_sha256": "d33f407fd74607a201bda7373ab46c16362066e5485311fad0b162bf325112bb",
+   "ok": true
+  },
+  "209": {
+   "shire": 3,
+   "minion": 8,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1054,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "210": {
+   "shire": 3,
+   "minion": 9,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "0fc40a482c4fd00e48bb45ded93a60eaf48db6dfe4ff19e06735b23b2f76a99d",
+   "trace_sha256": "0fc40a482c4fd00e48bb45ded93a60eaf48db6dfe4ff19e06735b23b2f76a99d",
+   "ok": true
+  },
+  "211": {
+   "shire": 3,
+   "minion": 9,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "212": {
+   "shire": 3,
+   "minion": 10,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "cdb2616ed805776e0a9fd64f0f71e5d226508fb224abf0932b7533d650c6dd07",
+   "trace_sha256": "cdb2616ed805776e0a9fd64f0f71e5d226508fb224abf0932b7533d650c6dd07",
+   "ok": true
+  },
+  "213": {
+   "shire": 3,
+   "minion": 10,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "214": {
+   "shire": 3,
+   "minion": 11,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "70266f5c6121f11eddbbc4b467ffcb289949027a77387660be5d58676613b705",
+   "trace_sha256": "70266f5c6121f11eddbbc4b467ffcb289949027a77387660be5d58676613b705",
+   "ok": true
+  },
+  "215": {
+   "shire": 3,
+   "minion": 11,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "216": {
+   "shire": 3,
+   "minion": 12,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1040,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "b92f260c53505b6bb8f86e6206edf3de0b161e70e2b868134e07d7b284a83ad9",
+   "trace_sha256": "b92f260c53505b6bb8f86e6206edf3de0b161e70e2b868134e07d7b284a83ad9",
+   "ok": true
+  },
+  "217": {
+   "shire": 3,
+   "minion": 12,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1046,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "218": {
+   "shire": 3,
+   "minion": 13,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "cdcde5129842f93f31762b42bf9689876739a09d90a75b676ee61711c670fee2",
+   "trace_sha256": "cdcde5129842f93f31762b42bf9689876739a09d90a75b676ee61711c670fee2",
+   "ok": true
+  },
+  "219": {
+   "shire": 3,
+   "minion": 13,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "220": {
+   "shire": 3,
+   "minion": 14,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1048,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "f6ad2650fab3bf596b1b11bca98cb75bba99838a36e8b766de9575d156e4f9a7",
+   "trace_sha256": "f6ad2650fab3bf596b1b11bca98cb75bba99838a36e8b766de9575d156e4f9a7",
+   "ok": true
+  },
+  "221": {
+   "shire": 3,
+   "minion": 14,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1054,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "222": {
+   "shire": 3,
+   "minion": 15,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 508,
+    "S": 1048,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "1": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "604a1c5580f45193e9212779cd88438a543da6c2f4f85f196edbb6f65c1f3b95",
+   "trace_sha256": "604a1c5580f45193e9212779cd88438a543da6c2f4f85f196edbb6f65c1f3b95",
+   "ok": true
+  },
+  "223": {
+   "shire": 3,
+   "minion": 15,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1054,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "224": {
+   "shire": 3,
+   "minion": 16,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 573,
+    "S": 1048,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "7fdf36cae1577f6e0b99a34dccda0fb63ff750004a8079bfe0756d9a30713cd9",
+   "trace_sha256": "7fdf36cae1577f6e0b99a34dccda0fb63ff750004a8079bfe0756d9a30713cd9",
+   "ok": true
+  },
+  "225": {
+   "shire": 3,
+   "minion": 16,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1054,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "226": {
+   "shire": 3,
+   "minion": 17,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "4d1a24844ba3dd3debe526c9558e3355293005cafd33b8cdfa902778d4373f08",
+   "trace_sha256": "4d1a24844ba3dd3debe526c9558e3355293005cafd33b8cdfa902778d4373f08",
+   "ok": true
+  },
+  "227": {
+   "shire": 3,
+   "minion": 17,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "228": {
+   "shire": 3,
+   "minion": 18,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "4c7173b0bca402cd7f1ee38d14ba4dfb11d135296aefdbb1f0d5ac90fc388a3c",
+   "trace_sha256": "4c7173b0bca402cd7f1ee38d14ba4dfb11d135296aefdbb1f0d5ac90fc388a3c",
+   "ok": true
+  },
+  "229": {
+   "shire": 3,
+   "minion": 18,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "230": {
+   "shire": 3,
+   "minion": 19,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "3af2035138135f7d2dce7c900feb822357a3b361b0c42748b0549f50b9a36723",
+   "trace_sha256": "3af2035138135f7d2dce7c900feb822357a3b361b0c42748b0549f50b9a36723",
+   "ok": true
+  },
+  "231": {
+   "shire": 3,
+   "minion": 19,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "232": {
+   "shire": 3,
+   "minion": 20,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1040,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "dcd973c176e5fbbc93335ac97f81998104b4941717172f2e7d4bd09f2bd4fdd4",
+   "trace_sha256": "dcd973c176e5fbbc93335ac97f81998104b4941717172f2e7d4bd09f2bd4fdd4",
+   "ok": true
+  },
+  "233": {
+   "shire": 3,
+   "minion": 20,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1046,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "234": {
+   "shire": 3,
+   "minion": 21,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "eb2343773475dd433e4716aebe804826da0a8cd69d3078659b46188546cb210e",
+   "trace_sha256": "eb2343773475dd433e4716aebe804826da0a8cd69d3078659b46188546cb210e",
+   "ok": true
+  },
+  "235": {
+   "shire": 3,
+   "minion": 21,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "236": {
+   "shire": 3,
+   "minion": 22,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1048,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "64f5559d6b25aeb626883e17350806bb4e162f261228af7f125b4c09a90311fc",
+   "trace_sha256": "64f5559d6b25aeb626883e17350806bb4e162f261228af7f125b4c09a90311fc",
+   "ok": true
+  },
+  "237": {
+   "shire": 3,
+   "minion": 22,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1054,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "238": {
+   "shire": 3,
+   "minion": 23,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 508,
+    "S": 1048,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "2": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "a4b53fe5c7af43f86952c02ce7585c9c73c0b4b497e1b2123e98af7ff1f6d7fb",
+   "trace_sha256": "a4b53fe5c7af43f86952c02ce7585c9c73c0b4b497e1b2123e98af7ff1f6d7fb",
+   "ok": true
+  },
+  "239": {
+   "shire": 3,
+   "minion": 23,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1054,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "240": {
+   "shire": 3,
+   "minion": 24,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 573,
+    "S": 1048,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "c44e372b5fd9268eff065bf94dc15db882fb7b5055bdf7da9efdb335e50d68b7",
+   "trace_sha256": "c44e372b5fd9268eff065bf94dc15db882fb7b5055bdf7da9efdb335e50d68b7",
+   "ok": true
+  },
+  "241": {
+   "shire": 3,
+   "minion": 24,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 420,
+    "S": 1054,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "242": {
+   "shire": 3,
+   "minion": 25,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "ec797bb9b7e1a6ea11c37059f89d4f1a792d1329ad199536eb55cef67bbd0719",
+   "trace_sha256": "ec797bb9b7e1a6ea11c37059f89d4f1a792d1329ad199536eb55cef67bbd0719",
+   "ok": true
+  },
+  "243": {
+   "shire": 3,
+   "minion": 25,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "244": {
+   "shire": 3,
+   "minion": 26,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 536,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "12d624da909c260f5eaac06879089f35ca6123d8ea92c5b55a0070cfa9cdd057",
+   "trace_sha256": "12d624da909c260f5eaac06879089f35ca6123d8ea92c5b55a0070cfa9cdd057",
+   "ok": true
+  },
+  "245": {
+   "shire": 3,
+   "minion": 26,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 439,
+    "S": 1038,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "246": {
+   "shire": 3,
+   "minion": 27,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 542,
+    "S": 1032,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "e771225aff18b550f9c6240048e7567e3f7079de4905eaa381a4bbd95fdf7a7c",
+   "trace_sha256": "e771225aff18b550f9c6240048e7567e3f7079de4905eaa381a4bbd95fdf7a7c",
+   "ok": true
+  },
+  "247": {
+   "shire": 3,
+   "minion": 27,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 445,
+    "S": 1034,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "248": {
+   "shire": 3,
+   "minion": 28,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 525,
+    "S": 1040,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "fbfff0f1148b6afa0b6212878e57e91facadaf1d67998941440a44591fa38942",
+   "trace_sha256": "fbfff0f1148b6afa0b6212878e57e91facadaf1d67998941440a44591fa38942",
+   "ok": true
+  },
+  "249": {
+   "shire": 3,
+   "minion": 28,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 427,
+    "S": 1046,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "250": {
+   "shire": 3,
+   "minion": 29,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 530,
+    "S": 1036,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "147fa93a37af0e6bf9ee030462d910baeb6d0e9e0442b689d65421f894900a26",
+   "trace_sha256": "147fa93a37af0e6bf9ee030462d910baeb6d0e9e0442b689d65421f894900a26",
+   "ok": true
+  },
+  "251": {
+   "shire": 3,
+   "minion": 29,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 433,
+    "S": 1042,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "252": {
+   "shire": 3,
+   "minion": 30,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 528,
+    "S": 1048,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "c36d804d2e0518b9ddb262a327d1daaabe1ef9d5b565f677ed2c0be845204121",
+   "trace_sha256": "c36d804d2e0518b9ddb262a327d1daaabe1ef9d5b565f677ed2c0be845204121",
+   "ok": true
+  },
+  "253": {
+   "shire": 3,
+   "minion": 30,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1054,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "254": {
+   "shire": 3,
+   "minion": 31,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 608,
+    "S": 1409,
+    "U": 48060
+   },
+   "outside_tensor": {
+    "TensorIMA8A32": 2,
+    "TensorLoad": 3
+   },
+   "expect": "the walk's events",
+   "n_trace": 3074,
+   "n_walk": 3074,
+   "equal": true,
+   "n_diff_positions": 0,
+   "first_diff": null,
+   "counts_trace": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "counts_walk": {
+    "LA": 1024,
+    "LB": 1024,
+    "F": 1024,
+    "S": 2
+   },
+   "side_field_problems": 0,
+   "leader_ok": true,
+   "leaderA": {
+    "3": 1024
+   },
+   "leaderB": {
+    "0": 1024
+   },
+   "lines_read": 32768,
+   "lines_written": 128,
+   "line_mismatch": 0,
+   "pa_minus_va": {
+    "0": 32768
+   },
+   "lines_ok": true,
+   "walk_sha256": "a6095e2632a41b8cd8ca85b65d0fb785984da7af4000102585f00d84220791ec",
+   "trace_sha256": "a6095e2632a41b8cd8ca85b65d0fb785984da7af4000102585f00d84220791ec",
+   "ok": true
+  },
+  "255": {
+   "shire": 3,
+   "minion": 31,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 411,
+    "S": 1051,
+    "U": 57
+   },
+   "outside_tensor": {},
+   "expect": "enter and return: no U-mode tensor operation",
+   "ok": true,
+   "u_instructions": 57
+  },
+  "1984": {
+   "shire": 31,
+   "minion": 0,
+   "thread": 0,
+   "instr_by_mode": {
+    "M": 246,
+    "S": 1095
+   },
+   "outside_tensor": {},
+   "expect": "never launched: no U-mode instruction",
+   "ok": true
+  },
+  "1985": {
+   "shire": 31,
+   "minion": 0,
+   "thread": 1,
+   "instr_by_mode": {
+    "M": 155,
+    "S": 164
+   },
+   "outside_tensor": {},
+   "expect": "never launched: no U-mode instruction",
+   "ok": true
+  }
+ },
+ "summary_meta": {
+  "name": "t7-gemmL-1x1x16-0xf-all",
+  "arm": "gemmL1x1x16",
+  "mask": "0xf",
+  "host_rc": 0,
+  "host_wall_s": 274.8,
+  "reader_error": null,
+  "peak_rss_kb_sum_of_sim_tree": 370136,
+  "log_sel": [
+   "0,ffffffffffffffff",
+   "1,ffffffffffffffff",
+   "2,ffffffffffffffff",
+   "3,ffffffffffffffff",
+   "31,3"
+  ],
+  "sim_args": "-vpurf_warn -l -ls 0,ffffffffffffffff -ls 1,ffffffffffffffff -ls 2,ffffffffffffffff -ls 3,ffffffffffffffff -ls 31,3",
+  "elf_sha256": "ff2723b81e2ce409d14e4ee54ae5a91b6fb3a11827097023c8c35ac088608684",
+  "host_sha256": "09bba984e3361d511f0a4a33321bfb8f2b5ea43d8193e3b743f371cb865b2054",
+  "python": "3.12.3"
+ },
+ "log_lines": 101656908,
+ "log_bytes": 9875978888,
+ "warn": {},
+ "unparsed_tensor": {}
+}

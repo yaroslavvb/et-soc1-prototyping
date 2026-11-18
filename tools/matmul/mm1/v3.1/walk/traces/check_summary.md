@@ -1,0 +1,10 @@
+| run | kernel | mask | aifoundry3 (PST) | host rc, wall | log streamed | traced working harts exact | events a hart | hart 1s | off-mask | lines read / written | shire streams, chip sharing equal (steps) | sim steps an op | verdict |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| t1-gemmL-2x4x16-0xf | rgm136.gemmL | 0xf | 07:27:50-07:41:50 | 0, 840 s | 403,384,156 lines, 37.9 GB | 32 of 32 | [24592] | 128 of 128 (U [57]) | 2 of 2 | 8,388,608 / 32,768 | yes; 8192 of 8192 | 46.68 | EXACT |
+| t2-gemmL-2x4x16-0x1111 | rgm136.gemmL | 0x1111 | 07:42:44-07:56:44 | 0, 840 s | 403,384,393 lines, 38.0 GB | 32 of 32 | [24592] | 128 of 128 (U [57]) | 2 of 2 | 8,388,608 / 32,768 | yes; 8192 of 8192 | 46.68 | EXACT |
+| t3-gemmLn-2x4x16-0xf | rgm211.gemmLn | 0xf | 07:57:02-08:09:46 | 0, 764 s | 387,710,180 lines, 36.8 GB | 32 of 32 | [24592] | 128 of 128 (U [55]) | 2 of 2 | 8,388,608 / 32,768 | yes; 8192 of 8192 | 31.98 | EXACT |
+| t4-gemmLn-2x4x16-0x1111 | rgm211.gemmLn | 0x1111 | 08:09:52-08:22:44 | 0, 772 s | 387,710,416 lines, 36.9 GB | 32 of 32 | [24592] | 128 of 128 (U [55]) | 2 of 2 | 8,388,608 / 32,768 | yes; 8192 of 8192 | 31.98 | EXACT |
+| t5-gemmLnc-2x4x16-0xf | rgm136.gemmLnc | 0xf | 08:22:49-08:36:05 | 0, 796 s | 395,265,130 lines, 37.3 GB | 32 of 32 | [24592] | 128 of 128 (U [57]) | 2 of 2 | 8,388,608 / 32,768 | yes; 8192 of 8192 | 39.67 | EXACT |
+| t6-gemmLnc-2x4x16-0x1111 | rgm136.gemmLnc | 0x1111 | 08:36:11-08:49:31 | 0, 800 s | 395,265,356 lines, 37.4 GB | 32 of 32 | [24592] | 128 of 128 (U [57]) | 2 of 2 | 8,388,608 / 32,768 | yes; 8192 of 8192 | 39.67 | EXACT |
+| t7-gemmL-1x1x16-0xf-all | rgm136.gemmL | 0xf | 08:49:37-08:54:12 | 0, 275 s | 101,656,908 lines, 9.9 GB | 128 of 128 | [3074] | 128 of 128 (U [57]) | 2 of 2 | 4,194,304 / 16,384 | yes; 1024 of 1024 | 46.76 | EXACT |
+| t8-gemmL-1x1x16-0x1111-all | rgm136.gemmL | 0x1111 | 08:54:15-08:58:49 | 0, 275 s | 101,657,130 lines, 9.9 GB | 128 of 128 | [3074] | 128 of 128 (U [57]) | 2 of 2 | 4,194,304 / 16,384 | yes; 1024 of 1024 | 46.76 | EXACT |
