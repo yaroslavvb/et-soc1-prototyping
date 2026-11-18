@@ -1,0 +1,1422 @@
+{
+ "bench": "rtl-sim/fma_toggle_v2 (vpu_top, -fno-dfg), built from the committed sources; maps trained on the same binary",
+ "driver": "count_e210.py: run_kinds.point() with C0 = a GEMM accumulation of j other tiles of the kind",
+ "incomplete": [],
+ "js": [
+  3,
+  11,
+  19,
+  27
+ ],
+ "label": "recount: S1 gemmL1x1x1 fp32 randn (E210's row)",
+ "numpy": "1.26.4",
+ "python": "3.12.3",
+ "rows": {
+  "randn": {
+   "kind": "randn",
+   "macs_per_op": 4096,
+   "mean": {
+    "busy": 537.0,
+    "check_mismatch": 0.0,
+    "check_words": 256.0,
+    "clock_nets_cov": 760304.0,
+    "cycles": 545.0,
+    "ff": {
+     "all": {
+      "clocked": 7914768.0,
+      "present": 10703158.0,
+      "toggles": 1802746.0625
+     },
+     "rest": {
+      "clocked": 788624.0,
+      "present": 2294838.0,
+      "toggles": 214538.375
+     },
+     "txfma": {
+      "clocked": 7126144.0,
+      "present": 8408320.0,
+      "toggles": 1588207.6875
+     }
+    },
+    "j": 15.0,
+    "median_abs_c0": 10.469607889652252,
+    "nets_cov": 45266086.625,
+    "scp_reads": 288.0,
+    "unit": {
+     "by_stage": {
+      "adder_norm": 2445310.75,
+      "c_regfile": 0.0,
+      "control": 324322.0,
+      "exponent": 472793.25,
+      "lane_operand_bus": 59890.0,
+      "multiplier": 3619698.875,
+      "operand": 585901.25,
+      "other": 6002.0,
+      "result": 140517.25,
+      "vpu_sequencer": 0.0
+     },
+     "by_stage_hier1": {
+      "adder_norm": 2379750.0,
+      "c_regfile": 0.0,
+      "control": 308328.0,
+      "exponent": 390173.75,
+      "lane_operand_bus": 57159.0,
+      "multiplier": 3325672.875,
+      "operand": 297533.375,
+      "other": 4281.0,
+      "result": 81473.5,
+      "vpu_sequencer": 0.0
+     },
+     "by_stage_hier2": {
+      "adder_norm": 2465459.5,
+      "c_regfile": 0.0,
+      "control": 296887.875,
+      "exponent": 433199.5,
+      "lane_operand_bus": 57183.5,
+      "multiplier": 3473389.875,
+      "operand": 817868.875,
+      "other": 4281.0,
+      "result": 335689.625,
+      "vpu_sequencer": 0.0
+     },
+     "by_stage_n": {
+      "adder_norm": 10920.375,
+      "c_regfile": 0.0,
+      "control": 2174.25,
+      "exponent": 3632.5,
+      "lane_operand_bus": 264.0,
+      "multiplier": 18238.0,
+      "operand": 3095.0,
+      "other": 96.0,
+      "result": 632.0,
+      "vpu_sequencer": 0.0
+     },
+     "ids": 14790862.875,
+     "n_hier": 34463.625,
+     "n_hier2": 39711.0,
+     "n_map": 39052.125,
+     "name_raw": 31319291.5,
+     "name_settled": 31319291.5,
+     "nets_distinct": 5287466.625,
+     "nets_hier": 6844371.5,
+     "nets_hier2": 7883959.75,
+     "nets_map": 7654435.375,
+     "sample_cycles": 558.0,
+     "xz": 0.0
+    },
+    "uops": 512.0,
+    "valid_slots": 4096.0,
+    "vpu": {
+     "by_stage": {
+      "adder_norm": 2445310.75,
+      "c_regfile": 225251.875,
+      "control": 322772.0,
+      "exponent": 472793.25,
+      "lane_operand_bus": 127315.375,
+      "multiplier": 3619698.875,
+      "operand": 624064.375,
+      "other": 4466.0,
+      "result": 140517.25,
+      "vpu_sequencer": 182655.5
+     },
+     "by_stage_hier1": {
+      "adder_norm": 2379750.0,
+      "c_regfile": 225251.875,
+      "control": 305338.0,
+      "exponent": 390173.75,
+      "lane_operand_bus": 51582.125,
+      "multiplier": 3325672.875,
+      "operand": 351223.75,
+      "other": 1721.0,
+      "result": 81473.5,
+      "vpu_sequencer": 174027.5
+     },
+     "by_stage_hier2": {
+      "adder_norm": 2465459.5,
+      "c_regfile": 225251.875,
+      "control": 296201.875,
+      "exponent": 433199.5,
+      "lane_operand_bus": 295428.0,
+      "multiplier": 3473389.875,
+      "operand": 798677.875,
+      "other": 1721.0,
+      "result": 335689.625,
+      "vpu_sequencer": 247704.0
+     },
+     "by_stage_n": {
+      "adder_norm": 10920.375,
+      "c_regfile": 7265.125,
+      "control": 2119.25,
+      "exponent": 3632.5,
+      "lane_operand_bus": 2636.5,
+      "multiplier": 18238.0,
+      "operand": 3869.5,
+      "other": 48.0,
+      "result": 632.0,
+      "vpu_sequencer": 1256.0
+     },
+     "ids": 16638087.0,
+     "n_hier": 45587.75,
+     "n_hier2": 52116.875,
+     "n_map": 50617.25,
+     "name_raw": 34464149.625,
+     "name_settled": 34464149.625,
+     "nets_distinct": 5528135.25,
+     "nets_hier": 7286214.375,
+     "nets_hier2": 8572723.125,
+     "nets_map": 8164845.25,
+     "sample_cycles": 558.0,
+     "xz": 0.0
+    }
+   },
+   "n_files": 61,
+   "points": [
+    {
+     "busy": 537.0,
+     "check_mismatch": 0,
+     "check_words": 256,
+     "clock_nets_cov": 760304.0,
+     "cycles": 545.0,
+     "ff": {
+      "all": {
+       "clocked": 7914768.0,
+       "present": 10703158.0,
+       "toggles": 1841999.5
+      },
+      "rest": {
+       "clocked": 788624.0,
+       "present": 2294838.0,
+       "toggles": 220445.0
+      },
+      "txfma": {
+       "clocked": 7126144.0,
+       "present": 8408320.0,
+       "toggles": 1621554.5
+      }
+     },
+     "j": 3,
+     "median_abs_c0": 5.351077079772949,
+     "nets_cov": 45437294.0,
+     "scp_reads": 288.0,
+     "tile": "randn_00.bin",
+     "unit": {
+      "by_stage": {
+       "adder_norm": 2451440,
+       "c_regfile": 0,
+       "control": 351618,
+       "exponent": 537763,
+       "lane_operand_bus": 62442,
+       "multiplier": 3602849,
+       "operand": 587485,
+       "other": 5960,
+       "result": 140668,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2432137,
+       "c_regfile": 0,
+       "control": 335770,
+       "exponent": 444527,
+       "lane_operand_bus": 58952,
+       "multiplier": 3310279,
+       "operand": 300489,
+       "other": 4260,
+       "result": 80378,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2497948,
+       "c_regfile": 0,
+       "control": 323190,
+       "exponent": 484062,
+       "lane_operand_bus": 58952,
+       "multiplier": 3456805,
+       "operand": 822549,
+       "other": 4260,
+       "result": 341167,
+       "vpu_sequencer": 0
+      },
+      "by_stage_n": {
+       "adder_norm": 11044,
+       "c_regfile": 0,
+       "control": 2187,
+       "exponent": 3646,
+       "lane_operand_bus": 264,
+       "multiplier": 18242,
+       "operand": 3095,
+       "other": 96,
+       "result": 632,
+       "vpu_sequencer": 0
+      },
+      "ids": 14967566,
+      "n_hier": 34877,
+      "n_hier2": 40004,
+      "n_map": 39206,
+      "name_raw": 31641891,
+      "name_settled": 31641891,
+      "nets_distinct": 5354229,
+      "nets_hier": 6966792,
+      "nets_hier2": 7988933,
+      "nets_map": 7740225,
+      "sample_cycles": 558,
+      "xz": 0
+     },
+     "uops": 512.0,
+     "valid_slots": 4096.0,
+     "vpu": {
+      "by_stage": {
+       "adder_norm": 2451440,
+       "c_regfile": 234682,
+       "control": 350068,
+       "exponent": 537763,
+       "lane_operand_bus": 128360,
+       "multiplier": 3602849,
+       "operand": 627215,
+       "other": 4424,
+       "result": 140668,
+       "vpu_sequencer": 186366
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2432137,
+       "c_regfile": 234682,
+       "control": 332780,
+       "exponent": 444527,
+       "lane_operand_bus": 50078,
+       "multiplier": 3310279,
+       "operand": 358805,
+       "other": 1700,
+       "result": 80378,
+       "vpu_sequencer": 176936
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2497948,
+       "c_regfile": 234682,
+       "control": 322504,
+       "exponent": 484062,
+       "lane_operand_bus": 300646,
+       "multiplier": 3456805,
+       "operand": 803017,
+       "other": 1700,
+       "result": 341167,
+       "vpu_sequencer": 251276
+      },
+      "by_stage_n": {
+       "adder_norm": 11044,
+       "c_regfile": 7582,
+       "control": 2132,
+       "exponent": 3646,
+       "lane_operand_bus": 2637,
+       "multiplier": 18242,
+       "operand": 3865,
+       "other": 48,
+       "result": 632,
+       "vpu_sequencer": 1256
+      },
+      "ids": 16861234,
+      "n_hier": 46314,
+      "n_hier2": 52729,
+      "n_map": 51084,
+      "name_raw": 34851233,
+      "name_settled": 34851233,
+      "nets_distinct": 5596839,
+      "nets_hier": 7422302,
+      "nets_hier2": 8693807,
+      "nets_map": 8263835,
+      "sample_cycles": 558,
+      "xz": 0
+     }
+    },
+    {
+     "busy": 537.0,
+     "check_mismatch": 0,
+     "check_words": 256,
+     "clock_nets_cov": 760304.0,
+     "cycles": 545.0,
+     "ff": {
+      "all": {
+       "clocked": 7914768.0,
+       "present": 10703158.0,
+       "toggles": 1799599.5
+      },
+      "rest": {
+       "clocked": 788624.0,
+       "present": 2294838.0,
+       "toggles": 214181.0
+      },
+      "txfma": {
+       "clocked": 7126144.0,
+       "present": 8408320.0,
+       "toggles": 1585418.5
+      }
+     },
+     "j": 11,
+     "median_abs_c0": 10.502933502197266,
+     "nets_cov": 45120358.5,
+     "scp_reads": 288.0,
+     "tile": "randn_00.bin",
+     "unit": {
+      "by_stage": {
+       "adder_norm": 2440438,
+       "c_regfile": 0,
+       "control": 322772,
+       "exponent": 462095,
+       "lane_operand_bus": 59250,
+       "multiplier": 3602988,
+       "operand": 584019,
+       "other": 5960,
+       "result": 139197,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2402111,
+       "c_regfile": 0,
+       "control": 307995,
+       "exponent": 380273,
+       "lane_operand_bus": 56708,
+       "multiplier": 3310418,
+       "operand": 297023,
+       "other": 4260,
+       "result": 78391,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2472028,
+       "c_regfile": 0,
+       "control": 296031,
+       "exponent": 425311,
+       "lane_operand_bus": 56708,
+       "multiplier": 3456944,
+       "operand": 815467,
+       "other": 4260,
+       "result": 332999,
+       "vpu_sequencer": 0
+      },
+      "by_stage_n": {
+       "adder_norm": 10966,
+       "c_regfile": 0,
+       "control": 2194,
+       "exponent": 3646,
+       "lane_operand_bus": 264,
+       "multiplier": 18242,
+       "operand": 3095,
+       "other": 96,
+       "result": 632,
+       "vpu_sequencer": 0
+      },
+      "ids": 14708712,
+      "n_hier": 34619,
+      "n_hier2": 39825,
+      "n_map": 39135,
+      "name_raw": 31151205,
+      "name_settled": 31151205,
+      "nets_distinct": 5288389,
+      "nets_hier": 6837179,
+      "nets_hier2": 7859748,
+      "nets_map": 7616719,
+      "sample_cycles": 558,
+      "xz": 0
+     },
+     "uops": 512.0,
+     "valid_slots": 4096.0,
+     "vpu": {
+      "by_stage": {
+       "adder_norm": 2440438,
+       "c_regfile": 223340,
+       "control": 321222,
+       "exponent": 462095,
+       "lane_operand_bus": 126392,
+       "multiplier": 3602988,
+       "operand": 622217,
+       "other": 4424,
+       "result": 139197,
+       "vpu_sequencer": 183036
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2402111,
+       "c_regfile": 223340,
+       "control": 305005,
+       "exponent": 380273,
+       "lane_operand_bus": 51927,
+       "multiplier": 3310418,
+       "operand": 349990,
+       "other": 1700,
+       "result": 78391,
+       "vpu_sequencer": 174554
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2472028,
+       "c_regfile": 223340,
+       "control": 295345,
+       "exponent": 425311,
+       "lane_operand_bus": 292658,
+       "multiplier": 3456944,
+       "operand": 795935,
+       "other": 1700,
+       "result": 332999,
+       "vpu_sequencer": 248894
+      },
+      "by_stage_n": {
+       "adder_norm": 10966,
+       "c_regfile": 7257,
+       "control": 2139,
+       "exponent": 3646,
+       "lane_operand_bus": 2637,
+       "multiplier": 18242,
+       "operand": 3865,
+       "other": 48,
+       "result": 632,
+       "vpu_sequencer": 1256
+      },
+      "ids": 16546858,
+      "n_hier": 45731,
+      "n_hier2": 52211,
+      "n_map": 50688,
+      "name_raw": 34291641,
+      "name_settled": 34291641,
+      "nets_distinct": 5529369,
+      "nets_hier": 7277709,
+      "nets_hier2": 8545154,
+      "nets_map": 8125349,
+      "sample_cycles": 558,
+      "xz": 0
+     }
+    },
+    {
+     "busy": 537.0,
+     "check_mismatch": 0,
+     "check_words": 256,
+     "clock_nets_cov": 760304.0,
+     "cycles": 545.0,
+     "ff": {
+      "all": {
+       "clocked": 7914768.0,
+       "present": 10703158.0,
+       "toggles": 1780013.5
+      },
+      "rest": {
+       "clocked": 788624.0,
+       "present": 2294838.0,
+       "toggles": 210857.0
+      },
+      "txfma": {
+       "clocked": 7126144.0,
+       "present": 8408320.0,
+       "toggles": 1569156.5
+      }
+     },
+     "j": 19,
+     "median_abs_c0": 11.82620620727539,
+     "nets_cov": 44972913.5,
+     "scp_reads": 288.0,
+     "tile": "randn_00.bin",
+     "unit": {
+      "by_stage": {
+       "adder_norm": 2440619,
+       "c_regfile": 0,
+       "control": 318090,
+       "exponent": 449361,
+       "lane_operand_bus": 58522,
+       "multiplier": 3602169,
+       "operand": 582947,
+       "other": 5960,
+       "result": 140575,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2352879,
+       "c_regfile": 0,
+       "control": 301848,
+       "exponent": 370710,
+       "lane_operand_bus": 55266,
+       "multiplier": 3309599,
+       "operand": 295951,
+       "other": 4260,
+       "result": 86477,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2449998,
+       "c_regfile": 0,
+       "control": 290708,
+       "exponent": 415287,
+       "lane_operand_bus": 55266,
+       "multiplier": 3456125,
+       "operand": 812830,
+       "other": 4260,
+       "result": 332931,
+       "vpu_sequencer": 0
+      },
+      "by_stage_n": {
+       "adder_norm": 10872,
+       "c_regfile": 0,
+       "control": 2192,
+       "exponent": 3647,
+       "lane_operand_bus": 264,
+       "multiplier": 18242,
+       "operand": 3095,
+       "other": 96,
+       "result": 632,
+       "vpu_sequencer": 0
+      },
+      "ids": 14665652,
+      "n_hier": 34342,
+      "n_hier2": 39636,
+      "n_map": 39040,
+      "name_raw": 31063035,
+      "name_settled": 31063035,
+      "nets_distinct": 5244515,
+      "nets_hier": 6776990,
+      "nets_hier2": 7817405,
+      "nets_map": 7598243,
+      "sample_cycles": 558,
+      "xz": 0
+     },
+     "uops": 512.0,
+     "valid_slots": 4096.0,
+     "vpu": {
+      "by_stage": {
+       "adder_norm": 2440619,
+       "c_regfile": 220342,
+       "control": 316540,
+       "exponent": 449361,
+       "lane_operand_bus": 125644,
+       "multiplier": 3602169,
+       "operand": 621098,
+       "other": 4424,
+       "result": 140575,
+       "vpu_sequencer": 182326
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2352879,
+       "c_regfile": 220342,
+       "control": 298858,
+       "exponent": 370710,
+       "lane_operand_bus": 50376,
+       "multiplier": 3309599,
+       "operand": 349674,
+       "other": 1700,
+       "result": 86477,
+       "vpu_sequencer": 173130
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2449998,
+       "c_regfile": 220342,
+       "control": 290022,
+       "exponent": 415287,
+       "lane_operand_bus": 288979,
+       "multiplier": 3456125,
+       "operand": 793298,
+       "other": 1700,
+       "result": 332931,
+       "vpu_sequencer": 247470
+      },
+      "by_stage_n": {
+       "adder_norm": 10872,
+       "c_regfile": 7107,
+       "control": 2137,
+       "exponent": 3647,
+       "lane_operand_bus": 2637,
+       "multiplier": 18242,
+       "operand": 3865,
+       "other": 48,
+       "result": 632,
+       "vpu_sequencer": 1256
+      },
+      "ids": 16490907,
+      "n_hier": 45304,
+      "n_hier2": 51860,
+      "n_map": 50443,
+      "name_raw": 34187534,
+      "name_settled": 34187534,
+      "nets_distinct": 5483311,
+      "nets_hier": 7213745,
+      "nets_hier2": 8496152,
+      "nets_map": 8103098,
+      "sample_cycles": 558,
+      "xz": 0
+     }
+    },
+    {
+     "busy": 537.0,
+     "check_mismatch": 0,
+     "check_words": 256,
+     "clock_nets_cov": 760304.0,
+     "cycles": 545.0,
+     "ff": {
+      "all": {
+       "clocked": 7914768.0,
+       "present": 10703158.0,
+       "toggles": 1791604.5
+      },
+      "rest": {
+       "clocked": 788624.0,
+       "present": 2294838.0,
+       "toggles": 212792.0
+      },
+      "txfma": {
+       "clocked": 7126144.0,
+       "present": 8408320.0,
+       "toggles": 1578812.5
+      }
+     },
+     "j": 27,
+     "median_abs_c0": 13.997491836547852,
+     "nets_cov": 45060758.5,
+     "scp_reads": 288.0,
+     "tile": "randn_00.bin",
+     "unit": {
+      "by_stage": {
+       "adder_norm": 2438065,
+       "c_regfile": 0,
+       "control": 319389,
+       "exponent": 465273,
+       "lane_operand_bus": 59444,
+       "multiplier": 3603180,
+       "operand": 584472,
+       "other": 5960,
+       "result": 140677,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2336120,
+       "c_regfile": 0,
+       "control": 302249,
+       "exponent": 384415,
+       "lane_operand_bus": 56364,
+       "multiplier": 3310610,
+       "operand": 297476,
+       "other": 4260,
+       "result": 81197,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2438567,
+       "c_regfile": 0,
+       "control": 292399,
+       "exponent": 427668,
+       "lane_operand_bus": 56364,
+       "multiplier": 3457136,
+       "operand": 816532,
+       "other": 4260,
+       "result": 335040,
+       "vpu_sequencer": 0
+      },
+      "by_stage_n": {
+       "adder_norm": 10824,
+       "c_regfile": 0,
+       "control": 2186,
+       "exponent": 3624,
+       "lane_operand_bus": 264,
+       "multiplier": 18242,
+       "operand": 3095,
+       "other": 96,
+       "result": 632,
+       "vpu_sequencer": 0
+      },
+      "ids": 14713176,
+      "n_hier": 34204,
+      "n_hier2": 39527,
+      "n_map": 38963,
+      "name_raw": 31159759,
+      "name_settled": 31159759,
+      "nets_distinct": 5241243,
+      "nets_hier": 6772691,
+      "nets_hier2": 7827966,
+      "nets_map": 7616460,
+      "sample_cycles": 558,
+      "xz": 0
+     },
+     "uops": 512.0,
+     "valid_slots": 4096.0,
+     "vpu": {
+      "by_stage": {
+       "adder_norm": 2438065,
+       "c_regfile": 223052,
+       "control": 317839,
+       "exponent": 465273,
+       "lane_operand_bus": 126730,
+       "multiplier": 3603180,
+       "operand": 622703,
+       "other": 4424,
+       "result": 140677,
+       "vpu_sequencer": 183200
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2336120,
+       "c_regfile": 223052,
+       "control": 299259,
+       "exponent": 384415,
+       "lane_operand_bus": 51365,
+       "multiplier": 3310610,
+       "operand": 351376,
+       "other": 1700,
+       "result": 81197,
+       "vpu_sequencer": 174180
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2438567,
+       "c_regfile": 223052,
+       "control": 291713,
+       "exponent": 427668,
+       "lane_operand_bus": 292341,
+       "multiplier": 3457136,
+       "operand": 797000,
+       "other": 1700,
+       "result": 335040,
+       "vpu_sequencer": 248520
+      },
+      "by_stage_n": {
+       "adder_norm": 10824,
+       "c_regfile": 7072,
+       "control": 2131,
+       "exponent": 3624,
+       "lane_operand_bus": 2637,
+       "multiplier": 18242,
+       "operand": 3865,
+       "other": 48,
+       "result": 632,
+       "vpu_sequencer": 1256
+      },
+      "ids": 16554243,
+      "n_hier": 45131,
+      "n_hier2": 51734,
+      "n_map": 50331,
+      "name_raw": 34304246,
+      "name_settled": 34304246,
+      "nets_distinct": 5481260,
+      "nets_hier": 7213274,
+      "nets_hier2": 8512737,
+      "nets_map": 8125143,
+      "sample_cycles": 558,
+      "xz": 0
+     }
+    },
+    {
+     "busy": 537.0,
+     "check_mismatch": 0,
+     "check_words": 256,
+     "clock_nets_cov": 760304.0,
+     "cycles": 545.0,
+     "ff": {
+      "all": {
+       "clocked": 7914768.0,
+       "present": 10703158.0,
+       "toggles": 1832527.5
+      },
+      "rest": {
+       "clocked": 788624.0,
+       "present": 2294838.0,
+       "toggles": 218861.0
+      },
+      "txfma": {
+       "clocked": 7126144.0,
+       "present": 8408320.0,
+       "toggles": 1613666.5
+      }
+     },
+     "j": 3,
+     "median_abs_c0": 4.617117404937744,
+     "nets_cov": 45625544.5,
+     "scp_reads": 288.0,
+     "tile": "randn_01.bin",
+     "unit": {
+      "by_stage": {
+       "adder_norm": 2453334,
+       "c_regfile": 0,
+       "control": 340153,
+       "exponent": 513276,
+       "lane_operand_bus": 61724,
+       "multiplier": 3636479,
+       "operand": 588992,
+       "other": 6044,
+       "result": 141829,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2420122,
+       "c_regfile": 0,
+       "control": 323701,
+       "exponent": 423193,
+       "lane_operand_bus": 59134,
+       "multiplier": 3340997,
+       "operand": 299316,
+       "other": 4302,
+       "result": 82259,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2488181,
+       "c_regfile": 0,
+       "control": 311223,
+       "exponent": 462782,
+       "lane_operand_bus": 59330,
+       "multiplier": 3489905,
+       "operand": 822836,
+       "other": 4302,
+       "result": 340601,
+       "vpu_sequencer": 0
+      },
+      "by_stage_n": {
+       "adder_norm": 10999,
+       "c_regfile": 0,
+       "control": 2165,
+       "exponent": 3631,
+       "lane_operand_bus": 264,
+       "multiplier": 18234,
+       "operand": 3095,
+       "other": 96,
+       "result": 632,
+       "vpu_sequencer": 0
+      },
+      "ids": 14975947,
+      "n_hier": 34710,
+      "n_hier2": 39857,
+      "n_map": 39116,
+      "name_raw": 31684990,
+      "name_settled": 31684990,
+      "nets_distinct": 5361974,
+      "nets_hier": 6953024,
+      "nets_hier2": 7979160,
+      "nets_map": 7741831,
+      "sample_cycles": 558,
+      "xz": 0
+     },
+     "uops": 512.0,
+     "valid_slots": 4096.0,
+     "vpu": {
+      "by_stage": {
+       "adder_norm": 2453334,
+       "c_regfile": 232589,
+       "control": 338603,
+       "exponent": 513276,
+       "lane_operand_bus": 128975,
+       "multiplier": 3636479,
+       "operand": 627630,
+       "other": 4508,
+       "result": 141829,
+       "vpu_sequencer": 183420
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2420122,
+       "c_regfile": 232589,
+       "control": 320711,
+       "exponent": 423193,
+       "lane_operand_bus": 53266,
+       "multiplier": 3340997,
+       "operand": 352947,
+       "other": 1742,
+       "result": 82259,
+       "vpu_sequencer": 174976
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2488181,
+       "c_regfile": 232589,
+       "control": 310537,
+       "exponent": 462782,
+       "lane_operand_bus": 303227,
+       "multiplier": 3489905,
+       "operand": 803986,
+       "other": 1742,
+       "result": 340601,
+       "vpu_sequencer": 248136
+      },
+      "by_stage_n": {
+       "adder_norm": 10999,
+       "c_regfile": 7630,
+       "control": 2110,
+       "exponent": 3631,
+       "lane_operand_bus": 2636,
+       "multiplier": 18234,
+       "operand": 3874,
+       "other": 48,
+       "result": 632,
+       "vpu_sequencer": 1256
+      },
+      "ids": 16853669,
+      "n_hier": 46203,
+      "n_hier2": 52656,
+      "n_map": 51050,
+      "name_raw": 34860570,
+      "name_settled": 34860570,
+      "nets_distinct": 5606045,
+      "nets_hier": 7402802,
+      "nets_hier2": 8681686,
+      "nets_map": 8260643,
+      "sample_cycles": 558,
+      "xz": 0
+     }
+    },
+    {
+     "busy": 537.0,
+     "check_mismatch": 0,
+     "check_words": 256,
+     "clock_nets_cov": 760304.0,
+     "cycles": 545.0,
+     "ff": {
+      "all": {
+       "clocked": 7914768.0,
+       "present": 10703158.0,
+       "toggles": 1781928.0
+      },
+      "rest": {
+       "clocked": 788624.0,
+       "present": 2294838.0,
+       "toggles": 211334.0
+      },
+      "txfma": {
+       "clocked": 7126144.0,
+       "present": 8408320.0,
+       "toggles": 1570594.0
+      }
+     },
+     "j": 11,
+     "median_abs_c0": 11.150651931762695,
+     "nets_cov": 45215372.5,
+     "scp_reads": 288.0,
+     "tile": "randn_01.bin",
+     "unit": {
+      "by_stage": {
+       "adder_norm": 2438668,
+       "c_regfile": 0,
+       "control": 312335,
+       "exponent": 437952,
+       "lane_operand_bus": 58474,
+       "multiplier": 3635862,
+       "operand": 585278,
+       "other": 6044,
+       "result": 140297,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2372776,
+       "c_regfile": 0,
+       "control": 297147,
+       "exponent": 364982,
+       "lane_operand_bus": 57032,
+       "multiplier": 3340380,
+       "operand": 295602,
+       "other": 4302,
+       "result": 78857,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2456366,
+       "c_regfile": 0,
+       "control": 286479,
+       "exponent": 404325,
+       "lane_operand_bus": 57032,
+       "multiplier": 3489288,
+       "operand": 814801,
+       "other": 4302,
+       "result": 332390,
+       "vpu_sequencer": 0
+      },
+      "by_stage_n": {
+       "adder_norm": 10876,
+       "c_regfile": 0,
+       "control": 2155,
+       "exponent": 3621,
+       "lane_operand_bus": 264,
+       "multiplier": 18234,
+       "operand": 3095,
+       "other": 96,
+       "result": 632,
+       "vpu_sequencer": 0
+      },
+      "ids": 14713184,
+      "n_hier": 34397,
+      "n_hier2": 39615,
+      "n_map": 38973,
+      "name_raw": 31180332,
+      "name_settled": 31180332,
+      "nets_distinct": 5262772,
+      "nets_hier": 6811078,
+      "nets_hier2": 7844983,
+      "nets_map": 7614910,
+      "sample_cycles": 558,
+      "xz": 0
+     },
+     "uops": 512.0,
+     "valid_slots": 4096.0,
+     "vpu": {
+      "by_stage": {
+       "adder_norm": 2438668,
+       "c_regfile": 220523,
+       "control": 310785,
+       "exponent": 437952,
+       "lane_operand_bus": 126855,
+       "multiplier": 3635862,
+       "operand": 622538,
+       "other": 4508,
+       "result": 140297,
+       "vpu_sequencer": 180214
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2372776,
+       "c_regfile": 220523,
+       "control": 294157,
+       "exponent": 364982,
+       "lane_operand_bus": 51592,
+       "multiplier": 3340380,
+       "operand": 347409,
+       "other": 1742,
+       "result": 78857,
+       "vpu_sequencer": 172918
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2456366,
+       "c_regfile": 220523,
+       "control": 285793,
+       "exponent": 404325,
+       "lane_operand_bus": 294545,
+       "multiplier": 3489288,
+       "operand": 795951,
+       "other": 1742,
+       "result": 332390,
+       "vpu_sequencer": 245882
+      },
+      "by_stage_n": {
+       "adder_norm": 10876,
+       "c_regfile": 7179,
+       "control": 2100,
+       "exponent": 3621,
+       "lane_operand_bus": 2636,
+       "multiplier": 18234,
+       "operand": 3874,
+       "other": 48,
+       "result": 632,
+       "vpu_sequencer": 1256
+      },
+      "ids": 16534736,
+      "n_hier": 45439,
+      "n_hier2": 51957,
+      "n_map": 50456,
+      "name_raw": 34286246,
+      "name_settled": 34286246,
+      "nets_distinct": 5501609,
+      "nets_hier": 7245336,
+      "nets_hier2": 8526805,
+      "nets_map": 8118202,
+      "sample_cycles": 558,
+      "xz": 0
+     }
+    },
+    {
+     "busy": 537.0,
+     "check_mismatch": 0,
+     "check_words": 256,
+     "clock_nets_cov": 760304.0,
+     "cycles": 545.0,
+     "ff": {
+      "all": {
+       "clocked": 7914768.0,
+       "present": 10703158.0,
+       "toggles": 1798608.0
+      },
+      "rest": {
+       "clocked": 788624.0,
+       "present": 2294838.0,
+       "toggles": 214454.0
+      },
+      "txfma": {
+       "clocked": 7126144.0,
+       "present": 8408320.0,
+       "toggles": 1584154.0
+      }
+     },
+     "j": 19,
+     "median_abs_c0": 12.041719436645508,
+     "nets_cov": 45362434.0,
+     "scp_reads": 288.0,
+     "tile": "randn_01.bin",
+     "unit": {
+      "by_stage": {
+       "adder_norm": 2448538,
+       "c_regfile": 0,
+       "control": 314602,
+       "exponent": 457601,
+       "lane_operand_bus": 59688,
+       "multiplier": 3636714,
+       "operand": 586700,
+       "other": 6044,
+       "result": 140595,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2405815,
+       "c_regfile": 0,
+       "control": 299258,
+       "exponent": 376438,
+       "lane_operand_bus": 56988,
+       "multiplier": 3341232,
+       "operand": 296769,
+       "other": 4302,
+       "result": 84697,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2480252,
+       "c_regfile": 0,
+       "control": 287655,
+       "exponent": 421969,
+       "lane_operand_bus": 56988,
+       "multiplier": 3490140,
+       "operand": 818244,
+       "other": 4302,
+       "result": 335204,
+       "vpu_sequencer": 0
+      },
+      "by_stage_n": {
+       "adder_norm": 10988,
+       "c_regfile": 0,
+       "control": 2179,
+       "exponent": 3634,
+       "lane_operand_bus": 264,
+       "multiplier": 18234,
+       "operand": 3095,
+       "other": 96,
+       "result": 632,
+       "vpu_sequencer": 0
+      },
+      "ids": 14784924,
+      "n_hier": 34597,
+      "n_hier2": 39824,
+      "n_map": 39122,
+      "name_raw": 31321320,
+      "name_settled": 31321320,
+      "nets_distinct": 5310423,
+      "nets_hier": 6865499,
+      "nets_hier2": 7894754,
+      "nets_map": 7650482,
+      "sample_cycles": 558,
+      "xz": 0
+     },
+     "uops": 512.0,
+     "valid_slots": 4096.0,
+     "vpu": {
+      "by_stage": {
+       "adder_norm": 2448538,
+       "c_regfile": 224267,
+       "control": 313052,
+       "exponent": 457601,
+       "lane_operand_bus": 127474,
+       "multiplier": 3636714,
+       "operand": 624429,
+       "other": 4508,
+       "result": 140595,
+       "vpu_sequencer": 181432
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2405815,
+       "c_regfile": 224267,
+       "control": 296268,
+       "exponent": 376438,
+       "lane_operand_bus": 52892,
+       "multiplier": 3341232,
+       "operand": 348364,
+       "other": 1742,
+       "result": 84697,
+       "vpu_sequencer": 172878
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2480252,
+       "c_regfile": 224267,
+       "control": 286969,
+       "exponent": 421969,
+       "lane_operand_bus": 295545,
+       "multiplier": 3490140,
+       "operand": 799394,
+       "other": 1742,
+       "result": 335204,
+       "vpu_sequencer": 245842
+      },
+      "by_stage_n": {
+       "adder_norm": 10988,
+       "c_regfile": 7186,
+       "control": 2124,
+       "exponent": 3634,
+       "lane_operand_bus": 2636,
+       "multiplier": 18234,
+       "operand": 3874,
+       "other": 48,
+       "result": 632,
+       "vpu_sequencer": 1256
+      },
+      "ids": 16625554,
+      "n_hier": 45646,
+      "n_hier2": 52147,
+      "n_map": 50612,
+      "name_raw": 34450916,
+      "name_settled": 34450916,
+      "nets_distinct": 5551400,
+      "nets_hier": 7304593,
+      "nets_hier2": 8581324,
+      "nets_map": 8158610,
+      "sample_cycles": 558,
+      "xz": 0
+     }
+    },
+    {
+     "busy": 537.0,
+     "check_mismatch": 0,
+     "check_words": 256,
+     "clock_nets_cov": 760304.0,
+     "cycles": 545.0,
+     "ff": {
+      "all": {
+       "clocked": 7914768.0,
+       "present": 10703158.0,
+       "toggles": 1795688.0
+      },
+      "rest": {
+       "clocked": 788624.0,
+       "present": 2294838.0,
+       "toggles": 213383.0
+      },
+      "txfma": {
+       "clocked": 7126144.0,
+       "present": 8408320.0,
+       "toggles": 1582305.0
+      }
+     },
+     "j": 27,
+     "median_abs_c0": 14.269665718078613,
+     "nets_cov": 45334017.5,
+     "scp_reads": 288.0,
+     "tile": "randn_01.bin",
+     "unit": {
+      "by_stage": {
+       "adder_norm": 2451384,
+       "c_regfile": 0,
+       "control": 315617,
+       "exponent": 459025,
+       "lane_operand_bus": 59576,
+       "multiplier": 3637350,
+       "operand": 587317,
+       "other": 6044,
+       "result": 140300,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2316040,
+       "c_regfile": 0,
+       "control": 298656,
+       "exponent": 376852,
+       "lane_operand_bus": 56828,
+       "multiplier": 3341868,
+       "operand": 297641,
+       "other": 4302,
+       "result": 79532,
+       "vpu_sequencer": 0
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2440336,
+       "c_regfile": 0,
+       "control": 287418,
+       "exponent": 424192,
+       "lane_operand_bus": 56828,
+       "multiplier": 3490776,
+       "operand": 819692,
+       "other": 4302,
+       "result": 335185,
+       "vpu_sequencer": 0
+      },
+      "by_stage_n": {
+       "adder_norm": 10794,
+       "c_regfile": 0,
+       "control": 2136,
+       "exponent": 3611,
+       "lane_operand_bus": 264,
+       "multiplier": 18234,
+       "operand": 3095,
+       "other": 96,
+       "result": 632,
+       "vpu_sequencer": 0
+      },
+      "ids": 14797742,
+      "n_hier": 33963,
+      "n_hier2": 39400,
+      "n_map": 38862,
+      "name_raw": 31351800,
+      "name_settled": 31351800,
+      "nets_distinct": 5236188,
+      "nets_hier": 6771719,
+      "nets_hier2": 7858729,
+      "nets_map": 7656613,
+      "sample_cycles": 558,
+      "xz": 0
+     },
+     "uops": 512.0,
+     "valid_slots": 4096.0,
+     "vpu": {
+      "by_stage": {
+       "adder_norm": 2451384,
+       "c_regfile": 223220,
+       "control": 314067,
+       "exponent": 459025,
+       "lane_operand_bus": 128093,
+       "multiplier": 3637350,
+       "operand": 624685,
+       "other": 4508,
+       "result": 140300,
+       "vpu_sequencer": 181250
+      },
+      "by_stage_hier1": {
+       "adder_norm": 2316040,
+       "c_regfile": 223220,
+       "control": 295666,
+       "exponent": 376852,
+       "lane_operand_bus": 51161,
+       "multiplier": 3341868,
+       "operand": 351225,
+       "other": 1742,
+       "result": 79532,
+       "vpu_sequencer": 172648
+      },
+      "by_stage_hier2": {
+       "adder_norm": 2440336,
+       "c_regfile": 223220,
+       "control": 286732,
+       "exponent": 424192,
+       "lane_operand_bus": 295483,
+       "multiplier": 3490776,
+       "operand": 800842,
+       "other": 1742,
+       "result": 335185,
+       "vpu_sequencer": 245612
+      },
+      "by_stage_n": {
+       "adder_norm": 10794,
+       "c_regfile": 7108,
+       "control": 2081,
+       "exponent": 3611,
+       "lane_operand_bus": 2636,
+       "multiplier": 18234,
+       "operand": 3874,
+       "other": 48,
+       "result": 632,
+       "vpu_sequencer": 1256
+      },
+      "ids": 16637495,
+      "n_hier": 44934,
+      "n_hier2": 51641,
+      "n_map": 50274,
+      "name_raw": 34480811,
+      "name_settled": 34480811,
+      "nets_distinct": 5475249,
+      "nets_hier": 7209954,
+      "nets_hier2": 8544120,
+      "nets_map": 8163882,
+      "sample_cycles": 558,
+      "xz": 0
+     }
+    }
+   ]
+  }
+ },
+ "tsel": [
+  0,
+  1
+ ],
+ "units": "per TensorFMA op on one minion (4,096 multiply-adds in fp32)"
+}

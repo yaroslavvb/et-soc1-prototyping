@@ -1,0 +1,43 @@
+(1) fp32 gemmL1x1x1 (S1) randn at GEMM states, ours / committed (per op unless named):
+    vpu_nets_map                   8164845.2500 /     8164845.2500  ratio 1.000000  (rule)
+    clock_nets_cov                  760304.0000 /      760304.0000  ratio 1.000000  (rule)
+    ff_all_clocked                 7914768.0000 /     7914768.0000  ratio 1.000000  (rule)
+    unit_nets_hier                 6844371.5000 /     6844371.5000  ratio 1.000000
+    unit_nets_map                  7654435.3750 /     7654435.3750  ratio 1.000000
+    ff_all_toggles                 1802746.0625 /     1802746.0625  ratio 1.000000
+    valid_slots                       4096.0000 /        4096.0000  ratio 1.000000
+    cycles                             545.0000 /         545.0000  ratio 1.000000
+    MM1v1_signal_lo_a_MAC            65770.9586 /       65770.9586  ratio 1.000000  (rule)
+    MM1v1_clock_a_MAC                 7387.7195 /        7387.7195  ratio 1.000000  (rule)
+    MM1v1_fin_edges_lo_a_MAC         73158.6780 /       73158.6780  ratio 1.000000  (rule)
+    MM1v1_fin_edges_hi_a_MAC        110755.9524 /      110755.9524  ratio 1.000000  (rule)
+    points 8 / 8, same tiles and depths True, check mismatches (ours) 0
+(2) int8.full at the launch points [157232, 471698, 786163], ours / committed (per op unless named):
+    vpu_nets_map                            743334.3333 /      743334.3333  ratio 1.000000  (rule)
+    clock_nets_cov                          177058.0000 /      177058.0000  ratio 1.000000  (rule)
+    ff_all_clocked                          767971.0000 /      767971.0000  ratio 1.000000  (rule)
+    unit_nets_hier                          583617.6667 /      583617.6667  ratio 1.000000
+    unit_nets_map                           583617.6667 /      583617.6667  ratio 1.000000
+    ff_all_toggles                          126698.0000 /      126698.0000  ratio 1.000000
+    valid_slots                               4096.0000 /        4096.0000  ratio 1.000000
+    cycles                                     317.0000 /         317.0000  ratio 1.000000
+    table_signal_lo_zero_delay_a_op       24526205.0374 /    24526205.0000  ratio 1.000000  (rule)
+    table_signal_hi_timed_a_op            38546351.2346 /    38546351.0000  ratio 1.000000  (rule)
+    table_clock_a_op                       7046908.4000 /     7046908.0000  ratio 1.000000  (rule)
+    table_register_bits_clocked_a_MAC           46.8732 /          46.8700  ratio 1.000069  (rule)
+    check mismatches ours 0, committed 0
+(2) fp16.randn at the launch points [91575, 274725, 457875], ours / committed (per op unless named):
+    vpu_nets_map                           6590054.6667 /     6590310.6667  ratio 0.999961  (rule)
+    clock_nets_cov                          760304.0000 /      760304.0000  ratio 1.000000  (rule)
+    ff_all_clocked                         7906576.0000 /     7906576.0000  ratio 1.000000  (rule)
+    unit_nets_hier                         4754738.3333 /     4756274.3333  ratio 0.999677
+    unit_nets_map                          6113927.0000 /     6115463.0000  ratio 0.999749
+    ff_all_toggles                         1541112.1667 /     1541112.1667  ratio 1.000000
+    valid_slots                               4096.0000 /        4096.0000  ratio 1.000000
+    cycles                                     545.0000 /         545.0000  ratio 1.000000
+    table_signal_lo_zero_delay_a_op      217437867.0734 /   217446314.0000  ratio 0.999961  (rule)
+    table_signal_hi_timed_a_op           341733928.3893 /   341747204.0000  ratio 0.999961  (rule)
+    table_clock_a_op                      30260099.2000 /    30260099.0000  ratio 1.000000  (rule)
+    table_register_bits_clocked_a_MAC          965.1582 /         965.1600  ratio 0.999998  (rule)
+    check mismatches ours 0, committed 0
+VERDICT: MATCH (every rule ratio within 0.999-1.001, every check 0 or as committed)

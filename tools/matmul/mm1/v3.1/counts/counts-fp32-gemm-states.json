@@ -1,0 +1,934 @@
+{
+ "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+ "definition": "fin edges a MAC = (VPU nets_map x k_sig + clock-net toggles x k_clk) / 4096; k from MM1-v1 inputs/switch_table.json fp32.randn",
+ "driver": "tools/claims-v3/e210/desk/count_e210.py (E210's committed driver, unchanged): S1 j 3, 11, 19, 27 tiles 0, 1; S2 j 15, 47, 79, 111 tile 2; a pool of fewer than 3 files is measured at every file (real:blind4 at S2: tiles 2 and 3, both files)",
+ "fix": {
+  "by": "fix-v31counts (Q217), Wed 18 Nov 2026",
+  "changed": [
+   "shapes.S2.real:blind4 (8 points, both files; was 4 points, file 0 only)",
+   "note on real:blind4 S1 and S2 and on e37 S1 and S2"
+  ],
+  "superseded_land_SHA256SUMS_sha256": "76ad5d9719b173e47f0b090e819bae277b45dde60562a8042892a42d45e89c10"
+ },
+ "k_clk": 39.79999973694733,
+ "k_sig_hi": 51.85600819389694,
+ "k_sig_lo": 32.994850236933864,
+ "problems": [],
+ "python": "3.12.3",
+ "shapes": {
+  "S1": {
+   "designed:blind3 a_colconst_b_randn": {
+    "S_signal_lo_per_op": 244823174.54175922,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 101326.62542750474,
+    "fin_edges_lo": 67159.00232953107,
+    "gen": "tiles (one pair repeated)",
+    "group": "E207 designed tile (blind3)",
+    "key": "fp32.e207.blind3_a_colconst_b_randn",
+    "minus_randn_hi": -9429.327010459252,
+    "minus_randn_lo": -5999.675705500878,
+    "mm1_v3_kind": "designed:blind3 a_colconst_b_randn",
+    "n_points": 4,
+    "signal_hi": 93938.90594508286,
+    "signal_lo": 59771.282847109185,
+    "tiles": [
+     "a_colconst_b_randn.bin"
+    ],
+    "tiles_sha256": {
+     "a_colconst_b_randn.bin": "d6e283259e0dbe08364d5ba7db9018b41b341ce93850f4d787564f1daec28c2b"
+    },
+    "unit_nets_hier": 1350.0223388671875,
+    "unit_nets_map": 1701.30908203125,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1811.53369140625,
+    "vpu_nets_map_min_max": [
+     1803.89453125,
+     1826.04931640625
+    ]
+   },
+   "e37": {
+    "S_signal_lo_per_op": 69347244.06090929,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 33996.328939355895,
+    "fin_edges_lo": 24318.198989479806,
+    "gen": "gen e37: rgm136's drawTile, +-1 and +-2 (61 desk pairs, seed 'E210-desk|e37|fp32')",
+    "group": "E207 generator kind (e37)",
+    "key": "fp32.e207.e37",
+    "minus_randn_hi": -76759.6234986081,
+    "minus_randn_lo": -48840.47904555214,
+    "mm1_v3_kind": "e37",
+    "n_points": 8,
+    "note": "desk pool = 61 pure e37 pairs (+-1, +-2). The card's e37 pools (E207 b42 gemmL1x3x2 and b43 gemmL3x5x5, both KB >= 2, so S2) also hold tools/claims-v3/kinds/tiles/fp32/randn.bin as pair 0 (rgm136's fillPools copies files[0] as tile 0 of the A and B pools and repeats a pool after 8,192 distinct tiles, so in b43 every 8,192nd tile), and the C tiles that pair feeds carry random values from then on: NOT counted in this row. Bound (post hoc, desk; S2 tile 2 j 47, counted by E210's count_e210.py and by verify-v31counts' own driver, equal on every quantity; e37-randn-pair0-bound.json): an op whose C began with a randn product counts 31,728 against 24,460 fin edges lo a MAC (+29.7%); about 2.5-2.6% of b42's and b43's op-steps are affected (the verifier's layout estimates), so the S2 row would rise by about +182 to +188 fin edges lo a MAC (+0.74% to +0.77%). No E207 e37 run reads the S1 row",
+    "signal_hi": 26608.609456934024,
+    "signal_lo": 16930.47950705793,
+    "tiles": "61 desk tiles",
+    "tiles_measured": [
+     "e37_00.bin",
+     "e37_01.bin"
+    ],
+    "tiles_sha256": {
+     "list_sha256 (work/dsk/tiles-made.sha256)": "02dcec553cb8fe3d619eb01c5aaf14868503338dfc04e1f372ac1eca8715d799"
+    },
+    "unit_nets_hier": 324.7701110839844,
+    "unit_nets_map": 465.21746826171875,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 513.1249084472656,
+    "vpu_nets_map_min_max": [
+     497.1298828125,
+     523.514404296875
+    ]
+   },
+   "pattern:bf16trunc": {
+    "S_signal_lo_per_op": 146147455.62917534,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 63464.64975733972,
+    "fin_edges_lo": 43068.25064188851,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.bf16trunc",
+    "minus_randn_hi": -47291.30268062427,
+    "minus_randn_lo": -30090.427393143436,
+    "mm1_v3_kind": "pattern:bf16trunc",
+    "n_points": 4,
+    "signal_hi": 56076.930274917846,
+    "signal_lo": 35680.531159466635,
+    "tiles": [
+     "bf16trunc.bin"
+    ],
+    "tiles_sha256": {
+     "bf16trunc.bin": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1"
+    },
+    "unit_nets_hier": 800.4412841796875,
+    "unit_nets_map": 985.5712890625,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1081.39697265625,
+    "vpu_nets_map_min_max": [
+     1073.874755859375,
+     1090.2587890625
+    ]
+   },
+   "pattern:den16": {
+    "S_signal_lo_per_op": 161246979.67894152,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 69258.35279293434,
+    "fin_edges_lo": 46754.65788060096,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.den16",
+    "minus_randn_hi": -41497.59964502965,
+    "minus_randn_lo": -26404.02015443099,
+    "mm1_v3_kind": "pattern:den16",
+    "n_points": 4,
+    "signal_hi": 61870.63331051247,
+    "signal_lo": 39366.93839817908,
+    "tiles": [
+     "den16.bin"
+    ],
+    "tiles_sha256": {
+     "den16.bin": "0c2a722e56124ad5e0a04d9c26391bc53678443feebaf37c89655e7e6401dcbc"
+    },
+    "unit_nets_hier": 311.5791015625,
+    "unit_nets_map": 1086.3248901367188,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1193.1237182617188,
+    "vpu_nets_map_min_max": [
+     1102.640625,
+     1335.828125
+    ]
+   },
+   "pattern:den21": {
+    "S_signal_lo_per_op": 197233472.9868582,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 83066.40759196696,
+    "fin_edges_lo": 55540.42284835405,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.den21",
+    "minus_randn_hi": -27689.544845997036,
+    "minus_randn_lo": -17618.255186677896,
+    "mm1_v3_kind": "pattern:den21",
+    "n_points": 4,
+    "signal_hi": 75678.68810954508,
+    "signal_lo": 48152.703365932175,
+    "tiles": [
+     "den21.bin"
+    ],
+    "tiles_sha256": {
+     "den21.bin": "910cb88e2f133cf3aece6e08738d49ad35aef3c4b592438d1f040e92fcdaa502"
+    },
+    "unit_nets_hier": 354.21923828125,
+    "unit_nets_map": 1337.5236206054688,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1459.4005737304688,
+    "vpu_nets_map_min_max": [
+     1394.74609375,
+     1583.4296875
+    ]
+   },
+   "pattern:den4": {
+    "S_signal_lo_per_op": 68183684.79166009,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 33549.8700411731,
+    "fin_edges_lo": 24034.126902260763,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.den4",
+    "minus_randn_hi": -77206.0823967909,
+    "minus_randn_lo": -49124.55113277119,
+    "mm1_v3_kind": "pattern:den4",
+    "n_points": 4,
+    "signal_hi": 26162.150558751222,
+    "signal_lo": 16646.407419838888,
+    "tiles": [
+     "den4.bin"
+    ],
+    "tiles_sha256": {
+     "den4.bin": "61b74a52ddb9f346339700f8153117d4f6c5bea362121d80d24ecc74b56270da"
+    },
+    "unit_nets_hier": 174.7646484375,
+    "unit_nets_map": 449.24188232421875,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 504.51531982421875,
+    "vpu_nets_map_min_max": [
+     425.08203125,
+     641.060546875
+    ]
+   },
+   "pattern:den8": {
+    "S_signal_lo_per_op": 98042902.43117718,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 45006.88281246171,
+    "fin_edges_lo": 31323.974958783492,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.den8",
+    "minus_randn_hi": -65749.06962550228,
+    "minus_randn_lo": -41834.70307624845,
+    "mm1_v3_kind": "pattern:den8",
+    "n_points": 4,
+    "signal_hi": 37619.16333003983,
+    "signal_lo": 23936.255476361617,
+    "tiles": [
+     "den8.bin"
+    ],
+    "tiles_sha256": {
+     "den8.bin": "b85d9cbf2ef36ccb785f0abb10510b6d8a1bca3c020c5b6d7cbd7ec81a081181"
+    },
+    "unit_nets_hier": 232.89501953125,
+    "unit_nets_map": 654.5143432617188,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 725.4542846679688,
+    "vpu_nets_map_min_max": [
+     644.962890625,
+     867.92578125
+    ]
+   },
+   "pattern:fld_mant": {
+    "S_signal_lo_per_op": 236802299.67212436,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 98249.00742264798,
+    "fin_edges_lo": 65200.78092581161,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.fld_mant",
+    "minus_randn_hi": -12506.945015316014,
+    "minus_randn_lo": -7957.897109220336,
+    "mm1_v3_kind": "pattern:fld_mant",
+    "n_points": 4,
+    "signal_hi": 90861.2879402261,
+    "signal_lo": 57813.061443389735,
+    "tiles": [
+     "fld_mant.bin"
+    ],
+    "tiles_sha256": {
+     "fld_mant.bin": "6eaff4fcfdfeb18297bce527b1bcace44b10bb27899b85d038394def5bde5cc9"
+    },
+    "unit_nets_hier": 1228.60009765625,
+    "unit_nets_map": 1646.89599609375,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1752.1843872070312,
+    "vpu_nets_map_min_max": [
+     1738.19189453125,
+     1779.7509765625
+    ]
+   },
+   "pattern:fld_sign": {
+    "S_signal_lo_per_op": 57305728.09902119,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 29375.986778131788,
+    "fin_edges_lo": 21378.37575659697,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.fld_sign",
+    "minus_randn_hi": -81379.9656598322,
+    "minus_randn_lo": -51780.302278434974,
+    "mm1_v3_kind": "pattern:fld_sign",
+    "n_points": 4,
+    "signal_hi": 21988.267295709913,
+    "signal_lo": 13990.656274175095,
+    "tiles": [
+     "fld_sign.bin"
+    ],
+    "tiles_sha256": {
+     "fld_sign.bin": "9ed8277e4ae3e6cfd9593cb851af01cca5cd6cb4bb92bfc1bff7d15cba4c2560"
+    },
+    "unit_nets_hier": 265.73687744140625,
+    "unit_nets_map": 388.5028076171875,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 424.02545166015625,
+    "vpu_nets_map_min_max": [
+     418.78173828125,
+     433.51953125
+    ]
+   },
+   "pattern:fp16grid": {
+    "S_signal_lo_per_op": 174882068.5445042,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 74490.15052977997,
+    "fin_edges_lo": 50083.53699816997,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.fp16grid",
+    "minus_randn_hi": -36265.80190818402,
+    "minus_randn_lo": -23075.141036861976,
+    "mm1_v3_kind": "pattern:fp16grid",
+    "n_points": 4,
+    "signal_hi": 67102.4310473581,
+    "signal_lo": 42695.817515748095,
+    "tiles": [
+     "fp16grid.bin"
+    ],
+    "tiles_sha256": {
+     "fp16grid.bin": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f"
+    },
+    "unit_nets_hier": 1003.2499389648438,
+    "unit_nets_map": 1192.0636596679688,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1294.0145874023438,
+    "vpu_nets_map_min_max": [
+     1286.8515625,
+     1303.56298828125
+    ]
+   },
+   "pattern:lanes2": {
+    "S_signal_lo_per_op": 26726241.127544392,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 17642.605917275134,
+    "fin_edges_lo": 13912.680695201267,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.lanes2",
+    "minus_randn_hi": -93113.34652068885,
+    "minus_randn_lo": -59245.997339830676,
+    "mm1_v3_kind": "pattern:lanes2",
+    "n_points": 4,
+    "signal_hi": 10254.886434853259,
+    "signal_lo": 6524.961212779393,
+    "tiles": [
+     "lanes2.bin"
+    ],
+    "tiles_sha256": {
+     "lanes2.bin": "d18492bd7a6d3f9a1dc564741de24a17fd04764ffbdc4e6c3c3a9695323f852f"
+    },
+    "unit_nets_hier": 60.5814208984375,
+    "unit_nets_map": 166.9036865234375,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 197.7569580078125,
+    "vpu_nets_map_min_max": [
+     177.3095703125,
+     233.970703125
+    ]
+   },
+   "pattern:pow2": {
+    "S_signal_lo_per_op": 81333988.57140405,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 38595.65523788424,
+    "fin_edges_lo": 27244.650285987318,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.pow2",
+    "minus_randn_hi": -72160.29720007975,
+    "minus_randn_lo": -45914.02774904463,
+    "mm1_v3_kind": "pattern:pow2",
+    "n_points": 4,
+    "signal_hi": 31207.935755462364,
+    "signal_lo": 19856.930803565443,
+    "tiles": [
+     "pow2.bin"
+    ],
+    "tiles_sha256": {
+     "pow2.bin": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca"
+    },
+    "unit_nets_hier": 377.0096435546875,
+    "unit_nets_map": 516.9197387695312,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 601.819091796875,
+    "vpu_nets_map_min_max": [
+     581.909912109375,
+     619.68505859375
+    ]
+   },
+   "real:blind4": {
+    "S_signal_lo_per_op": 161144307.95371675,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S1, KB = 1)",
+    "fin_edges_hi": 69218.95754549847,
+    "fin_edges_lo": 46729.591541434755,
+    "gen": "tiles (the pool cycles the two pairs)",
+    "group": "E207 real tiles (blind4)",
+    "key": "fp32.e207.real_blind4",
+    "minus_randn_hi": -41536.99489246552,
+    "minus_randn_lo": -26429.08649359719,
+    "mm1_v3_kind": "real:blind4",
+    "n_points": 8,
+    "note": "both files of E207's two-file pool measured (tiles 0 and 1, 8 points), as the rule asks: a pool of fewer than 3 files is measured at every file",
+    "signal_hi": 61831.23806307659,
+    "signal_lo": 39341.87205901288,
+    "tiles": [
+     "fp32.real_pythia_embed_qkv.bin",
+     "fp32.real_qwen_q_down.bin"
+    ],
+    "tiles_measured": [
+     "fp32.real_pythia_embed_qkv.bin",
+     "fp32.real_qwen_q_down.bin"
+    ],
+    "tiles_sha256": {
+     "fp32.real_pythia_embed_qkv.bin": "964235353646465858567706933edea3f8019afd7bc19136315058a575bf005a",
+     "fp32.real_qwen_q_down.bin": "67cb6ae7071a69769395b5d6befe16b8dd7d6bba942ef66f83a396d89d21fb80"
+    },
+    "unit_nets_hier": 927.4779968261719,
+    "unit_nets_map": 1092.8583374023438,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1192.364013671875,
+    "vpu_nets_map_min_max": [
+     1082.188232421875,
+     1303.821044921875
+    ]
+   }
+  },
+  "S2": {
+   "designed:blind3 a_colconst_b_randn": {
+    "S_signal_lo_per_op": 243176888.24047485,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 100694.94366655832,
+    "fin_edges_lo": 66757.07696300655,
+    "gen": "tiles (one pair repeated)",
+    "group": "E207 designed tile (blind3)",
+    "key": "fp32.e207.blind3_a_colconst_b_randn",
+    "minus_randn_hi": -9200.795328840584,
+    "minus_randn_lo": -5854.265966648483,
+    "mm1_v3_kind": "designed:blind3 a_colconst_b_randn",
+    "n_points": 4,
+    "signal_hi": 93307.22418413644,
+    "signal_lo": 59369.35748058468,
+    "tiles": [
+     "a_colconst_b_randn.bin"
+    ],
+    "tiles_sha256": {
+     "a_colconst_b_randn.bin": "d6e283259e0dbe08364d5ba7db9018b41b341ce93850f4d787564f1daec28c2b"
+    },
+    "unit_nets_hier": 1318.7606811523438,
+    "unit_nets_map": 1690.9707641601562,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1799.3522338867188,
+    "vpu_nets_map_min_max": [
+     1779.976318359375,
+     1816.103271484375
+    ]
+   },
+   "e37": {
+    "S_signal_lo_per_op": 69649992.43361455,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 34112.493803902806,
+    "fin_edges_lo": 24392.112166409803,
+    "gen": "gen e37: rgm136's drawTile, +-1 and +-2 (61 desk pairs, seed 'E210-desk|e37|fp32')",
+    "group": "E207 generator kind (e37)",
+    "key": "fp32.e207.e37",
+    "minus_randn_hi": -75783.2451914961,
+    "minus_randn_lo": -48219.23076324523,
+    "mm1_v3_kind": "e37",
+    "n_points": 4,
+    "note": "desk pool = 61 pure e37 pairs (+-1, +-2). The card's e37 pools (E207 b42 gemmL1x3x2 and b43 gemmL3x5x5, both KB >= 2, so S2) also hold tools/claims-v3/kinds/tiles/fp32/randn.bin as pair 0 (rgm136's fillPools copies files[0] as tile 0 of the A and B pools and repeats a pool after 8,192 distinct tiles, so in b43 every 8,192nd tile), and the C tiles that pair feeds carry random values from then on: NOT counted in this row. Bound (post hoc, desk; S2 tile 2 j 47, counted by E210's count_e210.py and by verify-v31counts' own driver, equal on every quantity; e37-randn-pair0-bound.json): an op whose C began with a randn product counts 31,728 against 24,460 fin edges lo a MAC (+29.7%); about 2.5-2.6% of b42's and b43's op-steps are affected (the verifier's layout estimates), so the S2 row would rise by about +182 to +188 fin edges lo a MAC (+0.74% to +0.77%). No E207 e37 run reads the S1 row",
+    "signal_hi": 26724.77432148093,
+    "signal_lo": 17004.392683987928,
+    "tiles": "61 desk tiles",
+    "tiles_measured": [
+     "e37_02.bin"
+    ],
+    "tiles_sha256": {
+     "list_sha256 (work/dsk/tiles-made.sha256)": "02dcec553cb8fe3d619eb01c5aaf14868503338dfc04e1f372ac1eca8715d799"
+    },
+    "unit_nets_hier": 326.35321044921875,
+    "unit_nets_map": 466.18408203125,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 515.3650512695312,
+    "vpu_nets_map_min_max": [
+     508.907470703125,
+     521.534912109375
+    ]
+   },
+   "pattern:bf16trunc": {
+    "S_signal_lo_per_op": 146178693.50363714,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 63476.63576216334,
+    "fin_edges_lo": 43075.877076083285,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.bf16trunc",
+    "minus_randn_hi": -46419.10323323556,
+    "minus_randn_lo": -29535.465853571746,
+    "mm1_v3_kind": "pattern:bf16trunc",
+    "n_points": 4,
+    "signal_hi": 56088.91627974147,
+    "signal_lo": 35688.15759366141,
+    "tiles": [
+     "bf16trunc.bin"
+    ],
+    "tiles_sha256": {
+     "bf16trunc.bin": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1"
+    },
+    "unit_nets_hier": 755.363525390625,
+    "unit_nets_map": 986.4872436523438,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1081.6281127929688,
+    "vpu_nets_map_min_max": [
+     1076.284423828125,
+     1090.237548828125
+    ]
+   },
+   "pattern:den16": {
+    "S_signal_lo_per_op": 159390466.68937254,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 68546.00683369511,
+    "fin_edges_lo": 46301.40763900697,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.den16",
+    "minus_randn_hi": -41349.732161703796,
+    "minus_randn_lo": -26309.935290648064,
+    "mm1_v3_kind": "pattern:den16",
+    "n_points": 4,
+    "signal_hi": 61158.287351273226,
+    "signal_lo": 38913.68815658509,
+    "tiles": [
+     "den16.bin"
+    ],
+    "tiles_sha256": {
+     "den16.bin": "0c2a722e56124ad5e0a04d9c26391bc53678443feebaf37c89655e7e6401dcbc"
+    },
+    "unit_nets_hier": 292.453125,
+    "unit_nets_map": 1077.0966796875,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1179.38671875,
+    "vpu_nets_map_min_max": [
+     1113.0234375,
+     1306.99609375
+    ]
+   },
+   "pattern:den21": {
+    "S_signal_lo_per_op": 192510565.3778058,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 81254.22304487698,
+    "fin_edges_lo": 54387.369232862744,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.den21",
+    "minus_randn_hi": -28641.51595052192,
+    "minus_randn_lo": -18223.973696792287,
+    "mm1_v3_kind": "pattern:den21",
+    "n_points": 4,
+    "signal_hi": 73866.50356245511,
+    "signal_lo": 46999.64975044087,
+    "tiles": [
+     "den21.bin"
+    ],
+    "tiles_sha256": {
+     "den21.bin": "910cb88e2f133cf3aece6e08738d49ad35aef3c4b592438d1f040e92fcdaa502"
+    },
+    "unit_nets_hier": 342.1455078125,
+    "unit_nets_map": 1311.0703125,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1424.4541015625,
+    "vpu_nets_map_min_max": [
+     1379.25,
+     1507.46484375
+    ]
+   },
+   "pattern:den4": {
+    "S_signal_lo_per_op": 69972640.82536896,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 34236.29432639452,
+    "fin_edges_lo": 24470.883746427968,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.den4",
+    "minus_randn_hi": -75659.44466900438,
+    "minus_randn_lo": -48140.45918322707,
+    "mm1_v3_kind": "pattern:den4",
+    "n_points": 4,
+    "signal_hi": 26848.574843972645,
+    "signal_lo": 17083.164264006093,
+    "tiles": [
+     "den4.bin"
+    ],
+    "tiles_sha256": {
+     "den4.bin": "61b74a52ddb9f346339700f8153117d4f6c5bea362121d80d24ecc74b56270da"
+    },
+    "unit_nets_hier": 175.8681640625,
+    "unit_nets_map": 460.93603515625,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 517.75244140625,
+    "vpu_nets_map_min_max": [
+     439.4453125,
+     621.029296875
+    ]
+   },
+   "pattern:den8": {
+    "S_signal_lo_per_op": 101809437.80868693,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 46452.10634258288,
+    "fin_edges_lo": 32243.53925993333,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.den8",
+    "minus_randn_hi": -63443.63265281602,
+    "minus_randn_lo": -40367.8036697217,
+    "mm1_v3_kind": "pattern:den8",
+    "n_points": 4,
+    "signal_hi": 39064.38686016101,
+    "signal_lo": 24855.819777511457,
+    "tiles": [
+     "den8.bin"
+    ],
+    "tiles_sha256": {
+     "den8.bin": "b85d9cbf2ef36ccb785f0abb10510b6d8a1bca3c020c5b6d7cbd7ec81a081181"
+    },
+    "unit_nets_hier": 235.17041015625,
+    "unit_nets_map": 677.49072265625,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 753.32421875,
+    "vpu_nets_map_min_max": [
+     674.75,
+     894.91796875
+    ]
+   },
+   "pattern:fld_mant": {
+    "S_signal_lo_per_op": 235547398.28435048,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 97767.50045886856,
+    "fin_edges_lo": 64894.40851668713,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.fld_mant",
+    "minus_randn_hi": -12128.238536530349,
+    "minus_randn_lo": -7716.934412967901,
+    "mm1_v3_kind": "pattern:fld_mant",
+    "n_points": 4,
+    "signal_hi": 90379.78097644668,
+    "signal_lo": 57506.689034265255,
+    "tiles": [
+     "fld_mant.bin"
+    ],
+    "tiles_sha256": {
+     "fld_mant.bin": "6eaff4fcfdfeb18297bce527b1bcace44b10bb27899b85d038394def5bde5cc9"
+    },
+    "unit_nets_hier": 1210.9239501953125,
+    "unit_nets_map": 1638.756591796875,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1742.89892578125,
+    "vpu_nets_map_min_max": [
+     1728.090576171875,
+     1775.660400390625
+    ]
+   },
+   "pattern:fld_sign": {
+    "S_signal_lo_per_op": 59585944.45790777,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 30250.908159544357,
+    "fin_edges_lo": 21935.069203590763,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.fld_sign",
+    "minus_randn_hi": -79644.83083585455,
+    "minus_randn_lo": -50676.27372606427,
+    "mm1_v3_kind": "pattern:fld_sign",
+    "n_points": 4,
+    "signal_hi": 22863.18867712248,
+    "signal_lo": 14547.34972116889,
+    "tiles": [
+     "fld_sign.bin"
+    ],
+    "tiles_sha256": {
+     "fld_sign.bin": "9ed8277e4ae3e6cfd9593cb851af01cca5cd6cb4bb92bfc1bff7d15cba4c2560"
+    },
+    "unit_nets_hier": 278.86114501953125,
+    "unit_nets_map": 402.88165283203125,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 440.8975830078125,
+    "vpu_nets_map_min_max": [
+     428.81396484375,
+     453.418212890625
+    ]
+   },
+   "pattern:fp16grid": {
+    "S_signal_lo_per_op": 174584389.00566658,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 74375.9305820443,
+    "fin_edges_lo": 50010.86132950844,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.fp16grid",
+    "minus_randn_hi": -35519.80841335461,
+    "minus_randn_lo": -22600.481600146588,
+    "mm1_v3_kind": "pattern:fp16grid",
+    "n_points": 4,
+    "signal_hi": 66988.21109962242,
+    "signal_lo": 42623.14184708657,
+    "tiles": [
+     "fp16grid.bin"
+    ],
+    "tiles_sha256": {
+     "fp16grid.bin": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f"
+    },
+    "unit_nets_hier": 961.9735717773438,
+    "unit_nets_map": 1191.1099853515625,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1291.8119506835938,
+    "vpu_nets_map_min_max": [
+     1286.13916015625,
+     1299.380859375
+    ]
+   },
+   "pattern:lanes2": {
+    "S_signal_lo_per_op": 27659995.38924962,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 18000.88839576324,
+    "fin_edges_lo": 14140.648044250396,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.lanes2",
+    "minus_randn_hi": -91894.85059963567,
+    "minus_randn_lo": -58470.694885404635,
+    "mm1_v3_kind": "pattern:lanes2",
+    "n_points": 4,
+    "signal_hi": 10613.168913341364,
+    "signal_lo": 6752.92856182852,
+    "tiles": [
+     "lanes2.bin"
+    ],
+    "tiles_sha256": {
+     "lanes2.bin": "d18492bd7a6d3f9a1dc564741de24a17fd04764ffbdc4e6c3c3a9695323f852f"
+    },
+    "unit_nets_hier": 61.196044921875,
+    "unit_nets_map": 172.6685791015625,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 204.6661376953125,
+    "vpu_nets_map_min_max": [
+     185.01123046875,
+     240.3212890625
+    ]
+   },
+   "pattern:pow2": {
+    "S_signal_lo_per_op": 81996129.22595885,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "v31-counts' desk counts at GEMM states (S2, KB >= 2)",
+    "fin_edges_hi": 38849.71929365453,
+    "fin_edges_lo": 27406.305719228236,
+    "gen": "tiles (one pair repeated)",
+    "group": "E212 plan tile",
+    "key": "fp32.e212.pow2",
+    "minus_randn_hi": -71046.01970174437,
+    "minus_randn_lo": -45205.037210426795,
+    "mm1_v3_kind": "pattern:pow2",
+    "n_points": 4,
+    "signal_hi": 31461.999811232658,
+    "signal_lo": 20018.58623680636,
+    "tiles": [
+     "pow2.bin"
+    ],
+    "tiles_sha256": {
+     "pow2.bin": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca"
+    },
+    "unit_nets_hier": 370.72894287109375,
+    "unit_nets_map": 522.1416625976562,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 606.718505859375,
+    "vpu_nets_map_min_max": [
+     601.307861328125,
+     614.9013671875
+    ]
+   },
+   "real:blind4": {
+    "S_signal_lo_per_op": 161478694.26344296,
+    "check_mismatch_max": 0,
+    "clock": 7387.719482421875,
+    "clock_nets": 185.62109375,
+    "clocked_bits": 1932.31640625,
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210, MM1-v1 units)",
+    "counts_source": "fix-v31counts' desk re-count at GEMM states (S2, KB >= 2; both files of the pool)",
+    "fin_edges_hi": 69347.26191928779,
+    "fin_edges_lo": 46811.228824082755,
+    "gen": "tiles (the pool cycles the two pairs)",
+    "group": "E207 real tiles (blind4)",
+    "key": "fp32.e207.real_blind4",
+    "minus_randn_hi": -40548.477076111114,
+    "minus_randn_lo": -25800.114105572276,
+    "mm1_v3_kind": "real:blind4",
+    "n_points": 8,
+    "note": "both files of E207's two-file pool measured (8 points: count_e210.py --tsel 2,3, tile 2 mod 2 = file 0 pythia_embed_qkv, tile 3 mod 2 = file 1 qwen_q_down; fix-v31counts' re-count, raw/recount-fp32-S2-real_blind4.json): the rule, a pool of fewer than 3 files is measured at every file. v31-counts' first row (land SHA256SUMS 76ad5d97...) read tile 2 only, i.e. file 0 alone: 50,378.5 fin edges lo a MAC, +7.62% (S +9.05%) over this row; superseded",
+    "signal_hi": 61959.542436865915,
+    "signal_lo": 39423.50934166088,
+    "tiles": [
+     "fp32.real_pythia_embed_qkv.bin",
+     "fp32.real_qwen_q_down.bin"
+    ],
+    "tiles_measured": [
+     "fp32.real_pythia_embed_qkv.bin",
+     "fp32.real_qwen_q_down.bin"
+    ],
+    "tiles_sha256": {
+     "fp32.real_pythia_embed_qkv.bin": "964235353646465858567706933edea3f8019afd7bc19136315058a575bf005a",
+     "fp32.real_qwen_q_down.bin": "67cb6ae7071a69769395b5d6befe16b8dd7d6bba942ef66f83a396d89d21fb80"
+    },
+    "unit_nets_hier": 896.6478576660156,
+    "unit_nets_map": 1096.1326599121094,
+    "valid_slots": 1.0,
+    "vpu_nets_map": 1194.8382568359375,
+    "vpu_nets_map_min_max": [
+     1083.724853515625,
+     1305.454345703125
+    ]
+   }
+  }
+ },
+ "sources": {
+  "bench": "rtl-sim/fma_toggle_v2 at GitHub main 6efdb002 (vpu_top, -fno-dfg; Verilator 5.042; the Makefile copy -j 10 -> -j 2)",
+  "bench_sources_manifest_sha256": "878184cd66f32bb0d4b5346859fc1355faaee94048e1dd73b27470b9e24bd42f",
+  "core_et": "b38a1a31 (rtl, dv/inc, extern copied)",
+  "core_et_manifest_sha256": "36971f3abc1153834952982011b54bc820977e8a0e08143205f12481747752fc"
+ },
+ "what": "v31-counts (Q217) desk switch counts (MM1-v1 units) at GEMM accumulator states for fp32 kinds with no committed count; desk inputs, not measurements; rebuilt by fix-v31counts with the S2 row of real:blind4 measured at both of its files"
+}

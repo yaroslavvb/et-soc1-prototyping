@@ -1,0 +1,32 @@
+{
+ "G4_identical_to_v31counts_published_point_e37_02_j47": true,
+ "G4_pure_e37_fin_edges_lo_a_MAC": 24460.403692678396,
+ "G4_quantities_equal_to_verify_v31counts_driver": "11/11",
+ "G7_quantities_equal_to_verify_v31counts_driver": "11/11",
+ "G7_randn_A_first_fin_edges_lo_a_MAC": 31728.026946514674,
+ "affected_share_of_op_steps (verify-v31counts layout estimates, quoted)": {
+  "b42 gemmL1x3x2: one randn pair in pools of A 4,096 and B 6,144 tiles; 159 of 6,144 C tiles from their first op": 0.02587890625,
+  "b43 gemmL3x5x5: pools of 8,192 repeat, four randn A and four randn B tiles; about 2.5% of op-steps, layout-dependent": 0.025
+ },
+ "difference": 7267.623253836278,
+ "driver": "tools/claims-v3/e210/desk/count_e210.py (E210's committed driver, unchanged), on v31-counts' binary and maps",
+ "e37_S2_row_fin_edges_lo": 24392.112166409803,
+ "effect_on_the_e37_S2_row": {
+  "b42": {
+   "fin_edges_lo_a_MAC": 188.078140846349,
+   "relative": 0.007710613150809876
+  },
+  "b43": {
+   "fin_edges_lo_a_MAC": 181.69058134590696,
+   "relative": 0.0074487432702163335
+  }
+ },
+ "not_counted": "the e37 rows stay pure-e37 counts; a mixture row would need each arm's layout share, which is v3.1's to declare",
+ "relative": 0.29711787855781213,
+ "sources": {
+  "verifier_G7_minus_G4": 7267.623253836278,
+  "verify-v31counts work/compare.json sha256": "148642d2789c4385046f1e03e7651a383630808cce4bc9e7be87253de101d2aa",
+  "verify-v31counts work/counts/mine.json sha256": "61aa05f63b7348a2053ec1b1108fc3130292791ac5befa7f3c29242fde430e93"
+ },
+ "what": "fp32 e37: the card's pools (E207 b42 gemmL1x3x2 and b43 gemmL3x5x5) hold randn.bin as pair 0, which the desk pool (61 pure e37 pairs) leaves out; the effect of one randn product at the start of a C tile's accumulation, counted at S2 tile 2 j 47 (post hoc, desk)"
+}

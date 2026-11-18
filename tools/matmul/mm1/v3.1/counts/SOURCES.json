@@ -1,0 +1,610 @@
+{
+ "bench": {
+  "equal_to_lab_working_tree": true,
+  "files_sha256": {
+   "Makefile": "f9dc72c38cb19ef4a33610f87aa2c4c728c763b3d1d38ba2e866afffa49252e2",
+   "README.md": "86aec606d56415930f659fb28ef5b0314748e70982742a24f5f4c2ed3de07575",
+   "README.md.dated-note-1.md": "6cf0bbb45122c1392045a1d280a1c8dc0b9338cd245e725e2283ee41a2fa3bdd",
+   "acct.cpp": "2e00d7aeb9fc87ae3490305a301ba071792aff5d3b6b02e017d4f7cedad5a73a",
+   "accum.c": "dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf",
+   "fcheck_all.sh": "ef2359e7153a41e3ce4c56570455a8db28e1b5e5309c4ceaa118d9e9b9152a6f",
+   "fcheck_unit.py": "9ae64ab16d265bc42be5412c4685b96e6c221a3c511b67bfe5925e9aba4f5c58",
+   "fcheck_vpu.py": "4f44e1b120089db1c6f5347fe43aef310c66f6131e8142faa97d6ad8370ffd51",
+   "ff_acct.sv": "ea5e0240d6110def296ddeb0f2dbf14b372361ba173ced31fa2ed471386b9a2a",
+   "flip_stages.py": "3f46c59ccc1e247ea962808c120824843654bf372ab8d1dc5d1f8d1e49ace2c8",
+   "fp16_model.py": "3abe672c52a8923ccf5914b50f07fcf4b465d43573fde014bde05f7979751c51",
+   "macros_acct.vh": "ada147e820d1a607266504c9eef44bc9acd1a8ad162db247f4a860bdfa7f6125",
+   "run_kinds.py": "fa8112e9ff953f714f3a2161990a581c37617884a44cc6dddfb6bbe5e6133110",
+   "settle_count.cpp": "8840aacc0ec99ca8ea32a34a6f384b99ad8a59df72c393097d7a02b21df23262",
+   "tb_flip.sv": "5b3c6edcb65b1dafd04b60111f092418d027b0a5b234d21ef20f29661049025d",
+   "tb_prev.sv": "18e01ae59a9bfb32b4c6714ac43a116bba616e2207b84c7c73605d89bb81f864",
+   "tb_unit.sv": "ccfb1b12c1ac810ffeb1376b83a865cf28d090fe94638107188af987d42bebf3",
+   "tb_vpu.sv": "6b3ab2b4a70b9c95a0d95e80980ca663e5491d77554a7a9bc01b291c32d76021",
+   "train_maps.py": "f7438fc4667369d68cca5284cd7263d6298bdbaed243c354ad627569e0a5c117",
+   "verilator_dfg_reproducer.sv": "7681d6a90019b3f7c51dbcc7a810239dd019af2628a407307f89fbacab040639"
+  },
+  "makefile_copy_change": "Verilator's -j 10 made -j 2 in this lane's copy (the one change; no --threads anywhere: single-threaded model)",
+  "makefile_copy_sha256": "5f737efbfd34f2b4296554e499972956a732c867090de13617a1de0c87ba560b",
+  "path": "rtl-sim/fma_toggle_v2"
+ },
+ "binaries_sha256": {
+  "accum": "ef7099afc5d14d5df4e748999b91028108d9db3dbb071d8b5e3483f8862004ff",
+  "obj_unit/Vtb": "956bd4126e45208c2c1fb303a51af588555a1e251253daa5f44cc0c6d322e0ca",
+  "obj_vpu/Vtb": "24795d38a061647f1a7434a5682ca460feace4f7243a8f2d33cc4acd4ae6b565",
+  "settle_count": "a14a94db6cabb43e44aa3577f91a54e6236bca3099f955bc3dc2c42f73652c60"
+ },
+ "committed_references_sha256": {
+  "docs/reports/data/2026-11-01-q132-rtl-bench/counts-v2.json": "422bdeac130a12d352f77e2e635eae2592188e7548d8196c9e033f5228986f45",
+  "tools/claims-v3/e210/desk/counts-e210-S1.json": "344bc69080b64016be8ed6afedadd2e8ab5df58a377b620de8c158c2dc5d9254",
+  "tools/claims-v3/e210/desk/counts-e210-S2.json": "9f71e96dc0c7d12b2e467fc237f67f706f571eb8612f92430782a1a56c7893dc",
+  "tools/claims-v3/e210/desk/switch-counts-e210.json": "ff484d170a7a0d9d1c31f97b6f0cd2e996e88c2f65e2ff05d007def5f19fd68f",
+  "tools/matmul/mm1/v1/inputs/switch_table.json": "6c987d802390ed78c67f2e8579d042e5511cc464ae91da3dbaeafe2d7c249599"
+ },
+ "core_et": {
+  "commit": "b38a1a31da67efe00c61e983e64b892c58080115",
+  "copied": "rtl, dv/inc, extern",
+  "files": 1268,
+  "manifest_sha256": "36971f3abc1153834952982011b54bc820977e8a0e08143205f12481747752fc"
+ },
+ "desk_tiles": {
+  "gens": [
+   "randn (the fp32 re-count, E210's desk-only tiles)",
+   "e37 (E207's e37 kind)"
+  ],
+  "list_sha256": "02dcec553cb8fe3d619eb01c5aaf14868503338dfc04e1f372ac1eca8715d799",
+  "n": 122,
+  "what": "rgm136's drawTile (copied verbatim in gen_tiles_e210.cpp), 61 pairs each, seeds FNV-1a('E210-desk|<gen>|fp32')"
+ },
+ "drivers_sha256": {
+  "rtl-sim/fma_toggle_v2/accum.c": "dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf",
+  "rtl-sim/fma_toggle_v2/run_kinds.py": "fa8112e9ff953f714f3a2161990a581c37617884a44cc6dddfb6bbe5e6133110",
+  "rtl-sim/fma_toggle_v2/settle_count.cpp": "8840aacc0ec99ca8ea32a34a6f384b99ad8a59df72c393097d7a02b21df23262",
+  "rtl-sim/fma_toggle_v2/train_maps.py": "f7438fc4667369d68cca5284cd7263d6298bdbaed243c354ad627569e0a5c117",
+  "tools/claims-v3/e210/desk/count_e210.py": "ddb9fc812f3e5a0193de257425c54219e161c8fd1200c8c4e74b474a3e6436cb",
+  "tools/claims-v3/e210/desk/drawtile_e210.h": "2a97867e5dd71499f7bb1401b8d26c26fef0917ed43fd8605b35d08125545be3",
+  "tools/claims-v3/e210/desk/gen_tiles_e210.cpp": "10102685672f42efaf8c025e97437789b1dd50295088ac364efff55287eb15d9",
+  "tools/claims-v3/e210/desk/hd_model_e210.py": "543e90c6d00753948037e16247af9f2509b31c71674e5d71390263bf1a7ab071",
+  "tools/claims-v3/e210/desk/switch_counts_e210.py": "a396d6baaa11755d2228e24825ff7c8ec2124b3f245f9ccbbbd9e5855d2d3531"
+ },
+ "fix_v31counts": {
+  "bench_outputs_sha256": {
+   "e37-bound-G4.json": "766aa56f0a76fcb3a5356f479cc5d28c4872acc51511e42574e02160e3332e5b",
+   "e37-bound-G7.json": "7e0808c21123558000c19000ab19ac701782ded6ababe9db637173e177a69ddc",
+   "recount-fp32-S2-real_blind4.json": "f66aef278b615dc3380ae412b0dae21826513bd3344b9a5d600b73534d28a40e"
+  },
+  "binaries_note": "v31-counts' build, copied (not rebuilt): each sha256 equal to binaries_sha256 above",
+  "binaries_sha256": {
+   "obj_vpu/Vtb": "24795d38a061647f1a7434a5682ca460feace4f7243a8f2d33cc4acd4ae6b565",
+   "settle_count": "a14a94db6cabb43e44aa3577f91a54e6236bca3099f955bc3dc2c42f73652c60"
+  },
+  "commands": {
+   "e37-bound-G4.json": "count_e210.py --kinds fp32.e207.e37 --js 47 --tsel 2 --jobs 1 (spec: the 61 desk e37 tiles)",
+   "e37-bound-G7.json": "count_e210.py --kinds fp32.e207.e37.randnpair0 --js 47 --tsel 2 --jobs 1 (spec: the same list, file 3 = the hybrid tile)",
+   "recount-fp32-S2-real_blind4.json": "count_e210.py --kinds fp32.e207.real_blind4 --js 15,47,79,111 --tsel 2,3 --jobs 1 (spec: the two blind4 fp32 files, file 0 pythia_embed_qkv, file 1 qwen_q_down)"
+  },
+  "desk_tiles": {
+   "e37": "v31-counts' 61 desk e37 tiles, copied, each equal to its desk list (raw/desk-tiles.sha256)",
+   "hybrid randnA_e37x03B.bin": {
+    "sha256": "5f7f32f1627f8e159aa180fdcd07b7fb3dfa7f413ddfe930af36d97b78876b6d",
+    "what": "randn.bin's A (words 0-255) + e37_03's B (words 256-511); equal to verify-v31counts' hybrid tile"
+   }
+  },
+  "drivers_sha256": {
+   "rtl-sim/fma_toggle_v2/run_kinds.py": "fa8112e9ff953f714f3a2161990a581c37617884a44cc6dddfb6bbe5e6133110",
+   "tools/claims-v3/e210/desk/count_e210.py": "ddb9fc812f3e5a0193de257425c54219e161c8fd1200c8c4e74b474a3e6436cb",
+   "tools/claims-v3/e210/desk/hd_model_e210.py": "543e90c6d00753948037e16247af9f2509b31c71674e5d71390263bf1a7ab071"
+  },
+  "lab_github_main": "6efdb0024cc5a44b46c4d11f71047bc1d12f611c",
+  "lane": "fix-v31counts (Q217), Wed 18 Nov 2026, on aifoundry2: desk only, no card, no sys_emu, no build, no fit",
+  "maps_sha256": {
+   "unit_float.map": "341deecbb2b6627d41c19a948ea51e2577872291184752d35db9d85d31fc181f",
+   "unit_int8.map": "61cf2115968282195348a820fcf2739d1173af0e776d6415e8613c5af7fc91ae",
+   "vpu.map": "9d06ade0bb9a50fb5892f2ef4d579d829db15f40f7b16f4f6dd27fc165f48794"
+  },
+  "numpy": "1.26.4",
+  "python": "3.12.3 (/usr/bin/python3 -I -B)",
+  "slot_jobs": [
+   {
+    "minutes": 1.87,
+    "rc": 0,
+    "start": "2026-11-18 06:10:56",
+    "what": "s02_recount_inner.sh"
+   },
+   {
+    "minutes": 0.0,
+    "rc": 0,
+    "start": "2026-11-18 06:16:20",
+    "what": "s04_desk_inner.sh"
+   },
+   {
+    "minutes": 0.45,
+    "rc": 0,
+    "start": "2026-11-18 06:17:57",
+    "what": "s10_e37_inner.sh"
+   },
+   {
+    "minutes": 0.0,
+    "rc": 0,
+    "start": "2026-11-18 06:22:18",
+    "what": "s12_desk2_inner.sh"
+   }
+  ],
+  "slot_jobs_open": [],
+  "slot_minutes_total": 2.32,
+  "tiles_sha256": {
+   "tools/claims-v3/kinds/blind4/tiles/fp32/fp32.real_pythia_embed_qkv.bin": "964235353646465858567706933edea3f8019afd7bc19136315058a575bf005a",
+   "tools/claims-v3/kinds/blind4/tiles/fp32/fp32.real_qwen_q_down.bin": "67cb6ae7071a69769395b5d6befe16b8dd7d6bba942ef66f83a396d89d21fb80",
+   "tools/claims-v3/kinds/tiles/fp32/randn.bin": "34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa"
+  },
+  "what": "the re-counts that answer verify-v31counts' findings: fp32 real:blind4 at the S2 states with both files of its two-file pool (8 points; finding 1) and the e37 bound's two points (G4, G7; finding 2), each by E210's committed count_e210.py, unchanged"
+ },
+ "functional_check": "fcheck_all.sh PASS on this build: unit fp32 40,000 of 40,000 exact; unit fp16 39,701 exact + 299 named residue; vpu fp32 22,016, fp16 22,016, int8 18,944 accumulator words exact, 0 mismatched; zero gate 63 cases, 0 differ",
+ "gxx": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+ "lab_github_main": "6efdb0024cc5a44b46c4d11f71047bc1d12f611c",
+ "maps_sha256": {
+  "unit_float.map": "341deecbb2b6627d41c19a948ea51e2577872291184752d35db9d85d31fc181f",
+  "unit_int8.map": "61cf2115968282195348a820fcf2739d1173af0e776d6415e8613c5af7fc91ae",
+  "vpu.map": "9d06ade0bb9a50fb5892f2ef4d579d829db15f40f7b16f4f6dd27fc165f48794"
+ },
+ "numpy": "1.26.4",
+ "python": "3.12.3 (/usr/bin/python3 -I -B)",
+ "slot_jobs": [
+  {
+   "minutes": 0.0,
+   "rc": 0,
+   "start": "2026-11-18 04:46:54",
+   "what": "s01_enum_unpriced.py"
+  },
+  {
+   "minutes": 2.17,
+   "rc": 0,
+   "start": "2026-11-18 04:50:26",
+   "what": "s03_build_inner.sh"
+  },
+  {
+   "minutes": 3.35,
+   "rc": 0,
+   "start": "2026-11-18 04:52:45",
+   "what": "s04_fcheck_inner.sh"
+  },
+  {
+   "minutes": 1.08,
+   "rc": 0,
+   "start": "2026-11-18 04:56:16",
+   "what": "s05_maps_inner.sh"
+  },
+  {
+   "minutes": 2.53,
+   "rc": 0,
+   "start": "2026-11-18 04:58:21",
+   "what": "s06_recount_inner.sh"
+  },
+  {
+   "minutes": 13.05,
+   "rc": 0,
+   "start": "2026-11-18 05:03:17",
+   "what": "s07_fp32_inner.sh"
+  },
+  {
+   "minutes": 12.02,
+   "rc": 0,
+   "start": "2026-11-18 05:16:20",
+   "what": "s08_launch_inner.sh"
+  },
+  {
+   "minutes": 0.0,
+   "rc": 0,
+   "start": "2026-11-18 05:28:43",
+   "what": "s13_desk_inner.sh"
+  },
+  {
+   "minutes": 0.0,
+   "rc": 0,
+   "start": "2026-11-18 05:30:09",
+   "what": "s14_inner.sh"
+  },
+  {
+   "minutes": 0.0,
+   "rc": 0,
+   "start": "2026-11-18 05:32:23",
+   "what": "s15_inner.sh"
+  }
+ ],
+ "slot_jobs_open": [],
+ "slot_minutes_total": 34.2,
+ "tiles_sha256": {
+  "DESK:fp32/e37/e37_00.bin": {
+   "bytes": 2048,
+   "sha256": "5767a317bbb66e15ebf6d2182a6e823277a28fee6bb2a1f17e9e2e0a4708b4a7"
+  },
+  "DESK:fp32/e37/e37_01.bin": {
+   "bytes": 2048,
+   "sha256": "d58b41a1a3cd21ed587a496847aa47bd7966063239f9cafb817f4db1d8edf1c7"
+  },
+  "DESK:fp32/e37/e37_02.bin": {
+   "bytes": 2048,
+   "sha256": "e299e1c731b7a311854346085b9cb3732fb6c7d1acea78ac3cd589e0b0532658"
+  },
+  "DESK:fp32/e37/e37_03.bin": {
+   "bytes": 2048,
+   "sha256": "ef3de54636e0fe290269f1da33603795f95f35d345f84cdacdc2f273ba048472"
+  },
+  "DESK:fp32/e37/e37_04.bin": {
+   "bytes": 2048,
+   "sha256": "8e58934f60c9cae209d41e02e9a8e840decb952f5e9dbb902ebb2c409bb93ff1"
+  },
+  "DESK:fp32/e37/e37_05.bin": {
+   "bytes": 2048,
+   "sha256": "7d8f666c6f55c37e087efa8fb03d76bbbc72962cc88d457e63561cfc3b7caeb7"
+  },
+  "DESK:fp32/e37/e37_06.bin": {
+   "bytes": 2048,
+   "sha256": "63d2ff462d027f1fd710b3cc6068fc912f9732dc0cd97fe3d386a2efe2527d29"
+  },
+  "DESK:fp32/e37/e37_07.bin": {
+   "bytes": 2048,
+   "sha256": "7e6c152480fae74caf2246ff62944fb62f932bf8310208cd18ee59e9266172a0"
+  },
+  "DESK:fp32/e37/e37_08.bin": {
+   "bytes": 2048,
+   "sha256": "920c20a220187deb6fb48867c89b531a4242f6d3b75728ead5509b4db57e41e6"
+  },
+  "DESK:fp32/e37/e37_09.bin": {
+   "bytes": 2048,
+   "sha256": "201723b4ba78a23f720a57aba1ca5c43b667c7b68b5ac77a056a9debfe4e2516"
+  },
+  "DESK:fp32/e37/e37_10.bin": {
+   "bytes": 2048,
+   "sha256": "3d2428520b8037e8a9f2213994d3a9851af311dca0677f3302398e188b7635ab"
+  },
+  "DESK:fp32/e37/e37_11.bin": {
+   "bytes": 2048,
+   "sha256": "06702c10c3de94064e17336c19554f614a84267ea9f0b73d9beea7d77c1fa841"
+  },
+  "DESK:fp32/e37/e37_12.bin": {
+   "bytes": 2048,
+   "sha256": "96f0cbf62a6b3a2eddaaf6409522b59e2292d19b008169297108d2a440e58541"
+  },
+  "DESK:fp32/e37/e37_13.bin": {
+   "bytes": 2048,
+   "sha256": "ecf9103164a0018483c1918475550f409dcf41e5f7877ad74a60e9b2d20df650"
+  },
+  "DESK:fp32/e37/e37_14.bin": {
+   "bytes": 2048,
+   "sha256": "78af7ce35ca7481e9cd61501ad065a7be973e7a649afde675f744ee8c1f402b8"
+  },
+  "DESK:fp32/e37/e37_15.bin": {
+   "bytes": 2048,
+   "sha256": "a75fca2128ef4070be5c18170009726d04d3d2dfff19beadf38cf91d67e8f60a"
+  },
+  "DESK:fp32/e37/e37_16.bin": {
+   "bytes": 2048,
+   "sha256": "63916681d64c487e3fc2f6cc76828a64c583c2ca8c28e41d918ad32cc977ab8a"
+  },
+  "DESK:fp32/e37/e37_17.bin": {
+   "bytes": 2048,
+   "sha256": "ca73269cc7dc44d5c587297e5edcef70de52b3d1604af8553a6950b45d5d2f56"
+  },
+  "DESK:fp32/e37/e37_18.bin": {
+   "bytes": 2048,
+   "sha256": "d8b3ac33236f81190b86110493848cd5cb31ff0ed550390955f75d24a2b91bde"
+  },
+  "DESK:fp32/e37/e37_19.bin": {
+   "bytes": 2048,
+   "sha256": "dc766296c73ae0ec2108d968639bc938b1e4151b28963f225082f9decec5c789"
+  },
+  "DESK:fp32/e37/e37_20.bin": {
+   "bytes": 2048,
+   "sha256": "c423cef1d6f9ed859dd648c53e06633cceb747edaab06f8a65c4f3f4a536fa88"
+  },
+  "DESK:fp32/e37/e37_21.bin": {
+   "bytes": 2048,
+   "sha256": "6d1514d8ed20530671d1153cd1c0ba40c7cf8868fe31cd3e2b0dbcd0d86ddb0d"
+  },
+  "DESK:fp32/e37/e37_22.bin": {
+   "bytes": 2048,
+   "sha256": "d24ade2b358975dd278f3a580b2c41af1cd62669f0f815810e1e28a872aaf3fa"
+  },
+  "DESK:fp32/e37/e37_23.bin": {
+   "bytes": 2048,
+   "sha256": "c087360d527a3baa34a7149cff50c3b5d46f8cc2dedd208d351d5663556e3120"
+  },
+  "DESK:fp32/e37/e37_24.bin": {
+   "bytes": 2048,
+   "sha256": "b170df729c3d053cc224c7eff7adee769a03d72e5b469365465f2a4f7daf96c4"
+  },
+  "DESK:fp32/e37/e37_25.bin": {
+   "bytes": 2048,
+   "sha256": "05bb0f98e95cee694940f3057fe60f06438053803b939b37b44d282102227d91"
+  },
+  "DESK:fp32/e37/e37_26.bin": {
+   "bytes": 2048,
+   "sha256": "5ba4db975764b8d1e89e9458a363b82d4e58c3ac359fd5bc5255b3dd3e57c0d5"
+  },
+  "DESK:fp32/e37/e37_27.bin": {
+   "bytes": 2048,
+   "sha256": "30e5800b2ea10e48554302c14f00cecd13e27079f233f1775a1907053bd582b9"
+  },
+  "DESK:fp32/e37/e37_28.bin": {
+   "bytes": 2048,
+   "sha256": "09bdb1dc184a52491402eb47701cd4f610360b6a81536f6703044a418be5a2ce"
+  },
+  "DESK:fp32/e37/e37_29.bin": {
+   "bytes": 2048,
+   "sha256": "ceffab511386e7c1b68d631e9e65507f3dee9ed244ad08255fb90ef8151b58de"
+  },
+  "DESK:fp32/e37/e37_30.bin": {
+   "bytes": 2048,
+   "sha256": "b020bf96fffc5c1a901e7b6617aebe229764be01dc0c78161183a50c2e6da433"
+  },
+  "DESK:fp32/e37/e37_31.bin": {
+   "bytes": 2048,
+   "sha256": "1acef53c104fed455e15371c4d1cc3046297c9e784a736cdaed7da22517caecd"
+  },
+  "DESK:fp32/e37/e37_32.bin": {
+   "bytes": 2048,
+   "sha256": "f31dab7de8b0a357ebc63a7e813e71af3cc4ad11a78e66459197f5095a0f4709"
+  },
+  "DESK:fp32/e37/e37_33.bin": {
+   "bytes": 2048,
+   "sha256": "b17c86a4f4e08e895ceb4a233cbca1b212364d1ec49282ccae49ac76c2970d54"
+  },
+  "DESK:fp32/e37/e37_34.bin": {
+   "bytes": 2048,
+   "sha256": "df6e962a9a48182bbdec3b697fddaf61035b374dd8dea1a5755c22739788085a"
+  },
+  "DESK:fp32/e37/e37_35.bin": {
+   "bytes": 2048,
+   "sha256": "119cd8db9259abea232752e74188b787a44ab9b77161412c59a18a691b04e7a5"
+  },
+  "DESK:fp32/e37/e37_36.bin": {
+   "bytes": 2048,
+   "sha256": "7fed4e5fc5370a147a65e1d2bc46595eed8118c26ec7caa30b62e228d989775a"
+  },
+  "DESK:fp32/e37/e37_37.bin": {
+   "bytes": 2048,
+   "sha256": "897cb0a4d1797143d4034ed4b58ab11aff0d159995d2271bd3657b3e5a694bcc"
+  },
+  "DESK:fp32/e37/e37_38.bin": {
+   "bytes": 2048,
+   "sha256": "af985309b9c6f2789db2c77c45ff5dce660fba802e6a05a7983fcf2cccdb4b7a"
+  },
+  "DESK:fp32/e37/e37_39.bin": {
+   "bytes": 2048,
+   "sha256": "b95a0d5724acd1108a171b4fc2229890c40b1e064d0ddda0d5dbd9ddd32b2c2c"
+  },
+  "DESK:fp32/e37/e37_40.bin": {
+   "bytes": 2048,
+   "sha256": "56f97d8e15f8402d825505c74079b78fb373c782595bf113e5e8b8f5bdc2c7ee"
+  },
+  "DESK:fp32/e37/e37_41.bin": {
+   "bytes": 2048,
+   "sha256": "cc4c23937391452be878a449a119702b0b08d05381582d7b41070079b24bfaf2"
+  },
+  "DESK:fp32/e37/e37_42.bin": {
+   "bytes": 2048,
+   "sha256": "a8aec5199ca628c54ae9de6c12e535d5f18ec2b03541de39e535889e8c0db86a"
+  },
+  "DESK:fp32/e37/e37_43.bin": {
+   "bytes": 2048,
+   "sha256": "845c5fc4d70d123b13ddd999831f9c7862afa3243bc7a758aca5ef1ba1e198e9"
+  },
+  "DESK:fp32/e37/e37_44.bin": {
+   "bytes": 2048,
+   "sha256": "d2ac03e6dfdaa40c827280d395ad5304a8d1c71bebc55a75652bae10edf19db6"
+  },
+  "DESK:fp32/e37/e37_45.bin": {
+   "bytes": 2048,
+   "sha256": "1884ac097ef9ed2b0b291e5fde76d6796ade69c64d6d176b0943a13711dcf8ff"
+  },
+  "DESK:fp32/e37/e37_46.bin": {
+   "bytes": 2048,
+   "sha256": "3832928cbc4485bcadd15a260d75b98764f042d4a3f0b4568e5fb85444dc5c92"
+  },
+  "DESK:fp32/e37/e37_47.bin": {
+   "bytes": 2048,
+   "sha256": "d82f4f20e7c1fa6b64c93965917589c22a1c5f32d08098e049a370f6990ee519"
+  },
+  "DESK:fp32/e37/e37_48.bin": {
+   "bytes": 2048,
+   "sha256": "3b4c4799f1bf3b2bd208132f008a6cdbac0ccb858861d2a578be6f5ed0c3d403"
+  },
+  "DESK:fp32/e37/e37_49.bin": {
+   "bytes": 2048,
+   "sha256": "926e6a966e282c4b8e6ec906b6e1d9f4c0ce9d32cfb23ce0ada313f6aab08f96"
+  },
+  "DESK:fp32/e37/e37_50.bin": {
+   "bytes": 2048,
+   "sha256": "d2ed31ff3642903d63a715ed01dd3d0af0017e164cdfc32db0fdcea55cc3ba68"
+  },
+  "DESK:fp32/e37/e37_51.bin": {
+   "bytes": 2048,
+   "sha256": "c0de5b1e5d9af2df310c4204ea58000afd8c2dc61db44b5ecc38175e21b96798"
+  },
+  "DESK:fp32/e37/e37_52.bin": {
+   "bytes": 2048,
+   "sha256": "98261c8bc184fb670ac5fd273c2051613592b106ccce4bc9140935dc2b031169"
+  },
+  "DESK:fp32/e37/e37_53.bin": {
+   "bytes": 2048,
+   "sha256": "79f6255491a94cffea8af505b75f04d59b2e9ad89df75f66aff9499ab8de6def"
+  },
+  "DESK:fp32/e37/e37_54.bin": {
+   "bytes": 2048,
+   "sha256": "29f0808a5187a8b33799281924d0f4c2f15fb1ae94538dbefa05caed759b0bc1"
+  },
+  "DESK:fp32/e37/e37_55.bin": {
+   "bytes": 2048,
+   "sha256": "cfcee6a8c33dd9834075b3e20f57a3bee8ddfbaccd913e8391557720701bca01"
+  },
+  "DESK:fp32/e37/e37_56.bin": {
+   "bytes": 2048,
+   "sha256": "8fc11b587e00c2a8f9dcfb2534420b0f5640224ca50b81b99fd9e2f29f6d8510"
+  },
+  "DESK:fp32/e37/e37_57.bin": {
+   "bytes": 2048,
+   "sha256": "40b94cd91e4416bd5c54c5e49776b87eaf20aea6e110c64edd7dd3940058ce19"
+  },
+  "DESK:fp32/e37/e37_58.bin": {
+   "bytes": 2048,
+   "sha256": "e7ca76ba5e7ea95161cef42fad577b91d3f7b0155f88855812696155a834b7b6"
+  },
+  "DESK:fp32/e37/e37_59.bin": {
+   "bytes": 2048,
+   "sha256": "37100427d9f884cfac37e87fb5c20214da3c65da16ee89a44137f25b6ccf4c18"
+  },
+  "DESK:fp32/e37/e37_60.bin": {
+   "bytes": 2048,
+   "sha256": "23570f8682154e81b34742bea3ee9ab8b0b68a6955282e2ce940b532b2eb1516"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp16/den16_10.bin": {
+   "bytes": 2048,
+   "sha256": "22a41bef3553ccd69c45d2cb0387b438d92c38d601ab17cd978a39cf027b8df2"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp16/den16_4.bin": {
+   "bytes": 2048,
+   "sha256": "75142510bdd06a8349f4eed5f162734e32f1564371e15e84b96aceef33f1d896"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp16/fld16_exp.bin": {
+   "bytes": 2048,
+   "sha256": "54e115eba0d836f7000b6fd14676a1dd90aa94e1f87f4707e4be54020b5ac65a"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp16/fld16_mant.bin": {
+   "bytes": 2048,
+   "sha256": "a7d401d3e2f880f3693b59403e0bb423d068ddf8ba0a34f3281001a23e068c73"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp16/fld16_sign.bin": {
+   "bytes": 2048,
+   "sha256": "9942964f9f32c4e7e12858b52c443ea91d356fffe482619b021d4990ef5d852b"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/bf16trunc.bin": {
+   "bytes": 2048,
+   "sha256": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/den16.bin": {
+   "bytes": 2048,
+   "sha256": "0c2a722e56124ad5e0a04d9c26391bc53678443feebaf37c89655e7e6401dcbc"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/den21.bin": {
+   "bytes": 2048,
+   "sha256": "910cb88e2f133cf3aece6e08738d49ad35aef3c4b592438d1f040e92fcdaa502"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/den4.bin": {
+   "bytes": 2048,
+   "sha256": "61b74a52ddb9f346339700f8153117d4f6c5bea362121d80d24ecc74b56270da"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/den8.bin": {
+   "bytes": 2048,
+   "sha256": "b85d9cbf2ef36ccb785f0abb10510b6d8a1bca3c020c5b6d7cbd7ec81a081181"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/fld_mant.bin": {
+   "bytes": 2048,
+   "sha256": "6eaff4fcfdfeb18297bce527b1bcace44b10bb27899b85d038394def5bde5cc9"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/fld_sign.bin": {
+   "bytes": 2048,
+   "sha256": "9ed8277e4ae3e6cfd9593cb851af01cca5cd6cb4bb92bfc1bff7d15cba4c2560"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/fp16grid.bin": {
+   "bytes": 2048,
+   "sha256": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/lanes2.bin": {
+   "bytes": 2048,
+   "sha256": "d18492bd7a6d3f9a1dc564741de24a17fd04764ffbdc4e6c3c3a9695323f852f"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/pow2.bin": {
+   "bytes": 2048,
+   "sha256": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/int8/i8_den1.bin": {
+   "bytes": 2048,
+   "sha256": "5b215b2e3d2dc9e8eefb4cc3a36de49f35fa2668a234806920757a27345dd8d7"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/int8/i8_den3.bin": {
+   "bytes": 2048,
+   "sha256": "3af408728082570257d48fd60553a82a377d90934e51521d63d14abb57d56cdb"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/int8/i8_den6.bin": {
+   "bytes": 2048,
+   "sha256": "3f7b2182065cd60bd20ce03a94dd49cbe5f56d1a78704a3de33ed38b2436db32"
+  },
+  "tools/claims-v3/e212/proposal/src/tiles/int8/i8_pm1.bin": {
+   "bytes": 2048,
+   "sha256": "d3c3db4b65c6dc9eb648f216cb758e4696b5a89b00ac0ffaab1e5df222e2746b"
+  },
+  "tools/claims-v3/kinds/blind3/tiles/fp32/a_colconst_b_randn.bin": {
+   "bytes": 2048,
+   "sha256": "d6e283259e0dbe08364d5ba7db9018b41b341ce93850f4d787564f1daec28c2b"
+  },
+  "tools/claims-v3/kinds/blind4/tiles/fp16/fp16.real_pythia_embed_qkv.bin": {
+   "bytes": 2048,
+   "sha256": "ea1bcc457b9e8d8bc0f98941202a2845498961636c77168252e459cf728b6dd6"
+  },
+  "tools/claims-v3/kinds/blind4/tiles/fp16/fp16.real_qwen_ln_down.bin": {
+   "bytes": 2048,
+   "sha256": "ad684a5b644e7ae0662a278bfcfd4f3467bf77931c3ae1bd3433c56f6e35fc7c"
+  },
+  "tools/claims-v3/kinds/blind4/tiles/fp32/fp32.real_pythia_embed_qkv.bin": {
+   "bytes": 2048,
+   "sha256": "964235353646465858567706933edea3f8019afd7bc19136315058a575bf005a"
+  },
+  "tools/claims-v3/kinds/blind4/tiles/fp32/fp32.real_qwen_q_down.bin": {
+   "bytes": 2048,
+   "sha256": "67cb6ae7071a69769395b5d6befe16b8dd7d6bba942ef66f83a396d89d21fb80"
+  },
+  "tools/claims-v3/kinds/blind4/tiles/int8/int8.real_pythia_embed_mlpout.bin": {
+   "bytes": 2048,
+   "sha256": "a95314aa8da340de1856aca7663648f8cf1a9670d776388f64c6fb30b1b5ecde"
+  },
+  "tools/claims-v3/kinds/blind4/tiles/int8/int8.real_qwen_q_down.bin": {
+   "bytes": 2048,
+   "sha256": "9d3841187aa90190483b68f7a86de7cfe3b11c5a110f6e8ebed5b9db29922a10"
+  },
+  "tools/claims-v3/kinds/real2/tiles/fp16/bert_l6_up.bin": {
+   "bytes": 2048,
+   "sha256": "a8c708293b5c8cd369ccefd8c4374f1a2aee907d971b7f6494731dd674a6aac0"
+  },
+  "tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l6_mlp_down_fp16fwd.bin": {
+   "bytes": 2048,
+   "sha256": "8d75f3fdee196fe9d4e099927488c1b4d421d8a7275a8926bb788b02ab9a7f87"
+  },
+  "tools/claims-v3/kinds/real2/tiles/fp16/gpt2_l9_attn_qk.bin": {
+   "bytes": 2048,
+   "sha256": "6cfef807543dba6c3aa26caf37a0a6b72d3fd309bd579d7330742d0c7e4b7b86"
+  },
+  "tools/claims-v3/kinds/real2/tiles/fp16/vit_l5_down.bin": {
+   "bytes": 2048,
+   "sha256": "64985e6c2bd5457c70d050daa0bdcde6a3c1e8f5a48ad9f958c15801f8ea617b"
+  },
+  "tools/claims-v3/kinds/real2/tiles/int8/gpt2_l11_down_p999.bin": {
+   "bytes": 2048,
+   "sha256": "eea7ce0a6f183100f9fd4781e34e368b6e795b21e4bb601d32075d8c64e3224e"
+  },
+  "tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p999.bin": {
+   "bytes": 2048,
+   "sha256": "fda41dd9f32e7d439a9d765cfd5cdf223684b45d05178ce06efef4337be9e799"
+  },
+  "tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_p9999.bin": {
+   "bytes": 2048,
+   "sha256": "deefd9cab63f5be939c3bb0093205cd977dcc398dc77941d8619339fcbd608f6"
+  },
+  "tools/claims-v3/kinds/real2/tiles/int8/gpt2_l6_down_per_token.bin": {
+   "bytes": 2048,
+   "sha256": "9f7daf2842262797dc1c9ed41dd882a324c7645eb41377e143a6c02990e60da7"
+  },
+  "tools/claims-v3/kinds/tiles/fp32/bf16trunc.bin": {
+   "bytes": 2048,
+   "sha256": "0053d39aedcb7f1fef140960543f5041eaf9c2ae89875e083dd8490c2747ddb1"
+  },
+  "tools/claims-v3/kinds/tiles/fp32/fp16grid.bin": {
+   "bytes": 2048,
+   "sha256": "ebe5514a927c5680c3421de2d36bc335fcdbf3265cd76558e5330b9ac244955f"
+  },
+  "tools/claims-v3/kinds/tiles/fp32/pow2.bin": {
+   "bytes": 2048,
+   "sha256": "73b9f0b76f09707eb372b03d8878004b7445656bdd708cc9759a30984c2dd4ca"
+  }
+ },
+ "verilator": "Verilator 5.042 2025-11-02 rev v5.042"
+}
