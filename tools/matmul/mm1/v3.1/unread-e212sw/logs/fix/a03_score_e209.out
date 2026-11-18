@@ -1,0 +1,67 @@
+start Wed 18 Nov 2026 07:55:15 PST; load 1.34 2.17 1.90
+A3 start Wed 18 Nov 2026 07:55:15 PST
+source {"path": "docs/reports/data/2026-11-17-e209-blind-matmul-aifoundry2/data-e209.json", "sha256": "90bc84ab52441f53a6283e5b096a83e02de5ed5979b4c0cd5423fb203a0c2805", "data_folder_SHA256SUMS": [["SHA256SUMS-note16", "90bc84ab52441f53a6283e5b096a83e02de5ed5979b4c0cd5423fb203a0c2805"]], "equal_to_SHA256SUMS": true, "mm1_v3_vendored_equal": true}
+loader check against data_v3.e209_runs: {"compared": 8, "max_abs_diff": 0.0, "runs_in_mm1_v3_time_records": 4}
+V3 frozen form = the predictor at each measured condition: {"n": 4, "max_rel": 2.220446049250313e-16}
+against the verifier: {
+ "verifier_file_sha256": "834b418eb32d1aed7123524957d9380db3d2efcecdd9f8cd2e4872d8f344fa51",
+ "per_point": {
+  "e34": {
+   "e1_V3_mine": 0.021821880959888684,
+   "e1_V3_verifier": 0.021821880959888573,
+   "e1_N_mine": -0.3311723920638464,
+   "e1_N_verifier": -0.3311723920638463,
+   "abs_diff_V3": 1.1102230246251565e-16,
+   "abs_diff_N": 1.1102230246251565e-16
+  },
+  "e35": {
+   "e1_V3_mine": -0.00010958653809600705,
+   "e1_V3_verifier": -0.00010958653809600705,
+   "e1_N_mine": -0.23125212509377713,
+   "e1_N_verifier": -0.23125212509377702,
+   "abs_diff_V3": 0.0,
+   "abs_diff_N": 1.1102230246251565e-16
+  },
+  "e36": {
+   "e1_V3_mine": 0.04751724394327428,
+   "e1_V3_verifier": 0.04751724394327406,
+   "e1_N_mine": -0.3173900477246563,
+   "e1_N_verifier": -0.3173900477246563,
+   "abs_diff_V3": 2.220446049250313e-16,
+   "abs_diff_N": 0.0
+  }
+ },
+ "group_A_with_e35_e36": {
+  "mine": {
+   "V3_rms": 6.708097415050515,
+   "N_rms": 25.09935991397885,
+   "closer": 37,
+   "non_tied": 42,
+   "ties": 2,
+   "p": 4.4337048166198656e-07
+  },
+  "verifier": {
+   "V3_rms": 6.7080974150505135,
+   "N_rms": 25.099359913978848,
+   "V3_closer": 37,
+   "non_tied": 42,
+   "ties": 2,
+   "p": 4.4337048166198656e-07
+  }
+ },
+ "max_abs_diff": 2.220446049250313e-16
+}
+A3 written Wed 18 Nov 2026 07:55:15 PST
+8ab39919582658f6ab7c3f78b45c213eda837c27da80ece406c2ef3a62fa8c5c scores-e209-posthoc.json
+dcd6f0b965e9d57f3b2e3d78fab5fce7dbd60ea1c9e540ef444e4a0e18e58c5a scores-e209-posthoc-runs.csv
+E209|e34 B fp32 runs 2 W_meas 31.252 Q1 V3 +2.1822 N -33.1172 N2 -18.4668 V3phi1 +2.3573 Q3 +1.2742 Q4 +3.3356
+E209|e35 A int8 runs 1 W_meas 20.273 Q1 V3 -0.0110 N -23.1252 N2 -12.6891 V3phi1 -0.7128 Q3 -0.0052 Q4 -0.7646
+E209|e36 A fp16 runs 1 W_meas 31.880 Q1 V3 +4.7517 N -31.7390 N2 -16.1789 V3phi1 +5.0651 Q3 +2.8187 Q4 +5.0884
+group_A_declared_42_Q1_vs_N {"n_cases": 42, "V3": {"n": 42, "rms_pct": 6.826695003370411, "mean_pct": 2.611555904098276}, "other": {"n": 42, "rms_pct": 24.965159684225675, "mean_pct": -16.036093752804828}, "rms_lower (P1)": true, "V3_closer": 35, "other_closer": 5, "ties": 2, "non_tied": 40, "p_two_sided": 1.382612026645802e-06, "sign_holds (P2)": true}
+group_A_with_e35_e36_Q1_vs_N {"n_cases": 44, "V3": {"n": 44, "rms_pct": 6.708097415050515, "mean_pct": 2.600593493469214}, "other": {"n": 44, "rms_pct": 25.09935991397885, "mean_pct": -16.55409442953741}, "rms_lower (P1)": true, "V3_closer": 37, "other_closer": 5, "ties": 2, "non_tied": 42, "p_two_sided": 4.4337048166198656e-07, "sign_holds (P2)": true}
+group_A_with_e35_e36_Q1_vs_N2 {"n_cases": 44, "V3": {"n": 44, "rms_pct": 6.708097415050515, "mean_pct": 2.600593493469214}, "other": {"n": 44, "rms_pct": 25.26894152890212, "mean_pct": 8.466478889937127}, "rms_lower (P1)": true, "V3_closer": 37, "other_closer": 5, "ties": 2, "non_tied": 42, "p_two_sided": 4.4337048166198656e-07, "sign_holds (P2)": true}
+group_B_with_e34_Q1 {"V3": {"n": 4, "rms_pct": 3.9915279275199342, "mean_pct": 0.3938960305260336}, "N": {"n": 4, "rms_pct": 41.96023137284974, "mean_pct": -41.45131567535141}}
+E209_alone_Q1 {"V3": {"n": 3, "rms_pct": 3.018882226808194, "mean_pct": 2.307651278835565}, "N": {"n": 3, "rms_pct": 29.65856486864784, "mean_pct": -29.32715216274266}, "N2": {"n": 3, "rms_pct": 15.95609752650479, "mean_pct": -15.778254980650347}}
+Q2 "unchanged: 29 declared cases (no E209 point has a zeros reference); P3 and P4 as declared"
+reading "REPORTED, post hoc: with e35 and e36 in group A, P1 holds and P2 holds; with P3 and P4 unchanged, the pass rule would read PASS. The verdict of record is the declared one."
+end 07:55:15 PST rc 0
