@@ -1,0 +1,28 @@
+E213 arm A, dated note 1 (post hoc): the figures of sections 2 and 3 (posthoc_note1_e213a.py)
+inputs at their registered sha256: points-e213.json f122b625..., mm1_v3_e213.csv 01a2fdae...
+
+SECTION 2. The smoke's --seconds and --budget
+  s01 (arm A): points-e213.json host_args --seconds 6 --budget 7.5; this session's command line --seconds 2 --budget 3.5 (session/smoke/s01/smoke.json)
+  s02 (arm A): points-e213.json host_args --seconds 6 --budget 7.5; this session's command line --seconds 2 --budget 3.5 (session/smoke/s02/smoke.json)
+  s03 (arm A): points-e213.json host_args --seconds 6 --budget 7.5; this session's command line --seconds 2 --budget 3.5 (session/smoke/s03/smoke.json)
+  s04 (arm A): points-e213.json host_args --seconds 6 --budget 7.5; this session's command line --seconds 2 --budget 3.5 (session/smoke/s04/smoke.json)
+  s11 (arm B): points-e213.json host_args --seconds 6 --budget 7.5; arm B: not run
+  s12 (arm B): points-e213.json host_args --seconds 6 --budget 7.5; arm B: not run
+  s13 (arm B): points-e213.json host_args --seconds 6 --budget 7.5; arm B: not run
+  s14 (arm B): points-e213.json host_args --seconds 6 --budget 7.5; arm B: not run
+
+SECTION 3. The board's peak in each point and reference run against MM1-v3's planning peak (W over idle + rest law + 2 W)
+  point and reference runs: 102 (the three tie runs and the smoke apart); board readings read: 25659
+  board peak above the planning peak: 6 runs, all of them 'rgm136 gemmLnc': True; every 'rgm136 gemmLnc' run among them: True
+  the other 96 runs: board peak minus planning peak, median -3.16 W, highest -0.43 W
+  run | point | configuration | p_work W | board peak W (PST) | planning peak W | peak - plan W | under the 65 W line by W | the gemmL twin: run, board peak W, planning peak W, peak - plan W
+  075-pass1-a086 | a086 | gemmLnc1x1x44 fp32 random 0xffffffff | 44.97 | 47.44 (07:06:33.615) | 42.81 | +4.63 | 17.56 | 072-pass1-a083, 37.82, 42.62, -4.80
+  079-pass1-a082 | a082 | gemmLnc4x1x6 fp32 random 0xffffffff | 46.69 | 47.66 (07:07:56.842) | 43.29 | +4.37 | 17.34 | 076-pass1-a030, 39.69, 43.17, -3.48; 095-pass2-a030, 40.37, 43.17, -2.80
+  083-pass1-a079 | a079 | gemmLnc1x6x5 fp32 random 0xffffffff | 50.03 | 50.79 (07:09:46.809) | 47.54 | +3.25 | 14.21 | 080-pass1-a076, 44.64, 47.17, -2.53
+  087-pass1-a075 | a075 | gemmLnc3x1x3 fp32 random 0xffffffff | 62.93 | 64.22 (07:12:07.029) | 51.31 | +12.91 | 0.78 | 084-pass1-a006, 49.06, 50.77, -1.71
+  089-pass1-a087 | a087 | gemmLnc1x1x1 int8 random 0xffffffff | 50.02 | 50.55 (07:13:21.948) | 42.01 | +8.54 | 14.45 | 088-pass1-a088, 38.67, 41.26, -2.59
+  094-pass2-a079 | a079 | gemmLnc1x6x5 fp32 random 0xffffffff | 49.91 | 50.77 (07:15:35.950) | 47.54 | +3.23 | 14.23 | 080-pass1-a076, 44.64, 47.17, -2.53
+  the twins' board peak minus planning peak: -4.80 to -1.71 W (6 twin runs of 5 gemmLnc points)
+  the session's highest board reading in a run: 64.22 W at 07:12:07.029 PST (087-pass1-a075); the arm's highest planning peak: 52.01 W (a073)
+
+JSON written
