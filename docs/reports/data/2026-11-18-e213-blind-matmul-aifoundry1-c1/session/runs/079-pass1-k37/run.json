@@ -1,0 +1,160 @@
+{
+ "n": 79,
+ "block": "pass1",
+ "id": "k37",
+ "name": "gemmLnc3x1x3.fp32.random",
+ "pair": null,
+ "arm": "B",
+ "run": "079-pass1-k37",
+ "gate": {
+  "c": 48.0,
+  "die": 48,
+  "waited_s": 6.0
+ },
+ "rest": {
+  "t0_ms": 1795045491861,
+  "t1_ms": 1795045501861
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/nekko/build/e213rgm/rgm211/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmLnc3x1x3:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/nekko/build/e213rgm/rgm136/kernel/sparsity.elf",
+    "--stop-file",
+    "~/nekko/build/e213/T1795043727-B/STOP"
+   ],
+   "rc": 0,
+   "hung": false,
+   "t0_ms": 1795045501862,
+   "t1_ms": 1795045508743,
+   "n_launch": 15,
+   "runtime_other_cards": [],
+   "family": "rgm136 gemmLnc",
+   "host": "rgm211",
+   "kernel": "rgm136",
+   "gate": "GATE OK: rgm136 gemmLnc: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones",
+   "walk_ok": true,
+   "walk_words": "walk mn on every launch, walk_ok true, walk_launches_bad 0",
+   "walk": {
+    "want": "mn",
+    "names": [
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn"
+    ],
+    "ok": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "tagged": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "check_walk": "mn",
+    "launches_bad": 0
+   },
+   "tensor_errors": 0,
+   "launches_ok": true,
+   "check": "approx",
+   "check_ok": true,
+   "check_cycles_per_op": 777.155,
+   "counted_cycles_per_op": 777.529,
+   "stopped_by_file": false,
+   "k1": false,
+   "records": {
+    "runtime_lines": 1,
+    "unparsed": 0,
+    "mismatched": 0,
+    "other": 0
+   },
+   "launch_window_ms": [
+    1795045502064,
+    1795045508644
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et1_ops"
+    ],
+    "stderr_ids": [
+     1
+    ],
+    "nodes_held": [
+     "/dev/et1_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 70,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [
+  "a stop tripped during this run: board 72.24 W above 72 W on 3 samples in a row"
+ ],
+ "gate_words": "GATE OK: rgm136 gemmLnc: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones",
+ "ran": true,
+ "work": {
+  "t0_ms": 1795045501862,
+  "t1_ms": 1795045508743
+ },
+ "tail_end_ms": 1795045512743,
+ "stop": "board 72.24 W above 72 W on 3 samples in a row"
+}
