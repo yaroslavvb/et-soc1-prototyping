@@ -1,0 +1,96 @@
+{
+ "experiment": "E213",
+ "request": "Q216",
+ "what": "E213's kernels by path and sha256, their pins and the arm families (desk)",
+ "kernels": {
+  "rgm136": {
+   "tree": "tools/claims-v3/e136/rgm136",
+   "sources_sha256": {
+    "tools/claims-v3/e136/rgm136/CMakeLists.txt": "123ef6e4ac1572d31914b6049fa700b30af1338c13cc96ec850cd047966dfcfd",
+    "tools/claims-v3/e136/rgm136/README.md": "52815705cbea14c0aea28c81a9e094bbe9e16a04280cb67db5a975aa35d5f8ef",
+    "tools/claims-v3/e136/rgm136/host/CMakeLists.txt": "6b6c1c80139ec0eadc8940bb93c264806412ab93ae90779d9ec6ad13d88a0477",
+    "tools/claims-v3/e136/rgm136/host/Constants.h.in": "c464f57f54f0efd6d5659483c9121a0299bf86d82eacacc66938c8226f7ceebb",
+    "tools/claims-v3/e136/rgm136/host/main.cpp": "f9b2279f838ad30444748f2a5abad5dd646df631735fc029a6ac01f9036e2fda",
+    "tools/claims-v3/e136/rgm136/kernel/CMakeLists.txt": "061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948",
+    "tools/claims-v3/e136/rgm136/kernel/crt.S": "dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4",
+    "tools/claims-v3/e136/rgm136/kernel/sections.ld": "b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09",
+    "tools/claims-v3/e136/rgm136/kernel/sparsity.c": "4be70db597aa2120b9c9904643ff9fc6108ef5eb1f4fb17ac844f9e037619f74",
+    "tools/claims-v3/e136/rgm136/sparsity_args.h": "a7e0144ef468dec18ed2d20ec150688a825d6482f17fa7be4dc23c7d17a15332"
+   },
+   "equal_to": [
+    "tools/claims-v3/e206/kernel-e206.json",
+    "tools/claims-v3/e211/kernel-e211.json"
+   ],
+   "elf_sha256": "aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0",
+   "text_sha256": "61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763",
+   "loadable_identity_sha256": "649d40793e459e51db9a590ca90dd1363da3a00398f98938c3ef6e190514e2b7",
+   "pins_note": "E136's build record (aifoundry2's and aifoundry1's builds byte-identical: arm B gates on the whole ELF, as E206 arm B did); aifoundry3's GCC prints '(g1b306039a) 15.1.0' into the ELF, so arm A gates on the .text and the loadable identity (E191's kit fix; E206, E207 and E211 on aifoundry3)"
+  },
+  "rgm211": {
+   "elf_sha256": "00402801a1a53a9330898ef023297d8967a2c655472a40e0f1cd65dea04f09ae",
+   "loadable_identity_sha256": "1351a569e4a200cb4cd916c4c6af822b45ce6e1cac9b7aa8b71c945a1f5bd847",
+   "note": "made by make_rgm211.py from rgm136 as committed (rgm211.diff is the whole difference); never run anywhere: the desk builds of Q202 (mm-kernel2, critic-kernel2) and Q204 (this) ran nothing they built",
+   "sources_sha256": {
+    "tools/claims-v3/e211/rgm211/CMakeLists.txt": "123ef6e4ac1572d31914b6049fa700b30af1338c13cc96ec850cd047966dfcfd",
+    "tools/claims-v3/e211/rgm211/README.md": "75935f6ae9326ae26f52e44f56ac519ef2c19db2cd19defb79bfcf500ac9529b",
+    "tools/claims-v3/e211/rgm211/host/CMakeLists.txt": "6b6c1c80139ec0eadc8940bb93c264806412ab93ae90779d9ec6ad13d88a0477",
+    "tools/claims-v3/e211/rgm211/host/Constants.h.in": "c464f57f54f0efd6d5659483c9121a0299bf86d82eacacc66938c8226f7ceebb",
+    "tools/claims-v3/e211/rgm211/host/main.cpp": "327f49b1e52560378a9e463547fd9b417a9aa8079c1cee3277d08b9b6234cc39",
+    "tools/claims-v3/e211/rgm211/kernel/CMakeLists.txt": "061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948",
+    "tools/claims-v3/e211/rgm211/kernel/crt.S": "dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4",
+    "tools/claims-v3/e211/rgm211/kernel/sections.ld": "b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09",
+    "tools/claims-v3/e211/rgm211/kernel/sparsity.c": "57e632a87e0eb74aacc613826c463600e27e6e868cd1cf20b5a3bff2c71fae6e",
+    "tools/claims-v3/e211/rgm211/sparsity_args.h": "0007ba722efe5f19c11076958aafca2d21450a2f1f33d204618a506b38e3b9cd"
+   },
+   "text_sha256": "82c7980716a0f0cacd24364ef9a23435343eb8f2c35c32b0ec5d60b46c8a4069",
+   "tree": "tools/claims-v3/e211/rgm211",
+   "equal_to": [
+    "tools/claims-v3/e211/kernel-e211.json"
+   ],
+   "pins_note": "E211's registration and kit (kit-e211 built it on aifoundry3 at its .text and loadable identity; E211 ran gemmLn on aifoundry3 card 0, data 38aaf004); arm A only"
+  }
+ },
+ "arm_families": {
+  "rgm136 gemmL": {
+   "host": "rgm136",
+   "elf": "rgm136",
+   "arms": "gemmL<MB>x<NB>x<KB>",
+   "where": "both arms",
+   "gate": "E206's / E207's"
+  },
+  "rgm136 gemmLnc": {
+   "host": "rgm211",
+   "elf": "rgm136",
+   "arms": "gemmLnc<MB>x<NB>x<KB>",
+   "where": "both arms (arm B: k37-k40)",
+   "gate": "E211's family C gate; arm B: built and gated on aifoundry1 by the kit, else NO DATA by amendment"
+  },
+  "rgm211 gemmLn": {
+   "host": "rgm211",
+   "elf": "rgm211",
+   "arms": "gemmLn<MB>x<NB>x<KB>",
+   "where": "arm A",
+   "gate": "E211's"
+  },
+  "rgm211 gemmL": {
+   "host": "rgm211",
+   "elf": "rgm211",
+   "arms": "gemmL<MB>x<NB>x<KB>",
+   "where": "arm A (a074, a078, a081, a085)",
+   "gate": "NEW: the kit adds it (rgm211's pins; a gemmL launch's walk tag), else NO DATA by amendment"
+  }
+ },
+ "build": {
+  "commands": [
+   "cmake -S <tree> -B <build> -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev",
+   "cmake --build <build> -j4"
+  ],
+  "host": "<build>/host/sparsity_host (its bytes carry the build path: hosts are gated by behaviour, E190's form)",
+  "identity_recipe": "E206's check_e206.elf_identity / identity_sha (check_e191.py's second form)",
+  "kernel": "<build>/kernel/sparsity.elf",
+  "text_recipe": "objcopy -O binary -j .text <elf> (E206's check_e206.text_sha)",
+  "toolchain": "riscv64-unknown-elf-gcc () 15.1.0; cmake 3.28.3; g++ 13.3.0",
+  "where": "aifoundry2, inside the round's CPU slot (nice 10) and nodev.sh (no device node), from the registration's scratch clone"
+ },
+ "host_arguments": "--test fma --type <fmt> --pattern none --values <arm>:<gen>:<tiles> --shires <mask> --per-shire 32 --seconds 6 --budget 7.5 --seed 1 (the kit adds --kernel, --stop-file and its absolute paths); gen randn, tiles or sparse50 (E101's grammar); tiles under tools/claims-v3/kinds/tiles/"
+}

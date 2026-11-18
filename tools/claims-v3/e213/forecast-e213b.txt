@@ -1,0 +1,63 @@
+E213 arm B forecasts (aifoundry1 card 1, 600 MHz): MM1-v3 and MM1-v2 as landed, unchanged; /usr/bin/python3 3.12.3, numpy 1.26.4; MM1-v3's SHA256SUMS 170 of 170 checked; MM1-v2 through e213_v3.v2_model (pins and SHA256SUMS checked)
+input 89c2e463e3527b379ed10557c2e595b294b289c0ba8cd2005481190c9555fe3c tools/matmul/mm1/v3/mm1_v3.py
+input da6213460e6c90dcfc304d53d096f7bbe2634baa81ab5309ee354b412a4ff898 tools/matmul/mm1/v3/engine_v3.py
+input 49a577bc0c3743e3289052501d75b24ecff740ff3d2d304eae9b7c59c17e2abe tools/matmul/mm1/v3/energy_v3.py
+input acebc705d06be133845b78ed85a7787a6792838fcca95f75dfc03fba41ea43c2 tools/matmul/mm1/v3/mm1_core_v3.py
+input d87de33c159a5cf35a037554899c73a9a17f6779bcbc640f28dd36170e4a9e2f tools/matmul/mm1/v3/kinds_v3.py
+input cad5250ccc2324c724fe2230093146aa6216779cf0c64003228b88fbd59d974f tools/matmul/mm1/v3/inputs/census/census-v3.json
+input 1fdc07496a39a5398021c2da0e60f157a2e7f693d845e039f8dc661f6aa325db tools/matmul/mm1/v3/out/mm1_v3_params.json
+input 3533b4d73278381bd2a7f26891f3dded5ef154de9751733402d1d9a174d826c1 tools/matmul/mm1/v3/e213_v3.py
+input 916954ccaf477c3e4c858d1a6f68c2cb5d224339792e33bab4fa81908c7f2028 tools/matmul/mm1/v3/unread_v2_e212.py
+input c24efc149110d0cb3d1c8603f0bb7ee83db85eebf9af7ba4254d267c7c85dc74 tools/matmul/mm1/v3/SHA256SUMS
+input 5abf3a0a49757e15a776f3a1b5cdb4f7fa90943de2e016fe8b26aa4bf5324c08 tools/matmul/mm1/v2/mm1_v2.py
+input f78c21b4f8b4c43a9a6c7319f12092937e9e92c69d3e7dc036f0e1f92b9d7e08 tools/matmul/mm1/v2/mm1_core_v2.py
+input 14c72c298956c551439a6eddb77f9d75a7b7fe3414cbb78cfbd0ad5a70ed686d tools/matmul/mm1/v2/kinds_v2.py
+input 9d79040bb8f86336987ff4b6aeaf7e5e6e3b2b2ba07e4bcdc4aa5f5b65c43fa5 tools/matmul/mm1/v2/out/mm1_v2_params.json
+input eafb6558c4eaa053e4e33b8a4d6b2a644175f325df9e9ba56a1b6373b556f2f2 tools/matmul/mm1/v2/SHA256SUMS
+input f122b62500ce7d0f5e924f7454adb074d9ca673c328fe3c98c64a9b906d65d15 tools/claims-v3/e213/points-e213.json
+id   family arm             fmt  kind     | v3 wall   mean     ms        W      mJ       | v2 wall   mean     W      mJ      | v3/v2 wall W
+k01  BI     gemmL2x1x2      int8 random   |    927.5    823.7   0.3957  11.27    4.460 |    887.7    788.4  11.17    4.230 | 1.045 1.009
+k02  BI     gemmL2x1x2      fp32 random   |    885.8    786.6   0.3779  24.74    9.351 |    887.7    788.4  23.55    8.921 | 0.998 1.051
+k03  BI     gemmL4x1x2      int8 random   |    928.5    824.6   0.7923  11.26    8.924 |    911.0    809.1  10.98    8.539 | 1.019 1.025
+k04  BI     gemmL4x1x2      fp32 random   |    886.8    787.6   0.7567  24.72   18.706 |    911.0    809.1  23.05   17.920 | 0.973 1.072
+k05  BI     gemmL3x1x3      int8 random   |    945.6    839.7   0.9077  11.45   10.398 |    917.1    814.4  11.53   10.149 | 1.031 0.994
+k06  BI     gemmL3x1x3      fp32 random   |    903.3    802.2   0.8672  24.68   21.400 |    917.1    814.4  23.52   20.704 | 0.985 1.049
+k07  BI     gemmL1x2x7      int8 random   |    960.8    853.3   1.4348  11.12   15.959 |    948.0    841.9  11.36   16.079 | 1.014 0.979
+k08  BI     gemmL1x2x7      fp32 random   |    919.6    816.7   1.3733  24.09   33.076 |    948.0    841.9  22.96   32.497 | 0.970 1.049
+k09  BI     gemmL1x2x11     int8 random   |   1367.1   1352.2   3.2080   9.13   29.276 |   1302.6   1288.4   9.77   29.850 | 1.049 0.935
+k10  BI     gemmL1x2x11     fp32 random   |   1359.2   1344.5   3.1897  17.65   56.290 |   1302.6   1288.4  18.21   55.650 | 1.043 0.969
+k11  BR     gemmL2x1x8      fp32 random   |   1386.2   1371.1   2.3658  17.15   40.569 |   1308.5   1294.3  17.69   39.497 | 1.059 0.970
+k12  BR     gemmL3x1x7      fp32 random   |   1406.1   1390.8   3.1496  16.98   53.480 |   1469.3   1453.3  16.19   53.276 | 0.957 1.049
+k13  BR     gemmL1x1x18     fp32 random   |   1447.3   1431.5   2.7788  16.74   46.520 |   1479.7   1463.6  16.50   46.883 | 0.978 1.015
+k14  BR     gemmL4x1x6      fp32 random   |   1405.9   1390.6   3.5991  17.02   61.240 |   1486.8   1470.6  16.04   61.059 | 0.946 1.061
+k15  BR     gemmL3x1x9      fp32 random   |   1406.7   1391.4   4.0512  16.93   68.590 |   1490.6   1474.4  16.02   68.774 | 0.944 1.057
+k16  BR     gemmL3x1x9      int8 random   |   1406.7   1391.4   4.0512   8.74   35.403 |   1490.6   1474.4   8.64   37.110 | 0.944 1.011
+k17  BR     gemmL1x1x26     fp32 random   |   1502.2   1485.9   4.1661  16.58   69.076 |   1491.7   1475.5  17.09   70.703 | 1.007 0.970
+k18  BR     gemmL1x1x26     int8 random   |   1502.2   1485.9   4.1661   8.91   37.119 |   1491.7   1475.5   9.72   40.213 | 1.007 0.917
+k19  BR     gemmL1x1x34     fp32 random   |   1520.2   1503.7   5.5134  16.53   91.112 |   1491.7   1475.5  17.15   92.766 | 1.019 0.964
+k20  BK     gemmL2x3x1      int8 random   |    881.3    782.7   0.5640  11.43    6.445 |    790.3    701.9  11.09    5.612 | 1.115 1.030
+k21  BK     gemmL2x3x1      fp32 random   |    853.0    757.6   0.5459  25.37   13.852 |    814.7    723.5  24.33   12.687 | 1.047 1.043
+k22  BK     gemmL4x4x1      int8 random   |    971.0    960.4   1.6571  11.61   19.246 |    835.8    826.7  10.67   15.222 | 1.162 1.088
+k23  BK     gemmL4x4x1      fp32 random   |    951.5    941.2   1.6239  24.03   39.019 |    863.2    853.8  23.15   34.103 | 1.102 1.038
+k24  BK     gemmL7x3x1      int8 random   |   1045.6   1034.2   2.3420  11.04   25.864 |    983.9    973.2   9.68   21.343 | 1.063 1.140
+k25  BK     gemmL7x3x1      fp32 random   |   1030.9   1019.7   2.3093  22.44   51.830 |   1008.3    997.3  20.41   46.107 | 1.022 1.099
+k26  BK     gemmL4x3x2      int8 random   |   1077.1   1065.4   2.7574  10.85   29.911 |   1007.9    996.9  10.58   27.308 | 1.069 1.025
+k27  BK     gemmL4x3x2      fp32 random   |   1047.7   1036.3   2.6820  22.11   59.300 |   1007.9    996.9  21.49   55.453 | 1.039 1.029
+k28  BE     gemmL1x3x40     fp32 zeros    |   1549.9   1533.0  19.8387   4.74   94.080 |   1491.7   1475.5   5.23   99.851 | 1.039 0.907
+k29  BE     gemmL1x3x40     fp32 random   |   1549.9   1533.0  19.8387  16.45  326.394 |   1491.7   1475.5  17.15  327.444 | 1.039 0.959
+k30  BE     gemmL2x2x44     fp32 zeros    |   1554.3   1537.4  29.1791   4.76  138.866 |   1491.7   1475.5   5.23  146.449 | 1.042 0.910
+k31  BE     gemmL2x2x44     fp32 random   |   1554.3   1537.4  29.1791  16.44  479.694 |   1491.7   1475.5  17.15  480.252 | 1.042 0.959
+k32  BS     gemmL3x1x3      fp32 zeros    |    903.3    802.2   0.8672   4.76    4.124 |    917.1    814.4   4.71    4.150 | 0.985 1.009
+k33  BS     gemmL3x1x3      fp32 ones     |    903.3    802.2   0.8672  11.16    9.678 |    917.1    814.4  11.18    9.846 | 0.985 0.998
+k34  BS     gemmL3x1x3      fp32 sparse50 |    903.3    802.2   0.8672  13.60   11.796 |    917.1    814.4    nan      nan | 0.985 n.f.
+k35  BS     gemmL3x1x3      int8 zeros    |    945.6    839.7   0.9077   4.18    3.795 |    917.1    814.4   4.45    3.917 | 1.031 0.940
+k36  BS     gemmL3x1x3      int8 ones     |    945.6    839.7   0.9077   5.68    5.160 |    917.1    814.4   5.90    5.196 | 1.031 0.963
+k37  BP     gemmLnc3x1x3    fp32 random   |    881.3    782.7   0.8461  25.22   21.342 |    917.1    814.4  23.52   20.704 | 0.961 1.073
+k38  BP     gemmLnc1x2x7    fp32 random   |    897.7    797.2   1.3405  24.61   32.986 |    948.0    841.9  22.96   32.497 | 0.947 1.072
+k39  BP     gemmLnc4x1x6    fp32 random   |   1393.3   1378.2   3.5669  17.14   61.120 |   1486.8   1470.6  16.04   61.059 | 0.937 1.068
+k40  BP     gemmLnc1x1x1    int8 random   |    367.8    365.6   0.0392  15.89    0.623 |    391.7    389.4  15.36    0.642 | 0.939 1.034
+k41  BP     gemmL1x1x1      int8 random   |    389.8    387.5   0.0416  15.13    0.629 |    391.7    389.4  15.36    0.642 | 0.995 0.985
+t02  tie    gemmL4x8x8      int8 random   |   1396.7   1381.5  38.1385   9.07  345.747 |   1378.7   1363.7   9.44  355.424 | 1.013 0.960
+output e529bbb24de26bc68c50279945c31a0da384e1f6c01cddc1f510cd2e1c0c4ed0 forecast-e213b-v3.csv
+output 297762ebbbed7186631716b45aca33af73fd6f56ff769509d1d0c68ef0c411f4 forecast-e213b-v2.csv
+output fc7ac54276cc5db385c88da1bb488e9bc0e76ad5c69f408bb626e807759479d9 forecast-e213b-v3.json

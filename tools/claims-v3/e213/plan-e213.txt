@@ -1,0 +1,25 @@
+ARM A: aifoundry3 card 0 (the box's one card, its device nodes at index 0; lock /run/lock/etsoc-shire0.lock)
+  clock: 600 MHz pinned (a boot-time TDP of 0 latches the governor), read, never set
+  start config gate (read): TDP 0 W, temperature threshold 65 C, minion 600 MHz, as found (read, nothing set; E207 and E211 read the same)
+  the line: 65 W (no point runs whose planning peak passes it)
+  live stops: the board strictly above 70 W on 3 samples in a row (counting the samples that carry a board reading; a sample with none neither counts nor breaks the row); the shires' mean die (minshire[0]) at or above 70 C; the hottest-sensor latch (minshire[2]) at or above 70 C once it has risen during the session above the lowest value it read since the session's first sample (E206.md A1 item 1; E207's and E211's kits)
+  die gate: min(60, the session's rest die + 4) C, waited at most 300 s, else that run is NO DATA (E207's)
+  planning peak: 52.01 W at a073 (MM1-v3's W over idle 25.27 + its rest law 24.74 + 2.0); top five [{'point': 'a073', 'W': 52.01}, {'point': 'a038', 'W': 51.45}, {'point': 'a075', 'W': 51.31}, {'point': 'a074', 'W': 51.08}, {'point': 'a002', 'W': 50.83}]
+  measured peaks on this card: E207 51.26 W, 56 C (session 07:06:44-07:53:54 PST Tue 17 Nov 2026); E210 58.66 W, 59 C; E211 61.9 W, 59 C (rgm211 and gemmLnc among its runs); E206 arm A 59.54 W, 61 C - all under this arm's 70 W / 70 C stops
+  card time planned: 46.3 card-minutes (105 runs at 25.96 s a run, E207 (docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3): 109 runs in 47.16 card-minutes, smoke included; smoke and stop-path test 0.89 min); no run starts after 60 card-minutes; the session ends at 70 after the run in progress
+  registered subset if cut: {'what': 'the smoke, tie 1, pass 1 and tie 2: every point once', 'runs': 92, 'card_minutes': 40.7}
+  rest: the first card command at least 40 minutes after our previous session on aifoundry3 ended (E211's ended 13:39:35 PST Tue 17 Nov 2026)
+
+ARM B: aifoundry1 card 1 (the card's device nodes at index 1; ET_DEVICES=1 on every device process; lock /run/lock/etsoc-shire1.lock; ET_DEVICES=1)
+  clock: 600 MHz as found (every sample since September, E137; E206 arm B 50,820 of 50,820 samples), read, never set
+  start config gate (read): TDP 65 W, temperature threshold 65 C, minion 600 MHz, as found (read, nothing set; E206 arm B read the same)
+  the line: 65 W (no point runs whose planning peak passes it)
+  live stops: the board strictly above 72 W on 3 samples in a row; the die at or above 80 C (the shires' mean, or the hottest-sensor latch once it has risen during the session) - E206 arm B's lines on this card
+  die gate: min(63, the session's rest die + 3) C, waited at most 300 s, else that run is NO DATA (E206 arm B's)
+  planning peak: 59.13 W at k21 (MM1-v3's W over idle 25.37 + its rest law 31.76 + 2.0); top five [{'point': 'k21', 'W': 59.13}, {'point': 'k37', 'W': 58.98}, {'point': 'k02', 'W': 58.5}, {'point': 'k04', 'W': 58.48}, {'point': 'k06', 'W': 58.43}]
+  measured peaks on this card: E206 arm B 59.34 W, the shires' mean 60 C, the latch 66 C (session 00:13:26-01:38:14 PST Tue 17 Nov 2026); E212 a1c1 sessions at or under 66.6 W planned - under this arm's 72 W / 80 C stops
+  card time planned: 32.5 card-minutes (85 runs at 22.22 s a run, E206 arm B (docs/reports/data/2026-11-17-e206-matmul-sweep-aifoundry1-c1): 229 runs in 84.81 card-minutes, smoke included; smoke and stop-path test 1.0 min); no run starts after 42 card-minutes; the session ends at 48 after the run in progress
+  registered subset if cut: {'what': 'the smoke, tie 1, pass 1 and tie 2: every point once', 'runs': 43, 'card_minutes': 16.9}
+  rest: the first card command at least 40 minutes after the last session on aifoundry1 ended, either card, ours or the model session's (E212 a1c1-S3 ended 14:22:13 PST Tue 17 Nov 2026, by the orchestrator's release record; any later release counts)
+
+refusals: none
