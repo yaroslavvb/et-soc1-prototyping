@@ -1,0 +1,39 @@
+E216's kit checks (re-made by fix-e216), 2026-11-19 15:08:31 PST on aifoundry2, /usr/bin/python3 3.12.3; the lab clone at 7dd28414b (the registration's local commit with Amendment 1) with the kit's files untracked on it, as kit-e216 checked them
+== make_box_e216.py check
+tools/claims-v3/e216/harness-e216.json: equal to its re-make (sha256 a1f2694121034223)
+harness: 77 files (E208's 48, E216's box files and inputs 11, rgm211's sources 10, its list, fwgate); the schedule: 69 runs, the G block last (g07, g08, g09, g10, g03, g04, g05, g06, g02, g01)
+CHECK PASS
+== the identity gate's own check, from the box root's src/ (its inputs beside it; kit-e216's box root, every file as this kit's harness)
+rgm136 ELF: kernel-e216.json aace138caf8071cc... E206's aace138caf8071cc...: SAME
+rgm136 .text: kernel-e216.json 61315bf6a449c282... E206's 61315bf6a449c282...: SAME
+rgm136 loadable identity: kernel-e216.json 649d40793e459e51... E206's 649d40793e459e51...: SAME
+rgm211 pins (named only to be refused): ELF 00402801a1a53a93... .text 82c7980716a0f0ca... identity 1351a569e4a200cb...; distinct from rgm136's: True
+the two families: ['rgm136 gemmL', 'rgm136 gemmLnc'] on rgm136's ELF; hosts {'rgm136 gemmL': 'rgm136', 'rgm136 gemmLnc': 'rgm211'}: True
+CHECK PASS
+== the schedule through run_e216.check_sched (the runner's own refusal of a schedule not E216's form)
+check_sched: E216 form (session E216, e216_line_w 64.0, every run under it, the G block last); 69 runs; families 57 'rgm136 gemmL', 10 'rgm136 gemmLnc'; the smoke ['1x1x4-fp32-zeros', '1x1x4-fp16-ones', '1x1x4-int8-rnd']
+SCHEDULE CHECK PASS
+== the lists
+tools/claims-v3/e216/SHA256SUMS-e216-registration: 40 OK of 40; its own sha256 778c77aa7e96f815
+tools/claims-v3/e208/SHA256SUMS-e208-registration: 57 OK of 57; its own sha256 74e483cfae187c0e
+tools/claims-v3/e208/proposal/src/SRC-SHA256SUMS: 48 OK of 48; its own sha256 543e9298d5a1013d
+tools/matmul/mm1/v3.1/SHA256SUMS: 64 OK of 64; its own sha256 f6840d2de6617a73
+tools/matmul/mm1/v3/SHA256SUMS: 170 OK of 170; its own sha256 c24efc149110d0cb
+tools/matmul/mm1/v2/SHA256SUMS: 114 OK of 114; its own sha256 eafb6558c4eaa053
+== the frozen scorer, print-only (as step 2 runs it)
+score_e216.py --forecasts: byte for byte logs/forecasts-print-e216.txt (dd4b751870053972)
+score_e216.py --selftest-standins: byte for byte the registered selftest-standins.json
+report_e216.py --selftest (Amendment 1): byte for byte the registered reported-selftest-e216.json
+git status of the registration's files (none changed by the kit's work):
+(end)
+== the kill words in the kit's code (every line naming SIGKILL, kill -9, timeout -k or signal 9; each must be a word that forbids it)
+  tools/claims-v3/e216/rb/s20_wait_e216.sh:8:# smoke gate) or with a LEFTOVER (tell the orchestrator; never kill -9), or GONE (no runner, no manifest: read session.log); 17 still
+  tools/claims-v3/e216/rb/rb_e216.sh:6:# (`timeout`, never `-k`; a bounded wait at most 520 s a call, then exit 17: call again). No step sends a SIGKILL, and none arranges one.
+  tools/claims-v3/e216/desk/realpath_e216.py:44:             runs before stand; no SIGKILL
+  tools/claims-v3/e216/desk/realpath_e216.py:46:             no closing read, the card's lock held until the host ends BY ITSELF; no SIGKILL
+  tools/claims-v3/e216/desk/realpath_e216.py:313:    own 'never kill -9' / 'no kill -9' words are its statements of the rule, not a kill)"""
+  tools/claims-v3/e216/desk/realpath_e216.py:316:    t = re.sub(r"(never|no) (kill -9|SIGKILL|`?timeout -k`?)", "", t)
+  tools/claims-v3/e216/desk/realpath_e216.py:321:    return [("no SIGKILL, kill -9 or timeout -k in any record of the case", not any(w in t for w in ("SIGKILL", "kill -9", "timeout -k"))),
+  tools/claims-v3/e216/desk/realpath_e216.py:467:                           ("the host ended BY ITSELF (its stderr's last line 'device held for'; no SIGKILL could have let it write it)",
+  tools/claims-v3/e216/desk/standin_e216.py:14:                                                               and writes <MMS_FAKE_DIR>/host-hang.ended (nothing may kill it: no SIGKILL)
+(end of the kill words)
