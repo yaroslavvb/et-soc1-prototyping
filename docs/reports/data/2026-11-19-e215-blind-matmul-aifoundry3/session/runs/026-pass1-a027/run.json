@@ -1,0 +1,158 @@
+{
+ "n": 26,
+ "block": "pass1",
+ "id": "a027",
+ "name": "gemmL1x5x7.fp32.random.rgm211-gemmL",
+ "pair": null,
+ "arm": "A",
+ "run": "026-pass1-a027",
+ "gate": {
+  "c": 50.0,
+  "die": 50,
+  "waited_s": 7.5
+ },
+ "rest": {
+  "t0_ms": 1795119401821,
+  "t1_ms": 1795119411821
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/aifoundry/build/e215rgm/rgm211/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL1x5x7:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/aifoundry/build/e215rgm/rgm211/kernel/sparsity.elf",
+    "--stop-file",
+    "~/aifoundry/build/e215/T1795118755-A/STOP"
+   ],
+   "rc": 0,
+   "hung": false,
+   "t0_ms": 1795119411822,
+   "t1_ms": 1795119418752,
+   "n_launch": 15,
+   "runtime_other_cards": [],
+   "family": "rgm211 gemmL",
+   "host": "rgm211",
+   "kernel": "rgm211",
+   "gate": "GATE OK: rgm211 gemmL: rgm211, .text 82c7980716a0f0ca... the pinned one; ELF 70c066e830883d51... not the desk build's (sections the card never loads differ), its loadable identity 1351a569e4a200cb... the pinned one",
+   "walk_ok": true,
+   "walk_words": "walk mn on every launch, walk_ok true, walk_launches_bad 0",
+   "walk": {
+    "want": "mn",
+    "names": [
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn",
+     "mn"
+    ],
+    "ok": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "tagged": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "check_walk": "mn",
+    "launches_bad": 0
+   },
+   "tensor_errors": 0,
+   "launches_ok": true,
+   "check": "approx",
+   "check_ok": true,
+   "check_cycles_per_op": 1059.466,
+   "counted_cycles_per_op": 1057.96,
+   "stopped_by_file": false,
+   "k1": false,
+   "records": {
+    "runtime_lines": 0,
+    "unparsed": 0,
+    "mismatched": 0,
+    "other": 0
+   },
+   "launch_window_ms": [
+    1795119412115,
+    1795119418643
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 70,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "gate_words": "GATE OK: rgm211 gemmL: rgm211, .text 82c7980716a0f0ca... the pinned one; ELF 70c066e830883d51... not the desk build's (sections the card never loads differ), its loadable identity 1351a569e4a200cb... the pinned one",
+ "ran": true,
+ "work": {
+  "t0_ms": 1795119411822,
+  "t1_ms": 1795119418752
+ },
+ "tail_end_ms": 1795119422752,
+ "stop": null
+}
