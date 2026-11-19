@@ -1,0 +1,32 @@
+QUICK-SET-E215 (kit-e215's quick set, re-run by fix-e215, Q224): 2026-11-19 05:50:15 PST; /usr/bin/python3 3.12.3 -I -B; single-threaded (OMP/OPENBLAS/MKL/NUMEXPR 1); the scratch clone at 77f024488308 (the registration as a local commit, the kit's files untracked)
+== the registration's list and its subtree
+  OK   SHA256SUMS-e215-registration (35 entries) (0 s): REG-OK 35
+  OK   the registration commit's e215 subtree (0 s): e89e512f4b528c7429d454af0c372549ef233957
+== the registration's own checks (each its --check: rebuilt in memory and compared; nothing rewritten)
+  OK   points_e215.py candidates --check (0 s): points_e215 candidates --check: desk/candidates-e215.json rebuilt == committed: True
+  OK   points_e215.py --check (0 s): PASS
+  OK   forecast_e215.py --check (108 s): PASS
+  OK   rules_e215.py --check (70 s): PASS
+  OK   plan_e215.py --check (0 s): PASS
+  OK   desk/kernel_e215.py --check (0 s): PASS
+  NOT RUN desk/choose_e215b.py --check (this pass: it ran in the runbook test's P1B step-2 run)
+== the frozen scorer's three self-checks, byte-identical to the committed files (the forecasts print through rb/forecasts_print_e215.py, print only: fix-e215)
+  OK   score_e215.py --selftest-standins (31 s): score_e215 --selftest-standins: PASS (every day as stated: True; coverage of PASS and FAIL: True; head-to-head coverage: True; NOT DECIDED seen in 15 rules)
+  OK     ... byte-identical to selftest-standins.json (0 s): SAME
+  OK   score_e215.py --selftest-real (0 s): score_e215 --selftest-real: PASS
+  OK     ... byte-identical to selftest-real.json (0 s): SAME
+  OK   rb/forecasts_print_e215.py byte-identical to the committed forecasts-e215.txt, nothing written (0 s): SAME (the committed bytes and the file in the clone; files written by it: 0)
+== the kit's self-checks
+  OK   e215_common.py (0 s): E215-COMMON SELF-CHECK PASS
+  OK   e215_ident.py (0 s): E215-IDENT SELF-CHECK PASS
+  OK   ident_e215.py --check (0 s): CHECK PASS
+  OK   check_e215.py --check (harness-e215.json re-made) (0 s): CHECK PASS
+  OK   check_e215.py --box (every harness file at its sha256) (0 s): HARNESS OK: 61 files at harness-e215.json's sha256
+  OK   preflight_e215.sh (dmcmd_audit_v2 on the session's files, no WRITE allowed) (1 s): dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+  OK   a2/: fwgate_e215a2.py and fwgate.py through dmcmd_audit_v2 (no --allow) (0 s): dmcmd_audit: GO (1 send site(s), 0 disallowed; allow-list: none)
+  OK   the A2 form's pins (fwgate.py, its six records, the helper) in the clone (0 s): PINS-OK 8
+== every kit file parsed
+  OK   29 shell files (bash -n), 16 Python files (ast), 1 JSON files parse
+== the kill scan (no SIGKILL, no kill -9, no timeout -k in a kit file's code)
+  OK   0 kill calls in the kit's code (the words 'never' and the tests' refusals of '-k' aside)
+QUICK-SET-E215 PASS: 0 not as stated (2026-11-19 05:53:45 PST)
