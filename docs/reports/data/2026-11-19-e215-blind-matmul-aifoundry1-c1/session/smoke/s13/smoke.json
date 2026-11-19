@@ -1,0 +1,92 @@
+{
+ "name": "proc",
+ "argv": [
+  "~/nekko/build/e215rgm/rgm136/host/sparsity_host",
+  "--test",
+  "fma",
+  "--type",
+  "int8",
+  "--pattern",
+  "none",
+  "--values",
+  "gemmL2x4x1:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+  "--shires",
+  "0xffffffff",
+  "--per-shire",
+  "32",
+  "--seconds",
+  "2",
+  "--budget",
+  "3.5",
+  "--seed",
+  "1",
+  "--kernel",
+  "~/nekko/build/e215rgm/rgm136/kernel/sparsity.elf",
+  "--stop-file",
+  "~/nekko/build/e215/T1795124542-B/STOP"
+ ],
+ "rc": 0,
+ "hung": false,
+ "t0_ms": 1795124579139,
+ "t1_ms": 1795124582015,
+ "n_launch": 7,
+ "runtime_other_cards": [],
+ "family": "rgm136 gemmL",
+ "host": "rgm136",
+ "kernel": "rgm136",
+ "gate": "GATE OK: rgm136 gemmL: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones",
+ "walk_ok": true,
+ "walk_words": "no walk (rgm136's host prints none)",
+ "walk": {},
+ "tensor_errors": 0,
+ "launches_ok": true,
+ "check": "exact",
+ "check_ok": true,
+ "check_cycles_per_op": 787.413,
+ "counted_cycles_per_op": 787.413,
+ "stopped_by_file": false,
+ "k1": false,
+ "records": {
+  "runtime_lines": 1,
+  "unparsed": 0,
+  "mismatched": 0,
+  "other": 0
+ },
+ "launch_window_ms": [
+  1795124579304,
+  1795124581894
+ ],
+ "ident": {
+  "stderr_targets": [
+   "/dev/et1_ops"
+  ],
+  "stderr_ids": [
+   1
+  ],
+  "nodes_held": [
+   "/dev/et1_ops"
+  ],
+  "wrong": [],
+  "right": true,
+  "polls": 30,
+  "tripped": null
+ },
+ "cycles_band": [
+  200.0,
+  4000.0
+ ],
+ "cycles_band_is": "R0's: the smoke's counter mean 200-4,000 cycles an op (E215.md 7), read on the median over the process's counted launches (the scorer's reading)",
+ "cycles_in_band": true,
+ "identity_ok": true,
+ "kernel_stop": "",
+ "board_rise": {
+  "ok": true,
+  "rise_w": 10.92,
+  "samples": 26,
+  "rest_w": 27.67,
+  "min_w": 2.0
+ },
+ "good": true,
+ "a1_family_dropped": null,
+ "a1_session_level": ""
+}

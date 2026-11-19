@@ -1,0 +1,103 @@
+{
+ "n": 38,
+ "block": "pass1",
+ "id": "b030",
+ "name": "gemmL3x1x3.int8.real:blind4",
+ "pair": null,
+ "arm": "B",
+ "run": "038-pass1-b030",
+ "gate": {
+  "c": 47.0,
+  "die": 47,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795125458012,
+  "t1_ms": 1795125468012
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/nekko/build/e215rgm/rgm136/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "int8",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL3x1x3:tiles:tools/claims-v3/kinds/blind4/tiles/int8/int8.real_pythia_embed_mlpout.bin,tools/claims-v3/kinds/blind4/tiles/int8/int8.real_qwen_q_down.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/nekko/build/e215rgm/rgm136/kernel/sparsity.elf",
+    "--stop-file",
+    "~/nekko/build/e215/T1795124542-B/STOP"
+   ],
+   "rc": 0,
+   "hung": false,
+   "t0_ms": 1795125468013,
+   "t1_ms": 1795125474894,
+   "n_launch": 15,
+   "runtime_other_cards": [],
+   "family": "rgm136 gemmL",
+   "host": "rgm136",
+   "kernel": "rgm136",
+   "gate": "GATE OK: rgm136 gemmL: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones",
+   "walk_ok": true,
+   "walk_words": "no walk (rgm136's host prints none)",
+   "walk": {},
+   "tensor_errors": 0,
+   "launches_ok": true,
+   "check": "exact",
+   "check_ok": true,
+   "check_cycles_per_op": 865.886,
+   "counted_cycles_per_op": 865.929,
+   "stopped_by_file": false,
+   "k1": false,
+   "records": {
+    "runtime_lines": 1,
+    "unparsed": 0,
+    "mismatched": 0,
+    "other": 0
+   },
+   "launch_window_ms": [
+    1795125468166,
+    1795125474749
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et1_ops"
+    ],
+    "stderr_ids": [
+     1
+    ],
+    "nodes_held": [
+     "/dev/et1_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 70,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "gate_words": "GATE OK: rgm136 gemmL: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones",
+ "ran": true,
+ "work": {
+  "t0_ms": 1795125468013,
+  "t1_ms": 1795125474894
+ },
+ "tail_end_ms": 1795125478894,
+ "stop": null
+}

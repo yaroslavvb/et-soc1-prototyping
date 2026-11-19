@@ -1,0 +1,158 @@
+{
+ "n": 55,
+ "block": "pass2",
+ "id": "b012",
+ "name": "gemmLn3x1x2.int8.random.rgm211-gemmLn",
+ "pair": null,
+ "arm": "B",
+ "run": "055-pass2-b012",
+ "gate": {
+  "c": 47.0,
+  "die": 46,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795125831103,
+  "t1_ms": 1795125841103
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/nekko/build/e215rgm/rgm211/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "int8",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmLn3x1x2:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/nekko/build/e215rgm/rgm211/kernel/sparsity.elf",
+    "--stop-file",
+    "~/nekko/build/e215/T1795124542-B/STOP"
+   ],
+   "rc": 0,
+   "hung": false,
+   "t0_ms": 1795125841104,
+   "t1_ms": 1795125847987,
+   "n_launch": 15,
+   "runtime_other_cards": [],
+   "family": "rgm211 gemmLn",
+   "host": "rgm211",
+   "kernel": "rgm211",
+   "gate": "GATE OK: rgm211 gemmLn: rgm211, .text 82c7980716a0f0ca... and the whole ELF 00402801a1a53a93... the pinned ones",
+   "walk_ok": true,
+   "walk_words": "walk nm on every launch, walk_ok true, walk_launches_bad 0",
+   "walk": {
+    "want": "nm",
+    "names": [
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm",
+     "nm"
+    ],
+    "ok": [
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true,
+     true
+    ],
+    "tagged": [
+     1024,
+     1024,
+     1024,
+     1024,
+     1024,
+     1024,
+     1024,
+     1024,
+     1024,
+     1024,
+     1024,
+     1024,
+     1024,
+     1024,
+     1024
+    ],
+    "check_walk": "nm",
+    "launches_bad": 0
+   },
+   "tensor_errors": 0,
+   "launches_ok": true,
+   "check": "exact",
+   "check_ok": true,
+   "check_cycles_per_op": 747.129,
+   "counted_cycles_per_op": 747.124,
+   "stopped_by_file": false,
+   "k1": false,
+   "records": {
+    "runtime_lines": 1,
+    "unparsed": 0,
+    "mismatched": 0,
+    "other": 0
+   },
+   "launch_window_ms": [
+    1795125841286,
+    1795125847863
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et1_ops"
+    ],
+    "stderr_ids": [
+     1
+    ],
+    "nodes_held": [
+     "/dev/et1_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 70,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "gate_words": "GATE OK: rgm211 gemmLn: rgm211, .text 82c7980716a0f0ca... and the whole ELF 00402801a1a53a93... the pinned ones",
+ "ran": true,
+ "work": {
+  "t0_ms": 1795125841104,
+  "t1_ms": 1795125847987
+ },
+ "tail_end_ms": 1795125851987,
+ "stop": null
+}

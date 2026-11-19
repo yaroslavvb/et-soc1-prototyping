@@ -1,0 +1,103 @@
+{
+ "n": 16,
+ "block": "pass1",
+ "id": "b025",
+ "name": "gemmL4x1x10.int8.random",
+ "pair": null,
+ "arm": "B",
+ "run": "016-pass1-b025",
+ "gate": {
+  "c": 47.0,
+  "die": 47,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795124963049,
+  "t1_ms": 1795124973049
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/nekko/build/e215rgm/rgm136/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "int8",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL4x1x10:randn:tools/claims-v3/kinds/tiles/int8/full.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/nekko/build/e215rgm/rgm136/kernel/sparsity.elf",
+    "--stop-file",
+    "~/nekko/build/e215/T1795124542-B/STOP"
+   ],
+   "rc": 0,
+   "hung": false,
+   "t0_ms": 1795124973050,
+   "t1_ms": 1795124980230,
+   "n_launch": 15,
+   "runtime_other_cards": [],
+   "family": "rgm136 gemmL",
+   "host": "rgm136",
+   "kernel": "rgm136",
+   "gate": "GATE OK: rgm136 gemmL: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones",
+   "walk_ok": true,
+   "walk_words": "no walk (rgm136's host prints none)",
+   "walk": {},
+   "tensor_errors": 0,
+   "launches_ok": true,
+   "check": "exact",
+   "check_ok": true,
+   "check_cycles_per_op": 1423.582,
+   "counted_cycles_per_op": 1422.842,
+   "stopped_by_file": false,
+   "k1": false,
+   "records": {
+    "runtime_lines": 1,
+    "unparsed": 0,
+    "mismatched": 0,
+    "other": 0
+   },
+   "launch_window_ms": [
+    1795124973309,
+    1795124979972
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et1_ops"
+    ],
+    "stderr_ids": [
+     1
+    ],
+    "nodes_held": [
+     "/dev/et1_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 73,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "gate_words": "GATE OK: rgm136 gemmL: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones",
+ "ran": true,
+ "work": {
+  "t0_ms": 1795124973050,
+  "t1_ms": 1795124980230
+ },
+ "tail_end_ms": 1795124984230,
+ "stop": null
+}
