@@ -1,0 +1,99 @@
+{
+ "i": 25,
+ "block": "BP1a",
+ "role": "arm",
+ "arm": "1x2x10-fp32-ones",
+ "run": "025-1x2x10-fp32-ones",
+ "form": "burst",
+ "sched": {
+  "arm": "1x2x10-fp32-ones",
+  "block": "BP1a",
+  "est_peak_w": 49.0,
+  "est_s": 34.5,
+  "form": "burst",
+  "i": 25,
+  "role": "arm",
+  "shires": "0xffffffff",
+  "test": "fma",
+  "type": "fp32",
+  "unit": "BP1a:1x2x10-fp32-u",
+  "values": "gemmL1x2x10:tiles:src/tiles/fp32/ones.bin"
+ },
+ "gate": {
+  "c": 47.0,
+  "die": 47,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795049901936,
+  "t1_ms": 1795049911936
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "build/rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL1x2x10:tiles:src/tiles/fp32/ones.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "build/rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "sessions/1795049224-a1c1-S1/STOP"
+   ],
+   "rc": 0,
+   "t0_ms": 1795049911936,
+   "t1_ms": 1795049918811,
+   "n_launch": 15,
+   "launches_ok": true,
+   "check": "exact",
+   "check_ok": true,
+   "check_cycles_per_op": 1316.614,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1795049912250,
+    1795049918707
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et1_ops"
+    ],
+    "stderr_ids": [
+     1
+    ],
+    "nodes_held": [
+     "/dev/et1_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 70,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1795049911936,
+  "t1_ms": 1795049918812
+ },
+ "tail": {
+  "t0_ms": 1795049918812,
+  "t1_ms": 1795049923812
+ }
+}
