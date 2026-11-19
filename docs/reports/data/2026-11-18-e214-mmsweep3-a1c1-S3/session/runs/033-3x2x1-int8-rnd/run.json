@@ -1,0 +1,99 @@
+{
+ "i": 33,
+ "block": "MQ4",
+ "role": "arm",
+ "arm": "3x2x1-int8-rnd",
+ "run": "033-3x2x1-int8-rnd",
+ "form": "burst",
+ "sched": {
+  "arm": "3x2x1-int8-rnd",
+  "block": "MQ4",
+  "est_peak_w": 45.1,
+  "est_s": 34.4,
+  "form": "burst",
+  "i": 33,
+  "role": "arm",
+  "shires": "0xffffffff",
+  "test": "fma",
+  "type": "int8",
+  "unit": "MQ4:3x2x1-int8-u",
+  "values": "gemmL3x2x1:randn:src/tiles/int8/full.bin"
+ },
+ "gate": {
+  "c": 48.0,
+  "die": 47,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795060370137,
+  "t1_ms": 1795060380137
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "build/rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "int8",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL3x2x1:randn:src/tiles/int8/full.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "build/rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "sessions/1795059484-a1c1-S3/STOP"
+   ],
+   "rc": 0,
+   "t0_ms": 1795060380137,
+   "t1_ms": 1795060386963,
+   "n_launch": 15,
+   "launches_ok": true,
+   "check": "exact",
+   "check_ok": true,
+   "check_cycles_per_op": 807.73,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1795060380400,
+    1795060386880
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et1_ops"
+    ],
+    "stderr_ids": [
+     1
+    ],
+    "nodes_held": [
+     "/dev/et1_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 69,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1795060380137,
+  "t1_ms": 1795060386963
+ },
+ "tail": {
+  "t0_ms": 1795060386963,
+  "t1_ms": 1795060391963
+ }
+}
