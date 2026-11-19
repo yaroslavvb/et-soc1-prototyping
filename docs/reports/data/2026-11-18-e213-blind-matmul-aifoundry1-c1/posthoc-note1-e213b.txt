@@ -1,0 +1,50 @@
+E213 arm B data, dated note 1 (post hoc): the never-run judgement's exact counts (posthoc_note1_e213b.py)
+
+1. The inputs, checked against SHA256SUMS (the data commit's list)
+   judge-e213-card.json: sha256 7c653351bf8bfe3af8fb40a370a20905e0d55ebd8626cc83a97ffa673e574cdd OK (listed)
+   judge-e213-card.txt: sha256 104d5ffa824c7f4adffd4c7652c64d07529b6db78eccd9b83f625ac0d08e8003 OK (listed)
+   labels-e213.json: sha256 d801cae792a59f2e20cb92724310d46436605421a856a9bd34b1cd1f9f161184 OK (listed)
+   README.md: sha256 5902e620f45da3a2fb172cb2100cbc4738f2be081ae2d27585d76741ec286164 (not listed in SHA256SUMS, by design)
+
+2. The judgement (judge-e213-card.json)
+   arm B, aifoundry1 card 1; search 2026-11-18 15:14:18 PST to 2026-11-18 15:14:35 PST; files read 73519; scan e8441dc36c23
+   freeze line: the registration commit 291c8201, 2026-11-18 04:18:23 PST
+   points judged 40; never ran 0 of 40; ran before 0; ran after (REPORTED, kept) 40
+   labels in the judgement {"B": {"ran_before_cases": [], "ran_before_points": []}}; labels-e213.json equal to them: True
+
+3. The counted hits in the JSON (every counted file of every point)
+   hits (a point and one counted file naming its shape): 126
+   distinct files: 12
+   by lane folder: {"data-e214": 126}
+   by date: {"2026-11-18 06:29:02 PST": 16, "2026-11-18 13:42:16 PST": 110}
+   by class: {"aifoundry1 card 1": 16, "no card named": 110}
+   marked before the freeze line: 0; dated after it: 126 of 126
+   counted files a point: {"2": 32, "7": 2, "8": 6} (files: points)
+   the files, each with its date, class and the number of points it names:
+     W/out/data-e214/work/src/arms.json | 2026-11-18 06:29:02 PST (its modification time) | no card named | 8 points
+     W/out/data-e214/work/src/sched/a1c1-S1.json | 2026-11-18 06:29:02 PST (its modification time) | aifoundry1 card 1 | 2 points
+     W/out/data-e214/work/src/sched/a1c1-S3.json | 2026-11-18 06:29:02 PST (its modification time) | aifoundry1 card 1 | 4 points
+     W/out/data-e214/work/src/sched/a1c1-S4.json | 2026-11-18 06:29:02 PST (its modification time) | aifoundry1 card 1 | 2 points
+     W/out/data-e214/work/reg-tree/tools/claims-v3/e214/E214.md | 2026-11-18 13:42:16 PST (its modification time) | no card named | 6 points
+     W/out/data-e214/work/reg-tree/tools/claims-v3/e214/desk/configs-e214.json | 2026-11-18 13:42:16 PST (its modification time) | no card named | 40 points
+     W/out/data-e214/work/reg-tree/tools/claims-v3/e214/desk/neverrun-e214.json | 2026-11-18 13:42:16 PST (its modification time) | no card named | 8 points
+     W/out/data-e214/work/reg-tree/tools/claims-v3/e214/desk/scan-e214.json | 2026-11-18 13:42:16 PST (its modification time) | no card named | 40 points
+     W/out/data-e214/work/reg-tree/tools/claims-v3/e214/proposal/src/arms.json | 2026-11-18 13:42:16 PST (its modification time) | no card named | 8 points
+     W/out/data-e214/work/reg-tree/tools/claims-v3/e214/proposal/src/sched/a1c1-S1.json | 2026-11-18 13:42:16 PST (its modification time) | aifoundry1 card 1 | 2 points
+     W/out/data-e214/work/reg-tree/tools/claims-v3/e214/proposal/src/sched/a1c1-S3.json | 2026-11-18 13:42:16 PST (its modification time) | aifoundry1 card 1 | 4 points
+     W/out/data-e214/work/reg-tree/tools/claims-v3/e214/proposal/src/sched/a1c1-S4.json | 2026-11-18 13:42:16 PST (its modification time) | aifoundry1 card 1 | 2 points
+
+4. The text form (judge-e213-card.txt: at most the first 6 counted files a point)
+   point lines: 40; names of a lane-folder file: 112; by lane folder: {"data-e214": 112}
+   by date: {"2026-11-18 06:29:02 PST": 2, "2026-11-18 13:42:16 PST": 110}
+   points whose text names exactly the JSON's first 6 (or all) counted files, in order: 40 of 40
+   points with more than 6 counted files: 8 (k01 k02 k03 k04 k20 k21 k22 k23); the files the text leaves out: 14
+
+5. The README's figure (its results row, the never-run search)
+   it reads: "the judgement's named hits by lane folder: {"data-e214": 112}"
+   equal to the text form's names by lane folder: True; equal to the JSON's hits by lane folder: False
+
+6. So
+   the judgement holds 126 counted hits in 12 distinct files, every one under the lane folder data-e214, every one dated after the freeze line and none marked before it;
+   the README's 112 counts the text form's file names, which stop at 6 a point (14 names left out at 8 points);
+   the labels stay empty and every point stays in every rule (40 of 40 'ran after (REPORTED, kept)'). Nothing changes.
