@@ -1,0 +1,97 @@
+E215 arm B data, dated note 1 (post hoc): the arm A line of this directory's never-run report, read against arm A's own step 6n and E217's registration tree. Desk arithmetic on committed records (posthoc_note1_e215b.py, standard library only).
+
+1. Inputs, each checked first:
+   arm B step 6n files (this directory's SHA256SUMS): 4 of 4 OK
+   arm A step 6n files (arm A's SHA256SUMS): 4 of 4 OK
+   E215's candidates (SHA256SUMS-e215-registration): 1 of 1 OK
+   E217's registration tree (SHA256SUMS-e217-registration): 95 of 95 OK
+   the registered scanners: neverrun_e215.py 9e68b0012dd7, neverrun_e213.py d603ff8b4fac (pins OK)
+   both reports read the same candidates: yes
+
+2. The two step-6n reports (the registered scanner's report always prints both arms; the card tool judges only its own arm):
+   arm A's day (arm A's directory): scan d7af0eb066e3 over 84115 files, 2026-11-19 12:05:06 PST - 2026-11-19 12:05:17 PST
+     report row, arm A: 60 of 60 scored points never ran; 0 read otherwise
+     report row, arm B: 30 of 30 scored points never ran; 0 read otherwise
+     judgement of arm A only (2026-11-19 12:05:06 PST - 2026-11-19 12:05:17 PST): 60 of 60 never ran; labelled 'ran before': none; REPORTED and kept: 0
+   arm B's day (this directory): scan 058bffe8be5e over 83260 files, 2026-11-19 13:41:38 PST - 2026-11-19 13:41:49 PST
+     report row, arm A: 5 of 60 scored points never ran; 55 read otherwise
+     report row, arm B: 4 of 30 scored points never ran; 26 read otherwise
+     judgement of arm B only (2026-11-19 13:41:38 PST - 2026-11-19 13:41:58 PST): 4 of 30 never ran; labelled 'ran before': none; REPORTED and kept: 26
+
+3. Arm A's rows (62): the verdict at each scan, the change in counted files holding the shape, and E217's files that meet the row's reading (62 of E217's 95 registered files read; 33 skipped by the scanner's own extensions):
+   id   fam shape            mask / kind               12:05   13:41   files with shape 12:05 -> 13:41 (change) | E217 files holding the shape | E217 files meeting the reading; configs-e217.json rows of that configuration
+   a001 L   gemmL1x9x6       0xf0ffffff                never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a002 L   gemmL1x9x6       0xff0fffff                never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a003 L   gemmL1x9x6       0xfff0ffff                never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a004 L   gemmL1x9x6       0xffff0fff                never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a005 L   gemmL1x9x6       0xfffff0ff                never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a006 L   gemmL1x9x6       0xffffff0f                never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a007 L   gemmL1x9x6       0xfffffff                 never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a008 L   gemmL1x9x6       0xfffffff0                never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a009 L   gemmL1x9x6       0xbbbbbbbb                never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a010 L   gemmL1x9x6       0xdddddddd                never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a011 L   gemmL1x6x5       0x33000333                never   ran     48 -> 50 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a012 L   gemmL1x2x13      0x77007707                never   ran     44 -> 46 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a013 L   gemmL2x3x5       0x99990000                never   ran     72 -> 74 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a014 L   gemmL8x1x4       0x30000000                never   ran     220 -> 222 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a015 L   gemmL1x9x6       0x2002202                 never   ran     81 -> 83 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a016 L   gemmL2x6x10      0x4404444                 never   ran     287 -> 296 (+9) | 9 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a017 L   gemmL1x8x6       0xd000dd0                 never   ran     158 -> 160 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a018 L   gemmL2x4x16      0x990009                  never   ran     273 -> 275 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a019 L   gemmL1x7x6       0x10100000                never   ran     149 -> 154 (+5) | 5 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a020 L   gemmL2x4x4       0xee0e00                  never   ran     488 -> 490 (+2) | 2 | configs-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a021 P   gemmLn1x15x3                               never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a022 P   gemmLn1x12x4                               never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a023 P   gemmLn1x10x5                               never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a024 P   gemmLnc1x15x3                              never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a025 P   gemmLn1x9x6                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a026 P   gemmLnc1x12x4                              never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a027 P   gemmL1x5x7                                 never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a028 P   gemmL1x15x1                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a029 P   gemmL1x4x5                                 never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a030 P   gemmL1x10x1                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a031 P   gemmLnc8x1x5                               never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a032 P   gemmLnc5x1x10                              never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a033 C   gemmL2x15x2                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a034 C   gemmL3x15x2                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a035 C   gemmL10x15x2                               never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a036 C   gemmL11x15x2                               never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a037 C   gemmL12x15x2                               never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a038 C   gemmL11x11x1                               never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a039 C   gemmL8x15x1                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a040 C   gemmL4x13x1                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a041 C   gemmL15x9x2                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a042 C   gemmL16x9x2                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a043 R   gemmL2x1x7                                 never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a044 R   gemmL2x1x7                                 never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a045 R   gemmL1x1x41                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a046 R   gemmL1x1x41                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a047 R   gemmL1x1x39                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a048 R   gemmL2x3x12                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a049 R   gemmL2x2x11                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a050 R   gemmL1x4x22                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a051 R   gemmL1x1x37                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a052 R   gemmL2x2x11                                never   ran     0 -> 2 (+2) | 2 | configs-e217.json, scan-e217.json; PLANNED (E215 arm A, registered; not run at this index)
+   a053 S   gemmL3x1x3       int8.pattern:i8_den6      never   never   152 -> 157 (+5) | 5 | none
+   a054 S   gemmL3x1x3       int8.pattern:i8_den3      never   never   152 -> 157 (+5) | 5 | none
+   a055 S   gemmL3x1x3       fp32.pattern:pow2         never   ran     152 -> 157 (+5) | 5 | card-record-e217.txt; gemmL1x1x1:tiles:src/tiles/fp32/pow2.bin
+   a056 S   gemmL3x1x3       fp32.pattern:den21        never   never   152 -> 157 (+5) | 5 | none
+   a057 S   gemmL3x1x3       int8.pattern:i8_pm1       never   never   152 -> 157 (+5) | 5 | none
+   a058 S   gemmL3x1x3       fp32.pattern:lanes2       never   ran     152 -> 157 (+5) | 5 | card-record-e217.txt; gemmL1x1x1:tiles:src/tiles/fp32/lanes2.bin
+   a059 S   gemmL3x1x3       fp32.pattern:fp16grid     never   never   152 -> 157 (+5) | 5 | none
+   a060 S   gemmL3x1x3       fp32.pattern:bf16trunc    never   ran     152 -> 157 (+5) | 5 | card-record-e217.txt; gemmL1x1x1:tiles:src/tiles/fp32/bf16trunc.bin
+   r01  S-ref gemmL3x1x3                                 ran     ran     152 -> 157 (+5) | 5 | configs-e217.json, neverrun-e217.json, scan-e217.json, arms.json, a1c0-S2.json; PLANNED (E215 arm A, registered; not run at this index)
+   r02  S-ref gemmL3x1x3                                 ran     ran     152 -> 157 (+5) | 5 | configs-e217.json, neverrun-e217.json, scan-e217.json, arms.json, a1c0-S2.json; PLANNED (E215 arm A, registered; not run at this index)
+
+4. Summary:
+   arm A's own step 6n: 60 of 60 scored points never ran (its judgement and labels: labelled none)
+   arm B's step 6n, its arm A row: 5 of 60; read otherwise there only: 55; of them met by a file of E217's registration tree: 55
+     family L: 20 rows, 20 read otherwise at 13:41, 20 of them met by E217 files
+     family P, C, R: 32 rows, 32 read otherwise at 13:41, 32 of them met by E217 files
+     family S: 8 rows, 3 read otherwise at 13:41, 3 of them met by E217 files
+   rows whose change in counted files equals the E217 files holding the shape: 62 of 62
+   S points still never run at 13:41: a053 int8.pattern:i8_den6, a054 int8.pattern:i8_den3, a056 fp32.pattern:den21, a057 int8.pattern:i8_pm1, a059 fp32.pattern:fp16grid; any E217 run record of their kinds: none
+   configs-e217.json rows of E215 arm A: 62, status ['PLANNED (E215 arm A, registered; not run at this index)']
+   scan-e217.json: the P, C and R shapes it holds only in its own SUBTRACTED class (files of E215's folders, set apart by E217's scan): 32 of 32
+   card-record-e217.txt: its GEMM run strings of the S kinds: gemmL1x1x1:tiles:src/tiles/fp32/bf16trunc.bin, gemmL1x1x1:tiles:src/tiles/fp32/lanes2.bin, gemmL1x1x1:tiles:src/tiles/fp32/pow2.bin
+   checks failed: none

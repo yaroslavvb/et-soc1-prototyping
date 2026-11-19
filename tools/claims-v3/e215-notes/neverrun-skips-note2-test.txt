@@ -1,0 +1,46 @@
+neverrun_skips_note2_test.py: T0 (the registered scan) 2026-11-19 15:19:49 PST - 2026-11-19 15:20:00 PST, 84214 files; T1 (the wrapped scan) 2026-11-19 15:20:00 PST - 2026-11-19 15:20:13 PST, 84214 files; the fix skipped or thinned 126 files holding a shape or a GEMM run string, by rule {'SKIP-DESK': 70, 'SKIP-NRDESK': 56}
+1. accounting: 2647 (shape, class) cells, 2378 changed from T0 to T1, every change equal to the skipped files' count and masks: yes; 65 (S kind, class) cells, every change equal to the skipped files' GEMM run strings: yes
+2. skipped files that are run records (run.json, proc-*, telemetry, session.log, queue.json, runner.out): 0
+   skipped or thinned files by rule and folder (files; their classes):
+     SKIP-DESK    W/out/card-e207: 2 (aifoundry3 card 0)
+     SKIP-DESK    W/out/card-e210: 1 (aifoundry3 card 0)
+     SKIP-DESK    W/out/card-e211: 2 (aifoundry3 card 0)
+     SKIP-DESK    W/out/card-e213a: 1 (aifoundry1 card 1)
+     SKIP-DESK    W/out/data-e212: 15 (aifoundry1 card 0, aifoundry1 card 1, aifoundry2 card 0, no card named)
+     SKIP-DESK    W/out/data-e212s3: 16 (aifoundry1 card 0, aifoundry1 card 1, aifoundry2 card 0, no card named)
+     SKIP-DESK    W/out/data-e214: 16 (aifoundry1 card 0, aifoundry1 card 1, no card named)
+     SKIP-DESK    W/out/data-e217: 17 (aifoundry1 card 0, aifoundry1 card 1, no card named)
+     SKIP-NRDESK  W/out/card-e206a: 2 (aifoundry3 card 0)
+     SKIP-NRDESK  W/out/card-e206b2: 2 (aifoundry1 card 1)
+     SKIP-NRDESK  W/out/card-e207: 2 (aifoundry3 card 0)
+     SKIP-NRDESK  W/out/card-e209: 3 (aifoundry2 card 0)
+     SKIP-NRDESK  W/out/card-e210: 3 (aifoundry3 card 0)
+     SKIP-NRDESK  W/out/card-e211: 4 (aifoundry3 card 0)
+     SKIP-NRDESK  W/out/card-e213a: 8 (aifoundry1 card 1, aifoundry3 card 0)
+     SKIP-NRDESK  W/out/card-e213b2: 5 (aifoundry1 card 1)
+     SKIP-NRDESK  W/out/card-e215a: 3 (SUBTRACTED)
+     SKIP-NRDESK  W/out/card-e215b: 5 (SUBTRACTED)
+     SKIP-NRDESK  docs/reports/data: 19 (SUBTRACTED, aifoundry1 card 1, aifoundry2 card 0, aifoundry3 card 0)
+   of them in the lab's committed data folders: 19
+     docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/neverrun-e207-card.json
+     docs/reports/data/2026-11-17-e207-blind-matmul-aifoundry3/neverrun-e207-card.txt
+     docs/reports/data/2026-11-17-e209-blind-matmul-aifoundry2/neverrun-e209-card.txt
+     docs/reports/data/2026-11-17-e210-switch-test-aifoundry3/neverrun-e210-card.txt
+     docs/reports/data/2026-11-17-e210-switch-test-aifoundry3/neverrun-e210-late.txt
+     docs/reports/data/2026-11-17-e211-second-kernel-aifoundry3/neverrun-e211-card.json
+     docs/reports/data/2026-11-17-e211-second-kernel-aifoundry3/neverrun-e211-card.txt
+     docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry1-c1/judge-e213-card.json
+     docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry1-c1/judge-e213-card.txt
+     docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry1-c1/neverrun-e213-card.json
+     docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry1-c1/neverrun-e213-card.txt
+     docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry3/neverrun-e213-card.json
+     docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry3/neverrun-e213-card.txt
+     docs/reports/data/2026-11-19-e215-blind-matmul-aifoundry1-c1/judge-e215-card.json
+     docs/reports/data/2026-11-19-e215-blind-matmul-aifoundry1-c1/judge-e215-card.txt
+     docs/reports/data/2026-11-19-e215-blind-matmul-aifoundry1-c1/neverrun-e215-card.json
+     docs/reports/data/2026-11-19-e215-blind-matmul-aifoundry1-c1/neverrun-e215-card.txt
+     docs/reports/data/2026-11-19-e215-blind-matmul-aifoundry3/neverrun-e215-card.json
+     docs/reports/data/2026-11-19-e215-blind-matmul-aifoundry3/neverrun-e215-card.txt
+3. arm A: T0 5 of 60 never ran, T1 60 of 60; rows changed 55 (T0 not never run -> T1 never run: 55); references T0 ['r01', 'r02'], T1 ['r01', 'r02']
+3. arm B: T0 4 of 30 never ran, T1 30 of 30; rows changed 26 (T0 not never run -> T1 never run: 26); references T0 ['r11', 'r12'], T1 ['r11', 'r12']
+TEST PASS: every T0-to-T1 change is a skipped file's; no run record skipped
