@@ -1,0 +1,47 @@
+# E217: the lab's re-make of arms.json and the seven schedules without the plan (make_schedule2.py and tiles_gen.py, the proposal's own functions)
+arms.json: kit 1119-mmsweep4, seed 1119-mmsweep4, 332 arms (with the anchor), 24 tiles, sessions {"a1c0": ["S1", "S2", "S3"], "a1c1": ["S1", "S2", "S3", "S4"]}
+
+## A. the plan tiles' records from their bytes (toggle reference: the lab's randn tile, int8 full.bin)
+reference toggles: fp32 0.425659, fp16 0.422852, int8 0.501709
+EQUAL   tile gt125      fp32 gen tiles    K 512: 512 exact; toggle a 0.0010 b 0.0000 ratio 0.0023; ok
+EQUAL   tile gt25       fp32 gen tiles    K 512,4096: 512 exact, 4096 exact; toggle a 0.0020 b 0.0000 ratio 0.0046; ok
+EQUAL   tile gt875      fp32 gen tiles    K 512: 512 exact; toggle a 0.0000 b 0.0000 ratio 0.0; ok
+EQUAL   tile h_gt25     fp16 gen tiles    K 1024: 1024 exact; toggle a 0.0000 b 0.0000 ratio 0.0; ok
+EQUAL   tile h_rt32     fp16 gen tiles    K 1024: 1024 exact; toggle a 0.1562 b 0.0000 ratio 0.3695; ok
+EQUAL   tile h_rt64     fp16 gen tiles    K 1024: 1024 exact; toggle a 0.0625 b 0.0000 ratio 0.1478; ok
+EQUAL   tile h_sg       fp16 gen tiles    K 1024: 1024 exact; toggle a 0.0020 b 0.0000 ratio 0.0046; ok
+EQUAL   tile h_th_in    fp16 gen tiles    K 1024: 1024 approx; toggle a 0.4331 b 0.4219 ratio 1.0242; ok
+EQUAL   tile i8_t06     int8 gen tiles    K 2048,16384: 2048 exact, 16384 exact; toggle a 0.0000 b 0.0195 ratio 0.0389; ok
+EQUAL   tile i8_t1      int8 gen tiles    K 2048: 2048 exact; toggle a 0.0000 b 0.0293 ratio 0.0584; ok
+EQUAL   tile i8_t2      int8 gen tiles    K 2048: 2048 exact; toggle a 0.0000 b 0.0273 ratio 0.0545; ok
+EQUAL   tile i8_t3      int8 gen tiles    K 2048: 2048 exact; toggle a 0.0000 b 0.0083 ratio 0.0165; ok
+EQUAL   tile i8_t46     int8 gen tiles    K 2048,16384: 2048 exact, 16384 exact; toggle a 0.5430 b 0.5049 ratio 1.0822; ok
+EQUAL   tile i8_t5      int8 gen tiles    K 2048,16384: 2048 exact, 16384 exact; toggle a 0.0000 b 0.0112 ratio 0.0224; ok
+EQUAL   tile rt16       fp32 gen tiles    K 512: 512 exact; toggle a 0.0000 b 0.0000 ratio 0.0; ok
+EQUAL   tile rt32       fp32 gen tiles    K 512,4096: 512 exact, 4096 exact; toggle a 0.1562 b 0.0000 ratio 0.3671; ok
+EQUAL   tile rt32b      fp32 gen tiles    K 512: 512 exact; toggle a 0.0000 b 0.2500 ratio 0.5873; ok
+EQUAL   tile rt64       fp32 gen tiles    K 512: 512 exact; toggle a 0.0781 b 0.0000 ratio 0.1835; ok
+EQUAL   tile sg_kk      fp32 gen tiles    K 512: 512 exact; toggle a 0.0273 b 0.0273 ratio 0.0642; ok
+EQUAL   tile sgm1       fp32 gen tiles    K 512: 512 exact; toggle a 0.0039 b 0.0000 ratio 0.0092; ok
+EQUAL   tile sparse50f  fp32 gen sparse50 K 2048,4096: 2048 drawn, 4096 drawn; toggle a 0.3821 b 0.3799 ratio 0.8976; ok
+EQUAL   tile sparse50h  fp16 gen sparse50 K 1024,3072,8192: 1024 drawn, 3072 drawn, 8192 drawn; toggle a 0.3750 b 0.3694 ratio 0.8868; ok
+EQUAL   tile sparse50i  int8 gen sparse50 K 6144,8192,14336,18432,24576: 6144 drawn, 8192 drawn, 14336 drawn, 18432 drawn, 24576 drawn; toggle a 0.3743 b 0.3982 ratio 0.7937; ok
+EQUAL   tile th_top     fp32 gen tiles    K 512: 512 approx; toggle a 0.4648 b 0.4219 ratio 1.0921; ok
+
+## B. the arm records from their plan fields (make_schedule2.arm_rec), the anchor (anchor_rec), arms.json byte for byte
+anchor 4x8x8-int8-rnd: EQUAL
+arm records equal: 331 of 331
+arms.json's arms in id order (as make() sorts them): True
+arms.json re-made byte for byte: EQUAL
+
+## C. the seven schedules, byte for byte, from the arm records and each schedule's own blocks (make_schedule2.schedule)
+EQUAL   a1c0-S1: 91 runs, blocks SIM0 BL1 BLs1 MG1; reverse no; nulls set none; planned 59.3, rule 65, cap 72, line 52 W, highest estimate 51.5 W
+EQUAL   a1c0-S2: 89 runs, blocks KB1a LV1 TC1 TC2 BL2 NS0 BLs2; reverse no; nulls set none; planned 56.6, rule 65, cap 72, line 52 W, highest estimate 51.0 W
+EQUAL   a1c0-S3: 87 runs, blocks MQ3 LV2 KB1b TC1R TC2R BL3 MG3 TC3; reverse yes; nulls set none; planned 54.2, rule 60, cap 67, line 52 W, highest estimate 51.0 W
+EQUAL   a1c1-S1: 92 runs, blocks SIM1 BL1 BLs1 MG1; reverse no; nulls set none; planned 59.9, rule 65, cap 72, line 70 W, highest estimate 58.5 W
+EQUAL   a1c1-S2: 88 runs, blocks KB1a LV1 TT1 TT2 TT5 BL2a NS1 BLs2 MG3; reverse no; nulls set none; planned 56.9, rule 65, cap 72, line 70 W, highest estimate 66.6 W
+EQUAL   a1c1-S3: 94 runs, blocks BL2b MG2 MQ3 LV2 KB1b TT3 TT6; reverse no; nulls set none; planned 58.1, rule 65, cap 72, line 70 W, highest estimate 64.4 W
+EQUAL   a1c1-S4: 89 runs, blocks LV1R SP16 TT1R TT2R TT5R TT3R BL3 BLs3 TT7; reverse yes; nulls set none; planned 56.6, rule 65, cap 72, line 70 W, highest estimate 66.6 W
+schedules re-made byte for byte: 7 of 7
+
+REMAKE PASS (0 difference(s))

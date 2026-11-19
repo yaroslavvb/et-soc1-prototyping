@@ -1,0 +1,371 @@
+# E217 desk checks on the registered source (run Thu 19 Nov 2026 11:54:45 PST)
+# interpreter: /usr/bin/python3 3.12.3 -I -B; no device opened, no simulator
+
+## 1. sha256sum -c src/SRC-SHA256SUMS
+OK 74 of 74 listed files; files in src/: 75 (the list and the 74 it names)
+sha256 of src/SRC-SHA256SUMS: 7a3b4aac3383e8aad417eb14e53638e155aaf23971811c45624f52e94b56c888
+
+## 2. src/check_mms.py --check
+src/SRC-SHA256SUMS re-made: equal
+CHECK PASS
+rc 0
+
+## 3. src/make_schedule2.py --check (plan.json beside src/: absent)
+MAKE CHECK FAIL: no plan.json beside src/, but src/ holds what a plan made: ['arms.json', 'sched/a1c0-S1.json', 'sched/a1c0-S2.json', 'sched/a1c0-S3.json', 'sch
+rc 1
+
+## 4. src/mms_common.py (self-check)
+MMS-COMMON SELF-CHECK PASS
+rc 0
+
+## 5. src/mms_ident.py (self-check)
+MMS-IDENT SELF-CHECK PASS
+rc 0
+
+## 6. src/tiles_gen.py --check (plan.json beside src/: absent)
+tiles: 9 of the lab's, 0 of the plan's (no plan.json beside src/)
+TILES CHECK FAIL: src/tiles/fp32/gt125.bin: neither the lab's nor the plan's; src/tiles/fp32/gt25.bin: neither the lab's nor the plan's; src/tiles/fp32/gt875.bi
+rc 1
+
+## 7. the lab's device-command audit on the session's files
+audit tool: tools/claims-v3/dmcmd_audit.py, sha256 f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e; src/dmcmd/dmcmd_audit.py f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e
+dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+src/guard_ettelem.sh:33: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      2 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      2 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+rc 0
+
+## 8. the copied files against the lab's committed files (the mapping of src/README.md), and the plan tiles already in the lab
+EQUAL 123ef6e4ac1572d31914b6049fa700b30af1338c13cc96ec850cd047966dfcfd src/rgm136/CMakeLists.txt = tools/claims-v3/e136/rgm136/CMakeLists.txt
+EQUAL 52815705cbea14c0aea28c81a9e094bbe9e16a04280cb67db5a975aa35d5f8ef src/rgm136/README.md = tools/claims-v3/e136/rgm136/README.md
+EQUAL a7e0144ef468dec18ed2d20ec150688a825d6482f17fa7be4dc23c7d17a15332 src/rgm136/sparsity_args.h = tools/claims-v3/e136/rgm136/sparsity_args.h
+EQUAL 6b6c1c80139ec0eadc8940bb93c264806412ab93ae90779d9ec6ad13d88a0477 src/rgm136/host/CMakeLists.txt = tools/claims-v3/e136/rgm136/host/CMakeLists.txt
+EQUAL c464f57f54f0efd6d5659483c9121a0299bf86d82eacacc66938c8226f7ceebb src/rgm136/host/Constants.h.in = tools/claims-v3/e136/rgm136/host/Constants.h.in
+EQUAL f9b2279f838ad30444748f2a5abad5dd646df631735fc029a6ac01f9036e2fda src/rgm136/host/main.cpp = tools/claims-v3/e136/rgm136/host/main.cpp
+EQUAL 061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948 src/rgm136/kernel/CMakeLists.txt = tools/claims-v3/e136/rgm136/kernel/CMakeLists.txt
+EQUAL dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4 src/rgm136/kernel/crt.S = tools/claims-v3/e136/rgm136/kernel/crt.S
+EQUAL b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09 src/rgm136/kernel/sections.ld = tools/claims-v3/e136/rgm136/kernel/sections.ld
+EQUAL 4be70db597aa2120b9c9904643ff9fc6108ef5eb1f4fb17ac844f9e037619f74 src/rgm136/kernel/sparsity.c = tools/claims-v3/e136/rgm136/kernel/sparsity.c
+EQUAL a6cf931b2a123e88699c046eb45f438b06d1648cabb86fc114577a32ec153377 src/ettelem/ettelem.cpp = tools/ettelem/ettelem.cpp
+EQUAL 64793f7eeeea9d7371cd36680e2c8324b1ba6b9547fd1815fd04a0dec9f7ad39 src/ettelem/CMakeLists.txt = tools/ettelem/CMakeLists.txt
+EQUAL f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e src/dmcmd/dmcmd_audit.py = tools/claims-v3/dmcmd_audit.py
+EQUAL 50168632931fd8c1fab40794cbaaac6aca3d31f01d4367d8a21fcf69c0bdc638 src/dmcmd/dmcmd_table.json = tools/claims-v3/dmcmd_table.json
+EQUAL 34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa src/tiles/fp32/randn.bin = tools/claims-v3/kinds/tiles/fp32/randn.bin
+EQUAL e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad src/tiles/fp32/zeros.bin = tools/claims-v3/kinds/tiles/fp32/zeros.bin
+EQUAL fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1 src/tiles/fp32/ones.bin = tools/claims-v3/kinds/tiles/fp32/ones.bin
+EQUAL 2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974 src/tiles/fp16/randn.bin = tools/claims-v3/kinds/tiles/fp16/randn.bin
+EQUAL e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad src/tiles/fp16/zeros.bin = tools/claims-v3/kinds/tiles/fp16/zeros.bin
+EQUAL c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8 src/tiles/fp16/ones.bin = tools/claims-v3/kinds/tiles/fp16/ones.bin
+EQUAL f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9 src/tiles/int8/full.bin = tools/claims-v3/kinds/tiles/int8/full.bin
+EQUAL e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad src/tiles/int8/zeros.bin = tools/claims-v3/kinds/tiles/int8/zeros.bin
+EQUAL 7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2 src/tiles/int8/ones.bin = tools/claims-v3/kinds/tiles/int8/ones.bin
+EQUAL 23 of 23 (the README's copies)
+EQUAL 43ababfe5f3fed0963600a119a5ec805b433636594616042cac4fbab1fd69530 src/tiles/fp32/sparse50f.bin = tools/claims-v3/kinds/tiles/fp32/sparse50.bin
+EQUAL e235ed609c58b069f36412099d8d2fa890cae07bf5599f77b65904b6802d38a8 src/tiles/int8/sparse50i.bin = tools/claims-v3/kinds/tiles/int8/sparse50.bin
+EQUAL eeed63ab94ed2c7598575223f3bbc7dee9d7723027cbc7135e86447e047b6ede src/tiles/fp16/sparse50h.bin = tools/claims-v3/e214/proposal/src/tiles/fp16/sparse50h.bin
+EQUAL 3 of 3 (plan tiles whose bytes are already in the lab); plan tiles: 24, new to the lab: 21 (desk/tiles-vs-lab-e217.txt: against every 2,048-byte tile file in the lab tree)
+the kit's own files: 28; tile files: 33
+
+## 9. arms past the first sweep's largest K (fp32 16,384, fp16 8,192, int8 32,768) and past the third sweep's (E214's committed arms.json)
+past the first sweep's largest K: 19 arm(s): 10x12x11-fp16-rnd (K 11264), 1x18x11-fp16-ones (K 11264), 1x2x35-fp32-ones (K 17920), 1x31x12-fp16-rnd (K 12288), 2x17x18-fp16-zeros (K 18432), 2x1x46-fp32-ones (K 23552), 2x20x10-fp16-ones (K 10240), 2x21x9-fp16-zeros (K 9216), 2x8x14-fp16-ones (K 14336), 3x23x17-int8-rnd (K 34816), 3x3x15-fp16-ones-m40081000 (K 15360), 3x4x24-int8-zeros-m300 (K 49152), 4x11x20-fp16-rnd (K 20480), 5x13x13-fp16-ones-m22 (K 13312), 5x4x16-fp16-rnd (K 16384), 8x13x12-fp16-rnd-m80 (K 12288), 8x15x12-fp16-ones-m55555555 (K 12288), 8x3x18-int8-rnd (K 36864), 9x1x9-fp16-zeros-m90 (K 9216)
+the third sweep's largest K a type: fp32 24576, fp16 16384, int8 49152
+past the third sweep's largest K: 2 arm(s): 2x17x18-fp16-zeros (K 18432), 4x11x20-fp16-rnd (K 20480)
+
+## 10. the plan's sparse50 arms against E206's committed points (tools/claims-v3/e206/points-e206.csv): the same arm, format, kind, mask, gen and tile bytes
+1x1x1-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+1x20x7-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+1x9x8-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+2x2x3-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+2x30x12-int8-sparse50i-m46950281 (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+3x13x7-int8-sparse50i-m30 (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+3x1x3-int8-sparse50i (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+3x4x3-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+4x7x8-fp32-sparse50f-s2 (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+5x7x8-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+6x10x4-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+6x9x8-fp16-sparse50h (sparse50:src/tiles/fp16/sparse50h.bin): NO E206 POINT
+7x15x4-int8-sparse50i-m55550000 (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+8x14x9-int8-sparse50i-m9999 (sparse50:src/tiles/int8/sparse50i.bin): NO E206 POINT
+9x7x4-fp32-sparse50f (sparse50:src/tiles/fp32/sparse50f.bin): NO E206 POINT
+
+## 11. the pair check on the 24 plan tiles' files, without counted switches (src/tiles_gen.py --pairs --file NAME:TYPE:PATH)
+tile                      type  pooled  total    A      B      per lane (A + B bits a micro-op)              switches
+h_rt64                    fp16   0.125   1.000  0.125  0.000   0.12  0.12  0.12  0.12  0.12  0.12  0.12  0.12  -
+h_rt32                    fp16   0.312   2.500  0.312  0.000   0.31  0.31  0.31  0.31  0.31  0.31  0.31  0.31  -
+h_gt25                    fp16   0.375   3.000  0.375  0.000   0.38  0.38  0.38  0.38  0.38  0.38  0.38  0.38  -
+h_sg                      fp16   0.625   5.000  0.625  0.000   0.62  0.62  0.62  0.62  0.62  0.62  0.62  0.62  -
+sparse50h                 fp16  17.863 142.902  5.977 11.886  18.09 17.51 18.72 16.91 18.50 16.02 18.56 18.59  -
+h_th_in                   fp16  28.998 231.984  8.945 20.053  29.76 29.75 28.73 28.74 28.78 28.73 28.75 28.76  -
+sg_kk                     fp32   0.055   0.438  0.027  0.027   0.05  0.05  0.05  0.05  0.05  0.05  0.05  0.05  -
+rt64                      fp32   0.078   0.625  0.078  0.000   0.08  0.08  0.08  0.08  0.08  0.08  0.08  0.08  -
+gt875                     fp32   0.125   1.000  0.125  0.000   0.12  0.12  0.12  0.12  0.12  0.12  0.12  0.12  -
+gt125                     fp32   0.141   1.125  0.141  0.000   0.14  0.14  0.14  0.14  0.14  0.14  0.14  0.14  -
+rt32                      fp32   0.156   1.250  0.156  0.000   0.16  0.16  0.16  0.16  0.16  0.16  0.16  0.16  -
+gt25                      fp32   0.172   1.375  0.172  0.000   0.17  0.17  0.17  0.17  0.17  0.17  0.17  0.17  -
+rt32b                     fp32   0.250   2.000  0.000  0.250   0.25  0.25  0.25  0.25  0.25  0.25  0.25  0.25  -
+rt16                      fp32   0.312   2.500  0.312  0.000   0.31  0.31  0.31  0.31  0.31  0.31  0.31  0.31  -
+sgm1                      fp32   0.375   3.000  0.375  0.000   0.38  0.38  0.38  0.38  0.38  0.38  0.38  0.38  -
+sparse50f                 fp32  18.201 145.605  6.340 11.861  19.49 16.28 17.32 19.44 16.72 20.41 18.57 17.37  -
+th_top                    fp32  47.113 376.906 15.535 31.578  47.11 47.08 47.14 47.11 47.12 47.12 47.09 47.13  -
+i8_t06                    int8   0.625   5.000  0.000  0.625   0.62  0.62  0.62  0.62  0.62  0.62  0.62  0.62  -
+i8_t1                     int8   1.172   9.375  0.000  1.172   1.88  1.88  0.94  0.94  0.94  0.94  0.94  0.94  -
+i8_t2                     int8   2.406  19.250  0.000  2.406   2.62  2.62  2.62  2.62  2.62  2.62  1.75  1.75  -
+i8_t3                     int8   3.453  27.625  0.000  3.453   4.06  4.06  3.25  3.25  3.25  3.25  3.25  3.25  -
+i8_t5                     int8   5.242  41.938  0.000  5.242   5.50  5.50  5.50  5.50  5.50  4.81  4.81  4.81  -
+sparse50i                 int8  18.685 149.480  6.137 12.548  19.09 19.79 16.55 19.12 18.68 18.61 19.48 18.16  -
+i8_t46                    int8  46.507 372.055 15.484 31.022  46.98 46.98 46.95 47.02 46.06 46.00 46.04 46.04  -
+pair (one type)                                  toggles a / b     apart    switches a / b       verdict
+h_gt25 / h_rt32                                    0.375 /   0.312  16.67 %          - / -         apart
+h_th_in / sparse50h                               28.998 /  17.863  38.40 %          - / -         apart
+h_gt25 / h_sg                                      0.375 /   0.625  40.00 %          - / -         apart
+h_rt32 / h_sg                                      0.312 /   0.625  50.00 %          - / -         apart
+h_rt32 / h_rt64                                    0.312 /   0.125  60.00 %          - / -         apart
+h_gt25 / h_rt64                                    0.375 /   0.125  66.67 %          - / -         apart
+h_rt64 / h_sg                                      0.125 /   0.625  80.00 %          - / -         apart
+h_sg / sparse50h                                   0.625 /  17.863  96.50 %          - / -         apart
+h_sg / h_th_in                                     0.625 /  28.998  97.84 %          - / -         apart
+h_gt25 / sparse50h                                 0.375 /  17.863  97.90 %          - / -         apart
+h_rt32 / sparse50h                                 0.312 /  17.863  98.25 %          - / -         apart
+h_gt25 / h_th_in                                   0.375 /  28.998  98.71 %          - / -         apart
+h_rt32 / h_th_in                                   0.312 /  28.998  98.92 %          - / -         apart
+h_rt64 / sparse50h                                 0.125 /  17.863  99.30 %          - / -         apart
+h_rt64 / h_th_in                                   0.125 /  28.998  99.57 %          - / -         apart
+gt25 / rt32                                        0.172 /   0.156   9.09 %          - / -         apart
+gt125 / rt32                                       0.141 /   0.156  10.00 %          - / -         apart
+gt125 / gt875                                      0.141 /   0.125  11.11 %          - / -         apart
+rt16 / sgm1                                        0.312 /   0.375  16.67 %          - / -         apart
+gt125 / gt25                                       0.141 /   0.172  18.18 %          - / -         apart
+gt875 / rt32                                       0.125 /   0.156  20.00 %          - / -         apart
+rt16 / rt32b                                       0.312 /   0.250  20.00 %          - / -         apart
+gt25 / gt875                                       0.172 /   0.125  27.27 %          - / -         apart
+rt64 / sg_kk                                       0.078 /   0.055  30.00 %          - / -         apart
+gt25 / rt32b                                       0.172 /   0.250  31.25 %          - / -         apart
+rt32b / sgm1                                       0.250 /   0.375  33.33 %          - / -         apart
+gt875 / rt64                                       0.125 /   0.078  37.50 %          - / -         apart
+rt32 / rt32b                                       0.156 /   0.250  37.50 %          - / -         apart
+gt125 / rt32b                                      0.141 /   0.250  43.75 %          - / -         apart
+gt125 / rt64                                       0.141 /   0.078  44.44 %          - / -         apart
+gt25 / rt16                                        0.172 /   0.312  45.00 %          - / -         apart
+gt875 / rt32b                                      0.125 /   0.250  50.00 %          - / -         apart
+rt16 / rt32                                        0.312 /   0.156  50.00 %          - / -         apart
+rt32 / rt64                                        0.156 /   0.078  50.00 %          - / -         apart
+gt25 / sgm1                                        0.172 /   0.375  54.17 %          - / -         apart
+gt25 / rt64                                        0.172 /   0.078  54.55 %          - / -         apart
+gt125 / rt16                                       0.141 /   0.312  55.00 %          - / -         apart
+gt875 / sg_kk                                      0.125 /   0.055  56.25 %          - / -         apart
+rt32 / sgm1                                        0.156 /   0.375  58.33 %          - / -         apart
+gt875 / rt16                                       0.125 /   0.312  60.00 %          - / -         apart
+gt125 / sg_kk                                      0.141 /   0.055  61.11 %          - / -         apart
+sparse50f / th_top                                18.201 /  47.113  61.37 %          - / -         apart
+gt125 / sgm1                                       0.141 /   0.375  62.50 %          - / -         apart
+rt32 / sg_kk                                       0.156 /   0.055  65.00 %          - / -         apart
+gt875 / sgm1                                       0.125 /   0.375  66.67 %          - / -         apart
+gt25 / sg_kk                                       0.172 /   0.055  68.18 %          - / -         apart
+rt32b / rt64                                       0.250 /   0.078  68.75 %          - / -         apart
+rt16 / rt64                                        0.312 /   0.078  75.00 %          - / -         apart
+rt32b / sg_kk                                      0.250 /   0.055  78.12 %          - / -         apart
+rt64 / sgm1                                        0.078 /   0.375  79.17 %          - / -         apart
+rt16 / sg_kk                                       0.312 /   0.055  82.50 %          - / -         apart
+sg_kk / sgm1                                       0.055 /   0.375  85.42 %          - / -         apart
+sgm1 / sparse50f                                   0.375 /  18.201  97.94 %          - / -         apart
+rt16 / sparse50f                                   0.312 /  18.201  98.28 %          - / -         apart
+rt32b / sparse50f                                  0.250 /  18.201  98.63 %          - / -         apart
+gt25 / sparse50f                                   0.172 /  18.201  99.06 %          - / -         apart
+rt32 / sparse50f                                   0.156 /  18.201  99.14 %          - / -         apart
+sgm1 / th_top                                      0.375 /  47.113  99.20 %          - / -         apart
+gt125 / sparse50f                                  0.141 /  18.201  99.23 %          - / -         apart
+gt875 / sparse50f                                  0.125 /  18.201  99.31 %          - / -         apart
+rt16 / th_top                                      0.312 /  47.113  99.34 %          - / -         apart
+rt32b / th_top                                     0.250 /  47.113  99.47 %          - / -         apart
+rt64 / sparse50f                                   0.078 /  18.201  99.57 %          - / -         apart
+gt25 / th_top                                      0.172 /  47.113  99.64 %          - / -         apart
+rt32 / th_top                                      0.156 /  47.113  99.67 %          - / -         apart
+sg_kk / sparse50f                                  0.055 /  18.201  99.70 %          - / -         apart
+gt125 / th_top                                     0.141 /  47.113  99.70 %          - / -         apart
+gt875 / th_top                                     0.125 /  47.113  99.73 %          - / -         apart
+rt64 / th_top                                      0.078 /  47.113  99.83 %          - / -         apart
+sg_kk / th_top                                     0.055 /  47.113  99.88 %          - / -         apart
+i8_t2 / i8_t3                                      2.406 /   3.453  30.32 %          - / -         apart
+i8_t3 / i8_t5                                      3.453 /   5.242  34.13 %          - / -         apart
+i8_t06 / i8_t1                                     0.625 /   1.172  46.67 %          - / -         apart
+i8_t1 / i8_t2                                      1.172 /   2.406  51.30 %          - / -         apart
+i8_t2 / i8_t5                                      2.406 /   5.242  54.10 %          - / -         apart
+i8_t46 / sparse50i                                46.507 /  18.685  59.82 %          - / -         apart
+i8_t1 / i8_t3                                      1.172 /   3.453  66.06 %          - / -         apart
+i8_t5 / sparse50i                                  5.242 /  18.685  71.94 %          - / -         apart
+i8_t06 / i8_t2                                     0.625 /   2.406  74.03 %          - / -         apart
+i8_t1 / i8_t5                                      1.172 /   5.242  77.65 %          - / -         apart
+i8_t3 / sparse50i                                  3.453 /  18.685  81.52 %          - / -         apart
+i8_t06 / i8_t3                                     0.625 /   3.453  81.90 %          - / -         apart
+i8_t2 / sparse50i                                  2.406 /  18.685  87.12 %          - / -         apart
+i8_t06 / i8_t5                                     0.625 /   5.242  88.08 %          - / -         apart
+i8_t46 / i8_t5                                    46.507 /   5.242  88.73 %          - / -         apart
+i8_t3 / i8_t46                                     3.453 /  46.507  92.58 %          - / -         apart
+i8_t1 / sparse50i                                  1.172 /  18.685  93.73 %          - / -         apart
+i8_t2 / i8_t46                                     2.406 /  46.507  94.83 %          - / -         apart
+i8_t06 / sparse50i                                 0.625 /  18.685  96.66 %          - / -         apart
+i8_t1 / i8_t46                                     1.172 /  46.507  97.48 %          - / -         apart
+i8_t06 / i8_t46                                    0.625 /  46.507  98.66 %          - / -         apart
+pairs: 91 of one type over 24 tiles; 0 at equal input toggles (within 5 %), 0 refused
+PAIRS PASS
+rc 0 (3 = a pair at equal input toggles without the plan's counted switches, which are not in src/)
+
+## 11b. the same, with THE WIDER CHECK against the lab's nine kinds only (an empty prior list: desk/priors-none-e217.json)
+tile                      type  pooled  total    A      B      per lane (A + B bits a micro-op)              switches
+h_rt64                    fp16   0.125   1.000  0.125  0.000   0.12  0.12  0.12  0.12  0.12  0.12  0.12  0.12  -
+h_rt32                    fp16   0.312   2.500  0.312  0.000   0.31  0.31  0.31  0.31  0.31  0.31  0.31  0.31  -
+h_gt25                    fp16   0.375   3.000  0.375  0.000   0.38  0.38  0.38  0.38  0.38  0.38  0.38  0.38  -
+h_sg                      fp16   0.625   5.000  0.625  0.000   0.62  0.62  0.62  0.62  0.62  0.62  0.62  0.62  -
+sparse50h                 fp16  17.863 142.902  5.977 11.886  18.09 17.51 18.72 16.91 18.50 16.02 18.56 18.59  -
+h_th_in                   fp16  28.998 231.984  8.945 20.053  29.76 29.75 28.73 28.74 28.78 28.73 28.75 28.76  -
+sg_kk                     fp32   0.055   0.438  0.027  0.027   0.05  0.05  0.05  0.05  0.05  0.05  0.05  0.05  -
+rt64                      fp32   0.078   0.625  0.078  0.000   0.08  0.08  0.08  0.08  0.08  0.08  0.08  0.08  -
+gt875                     fp32   0.125   1.000  0.125  0.000   0.12  0.12  0.12  0.12  0.12  0.12  0.12  0.12  -
+gt125                     fp32   0.141   1.125  0.141  0.000   0.14  0.14  0.14  0.14  0.14  0.14  0.14  0.14  -
+rt32                      fp32   0.156   1.250  0.156  0.000   0.16  0.16  0.16  0.16  0.16  0.16  0.16  0.16  -
+gt25                      fp32   0.172   1.375  0.172  0.000   0.17  0.17  0.17  0.17  0.17  0.17  0.17  0.17  -
+rt32b                     fp32   0.250   2.000  0.000  0.250   0.25  0.25  0.25  0.25  0.25  0.25  0.25  0.25  -
+rt16                      fp32   0.312   2.500  0.312  0.000   0.31  0.31  0.31  0.31  0.31  0.31  0.31  0.31  -
+sgm1                      fp32   0.375   3.000  0.375  0.000   0.38  0.38  0.38  0.38  0.38  0.38  0.38  0.38  -
+sparse50f                 fp32  18.201 145.605  6.340 11.861  19.49 16.28 17.32 19.44 16.72 20.41 18.57 17.37  -
+kind:fp32/randn           fp32  20.072 160.574  6.883 13.189  19.99 19.58 20.88 19.64 18.92 20.11 21.44 20.02  -
+th_top                    fp32  47.113 376.906 15.535 31.578  47.11 47.08 47.14 47.11 47.12 47.12 47.09 47.13  -
+i8_t06                    int8   0.625   5.000  0.000  0.625   0.62  0.62  0.62  0.62  0.62  0.62  0.62  0.62  -
+i8_t1                     int8   1.172   9.375  0.000  1.172   1.88  1.88  0.94  0.94  0.94  0.94  0.94  0.94  -
+i8_t2                     int8   2.406  19.250  0.000  2.406   2.62  2.62  2.62  2.62  2.62  2.62  1.75  1.75  -
+i8_t3                     int8   3.453  27.625  0.000  3.453   4.06  4.06  3.25  3.25  3.25  3.25  3.25  3.25  -
+i8_t5                     int8   5.242  41.938  0.000  5.242   5.50  5.50  5.50  5.50  5.50  4.81  4.81  4.81  -
+sparse50i                 int8  18.685 149.480  6.137 12.548  19.09 19.79 16.55 19.12 18.68 18.61 19.48 18.16  -
+i8_t46                    int8  46.507 372.055 15.484 31.022  46.98 46.98 46.95 47.02 46.06 46.00 46.04 46.04  -
+pair (one type)                                  toggles a / b     apart    switches a / b       verdict
+h_gt25 / h_rt32                                    0.375 /   0.312  16.67 %          - / -         apart
+h_th_in / sparse50h                               28.998 /  17.863  38.40 %          - / -         apart
+h_gt25 / h_sg                                      0.375 /   0.625  40.00 %          - / -         apart
+h_rt32 / h_sg                                      0.312 /   0.625  50.00 %          - / -         apart
+h_rt32 / h_rt64                                    0.312 /   0.125  60.00 %          - / -         apart
+h_gt25 / h_rt64                                    0.375 /   0.125  66.67 %          - / -         apart
+h_rt64 / h_sg                                      0.125 /   0.625  80.00 %          - / -         apart
+h_sg / sparse50h                                   0.625 /  17.863  96.50 %          - / -         apart
+h_sg / h_th_in                                     0.625 /  28.998  97.84 %          - / -         apart
+h_gt25 / sparse50h                                 0.375 /  17.863  97.90 %          - / -         apart
+h_rt32 / sparse50h                                 0.312 /  17.863  98.25 %          - / -         apart
+h_gt25 / h_th_in                                   0.375 /  28.998  98.71 %          - / -         apart
+h_rt32 / h_th_in                                   0.312 /  28.998  98.92 %          - / -         apart
+h_rt64 / sparse50h                                 0.125 /  17.863  99.30 %          - / -         apart
+h_rt64 / h_th_in                                   0.125 /  28.998  99.57 %          - / -         apart
+gt25 / rt32                                        0.172 /   0.156   9.09 %          - / -         apart
+sparse50f / kind:fp32/randn                       18.201 /  20.072   9.32 %          - / -         apart
+gt125 / rt32                                       0.141 /   0.156  10.00 %          - / -         apart
+gt125 / gt875                                      0.141 /   0.125  11.11 %          - / -         apart
+rt16 / sgm1                                        0.312 /   0.375  16.67 %          - / -         apart
+gt125 / gt25                                       0.141 /   0.172  18.18 %          - / -         apart
+gt875 / rt32                                       0.125 /   0.156  20.00 %          - / -         apart
+rt16 / rt32b                                       0.312 /   0.250  20.00 %          - / -         apart
+gt25 / gt875                                       0.172 /   0.125  27.27 %          - / -         apart
+rt64 / sg_kk                                       0.078 /   0.055  30.00 %          - / -         apart
+gt25 / rt32b                                       0.172 /   0.250  31.25 %          - / -         apart
+rt32b / sgm1                                       0.250 /   0.375  33.33 %          - / -         apart
+gt875 / rt64                                       0.125 /   0.078  37.50 %          - / -         apart
+rt32 / rt32b                                       0.156 /   0.250  37.50 %          - / -         apart
+gt125 / rt32b                                      0.141 /   0.250  43.75 %          - / -         apart
+gt125 / rt64                                       0.141 /   0.078  44.44 %          - / -         apart
+gt25 / rt16                                        0.172 /   0.312  45.00 %          - / -         apart
+gt875 / rt32b                                      0.125 /   0.250  50.00 %          - / -         apart
+rt16 / rt32                                        0.312 /   0.156  50.00 %          - / -         apart
+rt32 / rt64                                        0.156 /   0.078  50.00 %          - / -         apart
+gt25 / sgm1                                        0.172 /   0.375  54.17 %          - / -         apart
+gt25 / rt64                                        0.172 /   0.078  54.55 %          - / -         apart
+gt125 / rt16                                       0.141 /   0.312  55.00 %          - / -         apart
+gt875 / sg_kk                                      0.125 /   0.055  56.25 %          - / -         apart
+rt32 / sgm1                                        0.156 /   0.375  58.33 %          - / -         apart
+gt875 / rt16                                       0.125 /   0.312  60.00 %          - / -         apart
+gt125 / sg_kk                                      0.141 /   0.055  61.11 %          - / -         apart
+sparse50f / th_top                                18.201 /  47.113  61.37 %          - / -         apart
+gt125 / sgm1                                       0.141 /   0.375  62.50 %          - / -         apart
+rt32 / sg_kk                                       0.156 /   0.055  65.00 %          - / -         apart
+gt875 / sgm1                                       0.125 /   0.375  66.67 %          - / -         apart
+gt25 / sg_kk                                       0.172 /   0.055  68.18 %          - / -         apart
+rt32b / rt64                                       0.250 /   0.078  68.75 %          - / -         apart
+rt16 / rt64                                        0.312 /   0.078  75.00 %          - / -         apart
+rt32b / sg_kk                                      0.250 /   0.055  78.12 %          - / -         apart
+rt64 / sgm1                                        0.078 /   0.375  79.17 %          - / -         apart
+rt16 / sg_kk                                       0.312 /   0.055  82.50 %          - / -         apart
+sg_kk / sgm1                                       0.055 /   0.375  85.42 %          - / -         apart
+sgm1 / sparse50f                                   0.375 /  18.201  97.94 %          - / -         apart
+rt16 / sparse50f                                   0.312 /  18.201  98.28 %          - / -         apart
+rt32b / sparse50f                                  0.250 /  18.201  98.63 %          - / -         apart
+gt25 / sparse50f                                   0.172 /  18.201  99.06 %          - / -         apart
+rt32 / sparse50f                                   0.156 /  18.201  99.14 %          - / -         apart
+sgm1 / th_top                                      0.375 /  47.113  99.20 %          - / -         apart
+gt125 / sparse50f                                  0.141 /  18.201  99.23 %          - / -         apart
+gt875 / sparse50f                                  0.125 /  18.201  99.31 %          - / -         apart
+rt16 / th_top                                      0.312 /  47.113  99.34 %          - / -         apart
+rt32b / th_top                                     0.250 /  47.113  99.47 %          - / -         apart
+rt64 / sparse50f                                   0.078 /  18.201  99.57 %          - / -         apart
+gt25 / th_top                                      0.172 /  47.113  99.64 %          - / -         apart
+rt32 / th_top                                      0.156 /  47.113  99.67 %          - / -         apart
+sg_kk / sparse50f                                  0.055 /  18.201  99.70 %          - / -         apart
+gt125 / th_top                                     0.141 /  47.113  99.70 %          - / -         apart
+gt875 / th_top                                     0.125 /  47.113  99.73 %          - / -         apart
+rt64 / th_top                                      0.078 /  47.113  99.83 %          - / -         apart
+sg_kk / th_top                                     0.055 /  47.113  99.88 %          - / -         apart
+i8_t2 / i8_t3                                      2.406 /   3.453  30.32 %          - / -         apart
+i8_t3 / i8_t5                                      3.453 /   5.242  34.13 %          - / -         apart
+i8_t06 / i8_t1                                     0.625 /   1.172  46.67 %          - / -         apart
+i8_t1 / i8_t2                                      1.172 /   2.406  51.30 %          - / -         apart
+i8_t2 / i8_t5                                      2.406 /   5.242  54.10 %          - / -         apart
+i8_t46 / sparse50i                                46.507 /  18.685  59.82 %          - / -         apart
+i8_t1 / i8_t3                                      1.172 /   3.453  66.06 %          - / -         apart
+i8_t5 / sparse50i                                  5.242 /  18.685  71.94 %          - / -         apart
+i8_t06 / i8_t2                                     0.625 /   2.406  74.03 %          - / -         apart
+i8_t1 / i8_t5                                      1.172 /   5.242  77.65 %          - / -         apart
+i8_t3 / sparse50i                                  3.453 /  18.685  81.52 %          - / -         apart
+i8_t06 / i8_t3                                     0.625 /   3.453  81.90 %          - / -         apart
+i8_t2 / sparse50i                                  2.406 /  18.685  87.12 %          - / -         apart
+i8_t06 / i8_t5                                     0.625 /   5.242  88.08 %          - / -         apart
+i8_t46 / i8_t5                                    46.507 /   5.242  88.73 %          - / -         apart
+i8_t3 / i8_t46                                     3.453 /  46.507  92.58 %          - / -         apart
+i8_t1 / sparse50i                                  1.172 /  18.685  93.73 %          - / -         apart
+i8_t2 / i8_t46                                     2.406 /  46.507  94.83 %          - / -         apart
+i8_t06 / sparse50i                                 0.625 /  18.685  96.66 %          - / -         apart
+i8_t1 / i8_t46                                     1.172 /  46.507  97.48 %          - / -         apart
+i8_t06 / i8_t46                                    0.625 /  46.507  98.66 %          - / -         apart
+pairs: 91 of one type over 24 tiles; 0 at equal input toggles (within 5 %), 0 refused
+wider: 9 kinds and priors; 72 same-type pairs with the tiles, 1 within 10 % (listed), 0 at equal input toggles, 0 refused
+PAIRS PASS
+rc 0 (3 = a pair at equal input toggles, among the tiles or with a kind, without the plan's counted switches)
+
+## 12. the host rules the README names, as lines of code, and the runner's own preflight call
+58:nice -n 10 cmake --build build/rgm -j1 > build/rgm-build.log 2>&1 || fail "the rgm build (build/rgm-build.log)"
+60:nice -n 10 cmake --build build/ettelem -j1 > build/ettelem-build.log 2>&1 || fail "the ettelem build (build/ettelem-build.log)"
+7:# The looks: the host; uptime; the box's one-minute load (/proc/loadavg, recorded in run/preflight-load.txt: 6 or more is a
+31:LOAD1=$(cut -d ' ' -f 1 /proc/loadavg 2>/dev/null)
+32:echo "load (one minute, /proc/loadavg): ${LOAD1:-unread} (NO-GO at 6 or more)"
+34:echo "$(date +%s) $CARD ${LOAD1:-unread}" >> run/preflight-load.txt
+35:if [ -z "$LOAD1" ]; then nogo "the box's one-minute load is unread (/proc/loadavg)"
+36:elif awk -v l="$LOAD1" 'BEGIN { exit !(l + 0 >= 6) }'; then nogo "the box's one-minute load is $LOAD1 (6 or more: the lab's host rule)"; fi
+preflight NO-GO lines on the load: 2
+src/preflight_mms.sh:4:#   bash ~/claude/work/ee-1119-mmsweep4/src/preflight_mms.sh <card> --audit-only   the audit alone (the runner's own call)
+src/preflight_mms.sh:19:  *) echo "usage: preflight_mms.sh a2c0|a1c1|a1c0 [--audit-only]"; exit 2 ;; esac
+src/preflight_mms.sh:24:if [ "${2:-}" = "--audit-only" ]; then audit; exit $?; fi
+src/run_mms.py:20:     audit GO (src/preflight_mms.sh --audit-only); else no device is opened; the kit's STOP file run/STOP and the session's STOP
+src/run_mms.py:888:                                ("preflight", ["bash", os.path.join(HERE, "preflight_mms.sh"), self.card, "--audit-only"],
+files of the session's path that name the preflight: src/run_mms.py
