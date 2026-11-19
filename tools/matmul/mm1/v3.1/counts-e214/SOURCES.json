@@ -1,0 +1,287 @@
+{
+ "bench": {
+  "copy_change": "the Makefile's Verilator -j 10 made -j 2 (the copy's one change); make -j 1; no --threads (a single-threaded model)",
+  "files_sha256": {
+   "Makefile": "f9dc72c38cb19ef4a33610f87aa2c4c728c763b3d1d38ba2e866afffa49252e2",
+   "README.md": "86aec606d56415930f659fb28ef5b0314748e70982742a24f5f4c2ed3de07575",
+   "README.md.dated-note-1.md": "6cf0bbb45122c1392045a1d280a1c8dc0b9338cd245e725e2283ee41a2fa3bdd",
+   "acct.cpp": "2e00d7aeb9fc87ae3490305a301ba071792aff5d3b6b02e017d4f7cedad5a73a",
+   "accum.c": "dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf",
+   "fcheck_all.sh": "ef2359e7153a41e3ce4c56570455a8db28e1b5e5309c4ceaa118d9e9b9152a6f",
+   "fcheck_unit.py": "9ae64ab16d265bc42be5412c4685b96e6c221a3c511b67bfe5925e9aba4f5c58",
+   "fcheck_vpu.py": "4f44e1b120089db1c6f5347fe43aef310c66f6131e8142faa97d6ad8370ffd51",
+   "ff_acct.sv": "ea5e0240d6110def296ddeb0f2dbf14b372361ba173ced31fa2ed471386b9a2a",
+   "flip_stages.py": "3f46c59ccc1e247ea962808c120824843654bf372ab8d1dc5d1f8d1e49ace2c8",
+   "fp16_model.py": "3abe672c52a8923ccf5914b50f07fcf4b465d43573fde014bde05f7979751c51",
+   "macros_acct.vh": "ada147e820d1a607266504c9eef44bc9acd1a8ad162db247f4a860bdfa7f6125",
+   "run_kinds.py": "fa8112e9ff953f714f3a2161990a581c37617884a44cc6dddfb6bbe5e6133110",
+   "settle_count.cpp": "8840aacc0ec99ca8ea32a34a6f384b99ad8a59df72c393097d7a02b21df23262",
+   "tb_flip.sv": "5b3c6edcb65b1dafd04b60111f092418d027b0a5b234d21ef20f29661049025d",
+   "tb_prev.sv": "18e01ae59a9bfb32b4c6714ac43a116bba616e2207b84c7c73605d89bb81f864",
+   "tb_unit.sv": "ccfb1b12c1ac810ffeb1376b83a865cf28d090fe94638107188af987d42bebf3",
+   "tb_vpu.sv": "6b3ab2b4a70b9c95a0d95e80980ca663e5491d77554a7a9bc01b291c32d76021",
+   "train_maps.py": "f7438fc4667369d68cca5284cd7263d6298bdbaed243c354ad627569e0a5c117",
+   "verilator_dfg_reproducer.sv": "7681d6a90019b3f7c51dbcc7a810239dd019af2628a407307f89fbacab040639"
+  },
+  "manifest_equal_to_v31counts": true,
+  "manifest_sha256": "878184cd66f32bb0d4b5346859fc1355faaee94048e1dd73b27470b9e24bd42f",
+  "path": "rtl-sim/fma_toggle_v2"
+ },
+ "bench_outputs_sha256": {
+  "new-fp32-S1.json": "3c7a1a59bd318f35f6052ace85649b661dd0e6ecb822c14ac1cc8eb769d70e55",
+  "new-fp32-S2.json": "bd4ed1944c619993e4b75037afca2c46a6bec9df47b4170c2efeafe165de35ca",
+  "new-launch.json": "b7f777063c55255dd6e842ceeeb90c0d6058b659bb0299439b66d546838d08d8",
+  "recount-fp32-S1-fld_mant.json": "55fe2e244ec7ec9e331b2f63240284ffb439567d3777f0bc757d8e2560db3ad0",
+  "recount-fp32-S2-den8.json": "43df5fcac979b01518e4bd2f69d5de3bcf1d2a6268b5b2fac3ebf491fb241c66",
+  "recount-launch.json": "06ab1a0c1d7c77dc5f508ab97bd4d86dd811d5f1aef7ea81476d01d8fba92704"
+ },
+ "binaries_note": "obj_unit/Vtb, accum and settle_count are byte-equal to v31-counts'; obj_vpu/Vtb embeds its build paths (as the verifier of v31-counts found)",
+ "binaries_sha256": {
+  "accum": "ef7099afc5d14d5df4e748999b91028108d9db3dbb071d8b5e3483f8862004ff",
+  "obj_unit/Vtb": "956bd4126e45208c2c1fb303a51af588555a1e251253daa5f44cc0c6d322e0ca",
+  "obj_vpu/Vtb": "b70f9fddeb09845acd8a6e8fd109bd9e19fcd5155dc24a748336ac41de46a01d",
+  "settle_count": "a14a94db6cabb43e44aa3577f91a54e6236bca3099f955bc3dc2c42f73652c60"
+ },
+ "binaries_v31counts_sha256": {
+  "accum": "ef7099afc5d14d5df4e748999b91028108d9db3dbb071d8b5e3483f8862004ff",
+  "obj_unit/Vtb": "956bd4126e45208c2c1fb303a51af588555a1e251253daa5f44cc0c6d322e0ca",
+  "obj_vpu/Vtb": "24795d38a061647f1a7434a5682ca460feace4f7243a8f2d33cc4acd4ae6b565",
+  "settle_count": "a14a94db6cabb43e44aa3577f91a54e6236bca3099f955bc3dc2c42f73652c60"
+ },
+ "commands": {
+  "new-fp32-S1.json": "count_e210.py --kinds <the 9 fp32 kinds> --js 3,11,19,27 --tsel 0,1 --jobs 1 (one file each: tile 0)",
+  "new-fp32-S2.json": "count_e210.py --kinds <the 9 fp32 kinds> --js 15,47,79,111 --tsel 2 --jobs 1 (one file each: tile 0)",
+  "new-launch.json": "run_kinds.py --types fp16 --only __none__ --extra-tiles <the 11 fp16 and int8 tiles + xcheck.sparse50h> --jobs 1 --keep-going",
+  "recount-fp32-S1-fld_mant.json": "count_e210.py --kinds fp32.e212.fld_mant --js 3,11,19,27 --tsel 0,1 --jobs 1",
+  "recount-fp32-S2-den8.json": "count_e210.py --kinds fp32.e212.den8 --js 15,47,79,111 --tsel 2 --jobs 1",
+  "recount-launch.json": "run_kinds.py --types fp16 --only __none__ --extra-tiles <int8 i8_pm1, fp16 fld16_mant> --jobs 1"
+ },
+ "committed_references_sha256": {
+  "docs/reports/data/2026-11-01-q132-rtl-bench/counts-v2.json": "422bdeac130a12d352f77e2e635eae2592188e7548d8196c9e033f5228986f45",
+  "tools/claims-v3/e210/desk/switch-counts-e210.json": "ff484d170a7a0d9d1c31f97b6f0cd2e996e88c2f65e2ff05d007def5f19fd68f",
+  "tools/matmul/mm1/v1/inputs/switch_table.json": "6c987d802390ed78c67f2e8579d042e5511cc464ae91da3dbaeafe2d7c249599",
+  "tools/matmul/mm1/v3.1/counts/SHA256SUMS": "c74c2d49c336159f6ca63aad2652601a10e22d6a8b5db00d46c66bfb1cf8aa7f",
+  "tools/matmul/mm1/v3.1/counts/counts-fp16-int8-launch.json": "6a392eb63f445f3763a91f4a87bb20de1414d391a63b1120d4b8301765509722",
+  "tools/matmul/mm1/v3.1/counts/counts-fp32-gemm-states.json": "aaa1b810af0f6e6e0617542af14007d5d1c1922dec02bad080d16d3e396f263b",
+  "tools/matmul/mm1/v3.1/counts/raw/new-fp32-S1.json": "8fbec76cf67369a0f1948cacef2cebdd653f0b2c59605ab910ceeb743c390912",
+  "tools/matmul/mm1/v3.1/counts/raw/new-fp32-S2.json": "d67bbaf10614026a6c7967a28654f940f3d5ddcc0b4886a5c93c303e381df88b",
+  "tools/matmul/mm1/v3.1/counts/raw/new-launch.json": "17a84bf0bb0fba0f27bc6200fe225d209577b6dec83e5b46276f6da21223e499",
+  "tools/matmul/mm1/v3.1/energy_v31.py": "21082cbfbd14ce24f7210360203e59feca7e643a7f36042e3ece2e468d2b906b",
+  "tools/matmul/mm1/v3.1/mm1_v31.py": "e67ea34d60e4947e6fe192d5ddd995682fe4992f7ec1595f7d5fc29843a87575",
+  "tools/matmul/mm1/v3/data_v3.py": "a5eb123bf1ba16fca51bf9474904a73919cacbf870e0f37bb5f78126236862be",
+  "tools/matmul/mm1/v3/energy_v3.py": "49a577bc0c3743e3289052501d75b24ecff740ff3d2d304eae9b7c59c17e2abe",
+  "tools/matmul/mm1/v3/mm1_v3.py": "89c2e463e3527b379ed10557c2e595b294b289c0ba8cd2005481190c9555fe3c"
+ },
+ "core_et": {
+  "by": "git archive of the commit: rtl, dv/inc, extern, LICENSE",
+  "commit": "b38a1a31da67efe00c61e983e64b892c58080115",
+  "files": 1268,
+  "manifest_equal_to_v31counts": true,
+  "manifest_sha256": "36971f3abc1153834952982011b54bc820977e8a0e08143205f12481747752fc"
+ },
+ "drivers_sha256": {
+  "rtl-sim/fma_toggle_v2/accum.c": "dc47efbc32e3c45bc935fc1fc1452c81f899423affb2ff94fcb393cf15ef10cf",
+  "rtl-sim/fma_toggle_v2/fcheck_all.sh": "ef2359e7153a41e3ce4c56570455a8db28e1b5e5309c4ceaa118d9e9b9152a6f",
+  "rtl-sim/fma_toggle_v2/run_kinds.py": "fa8112e9ff953f714f3a2161990a581c37617884a44cc6dddfb6bbe5e6133110",
+  "rtl-sim/fma_toggle_v2/settle_count.cpp": "8840aacc0ec99ca8ea32a34a6f384b99ad8a59df72c393097d7a02b21df23262",
+  "rtl-sim/fma_toggle_v2/train_maps.py": "f7438fc4667369d68cca5284cd7263d6298bdbaed243c354ad627569e0a5c117",
+  "tools/claims-v3/e210/desk/count_e210.py": "ddb9fc812f3e5a0193de257425c54219e161c8fd1200c8c4e74b474a3e6436cb",
+  "tools/claims-v3/e210/desk/hd_model_e210.py": "543e90c6d00753948037e16247af9f2509b31c71674e5d71390263bf1a7ab071"
+ },
+ "functional_check": "fcheck_all.sh PASS on this build (JOBS=1): unit fp32 40,000 of 40,000 exact; unit fp16 39,701 exact + 299 named residue; vpu fp32 22,016, fp16 22,016, int8 18,944 accumulator words exact, 0 mismatched; zero gate 63 cases, 0 differ (the same tallies as v31-counts').",
+ "gxx": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+ "lab_github_main": "8bde0182e66646cb67f9589b98c91a8b3a68b50e",
+ "lane": "counts-e214 (Q225, track A), Thu 19 Nov 2026, on aifoundry2: desk only, no card, no sys_emu, no fit, no commit",
+ "maps_sha256": {
+  "unit_float.map": "341deecbb2b6627d41c19a948ea51e2577872291184752d35db9d85d31fc181f",
+  "unit_int8.map": "61cf2115968282195348a820fcf2739d1173af0e776d6415e8613c5af7fc91ae",
+  "vpu.map": "9d06ade0bb9a50fb5892f2ef4d579d829db15f40f7b16f4f6dd27fc165f48794"
+ },
+ "maps_v31counts_sha256": {
+  "unit_float.map": "341deecbb2b6627d41c19a948ea51e2577872291184752d35db9d85d31fc181f",
+  "unit_int8.map": "61cf2115968282195348a820fcf2739d1173af0e776d6415e8613c5af7fc91ae",
+  "vpu.map": "9d06ade0bb9a50fb5892f2ef4d579d829db15f40f7b16f4f6dd27fc165f48794"
+ },
+ "numpy": "1.26.4",
+ "python": "3.12.3 (/usr/bin/python3 -I -B)",
+ "recount_rule_sha256": "ab02c0e07bb88587984ac8fc19b63f1c67518350bc1de930aa1b19a6f3f17e6d",
+ "recount_tiles_sha256": {
+  "tools/claims-v3/e212/proposal/src/tiles/fp16/fld16_mant.bin": "a7d401d3e2f880f3693b59403e0bb423d068ddf8ba0a34f3281001a23e068c73",
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/den8.bin": "b85d9cbf2ef36ccb785f0abb10510b6d8a1bca3c020c5b6d7cbd7ec81a081181",
+  "tools/claims-v3/e212/proposal/src/tiles/fp32/fld_mant.bin": "6eaff4fcfdfeb18297bce527b1bcace44b10bb27899b85d038394def5bde5cc9",
+  "tools/claims-v3/e212/proposal/src/tiles/int8/i8_pm1.bin": "d3c3db4b65c6dc9eb648f216cb758e4696b5a89b00ac0ffaab1e5df222e2746b"
+ },
+ "registration_sha256": {
+  "tools/claims-v3/e214/E214.md": "2b0eb7c1b7bc3c2ecf02c6080648acfcd8f333db16fdb1c7f14fc20795b2d5a9",
+  "tools/claims-v3/e214/SHA256SUMS-e214-registration": "48ac51001faab305b7e2dc8dcb35502aa578df0ca74c1c47513fd3d0fdd73070",
+  "tools/claims-v3/e214/proposal/src/arms.json": "68b85ab82c196bd93b272063f8d8b93d609dd258bd757c2da3065163016d0643",
+  "tools/claims-v3/e214/proposal/src/rgm136/host/main.cpp": "f9b2279f838ad30444748f2a5abad5dd646df631735fc029a6ac01f9036e2fda",
+  "tools/claims-v3/e214/proposal/src/tiles_gen.py": "329b42abc9e0c4eb3786843133dd1ac6c9e45002d432dd760d6ecf53676735cd"
+ },
+ "scope_sha256": "2d32a7b2bde4cffec450fbb2d885cfce29f8b7a7354115870819cd0e6432c212",
+ "slot_jobs": [
+  {
+   "minutes": 0.0,
+   "rc": 0,
+   "start": "2026-11-19 09:14:11",
+   "what": "s01_setup_inner.sh"
+  },
+  {
+   "minutes": 2.23,
+   "rc": 0,
+   "start": "2026-11-19 09:14:28",
+   "what": "s02_build_inner.sh"
+  },
+  {
+   "minutes": 0.0,
+   "rc": 0,
+   "start": "2026-11-19 09:16:55",
+   "what": "s03_scope_inner.sh"
+  },
+  {
+   "minutes": 6.5,
+   "rc": 0,
+   "start": "2026-11-19 09:17:03",
+   "what": "s04_fcheck_inner.sh"
+  },
+  {
+   "minutes": 1.95,
+   "rc": 0,
+   "start": "2026-11-19 09:23:49",
+   "what": "s05_maps_inner.sh"
+  },
+  {
+   "minutes": 3.77,
+   "rc": 0,
+   "start": "2026-11-19 09:25:53",
+   "what": "s06_recount_inner.sh"
+  },
+  {
+   "minutes": 16.93,
+   "rc": 0,
+   "start": "2026-11-19 09:29:50",
+   "what": "s07_fp32_inner.sh"
+  },
+  {
+   "minutes": 10.95,
+   "rc": 0,
+   "start": "2026-11-19 09:46:46",
+   "what": "s08_launch_inner.sh"
+  }
+ ],
+ "slot_jobs_open": [
+  {
+   "start": "2026-11-19 09:57:59",
+   "what": "s09_desk_inner.sh"
+  }
+ ],
+ "slot_minutes_total": 42.33,
+ "tiles_sha256": {
+  "tools/claims-v3/e214/proposal/src/tiles/fp16/h_ar_e3.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "1e145d847dfd010fd341cfd33af2f25b8a75006e6c4e6445bc24cdf891cfa989"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp16/h_bh_sm2.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "f156f032118614ffff9c9709f1e37797a45769ff88e12c7ffec3f191ade9b4c5"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp16/h_hi_all16a8.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "83fe7e6daaccb4b414f87a4c0ee4866b7434334e54994d7fddaf7ac1cf9de30f"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp16/h_hi_s11a5.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "e78e75630859f0c22202a951dfe6c1c5c8a2f85ec7cda9d34dce8338ba727304"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp16/h_ka_m9.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "d180bfbc30db2653809793e264812ae53acc51851e0dad533242370eb8be08fc"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp16/sparse50h.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "eeed63ab94ed2c7598575223f3bbc7dee9d7723027cbc7135e86447e047b6ede"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp32/ar_e5.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "34d51fc901437d1a6a76612bfb5c3add653e541d9757b79e1e73e9625a402654"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp32/bh3_e3.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "9d5d2e2444e70a31803682fde833656a2958ca71cf412fb246a46495abba22aa"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp32/hi_all32a25.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "f4df7e09ac8177c278125e55a05fc9bfc7db1182123c5308c192ff7ee2c6acb6"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp32/hi_e3s27a20.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "cb30697ac0b00d477448188b08f487c8b94a13d08e1be62eb4bbaf39d3be4a68"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp32/hi_m23a7.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "52e959a686ca3a33ade0c1b87e218ca46efb219aaf25a10146b0bc670c1afb7a"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp32/hi_s24a20.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "60c93b38f2c6badb7032606ae9b262a7c430e87b504956e27c927ee2590885dc"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp32/ka_e3m8.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "920ac494ba1423215c26d7d31fbc8beb9e68e53fee590aa2298369159a5947da"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp32/kb_s5m.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "3ab46d39984645524b5e8ab2097d9eb07805acdcafea860d120dec8550deff72"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/fp32/sp_ar4.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "958aa1e06d94b769a6a1336f82808c533b219f7c5e75dfaf7d4468022dd414c5"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/int8/i8_ar_d13.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "0b53c8f3d316255ec46e5978ff9ef6155e72da32ae0ff51938c80ddccb241dec"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/int8/i8_bh_hi12.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "cd4742d791bf4cfa90b986e3b360aee10c21d8e9a54352c5fd1fd6fbabfbbb98"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/int8/i8_bh_lo11.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "637fa676397214a0b89c449e8b7e554bfdd07d2e27e611743c59a4dc7ea34623"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/int8/i8_hi_b28.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "c9b34c81ed894579812c983fc96071a9ac621693a28ae22f86c9c84af190f916"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/int8/i8_hi_b32a8.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "e3ba092238cdfc1f447469de7a7178ccca55e6f9b1c26edc9fafb087b651328e"
+  },
+  "tools/claims-v3/e214/proposal/src/tiles/int8/i8_sp_bh.bin": {
+   "bytes": 2048,
+   "equals_arms_json_sha256": true,
+   "sha256": "5dedd103e17616a9aa38d92e7873eb7650fdf0db579d623ff9caa01bdc0e217d"
+  }
+ },
+ "verilator": "Verilator 5.042 2025-11-02 rev v5.042"
+}
