@@ -1,0 +1,23 @@
+3c3,5
+< # root on each box, at nice 10 with 2 jobs; writes nothing outside the kit's folder.
+---
+> # root on each box, at nice 10 with 1 job (single-threaded: the lab's host rule since aifoundry2's crash of 17 Nov keeps every
+> # host job single-threaded and the box's load under 6; a dated departure of Wed 18 Nov 2026 for S3's re-run, no arm changed);
+> # writes nothing outside the kit's folder.
+19c21
+< #     starts beside the compile jobs. The generator is pinned (Unix Makefiles), so the kernel's sub-build shares make's 2 jobs.
+---
+> #     starts beside the compile jobs. The generator is pinned (Unix Makefiles), so the kernel's sub-build shares make's 1 job.
+57c59
+< nice -n 10 cmake --build build/rgm -j2 > build/rgm-build.log 2>&1 || fail "the rgm build (build/rgm-build.log)"
+---
+> nice -n 10 cmake --build build/rgm -j1 > build/rgm-build.log 2>&1 || fail "the rgm build (build/rgm-build.log)"
+59c61
+< nice -n 10 cmake --build build/ettelem -j2 > build/ettelem-build.log 2>&1 || fail "the ettelem build (build/ettelem-build.log)"
+---
+> nice -n 10 cmake --build build/ettelem -j1 > build/ettelem-build.log 2>&1 || fail "the ettelem build (build/ettelem-build.log)"
+111c113,114
+<            "builder": "src/build_mms.sh", "what": "1117-mmsweep2: E136's rgm136 and the lab's ettelem, unchanged"}, open(p, "w"), indent=1)
+---
+>            "builder": "src/build_mms.sh", "jobs": 1, "what": "1117-mmsweep2: E136's rgm136 and the lab's ettelem, unchanged"},
+>           open(p, "w"), indent=1)
