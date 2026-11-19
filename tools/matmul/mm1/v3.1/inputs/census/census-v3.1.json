@@ -1,0 +1,341 @@
+{
+ "L1_load_to_use_cycles": 5.25,
+ "check_against_counted_run": {
+  "path_len": 46,
+  "same_set": true,
+  "steady_pcs_executed_ge60_times": 46,
+  "what": "rgm136 gemmL1x1x1 fp32 counted simulator run (mm-timing, Q198): the PCs its hart 0 ran at least 60 times equal the census's steady path"
+ },
+ "instruction_energy": {
+  "awake_W_per_1024_minions_600MHz": 1.379,
+  "cpi_both_harts": 1.3404825737265416,
+  "prices_pJ_above_idle_600MHz_aifoundry3": {
+   "alu": 9.6,
+   "branch": 6.6,
+   "jump": 21.9,
+   "ld_other": 11.5,
+   "ld_stack": 11.5,
+   "sd_other": 14.7,
+   "sd_stack": 14.7
+  },
+  "rule": "dE (pJ a minion-op, relative to rgm136 gemmL) = sum over classes dn_c (e_c - cpi x p_awake), p_awake = 1.379 W / 1,024 / 600 MHz (MM1-v2 aifoundry3 awake power, one minion-cycle), cpi = 1 / (2 x 0.373) (the catalogue issue rate, both harts)",
+  "source": "energy manual 03a (random data, aifoundry3 column), as design b read it; tensor CSRs priced 0 (their energy is in the resident and line terms)"
+ },
+ "issue_cycles_per_instruction": 1.0,
+ "label": "desk (a check of code); the path prices are frozen from microbenchmarks (E33), never fitted to a GEMM",
+ "loops": {
+  "rgm136 gemmL": {
+   "D_A_cycles_vs_rgm136": 0.0,
+   "D_B_cycles_vs_rgm136": 0.0,
+   "census_by_segment": {
+    "S1_wait_to_fma": {
+     "classes": {
+      "alu": 7,
+      "branch": 1,
+      "csr_tensor_fma": 1,
+      "ld_stack": 2,
+      "sd_stack": 1
+     },
+     "cum": 12,
+     "ld_stall_cycles": 7.5,
+     "n": 12
+    },
+    "S2_fma_to_A": {
+     "classes": {
+      "alu": 11,
+      "branch": 1,
+      "csr_tensor_coop": 1,
+      "csr_tensor_load": 1,
+      "ld_stack": 6,
+      "sd_stack": 3
+     },
+     "cum": 35,
+     "ld_stall_cycles": 18.5,
+     "n": 23
+    },
+    "S3_A_to_B": {
+     "classes": {
+      "alu": 2,
+      "csr_tensor_coop": 1,
+      "csr_tensor_load": 1,
+      "ld_stack": 3
+     },
+     "cum": 42,
+     "ld_stall_cycles": 9.75,
+     "n": 7
+    },
+    "S4_B_to_wait": {
+     "classes": {
+      "alu": 1,
+      "branch": 1,
+      "csr_tensor_wait": 1,
+      "ld_stack": 1
+     },
+     "cum": 46,
+     "ld_stall_cycles": 4.25,
+     "n": 4
+    },
+    "total": {
+     "classes": {
+      "alu": 21,
+      "branch": 3,
+      "csr_tensor_coop": 2,
+      "csr_tensor_fma": 1,
+      "csr_tensor_load": 2,
+      "csr_tensor_wait": 1,
+      "ld_stack": 12,
+      "sd_stack": 4
+     },
+     "ld_stall_cycles": 40.0,
+     "n": 46
+    }
+   },
+   "dE_instr_pJ_per_minion_op_vs_rgm136": 0.0,
+   "instructions_per_op": 46,
+   "kernel": "rgm136",
+   "ran_on_card_in_E211": true,
+   "wait_to_A": {
+    "cycles_model": 61.0,
+    "ld_stall": 26.0,
+    "n": 35
+   },
+   "wait_to_B": {
+    "cycles_model": 77.75,
+    "ld_stall": 35.75,
+    "n": 42
+   }
+  },
+  "rgm136 gemmLnc": {
+   "D_A_cycles_vs_rgm136": -12.5,
+   "D_B_cycles_vs_rgm136": -22.0,
+   "census_by_segment": {
+    "S1_wait_to_fma": {
+     "classes": {
+      "alu": 7,
+      "branch": 1,
+      "csr_tensor_fma": 1,
+      "ld_stack": 2,
+      "sd_stack": 1
+     },
+     "cum": 12,
+     "ld_stall_cycles": 7.5,
+     "n": 12
+    },
+    "S2_fma_to_A": {
+     "classes": {
+      "alu": 11,
+      "branch": 1,
+      "csr_tensor_load": 1,
+      "ld_stack": 4,
+      "sd_stack": 2
+     },
+     "cum": 31,
+     "ld_stall_cycles": 10.0,
+     "n": 19
+    },
+    "S3_A_to_B": {
+     "classes": {
+      "alu": 2,
+      "csr_tensor_load": 1,
+      "ld_stack": 1
+     },
+     "cum": 35,
+     "ld_stall_cycles": 3.25,
+     "n": 4
+    },
+    "S4_B_to_wait": {
+     "classes": {
+      "alu": 1,
+      "branch": 1,
+      "csr_tensor_wait": 1,
+      "ld_stack": 1
+     },
+     "cum": 39,
+     "ld_stall_cycles": 4.25,
+     "n": 4
+    },
+    "total": {
+     "classes": {
+      "alu": 21,
+      "branch": 3,
+      "csr_tensor_fma": 1,
+      "csr_tensor_load": 2,
+      "csr_tensor_wait": 1,
+      "ld_stack": 8,
+      "sd_stack": 3
+     },
+     "ld_stall_cycles": 25.0,
+     "n": 39
+    }
+   },
+   "dE_instr_pJ_per_minion_op_vs_rgm136": -39.6393,
+   "instructions_per_op": 39,
+   "kernel": "rgm136",
+   "ran_on_card_in_E211": true,
+   "wait_to_A": {
+    "cycles_model": 48.5,
+    "ld_stall": 17.5,
+    "n": 31
+   },
+   "wait_to_B": {
+    "cycles_model": 55.75,
+    "ld_stall": 20.75,
+    "n": 35
+   }
+  },
+  "rgm211 gemmL": {
+   "D_A_cycles_vs_rgm136": -10.5,
+   "D_B_cycles_vs_rgm136": -13.75,
+   "census_by_segment": {
+    "S1_wait_to_fma": {
+     "classes": {
+      "alu": 7,
+      "branch": 1,
+      "csr_tensor_fma": 1,
+      "ld_stack": 1
+     },
+     "cum": 10,
+     "ld_stall_cycles": 2.25,
+     "n": 10
+    },
+    "S2_fma_to_A": {
+     "classes": {
+      "alu": 12,
+      "branch": 1,
+      "csr_tensor_coop": 1,
+      "csr_tensor_load": 1,
+      "ld_stack": 5,
+      "sd_stack": 1
+     },
+     "cum": 31,
+     "ld_stall_cycles": 17.25,
+     "n": 21
+    },
+    "S3_A_to_B": {
+     "classes": {
+      "alu": 2,
+      "csr_tensor_coop": 1,
+      "csr_tensor_load": 1,
+      "ld_stack": 2
+     },
+     "cum": 37,
+     "ld_stall_cycles": 7.5,
+     "n": 6
+    },
+    "S4_B_to_wait": {
+     "classes": {
+      "alu": 1,
+      "branch": 1,
+      "csr_tensor_wait": 1
+     },
+     "cum": 40,
+     "ld_stall_cycles": 0.0,
+     "n": 3
+    },
+    "total": {
+     "classes": {
+      "alu": 22,
+      "branch": 3,
+      "csr_tensor_coop": 2,
+      "csr_tensor_fma": 1,
+      "csr_tensor_load": 2,
+      "csr_tensor_wait": 1,
+      "ld_stack": 8,
+      "sd_stack": 1
+     },
+     "ld_stall_cycles": 27.0,
+     "n": 40
+    }
+   },
+   "dE_instr_pJ_per_minion_op_vs_rgm136": -62.447993465147455,
+   "instructions_per_op": 40,
+   "kernel": "rgm211",
+   "ran_on_card_in_E211": false,
+   "wait_to_A": {
+    "cycles_model": 50.5,
+    "ld_stall": 19.5,
+    "n": 31
+   },
+   "wait_to_B": {
+    "cycles_model": 64.0,
+    "ld_stall": 27.0,
+    "n": 37
+   }
+  },
+  "rgm211 gemmLn": {
+   "D_A_cycles_vs_rgm136": -37.0,
+   "D_B_cycles_vs_rgm136": -49.75,
+   "census_by_segment": {
+    "S1_wait_to_fma": {
+     "classes": {
+      "alu": 7,
+      "branch": 1,
+      "csr_tensor_fma": 1
+     },
+     "cum": 9,
+     "ld_stall_cycles": 0.0,
+     "n": 9
+    },
+    "S2_fma_to_A": {
+     "classes": {
+      "alu": 12,
+      "branch": 1,
+      "csr_tensor_coop": 1,
+      "csr_tensor_load": 1
+     },
+     "cum": 24,
+     "ld_stall_cycles": 0.0,
+     "n": 15
+    },
+    "S3_A_to_B": {
+     "classes": {
+      "alu": 2,
+      "csr_tensor_coop": 1,
+      "csr_tensor_load": 1
+     },
+     "cum": 28,
+     "ld_stall_cycles": 0.0,
+     "n": 4
+    },
+    "S4_B_to_wait": {
+     "classes": {
+      "alu": 1,
+      "branch": 1,
+      "csr_tensor_wait": 1
+     },
+     "cum": 31,
+     "ld_stall_cycles": 0.0,
+     "n": 3
+    },
+    "total": {
+     "classes": {
+      "alu": 22,
+      "branch": 3,
+      "csr_tensor_coop": 2,
+      "csr_tensor_fma": 1,
+      "csr_tensor_load": 2,
+      "csr_tensor_wait": 1
+     },
+     "ld_stall_cycles": 0,
+     "n": 31
+    }
+   },
+   "dE_instr_pJ_per_minion_op_vs_rgm136": -142.06998366286865,
+   "instructions_per_op": 31,
+   "kernel": "rgm211",
+   "ran_on_card_in_E211": true,
+   "wait_to_A": {
+    "cycles_model": 24.0,
+    "ld_stall": 0.0,
+    "n": 24
+   },
+   "wait_to_B": {
+    "cycles_model": 28.0,
+    "ld_stall": 0.0,
+    "n": 28
+   }
+  }
+ },
+ "v3_1_note": "census-v3.1.json (MM1-v3.1, DECLARED-v31.md item 6): census-v3.json (sha256 cad5250ccc2324c724fe2230093146aa6216779cf0c64003228b88fbd59d974f) with rgm136 gemmLnc's dE_instr_pJ_per_minion_op_vs_rgm136 set to -39.6393 (was -45.65666122095622): the census's own stated rule, dE = sum over classes dn_c (e_c - cpi p_awake), applied to the two removed tensor_coop issue slots (e_c = 0 for the tensor CSRs; cpi p_awake = 3.008668 pJ a slot); desk; the time paths and every other loop unchanged",
+ "what": "MM1-v3's operations record: the steady op's census of each kernel loop by class and segment, and the path from the TensorWait's return to each operand's request (cycles: one an instruction plus the L1 load-to-use stalls at E33's 5.25 cycles). Transcribed from design b's desk census (Q214 lane v3-design-b; a desk check of each loop's disassembly, rgm136 as built on aifoundry3 and rgm211's desk build, the branch rule checked against the counted simulator run of rgm136's gemmL1x1x1: the same 46-instruction path PC by PC). Desk, not time; no number changed in the transcription."
+}
