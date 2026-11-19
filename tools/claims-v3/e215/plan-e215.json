@@ -1,0 +1,178 @@
+{
+ "experiment": "E215",
+ "request": "Q224",
+ "what": "the cards, stops, peaks and card time of E215 (frozen before any datum)",
+ "arms": {
+  "A": {
+   "card": "aifoundry3 card 0",
+   "box": "aifoundry3",
+   "devices": "the box's one card, its device nodes at index 0",
+   "lock": "/run/lock/etsoc-shire0.lock",
+   "et_devices": null,
+   "clock": "600 MHz pinned (a boot-time TDP of 0 latches the governor), read, never set",
+   "config_gate": "TDP 0 W, temperature threshold 65 C, minion 600 MHz, as found (read, nothing set; E207, E211 and E213 arm A read the same)",
+   "line_W": 65.0,
+   "stop_W": 70.0,
+   "stops": "the board strictly above 70 W on 3 samples in a row (counting the samples that carry a board reading; a sample with none neither counts nor breaks the row); the shires' mean die (minshire[0]) at or above 70 C; the hottest-sensor latch (minshire[2]) at or above 70 C once it has risen during the session above the lowest value it read since the session's first sample (E213 arm A's lines, E206.md A1 item 1)",
+   "die_gate": "min(60, the session's rest die + 4) C, waited at most 300 s, else that run is NO DATA (E207's and E213 arm A's)",
+   "pace": {
+    "source": "E213 arm A (docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry3): 105 runs in 42.83 card-minutes, smoke included",
+    "s_per_run": 24.474285714285713
+   },
+   "smoke_min_per_process": 0.2225,
+   "rule_min": 60.0,
+   "cap_min": 70.0,
+   "measured_peaks": "E213 arm A 64.22 W (a075, gemmLnc3x1x3 fp32), 58 C, latch 51 -> 61 C (session 06:37:09-07:19:59 PST Wed 18 Nov 2026); E211 61.9 W, 59 C; E210 58.66 W, 59 C; E207 51.26 W, 56 C - all under this arm's 70 W / 70 C stops",
+   "rest": "the first card command at least 40 minutes after our previous session on aifoundry3 ended (E213 arm A's ended 07:19:59 PST Wed 18 Nov 2026; the simulator runs on aifoundry3 since are not card sessions)",
+   "runs": 119,
+   "smoke_processes": 4,
+   "smoke_min": 0.89,
+   "card_minutes_planned": 49.4,
+   "registered_subset_if_cut": {
+    "what": "the opening smoke, tie 1, pass 1 and tie 2: every point once but the gemmLnc block",
+    "runs": 82,
+    "card_minutes": 34.1
+   },
+   "planning_peak": {
+    "W": 50.76,
+    "point": "r01",
+    "W_over_idle": 24.02,
+    "rest_W_REPORTED": 24.74,
+    "margin_W": 2.0
+   },
+   "top5_planning_peaks": [
+    {
+     "point": "r01",
+     "W": 50.76
+    },
+    {
+     "point": "a040",
+     "W": 48.19
+    },
+    {
+     "point": "a042",
+     "W": 47.33
+    },
+    {
+     "point": "a041",
+     "W": 47.33
+    },
+    {
+     "point": "a029",
+     "W": 47.18
+    }
+   ],
+   "gemmLnc_bounds_REPORTED": [
+    {
+     "point": "a024",
+     "W_over_idle_v31": 19.554,
+     "bound_W": 62.92,
+     "stop_W": 70.0,
+     "under_stop": true
+    },
+    {
+     "point": "a026",
+     "W_over_idle_v31": 19.456,
+     "bound_W": 62.73,
+     "stop_W": 70.0,
+     "under_stop": true
+    },
+    {
+     "point": "a031",
+     "W_over_idle_v31": 16.582,
+     "bound_W": 57.42,
+     "stop_W": 70.0,
+     "under_stop": true
+    },
+    {
+     "point": "a032",
+     "W_over_idle_v31": 16.446,
+     "bound_W": 57.17,
+     "stop_W": 70.0,
+     "under_stop": true
+    }
+   ],
+   "points_over_line": [],
+   "within_cap": true
+  },
+  "B": {
+   "card": "aifoundry1 card 1",
+   "box": "aifoundry1",
+   "devices": "the card's device nodes at index 1; ET_DEVICES=1 on every device process",
+   "lock": "/run/lock/etsoc-shire1.lock",
+   "et_devices": "1",
+   "clock": "600 MHz as found (every sample since September; E213 arm B 17,817 of 17,817 samples), read, never set",
+   "config_gate": "TDP 65 W, temperature threshold 65 C, minion 600 MHz, as found (read, nothing set; E206 arm B and E213 arm B read the same)",
+   "line_W": 65.0,
+   "stop_W": 72.0,
+   "stops": "the board strictly above 72 W on 3 samples in a row; the die at or above 80 C (the shires' mean, or the hottest-sensor latch once it has risen during the session) - E206 and E213 arm B's lines on this card",
+   "die_gate": "min(63, the session's rest die + 3) C, waited at most 300 s, else that run is NO DATA (E206 and E213 arm B's)",
+   "pace": {
+    "source": "E213 arm B (docs/reports/data/2026-11-18-e213-blind-matmul-aifoundry1-c1): 79 runs in 29.74 card-minutes, smoke included",
+    "s_per_run": 22.5873417721519
+   },
+   "smoke_min_per_process": 0.25,
+   "rule_min": 42.0,
+   "cap_min": 48.0,
+   "measured_peaks": "E213 arm B tripped its 72 W x3 stop at run 079 (k37, gemmLnc3x1x3 fp32: 72.24 W on 3 samples; its W over idle 1.69 x MM1-v3.1's in sample); its smoke s14 (gemmLnc2x2x2) 66.1 W; its other runs under 66 W; latch 53 -> 59 C (session 15:15:28-15:45:12 PST Wed 18 Nov 2026); E206 arm B 59.34 W",
+   "rest": "the first card command at least 40 minutes after the last session on aifoundry1 ended, either card, ours or the model session's (E214 a1c1-S4 ended 21:01:51 PST Wed 18 Nov 2026, the model session's release #12.8.1; any later release counts)",
+   "runs": 71,
+   "smoke_processes": 5,
+   "smoke_min": 1.25,
+   "card_minutes_planned": 28.0,
+   "registered_subset_if_cut": {
+    "what": "the opening smoke, tie 1, pass 1 and tie 2: every point once but the gemmLnc block",
+    "runs": 43,
+    "card_minutes": 17.2
+   },
+   "planning_peak": {
+    "W": 58.35,
+    "point": "r11",
+    "W_over_idle": 24.59,
+    "rest_W_REPORTED": 31.76,
+    "margin_W": 2.0
+   },
+   "top5_planning_peaks": [
+    {
+     "point": "r11",
+     "W": 58.35
+    },
+    {
+     "point": "b027",
+     "W": 57.06
+    },
+    {
+     "point": "b019",
+     "W": 55.57
+    },
+    {
+     "point": "b009",
+     "W": 54.26
+    },
+    {
+     "point": "b010",
+     "W": 54.16
+    }
+   ],
+   "gemmLnc_bounds_REPORTED": [
+    {
+     "point": "b013",
+     "W_over_idle_v31": 16.577,
+     "bound_W": 64.43,
+     "stop_W": 72.0,
+     "under_stop": true
+    }
+   ],
+   "points_over_line": [],
+   "within_cap": true
+  }
+ },
+ "gemmLnc_factor_REPORTED": 1.85,
+ "inputs_sha256": {
+  "tools/claims-v3/e215/points-e215.json": "d2bf8dddefdd0a565b531c55962cefe84ee1ef77618670ccbcd8e875f0646624",
+  "tools/matmul/mm1/v3.1/out/e215/mm1_v31_e215.json": "90742cddce9a355ddf53e85eb80a8075bc67613d36e804d12a8d422d342fd4d4",
+  "tools/claims-v3/e215/forecast-e215b-v31.csv": "06541b49e7b86b510aa711bbda7da147806ef05c4c2b42be9c94b1447778cf80",
+  "tools/claims-v3/e215/forecast-e215-refs.csv": "8eea6857bd7d0ba5a493b8262efe0b4e422707fd24dd2c0653f9de1a5f066bfe"
+ },
+ "refusals": []
+}

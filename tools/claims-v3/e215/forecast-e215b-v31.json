@@ -1,0 +1,4811 @@
+{
+ "calls": {
+  "MM1-v2": "e213_v3.v2_model().predict(card, arm with gemmLnc and gemmLn read as gemmL, fmt, kind, mask, 600.0, V=None, t0_c=None)",
+  "MM1-v3": "mm1_v3.Model(out/mm1_v3_params.json).predict(card, arm, fmt, kind, mask, 600.0, kernel=kernel, t0_c=None)",
+  "MM1-v3.1": "mm1_v31.Model(out/mm1_v31_params.json).predict_many([{card, arm, fmt, kind, mask, f: 600.0, kernel}])",
+  "v3.1 with T7": "mm1_v31.Model(params with time.theta = time_T5r+G0+T7.json > theta_all and time.form = its form).predict_many(...)"
+ },
+ "inputs_sha256": {
+  "tools/claims-v3/e215/desk/choice-e215b.json": "29bc58f4e1aa5b501746485ebb08a35627911eb1368e4553630710c4e87c58bd",
+  "tools/claims-v3/e215/points-e215.json": "d2bf8dddefdd0a565b531c55962cefe84ee1ef77618670ccbcd8e875f0646624",
+  "tools/matmul/mm1/v2/SHA256SUMS": "eafb6558c4eaa053e4e33b8a4d6b2a644175f325df9e9ba56a1b6373b556f2f2",
+  "tools/matmul/mm1/v2/mm1_v2.py": "5abf3a0a49757e15a776f3a1b5cdb4f7fa90943de2e016fe8b26aa4bf5324c08",
+  "tools/matmul/mm1/v2/out/mm1_v2_params.json": "9d79040bb8f86336987ff4b6aeaf7e5e6e3b2b2ba07e4bcdc4aa5f5b65c43fa5",
+  "tools/matmul/mm1/v3.1/SHA256SUMS": "f6840d2de6617a739c30485904230e96b744b03b7c82c08b14b6de2d942528ed",
+  "tools/matmul/mm1/v3.1/energy_v31.py": "21082cbfbd14ce24f7210360203e59feca7e643a7f36042e3ece2e468d2b906b",
+  "tools/matmul/mm1/v3.1/mm1_v31.py": "e67ea34d60e4947e6fe192d5ddd995682fe4992f7ec1595f7d5fc29843a87575",
+  "tools/matmul/mm1/v3.1/out/e215/e215_choice.json": "c1bfd070c9d48aa1cf60aa0c7983e4387f75a543c7e7da4e07c89e945d0cee84",
+  "tools/matmul/mm1/v3.1/out/e215/mm1_v31_e215.csv": "f8fe39b4fb847791352d5ccbcc92406f32cf28347fb3af1bca96b851bc8bc2cc",
+  "tools/matmul/mm1/v3.1/out/e215/mm1_v31_e215.json": "90742cddce9a355ddf53e85eb80a8075bc67613d36e804d12a8d422d342fd4d4",
+  "tools/matmul/mm1/v3.1/out/fits/time_T5r+G0+T7.json": "fe98b06f9a32412556137576422ca237aaa74c80542143d7f9fda0c6f308fcfd",
+  "tools/matmul/mm1/v3.1/out/mm1_v31_params.json": "d01009a0f586bb6e58ce5a5a1376fa0aaa567f086798f96c0d9dac7a83c9a7e3",
+  "tools/matmul/mm1/v3.1/t7_v31.py": "893ae962174678fcd1560dfc423722361e706319a188687f8f572a4e3ca89242",
+  "tools/matmul/mm1/v3.1/time_v31.py": "4a7147eb79754d657e74d5673e26c3db67bdb89f3ef08ee64748968688402ac5",
+  "tools/matmul/mm1/v3/SHA256SUMS": "c24efc149110d0cb3d1c8603f0bb7ee83db85eebf9af7ba4254d267c7c85dc74",
+  "tools/matmul/mm1/v3/e213_v3.py": "3533b4d73278381bd2a7f26891f3dded5ef154de9751733402d1d9a174d826c1",
+  "tools/matmul/mm1/v3/energy_v3.py": "49a577bc0c3743e3289052501d75b24ecff740ff3d2d304eae9b7c59c17e2abe",
+  "tools/matmul/mm1/v3/engine_v3.py": "da6213460e6c90dcfc304d53d096f7bbe2634baa81ab5309ee354b412a4ff898",
+  "tools/matmul/mm1/v3/mm1_core_v3.py": "acebc705d06be133845b78ed85a7787a6792838fcca95f75dfc03fba41ea43c2",
+  "tools/matmul/mm1/v3/mm1_v3.py": "89c2e463e3527b379ed10557c2e595b294b289c0ba8cd2005481190c9555fe3c",
+  "tools/matmul/mm1/v3/out/mm1_v3_params.json": "1fdc07496a39a5398021c2da0e60f157a2e7f693d845e039f8dc661f6aa325db",
+  "tools/matmul/mm1/v3/unread_v2_e212.py": "916954ccaf477c3e4c858d1a6f68c2cb5d224339792e33bab4fa81908c7f2028"
+ },
+ "interpreter": "/usr/bin/python3 3.12.3",
+ "mm1_v2_sha256sums_checked": null,
+ "mm1_v31_sha256sums_checked": 64,
+ "mm1_v3_sha256sums_checked": 170,
+ "numpy": "1.26.4",
+ "points": {
+  "b001": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.002583940793210287,
+    "awake_memory_path": 0.0025610892250430626,
+    "awake_minions": 0.007336918334961771,
+    "data_switches": 0.05564657592603028,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.017516734780847,
+    "lines_fresh": 0.013549078126745377,
+    "ungated_base": 0.033456042377903325,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.13265037956474107,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.03113440241926361,
+     0.968854268564815
+    ],
+    [
+     0.0,
+     3.5272613675049895e-07,
+     1.0976289784629194e-05
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9962477356481764,
+     0.0037409353359022495
+    ],
+    [
+     0.0,
+     1.1286634325256628e-05,
+     4.238159612306573e-08
+    ]
+   ],
+   "T_op_us": 2.0264579365291415,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.2719761357754962,
+    "B_W_us": 31.96676354290007,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 17.04667491765686,
+   "arm": "gemmL1x15x4",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 4668959.085763142,
+   "cycles_per_op_mean": 1202.6456596612118,
+   "cycles_per_op_wall": 1215.8747619174849,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 98.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    129.75247669836676,
+    62.247523301633244
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xf0ffffff",
+   "minions": 896,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 3840,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.3797699415609485,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.007781598476271903,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 104114107023360.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1444631315485201.5,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 919187487856592.0
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 943650895248023.8
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      285315131041012.25,
+      1141260524164049.0
+     ],
+     "count_estimated": 570630262082024.5,
+     "energy_J": 0.03364975370080266,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0025610892250430626,
+     "awake_minions": 0.007336918334961771,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 567345318485196.1,
+     "energy_J": 0.033456042377903325,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b002": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.002583940793210287,
+    "awake_memory_path": 0.0025610892250430626,
+    "awake_minions": 0.007336918334961771,
+    "data_switches": 0.05564657592603028,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.017516734780847,
+    "lines_fresh": 0.013549078126745377,
+    "ungated_base": 0.033456042377903325,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.13265037956474107,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.03113440241926361,
+     0.968854268564815
+    ],
+    [
+     0.0,
+     3.5272613675049895e-07,
+     1.0976289784629194e-05
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9962477356481764,
+     0.0037409353359022495
+    ],
+    [
+     0.0,
+     1.1286634325256628e-05,
+     4.238159612306573e-08
+    ]
+   ],
+   "T_op_us": 2.0264579365291415,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.2719761357754962,
+    "B_W_us": 31.96676354290007,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 17.04667491765686,
+   "arm": "gemmL1x15x4",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 4668959.085763142,
+   "cycles_per_op_mean": 1202.6456596612118,
+   "cycles_per_op_wall": 1215.8747619174849,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 98.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    129.75247669836676,
+    62.247523301633244
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xff0fffff",
+   "minions": 896,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 3840,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.3797699415609485,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.007781598476271903,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 104114107023360.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1444631315485201.5,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 919187487856592.0
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 943650895248023.8
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      285315131041012.25,
+      1141260524164049.0
+     ],
+     "count_estimated": 570630262082024.5,
+     "energy_J": 0.03364975370080266,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0025610892250430626,
+     "awake_minions": 0.007336918334961771,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 567345318485196.1,
+     "energy_J": 0.033456042377903325,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b003": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.002583940793210287,
+    "awake_memory_path": 0.0025610892250430626,
+    "awake_minions": 0.007336918334961771,
+    "data_switches": 0.05564657592603028,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.017516734780847,
+    "lines_fresh": 0.013549078126745377,
+    "ungated_base": 0.033456042377903325,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.13265037956474107,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.03113440241926361,
+     0.968854268564815
+    ],
+    [
+     0.0,
+     3.5272613675049895e-07,
+     1.0976289784629194e-05
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9962477356481764,
+     0.0037409353359022495
+    ],
+    [
+     0.0,
+     1.1286634325256628e-05,
+     4.238159612306573e-08
+    ]
+   ],
+   "T_op_us": 2.0264579365291415,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.2719761357754962,
+    "B_W_us": 31.96676354290007,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 17.04667491765686,
+   "arm": "gemmL1x15x4",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 4668959.085763142,
+   "cycles_per_op_mean": 1202.6456596612118,
+   "cycles_per_op_wall": 1215.8747619174849,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 98.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    129.75247669836676,
+    62.247523301633244
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xfff0ffff",
+   "minions": 896,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 3840,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.3797699415609485,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.007781598476271903,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 104114107023360.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1444631315485201.5,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 919187487856592.0
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 943650895248023.8
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      285315131041012.25,
+      1141260524164049.0
+     ],
+     "count_estimated": 570630262082024.5,
+     "energy_J": 0.03364975370080266,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0025610892250430626,
+     "awake_minions": 0.007336918334961771,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 567345318485196.1,
+     "energy_J": 0.033456042377903325,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b004": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.002583940793210287,
+    "awake_memory_path": 0.0025610892250430626,
+    "awake_minions": 0.007336918334961771,
+    "data_switches": 0.05564657592603028,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.017516734780847,
+    "lines_fresh": 0.013549078126745377,
+    "ungated_base": 0.033456042377903325,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.13265037956474107,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.03113440241926361,
+     0.968854268564815
+    ],
+    [
+     0.0,
+     3.5272613675049895e-07,
+     1.0976289784629194e-05
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9962477356481764,
+     0.0037409353359022495
+    ],
+    [
+     0.0,
+     1.1286634325256628e-05,
+     4.238159612306573e-08
+    ]
+   ],
+   "T_op_us": 2.0264579365291415,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.2719761357754962,
+    "B_W_us": 31.96676354290007,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 17.04667491765686,
+   "arm": "gemmL1x15x4",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 4668959.085763142,
+   "cycles_per_op_mean": 1202.6456596612118,
+   "cycles_per_op_wall": 1215.8747619174849,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 98.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    129.75247669836676,
+    62.247523301633244
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffff0fff",
+   "minions": 896,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 3840,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.3797699415609485,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.007781598476271903,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 104114107023360.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1444631315485201.5,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 919187487856592.0
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 943650895248023.8
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      285315131041012.25,
+      1141260524164049.0
+     ],
+     "count_estimated": 570630262082024.5,
+     "energy_J": 0.03364975370080266,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0025610892250430626,
+     "awake_minions": 0.007336918334961771,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 567345318485196.1,
+     "energy_J": 0.033456042377903325,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b005": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 2.6046785524984707e-05,
+    "awake_memory_path": 0.0014849746371384252,
+    "awake_minions": 0.0006077290159893324,
+    "data_switches": 3.0505348920976124e-05,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.00041371886680943357,
+    "lines_fresh": 0.0006435669782850044,
+    "ungated_base": 0.002549031800221205,
+    "zero_gate_saving": -0.002005665620466356
+   },
+   "J_over_idle_per_gemm": 0.003749907812423005,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     9.36412705988485e-12,
+     7.361176122350563e-13
+    ],
+    [
+     0.0,
+     0.9271188336296872,
+     0.07288116636021254
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     9.36412705988485e-12,
+     7.361176122350563e-13
+    ],
+    [
+     0.0,
+     0.9271188336296872,
+     0.07288116636021254
+    ]
+   ],
+   "T_op_us": 2.2030948367215557,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 0.4638147839107001,
+    "B_W_us": 0.8091817184058829,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 0.831107968442889,
+   "arm": "gemmL2x1x16",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 2707162.9353634478,
+   "cycles_per_op_mean": 1307.4746805469176,
+   "cycles_per_op_wall": 1321.8569020329335,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 84.0,
+   "kernel": "rgm136",
+   "kind": "zeros",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    118.67121070644498,
+    73.32878929355502
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xcc000",
+   "minions": 128,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 2048,
+   "phi": 0.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.14703514688836905,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.004511938225605746,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 4390846539836.8984
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 791944187179.1844,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 503896862910.91766
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0266141649169709,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 517307657121.57306
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.002005665620466356,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 3541656852419.1016
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      9185540976450.361,
+      36742163905801.445
+     ],
+     "count_estimated": 18371081952900.723,
+     "energy_J": 0.0010833326306194226,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0014849746371384252,
+     "awake_minions": 0.0006077290159893324,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 43226309979824.45,
+     "energy_J": 0.002549031800221205,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b006": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0003691343990300415,
+    "awake_memory_path": 0.004253194094679297,
+    "awake_minions": 0.0017406286931284079,
+    "data_switches": 0.01391164398150757,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.0043754743673729635,
+    "lines_fresh": 0.0033932501404303713,
+    "ungated_base": 0.008364010594475828,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.03640733627062448,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.18781860871249623,
+     0.6081921849891992
+    ],
+    [
+     0.0,
+     0.04813121784586215,
+     0.15585798845244242
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.7909995566985546,
+     0.005011237003140862
+    ],
+    [
+     0.0,
+     0.20270500479383793,
+     0.0012842015044666367
+    ]
+   ],
+   "T_op_us": 1.9230476168350525,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 0.46381478391070097,
+    "B_W_us": 4.525820458752495,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 2.8172772874555068,
+   "arm": "gemmL3x5x7",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 7753727.991078932,
+   "cycles_per_op_mean": 1141.2745500504764,
+   "cycles_per_op_wall": 1153.8285701010316,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 107.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    129.64257163215657,
+    62.35742836784344
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0x60000006",
+   "minions": 128,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 6720,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.44679813854512596,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.012922879985131553,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 26028526755840.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 361157828871300.4,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 229796871964148.0
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 235912723812005.94
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      69000632249532.61,
+      276002528998130.44
+     ],
+     "count_estimated": 138001264499065.22,
+     "energy_J": 0.008137858906833377,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.004253194094679297,
+     "awake_minions": 0.0017406286931284079,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 141836329621298.97,
+     "energy_J": 0.008364010594475828,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b007": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0011812300768961328,
+    "awake_memory_path": 0.005014466232102614,
+    "awake_minions": 0.003078271392048748,
+    "data_switches": 0.025438434709042414,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.008833748777334558,
+    "lines_fresh": 0.004861932282575443,
+    "ungated_base": 0.015294190801327233,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.06370227427132712,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.5724294496333917,
+     0.17756205360466726
+    ],
+    [
+     0.0,
+     0.19081846339222253,
+     0.05919003336971851
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.5424652908582188,
+     0.20752621237984015
+    ],
+    [
+     0.0,
+     0.18082995784279465,
+     0.06917853891914637
+    ]
+   ],
+   "T_op_us": 1.8598540992841988,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 0.5311615632327671,
+    "B_W_us": 6.788273516500948,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 4.181057283070977,
+   "arm": "gemmL8x4x4",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 9141554.868801694,
+   "cycles_per_op_mean": 1103.7709788036789,
+   "cycles_per_op_wall": 1115.9124595705193,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 144.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    143.13821855773995,
+    48.86178144226005
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0x50005500",
+   "minions": 192,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 8192,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.5475482437147129,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.015235924781336155,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 47595020353536.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 660402887078949.2,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 420199994448727.75
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 431383266399096.56
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      126140829684054.67,
+      504563318736218.7
+     ],
+     "count_estimated": 252281659368109.34,
+     "energy_J": 0.014876911136806135,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.005014466232102614,
+     "awake_minions": 0.003078271392048748,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 259357859878946.75,
+     "energy_J": 0.015294190801327233,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b008": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 5.5351115439987084e-05,
+    "awake_memory_path": 0.0007515033759927496,
+    "awake_minions": 0.0006919972843380381,
+    "data_switches": 0.004769706507945452,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.0013738779442482875,
+    "lines_fresh": 0.0013670108881494026,
+    "ungated_base": 0.0028676607752488553,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.011877107891362775,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0008396567692218565,
+     6.600574000158806e-05
+    ],
+    [
+     0.0,
+     0.9262791768698295,
+     0.07281516062094708
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0008396567692218565,
+     6.600574000158806e-05
+    ],
+    [
+     0.0,
+     0.9262791768698295,
+     0.07281516062094708
+    ]
+   ],
+   "T_op_us": 2.2298471179533164,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 0.6321817322158676,
+    "B_W_us": 10.189069561554671,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 5.201584486117127,
+   "arm": "gemmL1x1x16",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 1370018.0692705177,
+   "cycles_per_op_mean": 1323.3514053135411,
+   "cycles_per_op_wall": 1337.90827077199,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 50.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    118.72917310638887,
+    73.27082689361113
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xee000e",
+   "minions": 288,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 1024,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.08438968703076269,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.002283363448784196,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 8924066316288.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 123825541327302.98,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 78787498959136.45
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 80884362449830.6
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      23709224567679.066,
+      94836898270716.27
+     ],
+     "count_estimated": 47418449135358.13,
+     "energy_J": 0.002796239947837677,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0007515033759927496,
+     "awake_minions": 0.0006919972843380381,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 48629598727302.5,
+     "energy_J": 0.0028676607752488553,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b009": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0029530751921959058,
+    "awake_memory_path": 0.0018127200490853348,
+    "awake_minions": 0.005934876160943201,
+    "data_switches": 0.04769706507945453,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": -0.0004189814302198392,
+    "lines_L2": 0.0,
+    "lines_L3": 0.01563641866757855,
+    "lines_fresh": 0.010610514735098515,
+    "ungated_base": 0.028676607752488557,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.11290229620662476,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.11452629129815138,
+     0.8854721684085253
+    ],
+    [
+     0.0,
+     1.7640435354698514e-07,
+     1.3638889697851795e-06
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.996854530943851,
+     0.0031439287628256055
+    ],
+    [
+     0.0,
+     1.5354507433907588e-06,
+     4.842579941405784e-09
+    ]
+   ],
+   "T_op_us": 1.9124159591967915,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196337,
+    "B_W_us": 36.51204860992924,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 20.498775904024882,
+   "arm": "gemmLn1x15x3",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 31,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     -37.0,
+     -37.0,
+     -37.0
+    ],
+    "D_B": [
+     -49.75,
+     -49.75,
+     -49.75
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 3304654.7774920557,
+   "cycles_per_op_mean": 1134.9649609476508,
+   "cycles_per_op_wall": 1147.4495755180749,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 81.0,
+   "kernel": "rgm211",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    135.12838360344165,
+    56.87161639655834
+   ],
+   "loop": "rgm211 gemmLn",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 2880,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.2878116981015078,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.005507757962486759,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 89240663162880.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1238255413273030.0,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 787874989591364.6
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 808843624498306.1
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      247585891793500.3,
+      990343567174001.2
+     ],
+     "count_estimated": 495171783587000.6,
+     "energy_J": 0.02920000859487297,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0018127200490853348,
+     "awake_minions": 0.005934876160943201,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": -0.0004189814302198392,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 486295987273025.06,
+     "energy_J": 0.028676607752488557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b010": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0023624601537308703,
+    "awake_memory_path": 0.0019293751292787764,
+    "awake_minions": 0.00631680687045475,
+    "data_switches": 0.05087686941808482,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": -0.0004469135255678284,
+    "lines_L2": 0.0,
+    "lines_L3": 0.01673746253391091,
+    "lines_fresh": 0.011223374939843508,
+    "ungated_base": 0.030588381602654455,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.11958781712239028,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.12255212629267141,
+     0.8774365446914072
+    ],
+    [
+     0.0,
+     1.3884107192957536e-06,
+     9.94060520208394e-06
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9962477356481764,
+     0.0037409353359022495
+    ],
+    [
+     0.0,
+     1.1286634325256628e-05,
+     4.238159612306573e-08
+    ]
+   ],
+   "T_op_us": 1.9082689042213938,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196337,
+    "B_W_us": 36.244021849823156,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 20.399811473151985,
+   "arm": "gemmLn1x12x4",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 31,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     -37.0,
+     -37.0,
+     -37.0
+    ],
+    "D_B": [
+     -49.75,
+     -49.75,
+     -49.75
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 3517321.2442608727,
+   "cycles_per_op_mean": 1132.503800724863,
+   "cycles_per_op_wall": 1144.9613425328364,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 80.0,
+   "kernel": "rgm211",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    135.60327731007814,
+    56.39672268992186
+   ],
+   "loop": "rgm211 gemmLn",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 3072,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.3057532705597771,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.005862202073768121,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 95190040707072.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1320805774157898.5,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 840399988897455.5
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 862766532798193.0
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      257110221759965.2,
+      1028440887039860.8
+     ],
+     "count_estimated": 514220443519930.4,
+     "energy_J": 0.030323297627485292,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0019293751292787764,
+     "awake_minions": 0.00631680687045475,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": -0.0004469135255678284,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 518715719757893.3,
+     "energy_J": 0.030588381602654455,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b011": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0019687167947757254,
+    "awake_memory_path": 0.0020102205705326676,
+    "awake_minions": 0.006581496215210856,
+    "data_switches": 0.05299673897717169,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": -0.000465534922466488,
+    "lines_L2": 0.0,
+    "lines_L3": 0.01742841192869584,
+    "lines_fresh": 0.011701406741595003,
+    "ungated_base": 0.03186289750276506,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.12408435380828031,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.12254309867970939,
+     0.8773719096845425
+    ],
+    [
+     0.0,
+     1.0416023681326748e-05,
+     7.45756120668283e-05
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9954648466154,
+     0.004450161748851779
+    ],
+    [
+     0.0,
+     8.461337707295272e-05,
+     3.7825867520232447e-07
+    ]
+   ],
+   "T_op_us": 1.9087007463060497,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196266,
+    "B_W_us": 36.09144906954276,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 20.315578877481105,
+   "arm": "gemmLn1x10x5",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 31,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     -37.0,
+     -37.0,
+     -37.0
+    ],
+    "D_B": [
+     -49.75,
+     -49.75,
+     -49.75
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 3664705.4329076153,
+   "cycles_per_op_mean": 1132.7600868285163,
+   "cycles_per_op_wall": 1145.2204477836299,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 80.0,
+   "kernel": "rgm211",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    135.5531509158474,
+    56.44684908415261
+   ],
+   "loop": "rgm211 gemmLn",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 3200,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.31805058585060453,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.006107842388179358,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 99156292403200.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1375839348081144.2,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 875416655101516.2
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 898715138331451.1
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      263683437337830.7,
+      1054733749351322.8
+     ],
+     "count_estimated": 527366874675661.4,
+     "energy_J": 0.031098535465066572,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0020102205705326676,
+     "awake_minions": 0.006581496215210856,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": -0.000465534922466488,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 540328874747805.56,
+     "energy_J": 0.03186289750276506,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b012": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0003663333618448888,
+    "awake_memory_path": 0.00016574081892501298,
+    "awake_minions": 0.000607221885727556,
+    "data_switches": 0.001785232675492877,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": -5.5864190695978566e-05,
+    "lines_L2": 0.0,
+    "lines_L3": 0.002642794804045021,
+    "lines_fresh": 7.170447181023119e-06,
+    "ungated_base": 0.0010424642774957348,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.006561094080016135,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.99729509324397,
+     0.0026415495444335056
+    ],
+    [
+     0.0,
+     6.318983977880785e-05,
+     1.6737181764084183e-07
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.3190573928397544,
+     0.6790805597161355,
+     0.0017986902325137393
+    ],
+    [
+     2.0215867570558846e-05,
+     4.302737680758685e-05,
+     1.1396721830300356e-07
+    ]
+   ],
+   "T_op_us": 1.4675042834268612,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.3716646232420047,
+    "B_W_us": 15.073258790009287,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 11.643020530163636,
+   "arm": "gemmLn3x1x2",
+   "bench_resident_cycles_simulated": 318.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 31,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     -37.0,
+     -37.0,
+     -37.0
+    ],
+    "D_B": [
+     -49.75,
+     -49.75,
+     -49.75
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 338112.9869015488,
+   "cycles_per_op_mean": 781.9738632825193,
+   "cycles_per_op_wall": 880.5025700561167,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 270.0,
+   "fmt": "int8",
+   "footprint_MB": 20.0,
+   "kernel": "rgm211",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    20.420966957268796,
+    171.2907848297661,
+    0.2882482129650968
+   ],
+   "loop": "rgm211 gemmLn",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 384,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.024456803100709596,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.126,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.0005635216448359147,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 2770956976128
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 15157041954816,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 9644096225280
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "MM1-v1's switch table at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.1391075991802424,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 30273855748001.938
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      25575094596506.02,
+      102300378386024.08
+     ],
+     "count_estimated": 51150189193012.04,
+     "energy_J": 0.0030162986130709327,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.00016574081892501298,
+     "awake_minions": 0.000607221885727556,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": -5.5864190695978566e-05,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 17678039166876.574,
+     "energy_J": 0.0010424642774957348,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b013": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0003937433589653776,
+    "awake_memory_path": 0.003955699792708914,
+    "awake_minions": 0.01295102815872862,
+    "data_switches": 0.07843517368621411,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": -0.0001922372861952,
+    "lines_L2": 0.0,
+    "lines_L3": 0.003858352186813751,
+    "lines_fresh": 0.052685358687262665,
+    "ungated_base": 0.04715708830409229,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.19924420688859049,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     3.0553283365125004e-23,
+     1.6232170143126675e-22
+    ],
+    [
+     0.0,
+     0.15840977717965105,
+     0.8415902228203489
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     3.0553283365125004e-23,
+     1.6232170143126675e-22
+    ],
+    [
+     0.0,
+     0.15840977717965105,
+     0.8415902228203489
+    ]
+   ],
+   "T_op_us": 2.5377903385408667,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196266,
+    "B_W_us": 38.500312275581294,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 16.57747072194561,
+   "arm": "gemmLnc2x1x37",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 39,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     -12.5,
+     -12.5,
+     -12.5
+    ],
+    "D_B": [
+     -22.0,
+     -22.0,
+     -22.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 7211385.025997727,
+   "cycles_per_op_mean": 1506.1070258402772,
+   "cycles_per_op_wall": 1522.67420312452,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 189.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    20.276451478995334,
+    171.72354852100466
+   ],
+   "loop": "rgm136 gemmLnc",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 4736,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.5809297766860577,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.012018975043329544,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 146751312756736.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 2036242235160093.5,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 1295616649550244.0
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 1330098404730547.8
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      482770761417325.2,
+      1931083045669300.8
+     ],
+     "count_estimated": 965541522834650.4,
+     "energy_J": 0.0569374542330418,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.003955699792708914,
+     "awake_minions": 0.01295102815872862,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": -0.0001922372861952,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 799686734626752.4,
+     "energy_J": 0.04715708830409229,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b014": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.00039374335896530296,
+    "awake_memory_path": 0.0017020616416981043,
+    "awake_minions": 0.005572578659825035,
+    "data_switches": 0.03603778250447675,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.009570606806416738,
+    "lines_fresh": 0.01163418721147486,
+    "ungated_base": 0.02166677030188024,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.08657773048473705,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     5.615457997702636e-13,
+     9.507220971847238e-14
+    ],
+    [
+     0.0,
+     0.8552092566074034,
+     0.14479074339193995
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     5.615457997702636e-13,
+     9.507220971847238e-14
+    ],
+    [
+     0.0,
+     0.8552092566074034,
+     0.14479074339193995
+    ]
+   ],
+   "T_op_us": 2.3766241299077246,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196337,
+    "B_W_us": 36.44443482684461,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 16.741208449716886,
+   "arm": "gemmL2x1x17",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 3102920.4640075252,
+   "cycles_per_op_mean": 1410.4594242775815,
+   "cycles_per_op_wall": 1425.9744779446348,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 89.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    109.46678484586154,
+    82.53321515413846
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 2176,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.25080969994293073,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.005171534106679209,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 67426278834176.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 935570756695178.1,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 595283325469031.0
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 611126294065386.8
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      183133272735518.8,
+      732533090942075.2
+     ],
+     "count_estimated": 366266545471037.6,
+     "energy_J": 0.0215985373768569,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0017020616416981043,
+     "awake_minions": 0.005572578659825035,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 367423634828507.8,
+     "energy_J": 0.02166677030188024,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b015": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0059061503844806545,
+    "awake_memory_path": 0.0023245443324986167,
+    "awake_minions": 0.008038058274208606,
+    "data_switches": 0.06359608677260603,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.01995032713980541,
+    "lines_fresh": 0.013055630929522482,
+    "ungated_base": 0.03823547700331808,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.15110627483643987,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.23225156493602309,
+     0.7010815700449612
+    ],
+    [
+     0.0,
+     0.016589450379215862,
+     0.05007741463979987
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.14890285241852172,
+     0.7823580398153976,
+     0.0020722427470649244
+    ],
+    [
+     0.010635951935140778,
+     0.05588289527294829,
+     0.0001480178109266702
+    ]
+   ],
+   "T_op_us": 1.9425987806256948,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.3891671588308157,
+    "B_W_us": 36.65199797649288,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 20.25667512910123,
+   "arm": "gemmL2x15x2",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 4475747.590561601,
+   "cycles_per_op_mean": 1152.8776146146558,
+   "cycles_per_op_wall": 1165.5592683754169,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 98.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    10.2104834786344,
+    129.30656546461245,
+    52.48295105675318
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 3840,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.387999501756714,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.007459579317602668,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 118987550883840.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1651007217697373.2,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 1050499986121819.5
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 1078458165997741.4
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      329934460183452.7,
+      1319737840733810.8
+     ],
+     "count_estimated": 659868920366905.4,
+     "energy_J": 0.03891210845380855,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0023245443324986167,
+     "awake_minions": 0.008038058274208606,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 648394649697366.9,
+     "energy_J": 0.03823547700331808,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b016": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.008859225576720996,
+    "awake_memory_path": 0.0034868165001094645,
+    "awake_minions": 0.012057087416020986,
+    "data_switches": 0.09539413015890902,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.02992549068869479,
+    "lines_fresh": 0.01958344642816385,
+    "ungated_base": 0.0573532155049771,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.22665941227359623,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.23225156458298946,
+     0.7010815689792832
+    ],
+    [
+     0.0,
+     0.016589450732249492,
+     0.05007741570547782
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.14890285219218216,
+     0.7823580386261755,
+     0.0020722427439150153
+    ],
+    [
+     0.010635952161480326,
+     0.055882896462170414,
+     0.00014801781407657957
+    ]
+   ],
+   "T_op_us": 1.9425987813842451,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.3891671588308157,
+    "B_W_us": 36.651997978726705,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 20.256675122883717,
+   "arm": "gemmL3x15x2",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 6713621.388463951,
+   "cycles_per_op_mean": 1152.8776150648341,
+   "cycles_per_op_wall": 1165.5592688305471,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 132.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    10.2104834786344,
+    129.3065653738149,
+    52.48295114755072
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 5760,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.5819992527927612,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.01118936898077325,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 178481326325760.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 2476510826546060.0,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 1575749979182729.2
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0266141649169707,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 1617687248996611.5
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      494901690384276.3,
+      1979606761537105.2
+     ],
+     "count_estimated": 989803380768552.6,
+     "energy_J": 0.05836816269357963,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0034868165001094645,
+     "awake_minions": 0.012057087416020986,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 972591974546049.9,
+     "energy_J": 0.0573532155049771,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b017": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.02953075192240332,
+    "awake_memory_path": 0.011622721667031549,
+    "awake_minions": 0.04019029138673662,
+    "data_switches": 0.3179804338630301,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.09975163562898265,
+    "lines_fresh": 0.06527815476054617,
+    "ungated_base": 0.19117738501659037,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.7555313742453209,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.23225156458298946,
+     0.7010815689792832
+    ],
+    [
+     0.0,
+     0.016589450732249496,
+     0.050077415705477836
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.14890285219218216,
+     0.7823580386261755,
+     0.0020722427439150153
+    ],
+    [
+     0.01063595216148033,
+     0.05588289646217043,
+     0.0001480178140765796
+    ]
+   ],
+   "T_op_us": 1.9425987813842451,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.3891671588308157,
+    "B_W_us": 36.651997978726705,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 20.256675122883717,
+   "arm": "gemmL10x15x2",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 22378737.961546503,
+   "cycles_per_op_mean": 1152.8776150648341,
+   "cycles_per_op_wall": 1165.5592688305471,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 370.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    10.2104834786344,
+    129.3065653738149,
+    52.48295114755072
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 19200,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 1.9399975093092043,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.037297896602577506,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 594937754419200.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 8255036088486866.0,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 5252499930609097.0
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0266141649169709,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 5392290829988706.0
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      1649672301280921.0,
+      6598689205123684.0
+     ],
+     "count_estimated": 3299344602561842.0,
+     "energy_J": 0.19456054231193212,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.011622721667031549,
+     "awake_minions": 0.04019029138673662,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 3241973248486833.5,
+     "energy_J": 0.19117738501659037,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b018": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0055124070255150835,
+    "awake_memory_path": 0.002193369605699234,
+    "awake_minions": 0.007584468259436341,
+    "data_switches": 0.01666217163793352,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.019000099162726068,
+    "lines_fresh": 0.011572907849479622,
+    "ungated_base": 0.009729666589960191,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.07225509013075006,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.2737547080311137,
+     0.6548165353239398
+    ],
+    [
+     0.0,
+     0.02105811326841409,
+     0.050370643376532485
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.148143145922059,
+     0.7783664273260881,
+     0.00206167010690644
+    ],
+    [
+     0.011395658431603502,
+     0.059874507762257924,
+     0.00015859045108515492
+    ]
+   ],
+   "T_op_us": 1.963904308619404,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.3891671588308157,
+    "B_W_us": 17.432269047325473,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 10.26550037466866,
+   "arm": "gemmL2x14x2",
+   "bench_resident_cycles_simulated": 318.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 4223179.825255167,
+   "cycles_per_op_mean": 1165.5218448779847,
+   "cycles_per_op_wall": 1178.3425851716424,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 270.0,
+   "fmt": "int8",
+   "footprint_MB": 92.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    10.2104834786344,
+    131.94399998354734,
+    49.84551653781827
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 3584,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.2957803619264644,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.0070386330420919435,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 25862265110528
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 141465724911616,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 90011564769280
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "MM1-v1's switch table at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.1391075991802424,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 282555986981351.44
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      305967013202711.7,
+      1223868052810846.8
+     ],
+     "count_estimated": 611934026405423.4,
+     "energy_J": 0.036085414037720774,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.002193369605699234,
+     "awake_minions": 0.007584468259436341,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 164995032224181.38,
+     "energy_J": 0.009729666589960191,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b019": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0440992562041223,
+    "awake_memory_path": 0.0057051533194562775,
+    "awake_minions": 0.027128851846578393,
+    "data_switches": 0.23941778607699166,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.05351520962065589,
+    "lines_fresh": 0.03648718798256325,
+    "ungated_base": 0.1427457808123875,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.5490992258627552,
+   "Q0": [
+    [
+     0.0,
+     0.13580180635650738,
+     0.16048169567878803
+    ],
+    [
+     0.0,
+     0.28980972398632615,
+     0.34247818329773283
+    ],
+    [
+     0.0,
+     0.03273935799090057,
+     0.03868923268974497
+    ]
+   ],
+   "Q1": [
+    [
+     0.1890748626577078,
+     0.10697070137399886,
+     0.00023793800358875585
+    ],
+    [
+     0.40349782694151265,
+     0.2282823054535667,
+     0.0005077748889796747
+    ],
+    [
+     0.04558252781542939,
+     0.025788700318368416,
+     5.736254684773699e-05
+    ]
+   ],
+   "T_op_us": 1.7561702154632097,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.3041551556590036,
+    "B_W_us": 36.01180389904579,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 21.81002843716621,
+   "arm": "gemmL16x14x1",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 15105873.725328345,
+   "cycles_per_op_mean": 1042.237516595377,
+   "cycles_per_op_wall": 1053.702129277926,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 494.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    59.8040780447965,
+    92.90755217687854,
+    39.28836977832497
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 14336,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 1.3486258076989304,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.025176456208880576,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 444220189966336.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 6215484519851079.0,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 3954777624140444.5
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0266141649169713,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 4060030728039266.0
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      1137043416990758.5,
+      4548173667963034.0
+     ],
+     "count_estimated": 2274086833981517.0,
+     "energy_J": 0.13410165380734143,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0057051533194562775,
+     "awake_minions": 0.027128851846578393,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 2420673358870169.5,
+     "energy_J": 0.1427457808123875,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b020": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0014185164690412846,
+    "awake_memory_path": 0.0001982500863017162,
+    "awake_minions": 0.0011296827841030636,
+    "data_switches": 0.002677849013239316,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.001946897287002623,
+    "lines_fresh": 0.0009773136261040031,
+    "ungated_base": 0.0015636964162436026,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.009912205682035609,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.37801852664220165,
+     0.21386717598989904,
+     0.0004757109024674555
+    ],
+    [
+     0.2601366907724482,
+     0.14717453115603493,
+     0.00032736453694871213
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.37801852664220165,
+     0.21386717598989904,
+     0.0004757109024674555
+    ],
+    [
+     0.2601366907724482,
+     0.14717453115603493,
+     0.00032736453694871213
+    ]
+   ],
+   "T_op_us": 1.8201082268287945,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.2666494097091245,
+    "B_W_us": 14.903251409081296,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 9.454762176523813,
+   "arm": "gemmL9x1x1",
+   "bench_resident_cycles_simulated": 318.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 629029.4031920314,
+   "cycles_per_op_mean": 1080.1829239340027,
+   "cycles_per_op_wall": 1092.0649360972766,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 270.0,
+   "fmt": "int8",
+   "footprint_MB": 37.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    81.68386782907518,
+    84.12446898089192,
+    26.191663190032905
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 576,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.04320559458183209,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.0010483823386533855,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 4156435464192
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 22735562932224,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 14466144337920
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "MM1-v1's switch table at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.139107599180243,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 45410783622002.914
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      36821839563222.945,
+      147287358252891.78
+     ],
+     "count_estimated": 73643679126445.89,
+     "energy_J": 0.004342727382147911,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0001982500863017162,
+     "awake_minions": 0.0011296827841030636,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 26517058750314.867,
+     "energy_J": 0.0015636964162436026,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b021": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.00035331762852148135,
+    "awake_memory_path": 0.0006090520320734622,
+    "awake_minions": 0.0019940466746372057,
+    "data_switches": 0.014839086913608074,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.005333578681256666,
+    "lines_fresh": 0.0025450097019088158,
+    "ungated_base": 0.008921611300774217,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.03459570293277992,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.32543059240819566,
+     0.002061707636647253
+    ],
+    [
+     0.0,
+     0.6682739690841969,
+     0.0042337308709602456
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.32543059240819566,
+     0.002061707636647253
+    ],
+    [
+     0.0,
+     0.6682739690841969,
+     0.0042337308709602456
+    ]
+   ],
+   "T_op_us": 2.0653349566258132,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196337,
+    "B_W_us": 35.70603150230943,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 18.69492184342854,
+   "arm": "gemmL2x1x7",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 1110324.0726820373,
+   "cycles_per_op_mean": 1225.7180751488506,
+   "cycles_per_op_wall": 1239.2009739754878,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 39.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    148.1536910738962,
+    43.846308926103816
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 896,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.09336314841151498,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.0018505401211367286,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 27763761872896.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 385235017462720.44,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 245116663428424.53
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 251640238732806.3
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      69798054491725.38,
+      279192217966901.53
+     ],
+     "count_estimated": 139596108983450.77,
+     "energy_J": 0.008231906011686963,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0006090520320734622,
+     "awake_minions": 0.0019940466746372057,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 151292084929385.56,
+     "energy_J": 0.008921611300774217,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b022": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.00035331762852148114,
+    "awake_memory_path": 0.0006160321505369224,
+    "awake_minions": 0.002016899700778916,
+    "data_switches": 0.004165542909483379,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.005333578681256665,
+    "lines_fresh": 0.0025450097019088153,
+    "ungated_base": 0.0024324166474900474,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.017462797419976226,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.32543059240819566,
+     0.002061707636647253
+    ],
+    [
+     0.0,
+     0.6682739690841969,
+     0.0042337308709602456
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.32543059240819566,
+     0.002061707636647253
+    ],
+    [
+     0.0,
+     0.6682739690841969,
+     0.0042337308709602456
+    ]
+   ],
+   "T_op_us": 2.0890049912120126,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196302,
+    "B_W_us": 16.551189250737043,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 9.329670989468841,
+   "arm": "gemmL2x1x7",
+   "bench_resident_cycles_simulated": 318.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 1123049.083275578,
+   "cycles_per_op_mean": 1239.765573419592,
+   "cycles_per_op_wall": 1253.4029947272074,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 270.0,
+   "fmt": "int8",
+   "footprint_MB": 39.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    148.1536910738962,
+    43.846308926103816
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 896,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.07690375470005938,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.001871748472125963,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 6465566277632
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 35366431227904,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 22502891192320
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "MM1-v1's switch table at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.139107599180242,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 70638996745337.84
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      69798054491725.38,
+      279192217966901.53
+     ],
+     "count_estimated": 139596108983450.77,
+     "energy_J": 0.008231906011686963,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0006160321505369224,
+     "awake_minions": 0.002016899700778916,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 41248758056045.336,
+     "energy_J": 0.0024324166474900474,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b023": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.00019687167948268883,
+    "awake_memory_path": 0.0022370644850103973,
+    "awake_minions": 0.007324187035543665,
+    "data_switches": 0.04345732596128079,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.0012517750564485241,
+    "lines_fresh": 0.030618985073032276,
+    "ungated_base": 0.026127575952267352,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.11121378524306569,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     1.3165204268722402e-22,
+     1.2876451038269749e-21
+    ],
+    [
+     0.0,
+     0.09275861859552251,
+     0.9072413814044775
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     1.3165204268722402e-22,
+     1.2876451038269749e-21
+    ],
+    [
+     0.0,
+     0.09275861859552251,
+     0.9072413814044775
+    ]
+   ],
+   "T_op_us": 2.5903519844158263,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196337,
+    "B_W_us": 38.739532668640095,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 16.361985767951857,
+   "arm": "gemmL1x1x41",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 4078250.1642642766,
+   "cycles_per_op_mean": 1537.3008809589476,
+   "cycles_per_op_wall": 1554.2111906494958,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 125.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    11.873103180226881,
+    180.12689681977312
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 2624,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.3270681921443892,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.006797083607107127,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 81308159770624.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1128188265426538.2,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 717841657183243.2
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 736946413431790.0
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      271900372677352.03,
+      1087601490709408.1
+     ],
+     "count_estimated": 543800745354704.06,
+     "energy_J": 0.032067631808963486,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0022370644850103973,
+     "awake_minions": 0.007324187035543665,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 443069677293200.6,
+     "energy_J": 0.026127575952267352,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b024": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0011812300768926853,
+    "awake_memory_path": 0.00247981836244695,
+    "awake_minions": 0.008118967344230427,
+    "data_switches": 0.016067094079435896,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.016736256673596624,
+    "lines_fresh": 0.016001500933450468,
+    "ungated_base": 0.009382178497461615,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.06996704596751467,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.19733955251007204,
+     0.208189890270942
+    ],
+    [
+     0.0,
+     0.2892824573661268,
+     0.3051880998528591
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.401916868794374,
+     0.0036125739866400795
+    ],
+    [
+     0.0,
+     0.5891748409422458,
+     0.005295716276740056
+    ]
+   ],
+   "T_op_us": 2.1801694340712596,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196302,
+    "B_W_us": 17.178316047695976,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 9.286018785016273,
+   "arm": "gemmL3x2x9",
+   "bench_resident_cycles_simulated": 318.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 4520799.338490164,
+   "cycles_per_op_mean": 1293.8691003390265,
+   "cycles_per_op_wall": 1308.1016604427557,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 270.0,
+   "fmt": "int8",
+   "footprint_MB": 84.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    120.5275623932053,
+    71.4724376067947
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 3456,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.3092447804430633,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.007534665564150273,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 24938612785152
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 136413377593344,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 86796866027520
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "MM1-v1's switch table at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.139107599180243,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 272464701732017.5
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      287597956938119.1,
+      1150391827752476.5
+     ],
+     "count_estimated": 575195913876238.2,
+     "energy_J": 0.03391898768393978,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.00247981836244695,
+     "awake_minions": 0.008118967344230427,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 159102352501889.22,
+     "energy_J": 0.009382178497461615,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b025": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0007874867179307541,
+    "awake_memory_path": 0.0019707365956872576,
+    "awake_minions": 0.006452225012430513,
+    "data_switches": 0.011901551169952514,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.013026020944289033,
+    "lines_fresh": 0.010839149363977035,
+    "ungated_base": 0.006949761849971568,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.05192693165423867,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     4.742878717054744e-15,
+     5.090463324984611e-17
+    ],
+    [
+     0.0,
+     0.9893811151798017,
+     0.010618884820193525
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     4.742878717054744e-15,
+     5.090463324984611e-17
+    ],
+    [
+     0.0,
+     0.9893811151798017,
+     0.010618884820193525
+    ]
+   ],
+   "T_op_us": 2.339013480722279,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196302,
+    "B_W_us": 16.993738299265978,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 8.672014011297348,
+   "arm": "gemmL4x1x10",
+   "bench_resident_cycles_simulated": 318.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 3592724.7063894207,
+   "cycles_per_op_mean": 1388.138564226872,
+   "cycles_per_op_wall": 1403.4080884333673,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 270.0,
+   "fmt": "int8",
+   "footprint_MB": 98.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    126.64078274301554,
+    65.35921725698446
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 2560,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.24208335399752637,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.005987874510649034,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 18473046507520
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 101046946365440,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 64293974835200
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "MM1-v1's switch table at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.1391075991802424,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 201825704986679.6
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      209029050627811.8,
+      836116202511247.2
+     ],
+     "count_estimated": 418058101255623.6,
+     "energy_J": 0.024652657026196824,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0019707365956872576,
+     "awake_minions": 0.006452225012430513,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 117853594445843.88,
+     "energy_J": 0.006949761849971568,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b026": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0003937433589477014,
+    "awake_memory_path": 0.001483302924885821,
+    "awake_minions": 0.00485635891366906,
+    "data_switches": 0.03179804338630301,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.009476829833427245,
+    "lines_fresh": 0.00860126415137261,
+    "ungated_base": 0.019117738501659036,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.07572728107026447,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     1.4910927616465892e-10,
+     6.254940089876991e-12
+    ],
+    [
+     0.0,
+     0.959740149541284,
+     0.04025985030335183
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     1.4910927616465892e-10,
+     6.254940089876991e-12
+    ],
+    [
+     0.0,
+     0.959740149541284,
+     0.04025985030335183
+    ]
+   ],
+   "T_op_us": 2.3473223463046047,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196266,
+    "B_W_us": 36.139385016515426,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 16.802674028212873,
+   "arm": "gemmL2x1x15",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 2704115.342942904,
+   "cycles_per_op_mean": 1393.0696417238012,
+   "cycles_per_op_wall": 1408.3934077827628,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 79.0,
+   "kernel": "rgm136",
+   "kind": "random",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    122.84673917031364,
+    69.15326082968636
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 1920,
+   "phi": 1.0,
+   "phi_rule": "energy_v3.phi_of",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.2188512165900487,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.011,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.00450685890490484,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 59493775441920.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 825503608848686.6,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 525249993060909.75
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "E210 desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0266141649169709,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 539229082998870.56
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      156622088207851.66,
+      626488352831406.6
+     ],
+     "count_estimated": 313244176415703.3,
+     "energy_J": 0.018471837343747556,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.001483302924885821,
+     "awake_minions": 0.00485635891366906,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 324197324848683.4,
+     "energy_J": 0.019117738501659036,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b027": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0003472523947666725,
+    "awake_memory_path": 0.0002852557657433315,
+    "awake_minions": 0.0009339322112843246,
+    "data_switches": 0.00868318550185354,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.00418914395020034,
+    "lines_fresh": 2.10922224801818e-05,
+    "ungated_base": 0.005735321550497711,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.020195183596826097,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9939652432964499,
+     0.0031348163855862295
+    ],
+    [
+     0.0,
+     0.0028908230981446056,
+     9.117219819317223e-06
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9939652432964499,
+     0.0031348163855862295
+    ],
+    [
+     0.0,
+     0.0028908230981446056,
+     9.117219819317223e-06
+    ]
+   ],
+   "T_op_us": 1.5047212589051238,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196337,
+    "B_W_us": 32.944436839927846,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 23.30071594714495,
+   "arm": "gemmL3x1x3",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 520031.66707761073,
+   "cycles_per_op_mean": 801.805288937011,
+   "cycles_per_op_wall": 902.8327553430743,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 27.0,
+   "kernel": "rgm136",
+   "kind": "designed:blind3 a_colconst_b_randn",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    191.41198031815838,
+    0.588019681841601
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 576,
+   "phi": 0.9178002527757722,
+   "phi_rule": "kinds_v3.phi over the kind's committed tile files",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.047719519413825816,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.126,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.0008667194451293512,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 17848132632576.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 225422705447666.06,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 143431564929549.84
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0266141649169709,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 147248876252884.1
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      38642792437678.21,
+      154571169750712.84
+     ],
+     "count_estimated": 77285584875356.42,
+     "energy_J": 0.004557488567447194,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0002852557657433315,
+     "awake_minions": 0.0009339322112843246,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 97259197454605.0,
+     "energy_J": 0.005735321550497711,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b028": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.00019099473118795298,
+    "awake_memory_path": 0.0002852557657433315,
+    "awake_minions": 0.0009339322112843246,
+    "data_switches": 0.0024870118574167573,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.0023005798511524576,
+    "lines_fresh": 1.4430488791428056e-05,
+    "ungated_base": 0.005735321550497711,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.011947526456073962,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9939652432964499,
+     0.0031348163855862295
+    ],
+    [
+     0.0,
+     0.0028908230981446056,
+     9.117219819317223e-06
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9939652432964499,
+     0.0031348163855862295
+    ],
+    [
+     0.0,
+     0.0028908230981446056,
+     9.117219819317223e-06
+    ]
+   ],
+   "T_op_us": 1.5047212589051238,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196337,
+    "B_W_us": 18.625587637233167,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 13.784767981397817,
+   "arm": "gemmL3x1x3",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 520031.66707761073,
+   "cycles_per_op_mean": 801.805288937011,
+   "cycles_per_op_wall": 902.8327553430743,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 27.0,
+   "kernel": "rgm136",
+   "kind": "e37",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    191.41198031815838,
+    0.588019681841601
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 576,
+   "phi": 0.2728882089872639,
+   "phi_rule": "kinds_v3.phi's generator law",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.03947186227307368,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.126,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.0008667194451293512,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 17848132632576.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 64564892833354.42,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 41081237137164.266
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.026614164916971,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 42174579957325.95
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      21248332799605.797,
+      84993331198423.19
+     ],
+     "count_estimated": 42496665599211.59,
+     "energy_J": 0.0025060050711318387,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0002852557657433315,
+     "awake_minions": 0.0009339322112843246,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 97259197454605.0,
+     "energy_J": 0.005735321550497711,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b029": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.0002504565394363198,
+    "awake_memory_path": 0.0002852557657433315,
+    "awake_minions": 0.0009339322112843246,
+    "data_switches": 0.005765965125353518,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.003019248195158265,
+    "lines_fresh": 1.6965524335478696e-05,
+    "ungated_base": 0.005735321550497711,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.01600714491180895,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9939652432964499,
+     0.0031348163855862295
+    ],
+    [
+     0.0,
+     0.0028908230981446056,
+     9.117219819317223e-06
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9939652432964499,
+     0.0031348163855862295
+    ],
+    [
+     0.0,
+     0.0028908230981446056,
+     9.117219819317223e-06
+    ]
+   ],
+   "T_op_us": 1.5047212589051238,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196302,
+    "B_W_us": 25.673536345106413,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 18.468657882043946,
+   "arm": "gemmL3x1x3",
+   "bench_resident_cycles_simulated": 546.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 520031.66707761073,
+   "cycles_per_op_mean": 801.805288937011,
+   "cycles_per_op_wall": 902.8327553430743,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 529.0,
+   "fmt": "fp32",
+   "footprint_MB": 27.0,
+   "kernel": "rgm136",
+   "kind": "real:blind4",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    191.41198031815838,
+    0.588019681841601
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 576,
+   "phi": 0.5183010444703435,
+   "phi_rule": "kinds_v3.phi over the kind's committed tile files",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.043531480728808664,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.126,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.0008667194451293512,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 17848132632576.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 149689242248323.06,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 95244009365240.98
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0266141649169707,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 97778849137841.02
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      27867566697608.855,
+      111470266790435.42
+     ],
+     "count_estimated": 55735133395217.71,
+     "energy_J": 0.0032866702589300634,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0002852557657433315,
+     "awake_minions": 0.0009339322112843246,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 97259197454605.0,
+     "energy_J": 0.005735321550497711,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  },
+  "b030": {
+   "G_W": 0.0,
+   "J_over_idle_by_class": {
+    "C_stores": 0.00036111825448538747,
+    "awake_memory_path": 0.0002989611144144724,
+    "awake_minions": 0.0009788037550987217,
+    "data_switches": 0.0024597660961944543,
+    "governed_base": 0.0,
+    "instructions_vs_rgm136": 0.0,
+    "lines_L2": 0.0,
+    "lines_L3": 0.00435672974578602,
+    "lines_fresh": 2.168336574123e-05,
+    "ungated_base": 0.0015636964162436026,
+    "zero_gate_saving": -0.0
+   },
+   "J_over_idle_per_gemm": 0.010040758747963887,
+   "Q0": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9939652432964499,
+     0.0031348163855862295
+    ],
+    [
+     0.0,
+     0.0028908230981446056,
+     9.117219819317223e-06
+    ]
+   ],
+   "Q1": [
+    [
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.9939652432964499,
+     0.0031348163855862295
+    ],
+    [
+     0.0,
+     0.0028908230981446056,
+     9.117219819317223e-06
+    ]
+   ],
+   "T_op_us": 1.577016833553486,
+   "V": 0.517,
+   "W_affine": {
+    "A_W": 1.4066696944196302,
+    "B_W_us": 15.2135310389769,
+    "how": "W over idle at a measured op time t_us (the slowest minion) = A + B / t_us, at this clock and die"
+   },
+   "W_over_idle": 11.053701175178341,
+   "arm": "gemmL3x1x3",
+   "bench_resident_cycles_simulated": 318.0,
+   "card": "aifoundry1 card 1",
+   "census_instructions_per_op": 46,
+   "census_path_D_cycles_by_place": {
+    "D_A": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "D_B": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "places": [
+     "L2",
+     "L3",
+     "fresh"
+    ]
+   },
+   "cycles_per_gemm_wall": 545017.0176760848,
+   "cycles_per_op_mean": 840.3286857300992,
+   "cycles_per_op_wall": 946.2101001320916,
+   "die_start_c": 50.0,
+   "f_mhz": 600.0,
+   "floor_cycles_measured_tenb": 270.0,
+   "fmt": "int8",
+   "footprint_MB": 27.0,
+   "kernel": "rgm136",
+   "kind": "real:blind4",
+   "lines_L2_L3_F_per_shire_op": [
+    0.0,
+    191.41198031815838,
+    0.588019681841601
+   ],
+   "loop": "rgm136 gemmL",
+   "mask": "0xffffffff",
+   "minions": 1024,
+   "model": "MM1-v3.1",
+   "ops_per_minion_per_gemm": 576,
+   "phi": 0.9750279094889182,
+   "phi_rule": "kinds_v3.phi over the kind's committed tile files",
+   "rest_law": {
+    "J_at_rest_per_gemm_REPORTED": 0.0388875239936223,
+    "P_rest_W": 31.756915079817926,
+    "T0_c": 55.0,
+    "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+   },
+   "rho_wall_over_mean": 1.126,
+   "s_V": 1.0,
+   "seconds_per_gemm": 0.0009083616961268079,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 4156435464192
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 20883988611072,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 13288027521024
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.139107599180242,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 41712548169362.63
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      40186327210312.6,
+      160745308841250.4
+     ],
+     "count_estimated": 80372654420625.2,
+     "energy_J": 0.004739531366012637,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0002989611144144724,
+     "awake_minions": 0.0009788037550987217,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 26517058750314.867,
+     "energy_J": 0.0015636964162436026,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   },
+   "t7_mapped": false
+  }
+ },
+ "what": "E215 arm B: MM1-v3.1's forecasts (every field of its predictor), aifoundry1 card 1 at 600 MHz"
+}
