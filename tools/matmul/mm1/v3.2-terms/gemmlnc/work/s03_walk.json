@@ -1,0 +1,917 @@
+{
+ "walk": "tools/matmul/mm1/v3.1/walk/walk/walk_v31.py",
+ "walk_sha256": "87736da2a24b0f0b22157cbee5e39d5cfa54d1af7e32f28edaf5c506790f839e",
+ "mask": "0xffffffff",
+ "rows": [
+  {
+   "shape": "2x3x2",
+   "what": "E211 c01c",
+   "MB": 2,
+   "NB": 3,
+   "KB": 2,
+   "footprint": {
+    "A": 8192,
+    "B": 6144,
+    "C": 12288,
+    "MB": 26.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 24576,
+    "B_tile_requests": 24576,
+    "A_in_L3_share_distinct": 1.0,
+    "B_in_L3_share_distinct": 1.0,
+    "A_in_L3_share_by_shire_request": 1.0,
+    "B_in_L3_share_by_shire_request": 1.0,
+    "chip_fresh_tiles_per_step": 0.0,
+    "chip_fresh_lines_per_step": 0.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": true,
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 16.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 400.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 176.0,
+    "gemmLnc_lines_beyond_L2_desk": 176.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 0.95
+  },
+  {
+   "shape": "3x5x7",
+   "what": "E211 c02c",
+   "MB": 3,
+   "NB": 5,
+   "KB": 7,
+   "footprint": {
+    "A": 43008,
+    "B": 35840,
+    "C": 30720,
+    "MB": 107.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 215040,
+    "B_tile_requests": 215040,
+    "A_in_L3_share_distinct": 0.8,
+    "B_in_L3_share_distinct": 0.5,
+    "A_in_L3_share_by_shire_request": 0.8,
+    "B_in_L3_share_by_shire_request": 0.5,
+    "chip_fresh_tiles_per_step": 22.4,
+    "chip_fresh_lines_per_step": 358.4
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": "by construction (chip_steps reads no coop flag); hashed at the small shapes",
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 0.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 384.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 192.0,
+    "gemmLnc_lines_beyond_L2_desk": 192.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 5.83
+  },
+  {
+   "shape": "1x1x1",
+   "what": "E213 a087/k40",
+   "MB": 1,
+   "NB": 1,
+   "KB": 1,
+   "footprint": {
+    "A": 2048,
+    "B": 1024,
+    "C": 2048,
+    "MB": 5.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 2048,
+    "B_tile_requests": 2048,
+    "A_in_L3_share_distinct": 1.0,
+    "B_in_L3_share_distinct": 1.0,
+    "A_in_L3_share_by_shire_request": 1.0,
+    "B_in_L3_share_by_shire_request": 1.0,
+    "chip_fresh_tiles_per_step": 0.0,
+    "chip_fresh_lines_per_step": 0.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": true,
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 64.0,
+    "B_L2_lines_per_op": 128.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 512.0,
+    "B_L2_lines_per_op": 512.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 0.0,
+    "gemmLnc_lines_beyond_L2_desk": 0.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 0.08
+  },
+  {
+   "shape": "1x1x44",
+   "what": "E213 a086",
+   "MB": 1,
+   "NB": 1,
+   "KB": 44,
+   "footprint": {
+    "A": 90112,
+    "B": 45056,
+    "C": 2048,
+    "MB": 134.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 90112,
+    "B_tile_requests": 90112,
+    "A_in_L3_share_distinct": 0.0,
+    "B_in_L3_share_distinct": 0.0,
+    "A_in_L3_share_by_shire_request": 0.0,
+    "B_in_L3_share_by_shire_request": 0.0,
+    "chip_fresh_tiles_per_step": 64.0,
+    "chip_fresh_lines_per_step": 1024.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": "by construction (chip_steps reads no coop flag); hashed at the small shapes",
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 0.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 384.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 192.0,
+    "gemmLnc_lines_beyond_L2_desk": 192.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 2.13
+  },
+  {
+   "shape": "1x6x5",
+   "what": "E213 a079",
+   "MB": 1,
+   "NB": 6,
+   "KB": 5,
+   "footprint": {
+    "A": 10240,
+    "B": 30720,
+    "C": 12288,
+    "MB": 52.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 61440,
+    "B_tile_requests": 61440,
+    "A_in_L3_share_distinct": 1.0,
+    "B_in_L3_share_distinct": 0.5,
+    "A_in_L3_share_by_shire_request": 1.0,
+    "B_in_L3_share_by_shire_request": 0.5,
+    "chip_fresh_tiles_per_step": 16.0,
+    "chip_fresh_lines_per_step": 256.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": "by construction (chip_steps reads no coop flag); hashed at the small shapes",
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 0.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 384.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 192.0,
+    "gemmLnc_lines_beyond_L2_desk": 192.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 1.53
+  },
+  {
+   "shape": "3x1x3",
+   "what": "E213 a075/k37",
+   "MB": 3,
+   "NB": 1,
+   "KB": 3,
+   "footprint": {
+    "A": 18432,
+    "B": 3072,
+    "C": 6144,
+    "MB": 27.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 18432,
+    "B_tile_requests": 18432,
+    "A_in_L3_share_distinct": 1.0,
+    "B_in_L3_share_distinct": 1.0,
+    "A_in_L3_share_by_shire_request": 1.0,
+    "B_in_L3_share_by_shire_request": 1.0,
+    "chip_fresh_tiles_per_step": 0.0,
+    "chip_fresh_lines_per_step": 0.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": true,
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 0.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 384.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 192.0,
+    "gemmLnc_lines_beyond_L2_desk": 192.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 0.65
+  },
+  {
+   "shape": "4x1x6",
+   "what": "E213 a082",
+   "MB": 4,
+   "NB": 1,
+   "KB": 6,
+   "footprint": {
+    "A": 49152,
+    "B": 6144,
+    "C": 8192,
+    "MB": 62.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 49152,
+    "B_tile_requests": 49152,
+    "A_in_L3_share_distinct": 0.0,
+    "B_in_L3_share_distinct": 1.0,
+    "A_in_L3_share_by_shire_request": 0.0,
+    "B_in_L3_share_by_shire_request": 1.0,
+    "chip_fresh_tiles_per_step": 32.0,
+    "chip_fresh_lines_per_step": 512.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": "by construction (chip_steps reads no coop flag); hashed at the small shapes",
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 0.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 384.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 192.0,
+    "gemmLnc_lines_beyond_L2_desk": 192.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 1.15
+  },
+  {
+   "shape": "2x2x2",
+   "what": "E213/E215 smoke s03/s14",
+   "MB": 2,
+   "NB": 2,
+   "KB": 2,
+   "footprint": {
+    "A": 8192,
+    "B": 4096,
+    "C": 8192,
+    "MB": 20.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 16384,
+    "B_tile_requests": 16384,
+    "A_in_L3_share_distinct": 1.0,
+    "B_in_L3_share_distinct": 1.0,
+    "A_in_L3_share_by_shire_request": 1.0,
+    "B_in_L3_share_by_shire_request": 1.0,
+    "chip_fresh_tiles_per_step": 0.0,
+    "chip_fresh_lines_per_step": 0.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": true,
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 16.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 400.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 176.0,
+    "gemmLnc_lines_beyond_L2_desk": 176.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 0.61
+  },
+  {
+   "shape": "1x15x3",
+   "what": "E215 a024 (shape only)",
+   "MB": 1,
+   "NB": 15,
+   "KB": 3,
+   "footprint": {
+    "A": 6144,
+    "B": 46080,
+    "C": 30720,
+    "MB": 81.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 92160,
+    "B_tile_requests": 92160,
+    "A_in_L3_share_distinct": 1.0,
+    "B_in_L3_share_distinct": 0.5,
+    "A_in_L3_share_by_shire_request": 1.0,
+    "B_in_L3_share_by_shire_request": 0.5,
+    "chip_fresh_tiles_per_step": 16.0,
+    "chip_fresh_lines_per_step": 256.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": "by construction (chip_steps reads no coop flag); hashed at the small shapes",
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 0.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 384.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 192.0,
+    "gemmLnc_lines_beyond_L2_desk": 192.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 2.36
+  },
+  {
+   "shape": "1x12x4",
+   "what": "E215 a026 (shape only)",
+   "MB": 1,
+   "NB": 12,
+   "KB": 4,
+   "footprint": {
+    "A": 8192,
+    "B": 49152,
+    "C": 24576,
+    "MB": 80.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 98304,
+    "B_tile_requests": 98304,
+    "A_in_L3_share_distinct": 1.0,
+    "B_in_L3_share_distinct": 0.5,
+    "A_in_L3_share_by_shire_request": 1.0,
+    "B_in_L3_share_by_shire_request": 0.5,
+    "chip_fresh_tiles_per_step": 16.0,
+    "chip_fresh_lines_per_step": 256.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": "by construction (chip_steps reads no coop flag); hashed at the small shapes",
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 0.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 384.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 192.0,
+    "gemmLnc_lines_beyond_L2_desk": 192.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 2.56
+  },
+  {
+   "shape": "8x1x5",
+   "what": "E215 a031 (shape only)",
+   "MB": 8,
+   "NB": 1,
+   "KB": 5,
+   "footprint": {
+    "A": 81920,
+    "B": 5120,
+    "C": 16384,
+    "MB": 101.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 81920,
+    "B_tile_requests": 81920,
+    "A_in_L3_share_distinct": 0.0,
+    "B_in_L3_share_distinct": 1.0,
+    "A_in_L3_share_by_shire_request": 0.0,
+    "B_in_L3_share_by_shire_request": 1.0,
+    "chip_fresh_tiles_per_step": 32.0,
+    "chip_fresh_lines_per_step": 512.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": "by construction (chip_steps reads no coop flag); hashed at the small shapes",
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 0.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 384.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 192.0,
+    "gemmLnc_lines_beyond_L2_desk": 192.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 2.05
+  },
+  {
+   "shape": "5x1x10",
+   "what": "E215 a032 (shape only)",
+   "MB": 5,
+   "NB": 1,
+   "KB": 10,
+   "footprint": {
+    "A": 102400,
+    "B": 10240,
+    "C": 10240,
+    "MB": 120.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 102400,
+    "B_tile_requests": 102400,
+    "A_in_L3_share_distinct": 0.0,
+    "B_in_L3_share_distinct": 1.0,
+    "A_in_L3_share_by_shire_request": 0.0,
+    "B_in_L3_share_by_shire_request": 1.0,
+    "chip_fresh_tiles_per_step": 32.0,
+    "chip_fresh_lines_per_step": 512.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": "by construction (chip_steps reads no coop flag); hashed at the small shapes",
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 0.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 384.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 192.0,
+    "gemmLnc_lines_beyond_L2_desk": 192.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 2.51
+  },
+  {
+   "shape": "2x1x37",
+   "what": "E215 b013 (shape only)",
+   "MB": 2,
+   "NB": 1,
+   "KB": 37,
+   "footprint": {
+    "A": 151552,
+    "B": 37888,
+    "C": 4096,
+    "MB": 189.0
+   },
+   "l3_strict_32MB": {
+    "cap_MB": 32.0,
+    "A_tile_requests": 151552,
+    "B_tile_requests": 151552,
+    "A_in_L3_share_distinct": 0.0,
+    "B_in_L3_share_distinct": 0.0,
+    "A_in_L3_share_by_shire_request": 0.0,
+    "B_in_L3_share_by_shire_request": 0.0,
+    "chip_fresh_tiles_per_step": 64.0,
+    "chip_fresh_lines_per_step": 1024.0
+   },
+   "per_shire_step_gemmL": {
+    "A_reads": 4,
+    "B_reads": 8,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 192,
+    "lines_distinct": 192
+   },
+   "chip_step": {
+    "A_distinct": 32,
+    "B_distinct": 32,
+    "shire_requests": 384,
+    "A_sharing_hist": {
+     "4": 32
+    },
+    "B_sharing_hist": {
+     "8": 32
+    }
+   },
+   "chip_stream_equal_gemmL_gemmLnc": "by construction (chip_steps reads no coop flag); hashed at the small shapes",
+   "per_shire_step_gemmLnc": {
+    "A_reads": 32,
+    "B_reads": 32,
+    "A_distinct": 4,
+    "B_distinct": 8,
+    "lines_read": 1024,
+    "lines_distinct": 192
+   },
+   "l2_desk_shire0_gemmL": {
+    "A_L2_lines_per_op": 0.0,
+    "B_L2_lines_per_op": 0.0
+   },
+   "l2_desk_shire0_gemmLnc": {
+    "A_L2_lines_per_op": 448.0,
+    "B_L2_lines_per_op": 384.0
+   },
+   "derived_per_shire_op": {
+    "duplicate_line_reads": 832,
+    "duplicate_A_lines": 448,
+    "duplicate_B_lines": 384,
+    "gemmL_lines_beyond_L2_desk": 192.0,
+    "gemmLnc_lines_beyond_L2_desk": 192.0,
+    "extra_L2_hits_desk": 832.0,
+    "duplicates_that_hit_L2_desk_share": 1.0
+   },
+   "seconds": 3.72
+  }
+ ]
+}

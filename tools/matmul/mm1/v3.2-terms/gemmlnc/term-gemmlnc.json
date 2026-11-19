@@ -1,0 +1,138 @@
+{
+ "name": "MM1-v3.1 + gemmLnc term",
+ "form": "F3",
+ "x": [
+  "dup",
+  "first"
+ ],
+ "constants_pJ_per_line": [
+  254.41259268104486,
+  552.0890289143084
+ ],
+ "equation": "dW = D * sL * (minions / t_op) * 1e-12 * (c1 * dup + c2 * first); dup = 26 duplicate line reads a minion-op (gemmLnc; 0 for every cooperative loop); first = (14 qA_b + 12 qB_b) / NB, the duplicates of beyond-L2 lines on the A panel's first C block; qA_b, qB_b = 1 - the L2 marginals of MM1-v3.1's Q; D = 1 + 0.0048 (die - 50), sL = 1 + xi (s_V - 1), MM1-v3.1's; the scorer's given(): W = A + (B + dW t_op) / t_op, i.e. the term adds dW t_op to B",
+ "fit": {
+  "in_sample_rms_pct": 7.989980934665822,
+  "LOPO_rms_pct": 9.814200606546711,
+  "LORO_rms_pct": 9.626723676299212,
+  "folds": {
+   "LOEO E211 out": {
+    "constants_pJ_per_line": [
+     253.66496240815718,
+     542.0875316951774
+    ],
+    "test": [
+     "E211|c01c",
+     "E211|c02c"
+    ],
+    "err_pct": [
+     -8.853,
+     11.113
+    ],
+    "rms_pct": 10.04661717779858,
+    "identified": true
+   },
+   "LOEO E213 out": {
+    "constants_pJ_per_line": [
+     -499.5887013312295,
+     3424.0197533168516
+    ],
+    "test": [
+     "E213|a3|a087",
+     "E213|a3|a086",
+     "E213|a3|a079",
+     "E213|a3|a075",
+     "E213|a3|a082",
+     "E213|c1|k40",
+     "E213|c1|k37"
+    ],
+    "err_pct": [
+     -124.433,
+     97.096,
+     -8.697,
+     99.781,
+     121.18,
+     -119.264,
+     84.516
+    ],
+    "rms_pct": 100.70802992377088,
+    "identified": false
+   },
+   "LOEO-arm E213 arm A out": {
+    "constants_pJ_per_line": [
+     285.19665024514205,
+     663.5834575485334
+    ],
+    "test": [
+     "E213|a3|a087",
+     "E213|a3|a086",
+     "E213|a3|a079",
+     "E213|a3|a075",
+     "E213|a3|a082"
+    ],
+    "err_pct": [
+     9.915,
+     9.916,
+     11.626,
+     7.399,
+     20.857
+    ],
+    "rms_pct": 12.818185047511369,
+    "identified": true
+   },
+   "LOCO aifoundry1 card 1 out (= LOEO-arm E213 arm B out)": {
+    "constants_pJ_per_line": [
+     226.0747077287143,
+     512.5342029947468
+    ],
+    "test": [
+     "E213|c1|k40",
+     "E213|c1|k37"
+    ],
+    "err_pct": [
+     -10.617,
+     -9.046
+    ],
+    "rms_pct": 9.863003608263968,
+    "identified": true
+   },
+   "LOCO aifoundry3 card 0 out": {
+    "constants_pJ_per_line": [
+     296.98669787311826,
+     652.9645325962842
+    ],
+    "test": [
+     "E211|c01c",
+     "E211|c02c",
+     "E213|a3|a087",
+     "E213|a3|a086",
+     "E213|a3|a079",
+     "E213|a3|a075",
+     "E213|a3|a082"
+    ],
+    "err_pct": [
+     -4.791,
+     15.228,
+     11.933,
+     9.968,
+     12.253,
+     7.453,
+     20.916
+    ],
+    "rms_pct": 12.760322444680053,
+    "identified": true
+   }
+  }
+ },
+ "v31_alone_on_the_9": {
+  "rms_pct": 32.55622910614724,
+  "mean_pct": -30.65811122459764,
+  "rms_W": 10.581083672442167
+ },
+ "selection": {
+  "rule": "lowest LOPO rms % of W over idle; a two-constant form only if >= 1 point better than the best one-constant form",
+  "best_one_constant": "F1",
+  "best_two_constant": "F3",
+  "chosen": "F3"
+ },
+ "labels": "post hoc (fitted after the 9 points existed); desk"
+}
