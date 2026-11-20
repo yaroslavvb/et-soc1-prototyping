@@ -1,0 +1,139 @@
+{
+ "name": "proc",
+ "argv": [
+  "~/nekko/build/e220argm/rgm211/host/sparsity_host",
+  "--test",
+  "fma",
+  "--type",
+  "fp32",
+  "--pattern",
+  "none",
+  "--values",
+  "gemmLnc2x1x37:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+  "--shires",
+  "0xffffffff",
+  "--per-shire",
+  "32",
+  "--seconds",
+  "2",
+  "--budget",
+  "3.5",
+  "--seed",
+  "1",
+  "--kernel",
+  "~/nekko/build/e220argm/rgm136/kernel/sparsity.elf",
+  "--stop-file",
+  "~/nekko/build/e220a/T1795215315-A/STOP"
+ ],
+ "timeout_s": 10,
+ "rc": 0,
+ "hung": false,
+ "t0_ms": 1795217228219,
+ "t1_ms": 1795217231395,
+ "n_launch": 7,
+ "runtime_other_cards": [],
+ "family": "rgm136 gemmLnc",
+ "host": "rgm211",
+ "kernel": "rgm136",
+ "gate": "GATE OK: rgm136 gemmLnc: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones",
+ "walk_ok": true,
+ "walk_words": "walk mn on every launch, walk_ok true, walk_launches_bad 0",
+ "walk": {
+  "want": "mn",
+  "names": [
+   "mn",
+   "mn",
+   "mn",
+   "mn",
+   "mn",
+   "mn",
+   "mn"
+  ],
+  "ok": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "tagged": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "check_walk": "mn",
+  "launches_bad": 0
+ },
+ "tensor_errors": 0,
+ "launches_ok": true,
+ "check": "approx",
+ "check_ok": true,
+ "check_cycles_per_op": 1488.027,
+ "counted_cycles_per_op": 1488.027,
+ "stopped_by_file": false,
+ "k1": false,
+ "records": {
+  "runtime_lines": 1,
+  "unparsed": 0,
+  "mismatched": 0,
+  "other": 0
+ },
+ "launch_window_ms": [
+  1795217228571,
+  1795217231174
+ ],
+ "ident": {
+  "stderr_targets": [
+   "/dev/et1_ops"
+  ],
+  "stderr_ids": [
+   1
+  ],
+  "nodes_held": [
+   "/dev/et1_ops"
+  ],
+  "wrong": [],
+  "right": true,
+  "polls": 33,
+  "tripped": null
+ },
+ "sequence_n": 87,
+ "sequence_block": "G-smoke",
+ "run": "087-G-smoke-s03",
+ "rest": {
+  "t0_ms": 1795217218216,
+  "t1_ms": 1795217228216,
+  "samples": 50,
+  "board_w_median_last5s": 28.3
+ },
+ "gate_die": {
+  "c": 47.0,
+  "die": 47,
+  "waited_s": 0.0
+ },
+ "cycles_band": [
+  200.0,
+  4000.0
+ ],
+ "cycles_band_is": "R0's: the smoke's counter mean 200-4,000 cycles an op (E220.md 7), read on the median over the process's counted launches (the scorer's reading)",
+ "cycles_in_band": true,
+ "identity_ok": true,
+ "kernel_stop": "",
+ "board_rise": {
+  "ok": true,
+  "rise_w": 23.36,
+  "samples": 26,
+  "rest_w": 28.3,
+  "rest_is": "this smoke's own 10 s rest, its last 5 s",
+  "min_w": 2.0
+ },
+ "good": true,
+ "a1_family_dropped": null,
+ "a1_session_level": ""
+}
