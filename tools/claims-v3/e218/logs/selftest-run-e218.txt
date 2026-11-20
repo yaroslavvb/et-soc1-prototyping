@@ -1,0 +1,74 @@
+selftest_run_e218 (/usr/bin/python3 3.12.3), 2026-11-19 23:00:16 PST; /dev/et*: none; /run/lock entries: 0
+G1: PASS - rc 0; the smoke s01 good True (family rgm136 gemmL, counter mean 800.0 in R0's band) then the stop-path test (lines 8 < 9); 3 runs; gates ['GATE OK', 'GATE OK', 'GATE OK', 'GATE OK']; 7 smoke launches; the latch tripped nothing (True); 6 s
+LN: PASS - rc 0; s03 good True at place 84, its own rest 25.3 W (3 samples); then 24 G runs, each on ['rgm211']'s host with ['rgm136']'s ELF, walk mn, GATE OK: True; 29 s
+LN2: PASS - rc 0; s03 good True at place 84, its own rest 25.3 W (3 samples); then 2 G runs, each on ['rgm211']'s host with ['rgm136']'s ELF, walk mn, GATE OK: True; 8 s
+C1: PASS - rc 16; '['DRY config start: {"tdp_w": 65, "temp_threshold_c": 65, "power_state": 0, "power_state_name": "max_power", "minion_mhz": 600, "minion_mv": 523, "fake": true}: not {\'tdp_w\': 0, \'temp_threshold_c\': 65, \'minio']'
+C2: PASS - rc 16; '['DRY config start: {"tdp_w": 0, "temp_threshold_c": 65, "power_state": 0, "power_state_name": "max_power", "minion_mhz": 600, "minion_mv": 519, "fake": true}: the card\'s identity: PCIe target /dev/et1_mgmt, ']'
+C4: PASS - rc 16; '['DRY config start: {"tdp_w": 0, "temp_threshold_c": 65, "power_state": 0, "power_state_name": "max_power", "minion_mhz": 600, "minion_mv": 523, "fake": true}: the card\'s identity: no \'PCIe target\' line on th']'
+C5: PASS - rc 16; '["DRY config start: config read rc 1, no JSON line: not {'tdp_w': 0, 'temp_threshold_c': 65, 'minion_mhz': 600}: the gate, no launch"]'
+C8: PASS - rc 16; '['DRY config start: {"tdp_w": 0, "temp_threshold_c": 70, "power_state": 0, "power_state_name": "max_power", "minion_mhz": 600, "minion_mv": 523, "fake": true}: not {\'tdp_w\': 0, \'temp_threshold_c\': 65, \'minion']'
+C9: PASS - rc 16; '['DRY config start: {"tdp_w": 0, "temp_threshold_c": 65, "power_state": 0, "power_state_name": "max_power", "minion_mhz": 800, "minion_mv": 523, "fake": true}: not {\'tdp_w\': 0, \'temp_threshold_c\': 65, \'minion']'
+C6: PASS - rc 8; the HUNG line True; the hung double: 'the hung double ended by itself after 16.0 s (pid 2637008); nothing killed it'
+C7: PASS - rc 0; the config read whole past card 0's own runtime line (['0'])
+H1: PASS - rc 16; '['DRY refused, no device opened: a holder or a device process (1 holder line(s) of another login)']'
+H3: PASS - rc 16; '['DRY refused, no device opened: a holder or a device process (1 holder line(s) of another login)']'
+H4: PASS - rc 16; '['DRY refused, no device opened: a holder or a device process (et-who unreadable (rc 1))']'
+H5: PASS - rc 16; '['DRY refused, no device opened: a holder or a device process (1 other device process(es) of ours)']'
+H6: PASS - rc 16; '['DRY refused, no device opened: a holder or a device process (1 CI job(s))']'
+H7: PASS - rc 16; '['DRY the identity read (the sampler running, before the smoke): 1 holder line(s) of ours off card 0: the gate, no launch']'
+L1: PASS - rc 16
+S1: PASS - rc 16
+S2: PASS - rc 16; '["DRY the identity read (the sampler running, before the smoke): no holder line of ours on /dev/et0_mgmt (the sampler's) with the sampler running; 1 holder line(s) of ours off card 0; the sampler (pid 2639082"]'
+S3: PASS - rc 0; sampler starts 2; runs 3
+S4: PASS - rc 0; sampler starts 2; runs 3
+P1: PASS - ok False; {"board": false, "die": false}
+R1: PASS - rc 16; '["DRY smoke gate failed: s01: rc 1, check wrong, walk ok, the counter's mean 800.0 (in R0's band), the host's card ok, the board's rise 20.395 W on 6 samples"]'
+R2: PASS - rc 16; '["DRY smoke gate failed: s01: rc 134, check None, walk ok, the counter's mean 800.0 (in R0's band), the host's card ok, the board's rise 20.21 W on 3 samples"]'
+R4: PASS - rc 16; '["DRY smoke gate failed: s01: rc 0, check approx, walk ok, the counter's mean 800.0 (in R0's band), the host's card ok, the board's rise 0.005 W on 6 samples"]'
+R6: PASS - rc 16; '["DRY smoke gate failed: s01: rc 0, check approx, walk ok, the counter's mean None (outside R0's band), the host's card ok, the board's rise None W on 0 samples"]'
+R7: PASS - the counter's mean at 3 x the toy 800 (2,400 cycles an op, inside R0's 200-4,000): rc 0, '["DRY smoke s01: the identity gate GATE OK; rc 0, 7 launches, check approx, no walk (rgm136's host prints none), the counter's mean 2400.0 cycles an op (R0's band 200-4000: in; the check record's 2400.0); rec"]'
+R7X: PASS - the counter's mean at 6 x the toy (4,800, outside R0's 200-4,000): rc 16; '["DRY smoke gate failed: s01: rc 0, check approx, walk ok, the counter's mean 4800.0 (outside R0's band), the host's card ok, the board's rise 20.395 W on 6 samples"]'
+R3: PASS - rc 16; the host stopped by the file True
+R5: PASS - rc 0, 0; s01's records {'runtime_lines': 2, 'unparsed': 0, 'mismatched': 0, 'other': 0}; s03's (rgm211's form, its walk read) {'runtime_lines': 2, 'unparsed': 0, 'mismatched': 0, 'other': 0}, walk ok True
+K0: PASS - rc 16; the K1 line True
+K1: PASS - rc 0; runs 1; '["DRY STOP: K1: a launch of run 001-tie-t01 did not finish (the host's words): it may leave a hung hart: nothing further started"]'
+HG: PASS - rc 8; the run's process hung [True]; the hung double: 'the hung double ended by itself after 14.0 s (pid 2642958); nothing killed it' (19 s after the session began)
+SA: PASS - rc 0; y06b's run: t_gemm None, the host's record {'arm': 'gemmL2x8x24', 'minions': 128, 'shire_mask': '0x6060', 'type': 'fp32'}; the scorer's flags ["y06b run 2: SET ASIDE (record {'arm': 'gemmL2x8x24', 'minions': 128, 'shire_mask': '0x6060', 'type': 'fp32'})", 'y06b: NO DATA (no kept run)']
+TO: PASS - rc 0; y06b's process rc [124]; runs 3
+F2: PASS - rc 0; runs 5; '['DRY STOP: two failed processes in a row (the last in run 005-pass1-y05b): nothing further started']'
+B1: PASS - rc 0; '['DRY STOP: board 71.0 W above 70 W on 3 samples in a row: nothing further started']'; the host ended by the stop file True
+D1: PASS - rc 0; '["DRY STOP: die 70 C (the shires' mean) at or above 70 C: nothing further started"]'; the host ended by the stop file True
+D2: PASS - rc 0; '["DRY STOP: the hottest sensor's latch rose to 88 C (from 87 C this session), at or above 70 C: nothing further started"]'; the host ended by the stop file True
+D3: PASS - rc 0; the board at the line (not above it) on every later sample: no stop (True); runs 3
+DG: PASS - rc 0; [('001-tie-t01', True, 'None'), ('002-pass1-y06b', False, 'the die gate: 61 C after 3 s (gate 55.0 C)'), ('003-pass1-y08a', False, 'the die gate: 61 C after 3 s (gate 55.0 C)')]
+CT: PASS - rc 0; [('001-tie-t01', True, 'None'), ('002-pass1-y06b', False, 'the card-time rule: 0.1 card-minutes since the fir'), ('003-pass1-y08a', False, 'the card-time rule: 0.1 card-minutes since the fir')]
+OP: PASS - rc 0; runs 1; the host ended by the stop file True
+CR: PASS - rc 1; runs 1; '["DRY CRASH: KeyError: 'x999'"]'
+SF: PASS - rc 0; runs [('001-tie-t01', True), ('002-pass1-y06b', True), ('003-pass1-y08a', False)]; the stop "the operator's STOP file (a registered stop: nothing further starts)"; 7 s
+SS: PASS - rc 16; '["DRY smoke gate failed: a stop during the smoke's s01: the operator's STOP file (a registered stop: nothing further starts)"]'
+SSG: PASS - rc 0; the stop "the operator's STOP file (a registered stop: nothing further starts)"; [('083-tie-t01', True), ('084-G-smoke-s03', True), ('085-G-pass1-g08', False), ('086-G-pass1-g04', False)]
+S0: PASS - rc 16; '["DRY refused, no device opened: the operator's STOP file is already in the session's folder (a registered stop; the file is kept, never removed)"]'
+DF: PASS - rc 0; most processes on the stand-in management node at once 1; samplers started 1; left [2647909]; the stop 'the sampler would not stop on SIGTERM (pid(s) [2647909], left running, never killed): no second read'; the deaf double: 'the hung double ended by itself after 110.1 s (pid 2647909); nothing killed it'; 96 s
+RT: PASS - card 1's line: rc 16: '["DRY smoke s01: the identity gate GATE OK; rc 0, 7 launches, check approx, no walk (rgm136's host prints none), the counter's mean 800.0 cycles an op (R0's band 200-4000: in; the check record's 800.0); recor"]'; card 0's line (its own) rc 0, runs 3
+RT2: PASS - rc 0; runs 1; the stop "identity: the runtime named card(s) ['1'] on the host's stdout of 001-tie-t01 ('Opening device N')"
+RTC: PASS - rc 16; '['DRY config start: {"tdp_w": 0, "temp_threshold_c": 65, "power_state": 0, "power_state_name": "max_power", "minion_mhz": 600, "minion_mv": 523, "fake": true}: the card\'s identity: its stdout\'s runtime line(s']'
+BN: PASS - 95 W on every other sample, no board reading between: [[], [], [], [], ['stop'], [], []] 'board 95.0 W above 70 W on 3 samples in a row'
+GS: PASS - rc 16; '["DRY smoke gate failed: s01: the identity gate failed, no process started (GATE FAILED: (dry, by path) rgm136 gemmL needs rgm136's ELF; --kernel build/e218rgm/rgm136/kernel/sparsity.elf (forced))"]'
+GRY: PASS - rc 0; runs 1; the refused run in the data: checks []; R0 FAIL
+GR: PASS - rc 0; runs 2; '["DRY STOP before run 085-G-pass1-g08's process: the identity gate failed (GATE FAILED: (dry, by path) rgm136 gemmLnc needs rgm136's ELF; --kernel build/e218rgm/rgm136/kernel/sparsity.elf (forced)): nothing m"]'; the refused run: gate GATE FAILED: (dry, by path) rgm136 gemmLnc needs r; R0 FAIL
+CW: PASS - rc 0; runs 3; '["DRY STOP: the kernel stops in run 085-G-pass1-g08 (rgm136 gemmLnc): the check of C reads 'wrong' (ok False); the process rc 1: nothing further started"]'
+TE: PASS - rc 0; runs 3; '['DRY STOP: the kernel stops in run 085-G-pass1-g08 (rgm136 gemmLnc): 1 tensor error(s); a launch not ok; the process rc 1: nothing further started']'
+WR: PASS - rc 0; runs 3; '["DRY STOP: the kernel stops in run 085-G-pass1-g08 (rgm136 gemmLnc): the check of C reads 'approx' (ok False); the walk check failed (walk_ok not true on 15 launch(es); the check line reads walk 'mn', walk_l"]'; R0 FAIL (['g08 run 85: walk or gate not good'])
+TL: PASS - rc 0; runs 3; '["DRY STOP: the kernel stops in run 085-G-pass1-g08 (rgm136 gemmLnc): the check of C reads None (ok False); the walk check failed (no launch record; no check record); the process ended by its timeout's TERM ("]'
+WG: PASS - rc 0; runs 3; y06b flags ['the process rc 134']
+LG3: PASS - rc 0; (plan) '["DRY smoke s03: FAILED for its family alone (its own stop path, E218.md 3): the identity gate failed, no process started (GATE FAILED: (dry, by path) rgm136 gemmLnc needs rgm136's ELF; --kernel build/e218rgm"]'; 24 G runs never started; 83 entries ran; the smoke RUN n 84 block smoke; R0 PASS (["family G's smoke s03 failed (s03 (smoke run 84: checks []); s03 (smoke run 84: c"]); measured 40
+LW3: PASS - rc 0; (lnc) '["DRY smoke s03: FAILED for its family alone (its own stop path, E218.md 3): rc 1; a launch not ok; the check of C approx (ok False); walk FAILED: walk_ok not true on 7 launch(es); the check line reads walk '"]'; 24 G runs never started; 2 entries ran; the smoke RUN n 84 block smoke; R0 NO DATA ([]); measured 0
+LC3: PASS - rc 0; (lnc2) '["DRY smoke s03: FAILED for its family alone (its own stop path, E218.md 3): rc 1; the check of C wrong (ok False): the family 'rgm136 gemmLnc' is DROPPED - g01, g02, g03, g04, g05, g06, g07, g08, g09, g10, g"]'; 2 G runs never started; 2 entries ran; the smoke RUN n 84 block smoke; R0 NO DATA ([]); measured 0
+LK3: PASS - rc 0; '["DRY STOP: K1: a launch of the gemmLnc smoke s03 did not finish (the host's words): it may leave a hung hart"]'; s03's session-level reading 'K1 (a launch did not finish)'; runs 2
+LT3: PASS - rc 0; '["DRY STOP: the kernel stops in the gemmLnc smoke s03 (rgm136 gemmLnc): the check of C reads None (ok False); the walk check failed (no launch record; no check record); the process ended by its timeout's TERM"]'; s03's session-level reading "a launch timeout (rc 124: ended by its timeout's TERM)"; runs 2
+LD3: PASS - rc 0; [('083-tie-t01', True, 'None'), ('084-G-smoke-s03', False, 'the die gate: 61 C after 3 s (gate 55.0 C)'), ('085-G-pass1-g08', False, "the family 'rgm136 gemmLnc' was dropped by its smo")]
+OR: PASS - rc 0; 108 entries of 108 (the plan's 107 runs and the G smoke), every key, argv (host and ELF by loop) and gate the registered, 1626 host records read as their commands' (0 differ); the G block last; 62 s
+E2-ok: PASS - session rc 0, reduce rc 0, score rc 0; runs (points) 104 of 104; t_gemm worst 1.01e-06; J over idle against the injected watts x seconds worst 0.48% (82 runs of 3 W or more); verdicts {"E1": "PASS", "E2": "PASS", "E3": "PASS", "E4": "PASS", "H1": "MM1-v3.2 BETTER", "H10": "MM1-v3.2 BETTER", "H2": "MM1-v3.2 BETTER", "H3": "MM1-v3.2 BETTER", "H4": "MM1-v3.2 BETTER", "H5": "MM1-v3.2 BETTER", "H6": "MM1-v3.2 BETTER", "H7": "MM1-v3.2 BETTER", "H8": "MM1-v3.2 BETTER", "H9": "MM1-v3.2 BETTER", "HG1": "MM1-v3.2 BETTER", "HG2": "MM1-v3.2 BETTER", "HG3": "MM1-v3.2 BETTER", "HG4": "MM1-v3.2 BETTER", "HY1": "TOO FEW", "HY2": "MM1-v3.2 BETTER", "P1": "PASS", "R0": "PASS", "S6": "PASS", "T1": "PASS", "T2": "PASS", "T3": "PASS"}
+E2-W: PASS - session rc 0, reduce rc 0, score rc 0; runs (points) 104 of 104; t_gemm worst 1.01e-06; J over idle against the injected watts x seconds worst 0.40% (86 runs of 3 W or more); verdicts {"E1": "FAIL", "E2": "FAIL", "E3": "FAIL", "E4": "FAIL", "H1": "MM1-v3.2 BETTER", "H10": "NOT DECIDED", "H2": "MM1-v3.2 BETTER", "H3": "MM1-v3.2 BETTER", "H4": "NOT DECIDED", "H5": "NOT DECIDED", "H6": "MM1-v3.2 BETTER", "H7": "MM1-v3.2 BETTER", "H8": "MM1-v3.2 BETTER", "H9": "NOT DECIDED", "HG1": "MM1-v3.2 BETTER", "HG2": "MM1-v3.2 BETTER", "HG3": "v3.1 + gemmLnc term BETTER", "HG4": "v3.1 + gemmLnc term BETTER", "HY1": "TOO FEW", "HY2": "MM1-v3.2 BETTER", "P1": "PASS", "R0": "PASS", "S6": "PASS", "T1": "PASS", "T2": "PASS", "T3": "PASS"}
+RF: PASS - rc 2, 2, --arm B 2, the real runner 16 ('["refused, no device opened: the box or the build is not the registered one (this host is 'aifoundry2', not arm A's 'aifoundry3')"]'), --cap-s without --dry 2, --sequence without --dry 2
+SELFTEST-RUN-E218 72 of 72 PASS
