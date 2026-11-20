@@ -1,0 +1,109 @@
+{
+ "i": 9,
+ "block": "pass1",
+ "role": "arm",
+ "arm": "f09",
+ "run": "009-f09",
+ "form": "burst",
+ "sched": {
+  "arm": "f09",
+  "block": "pass1",
+  "est_peak_w": 46.476,
+  "est_s": 23.0,
+  "family": "rgm136 gemmL",
+  "form": "burst",
+  "i": 9,
+  "plan_n": 10,
+  "role": "arm",
+  "shires": "0xffffffff",
+  "test": "fma",
+  "type": "int8",
+  "unit": "gemmL1x13x4|int8|0xffffffff",
+  "values": "gemmL1x13x4:randn:src/tiles/int8/full.bin"
+ },
+ "gate": {
+  "c": 55.0,
+  "die": 44,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795136444016,
+  "t1_ms": 1795136454016
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "build/rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "int8",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL1x13x4:randn:src/tiles/int8/full.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "build/rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "sessions/1795136155-a2c0-E216/STOP"
+   ],
+   "rc": 0,
+   "t0_ms": 1795136454017,
+   "t1_ms": 1795136460845,
+   "n_launch": 16,
+   "launches_ok": true,
+   "check": "exact",
+   "check_ok": true,
+   "check_cycles_per_op": 1320.965,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1795136454384,
+    1795136460684
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 69,
+    "tripped": null
+   },
+   "family": "rgm136 gemmL",
+   "gate": {
+    "t_ms": 1795136454017,
+    "proc": "runs/009-f09/proc-00",
+    "family": "rgm136 gemmL",
+    "ok": true,
+    "words": "rgm136 gemmL: rgm136's ELF, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones (loadable identity 649d40793e459e51...)"
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1795136454017,
+  "t1_ms": 1795136460845
+ },
+ "tail": {
+  "t0_ms": 1795136460845,
+  "t1_ms": 1795136465846
+ }
+}

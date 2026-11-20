@@ -1,0 +1,109 @@
+{
+ "i": 38,
+ "block": "pass1",
+ "role": "arm",
+ "arm": "g09t",
+ "run": "038-g09t",
+ "form": "burst",
+ "sched": {
+  "arm": "g09t",
+  "block": "pass1",
+  "est_peak_w": 59.24,
+  "est_s": 23.0,
+  "family": "rgm136 gemmL",
+  "form": "burst",
+  "i": 38,
+  "plan_n": 39,
+  "role": "arm",
+  "shires": "0xffffffff",
+  "test": "fma",
+  "type": "fp32",
+  "unit": "gemmL5x5x10|fp32|0xffffffff",
+  "values": "gemmL5x5x10:randn:src/tiles/fp32/randn.bin"
+ },
+ "gate": {
+  "c": 55.0,
+  "die": 44,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795137081339,
+  "t1_ms": 1795137091339
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "build/rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL5x5x10:randn:src/tiles/fp32/randn.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "build/rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "sessions/1795136155-a2c0-E216/STOP"
+   ],
+   "rc": 0,
+   "t0_ms": 1795137091340,
+   "t1_ms": 1795137098115,
+   "n_launch": 16,
+   "launches_ok": true,
+   "check": "approx",
+   "check_ok": true,
+   "check_cycles_per_op": 1638.745,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1795137091824,
+    1795137097908
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 69,
+    "tripped": null
+   },
+   "family": "rgm136 gemmL",
+   "gate": {
+    "t_ms": 1795137091340,
+    "proc": "runs/038-g09t/proc-00",
+    "family": "rgm136 gemmL",
+    "ok": true,
+    "words": "rgm136 gemmL: rgm136's ELF, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones (loadable identity 649d40793e459e51...)"
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1795137091340,
+  "t1_ms": 1795137098116
+ },
+ "tail": {
+  "t0_ms": 1795137098116,
+  "t1_ms": 1795137103116
+ }
+}
