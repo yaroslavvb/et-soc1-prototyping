@@ -1,0 +1,480 @@
+arms.json: kit 1119-mmsweep5, seed 1119-mmsweep5-syn, 207 arms with the anchor, 0 plan tiles, sessions {"a1c0": ["S1", "S2"], "a1c1": ["S1", "S2", "S3"]}
+  host families: gemm 6, gemmL 36, gemmc 136, gemmh 17, mm 6, tenb 6
+  tags (an arm carries one or more): Bclass 20, Cshared 14, L2res 4, anchor 1, control 9, core 91, energy 36, fp16rep 38, gap 28, gemmL 35, gemmh 16, int8lad 32, kind 19, ladB16 47, ladB2 38, loop 23, packed 5, repeat 19, scope 15, stream 4, tenb 3
+  type: fp16 60, fp32 93, int8 54
+  kind: ones 16, rnd 58, zeros 133
+  shires: 0xf 2, 0xff 3, 0xffffffff 202
+  form: burst 207
+  priority: 1 108, 2 50, 3 49
+  gemmL  36 arms; type/kind fp16/ones 2, fp16/rnd 4, fp16/zeros 5, fp32/ones 4, fp32/rnd 5, fp32/zeros 7, int8/rnd 6, int8/zeros 3; M 1024-6144, N 512-6656, K 512-30720; footprint 5-192 MB; masks 0xf 2, 0xff 3, 0xffffffff 31
+        tokens: gemmL1x1x1 gemmL3x3x2 gemmL4x2x1 gemmL4x3x1 gemmL4x3x3 gemmL4x4x2 gemmL4x8x8 gemmL5x3x2 gemmL6x3x1 gemmL6x4x1 gemmL1x11x6 gemmL1x12x1 gemmL1x12x5 gemmL1x12x7 gemmL1x13x1 gemmL1x13x6 gemmL1x2x12 gemmL1x2x15 gemmL2x10x1 gemmL2x12x1 gemmL3x10x1 gemmL3x11x1
+  gemmc 136 arms; type/kind fp16/rnd 18, fp16/zeros 21, fp32/ones 5, fp32/rnd 6, fp32/zeros 45, int8/rnd 16, int8/zeros 25; blocks 1,2,3,4,6,8,12,16,24,32; repeats 1,2,3,4,5,6,8,12,16,24,32; shared C 14; ops a minion a pass 64-32768; footprint 5-160 MB
+        tokens: gemmc1 gemmc2 gemmc16 gemmc2s gemmc4s gemmc8s gemmc16s gemmc1r8 gemmc2r2 gemmc2r3 gemmc2r4 gemmc2r6 gemmc2r8 gemmc3r8 gemmc4r4 gemmc4r8 gemmc6r4 gemmc6r8 gemmc8r4 gemmc8r8 gemmc12r4 gemmc16r2 gemmc16r3 gemmc16r4 gemmc16r5 gemmc16r6 gemmc16r8 gemmc24r4 gemmc2r12 gemmc2r16 gemmc2r32 gemmc2r8s gemmc32r8 gemmc4r16 gemmc4r4s gemmc4r8s gemmc8r16 gemmc16r12 gemmc16r16 gemmc16r24 gemmc16r32 gemmc16r4s gemmc16r8s gemmc2r32s gemmc16r32s
+  gemmh  17 arms; type/kind fp16/zeros 6, fp32/ones 1, fp32/zeros 8, int8/rnd 1, int8/zeros 1; blocks 1,2,16; repeats 1,4,8,32; shared C 0; ops a minion a pass 32-16384; footprint 5-80 MB
+        tokens: gemmh1 gemmh2 gemmh2r4 gemmh2r8 gemmh16r4 gemmh16r8 gemmh2r32 gemmh16r32
+  gemm    6 arms; type/kind fp32/rnd 1, fp32/zeros 4, int8/zeros 1; blocks 1,2,16; repeats 1,8; shared C 0; ops a minion a pass 64-8192; footprint 5-80 MB
+        tokens: gemm1 gemm1r8 gemm2r8 gemm16r8
+  mm      6 arms; type/kind fp16/zeros 2, fp32/ones 2, fp32/zeros 2; pools 16,128 pairs; ops a minion a pass 16-128
+        tokens: mm16 mm128
+  tenb    6 arms; type/kind fp16/ones 1, fp16/zeros 1, fp32/ones 1, fp32/rnd 1, fp32/zeros 1, int8/zeros 1
+        tokens: tenb
+
+a1c0-S1.json: card a1c0 session S1 seed 1119-mmsweep5-syn-a1c0-S1 kit 1119-mmsweep5
+  runs 95 (anchor 8, arm 83, null 4); forms {'burst': 91, 'null': 4}; distinct arms 84 with the anchor (not in arms.json: 0); distinct arm labels 88 (arms, anchor, nulls); device processes planned 91 (+3 smoke)
+  arm runs by host family: gemmL 4, gemmc 70, gemmh 9
+  blocks in order: CTLA FPL LOOP BIND I8L FPL16 CTLB
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 72.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 65.0}; planned 58.2 card-minutes; planning line 52.0 W; cap_est_w None
+  highest planned peak in the schedule 46.0 W (smoke 1x1x4-fp32-zeros 0xffffffff 37.0 W, 1x1x4-fp16-ones 0xffffffff 51.0 W, 1x1x4-int8-rnd 0xffffffff 46.0 W)
+      1  CTLA    anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+      2  CTLA    null   null  null-1                       -           18.5 W
+      3  CTLA    arm    burst 1x1x1-int8-zeros             0xffffffff  40.0 W
+      4  CTLA    arm    burst gemmc1-fp32-zeros            0xffffffff  37.8 W
+      5  CTLA    arm    burst 1x1x1-fp16-zeros             0xffffffff  37.8 W
+      6  CTLA    anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+      7  FPL     arm    burst gemmc2r4-fp32-zeros          0xffffffff  37.8 W
+      8  FPL     arm    burst gemmc16r32-fp32-zeros        0xffffffff  37.8 W
+      9  FPL     arm    burst gemmc2r6-fp32-zeros          0xffffffff  37.8 W
+     10  FPL     arm    burst gemmc16r24-fp32-zeros        0xffffffff  37.8 W
+     11  FPL     arm    burst gemmc16r3-fp32-zeros         0xffffffff  37.8 W
+     12  FPL     arm    burst gemmc16-fp32-zeros           0xffffffff  37.8 W
+     13  FPL     arm    burst gemmc16r6-fp32-zeros         0xffffffff  37.8 W
+     14  FPL     arm    burst gemmc2r16-fp32-zeros         0xffffffff  37.8 W
+     15  FPL     arm    burst gemmc2-fp32-zeros            0xffffffff  37.8 W
+     16  FPL     arm    burst gemmc2r3-fp32-zeros          0xffffffff  37.8 W
+     17  FPL     arm    burst gemmc2r8-fp32-zeros          0xffffffff  37.8 W
+     18  FPL     arm    burst gemmc16r4-fp32-zeros         0xffffffff  37.8 W
+     19  FPL     arm    burst gemmc16r2-fp32-zeros         0xffffffff  37.8 W
+     20  FPL     arm    burst gemmc16r8-fp32-zeros         0xffffffff  37.8 W
+     21  FPL     arm    burst gemmc2r32-fp32-zeros         0xffffffff  37.8 W
+     22  FPL     arm    burst gemmc2r12-fp32-zeros         0xffffffff  37.8 W
+     23  FPL     arm    burst gemmc16r12-fp32-zeros        0xffffffff  37.8 W
+     24  FPL     arm    burst gemmc16r16-fp32-zeros        0xffffffff  37.8 W
+     25  FPL     arm    burst gemmc2r2-fp32-zeros          0xffffffff  37.8 W
+     26  FPL     arm    burst gemmc16r5-fp32-zeros         0xffffffff  37.8 W
+     27  FPL     anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+     28  LOOP    arm    burst gemmh2r32-fp32-zeros         0xffffffff  37.8 W
+     29  LOOP    arm    burst gemmh2-fp32-zeros            0xffffffff  37.8 W
+     30  LOOP    arm    burst gemmh2r4-fp32-zeros          0xffffffff  37.8 W
+     31  LOOP    arm    burst gemmh16r32-fp32-zeros        0xffffffff  37.8 W
+     32  LOOP    arm    burst gemmh16r8-fp32-zeros         0xffffffff  37.8 W
+     33  LOOP    arm    burst gemmh16r4-fp32-zeros         0xffffffff  37.8 W
+     34  LOOP    arm    burst gemmh2r8-fp32-zeros          0xffffffff  37.8 W
+     35  LOOP    arm    burst gemmh1-fp32-zeros            0xffffffff  37.8 W
+     36  LOOP    anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+     37  BIND    arm    burst gemmc6r4-fp32-zeros          0xffffffff  37.8 W
+     38  BIND    arm    burst gemmc4r8-fp32-zeros          0xffffffff  37.8 W
+     39  BIND    arm    burst gemmc6r8-fp32-zeros          0xffffffff  37.8 W
+     40  BIND    arm    burst gemmc24r4-fp32-zeros         0xffffffff  37.8 W
+     41  BIND    arm    burst gemmc8r16-fp32-zeros         0xffffffff  37.8 W
+     42  BIND    arm    burst gemmc4r16-fp32-zeros         0xffffffff  37.8 W
+     43  BIND    arm    burst gemmc12r4-fp32-zeros         0xffffffff  37.8 W
+     44  BIND    arm    burst gemmc4r4-fp32-zeros          0xffffffff  37.8 W
+     45  BIND    arm    burst gemmc8r4-fp32-zeros          0xffffffff  37.8 W
+     46  BIND    arm    burst gemmc32r8-fp32-zeros         0xffffffff  37.8 W
+     47  BIND    arm    burst gemmc8r8-fp32-zeros          0xffffffff  37.8 W
+     48  BIND    arm    burst gemmc3r8-fp32-zeros          0xffffffff  37.8 W
+     49  BIND    anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+     50  I8L     arm    burst gemmc2r16-int8-zeros         0xffffffff  40.0 W
+     51  I8L     arm    burst gemmc2r32-int8-zeros         0xffffffff  40.0 W
+     52  I8L     arm    burst gemmc16r2-int8-zeros         0xffffffff  40.0 W
+     53  I8L     arm    burst gemmc2r4-int8-zeros          0xffffffff  40.0 W
+     54  I8L     arm    burst gemmc2r12-int8-zeros         0xffffffff  40.0 W
+     55  I8L     arm    burst gemmc2r8-int8-zeros          0xffffffff  40.0 W
+     56  I8L     arm    burst gemmc8r16-int8-zeros         0xffffffff  40.0 W
+     57  I8L     arm    burst gemmc2r2-int8-zeros          0xffffffff  40.0 W
+     58  I8L     arm    burst gemmc16r24-int8-zeros        0xffffffff  40.0 W
+     59  I8L     arm    burst gemmc16r8-int8-zeros         0xffffffff  40.0 W
+     60  I8L     arm    burst gemmc1-int8-zeros            0xffffffff  40.0 W
+     61  I8L     arm    burst gemmc16r16-int8-zeros        0xffffffff  40.0 W
+     62  I8L     arm    burst gemmc16-int8-zeros           0xffffffff  40.0 W
+     63  I8L     arm    burst gemmc2-int8-zeros            0xffffffff  40.0 W
+     64  I8L     arm    burst gemmc16r32-int8-zeros        0xffffffff  40.0 W
+     65  I8L     arm    burst gemmc16r4-int8-zeros         0xffffffff  40.0 W
+     66  I8L     arm    burst gemmh1-int8-zeros            0xffffffff  40.0 W
+     67  I8L     null   null  null-2                       -           18.5 W
+     68  I8L     anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+     69  FPL16   arm    burst gemmc16r2-fp16-zeros         0xffffffff  37.8 W
+     70  FPL16   arm    burst gemmc2r8-fp16-zeros          0xffffffff  37.8 W
+     71  FPL16   arm    burst gemmc16r8-fp16-zeros         0xffffffff  37.8 W
+     72  FPL16   arm    burst gemmc16r4-fp16-zeros         0xffffffff  37.8 W
+     73  FPL16   arm    burst gemmc2r16-fp16-zeros         0xffffffff  37.8 W
+     74  FPL16   arm    burst gemmc16r3-fp16-zeros         0xffffffff  37.8 W
+     75  FPL16   arm    burst gemmc16r5-fp16-zeros         0xffffffff  37.8 W
+     76  FPL16   arm    burst gemmc2r4-fp16-zeros          0xffffffff  37.8 W
+     77  FPL16   arm    burst gemmc2-fp16-zeros            0xffffffff  37.8 W
+     78  FPL16   arm    burst gemmc16-fp16-zeros           0xffffffff  37.8 W
+     79  FPL16   arm    burst gemmc2r3-fp16-zeros          0xffffffff  37.8 W
+     80  FPL16   arm    burst gemmc16r12-fp16-zeros        0xffffffff  37.8 W
+     81  FPL16   arm    burst gemmc16r16-fp16-zeros        0xffffffff  37.8 W
+     82  FPL16   arm    burst gemmc16r32-fp16-zeros        0xffffffff  37.8 W
+     83  FPL16   arm    burst gemmc16r24-fp16-zeros        0xffffffff  37.8 W
+     84  FPL16   arm    burst gemmc16r6-fp16-zeros         0xffffffff  37.8 W
+     85  FPL16   arm    burst gemmc2r6-fp16-zeros          0xffffffff  37.8 W
+     86  FPL16   arm    burst gemmc2r12-fp16-zeros         0xffffffff  37.8 W
+     87  FPL16   arm    burst gemmc2r2-fp16-zeros          0xffffffff  37.8 W
+     88  FPL16   arm    burst gemmc2r32-fp16-zeros         0xffffffff  37.8 W
+     89  FPL16   null   null  null-3                       -           18.5 W
+     90  FPL16   anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+     91  CTLB    arm    burst 1x1x1-fp16-zeros-s4          0xf         30.1 W
+     92  CTLB    arm    burst 1x1x1-int8-zeros-s8          0xff        31.8 W
+     93  CTLB    arm    burst gemmc1-fp16-zeros            0xffffffff  37.8 W
+     94  CTLB    null   null  null-4                       -           18.5 W
+     95  CTLB    anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+
+a1c0-S2.json: card a1c0 session S2 seed 1119-mmsweep5-syn-a1c0-S2 kit 1119-mmsweep5
+  runs 77 (anchor 7, arm 66, null 4); forms {'burst': 73, 'null': 4}; distinct arms 67 with the anchor (not in arms.json: 0); distinct arm labels 71 (arms, anchor, nulls); device processes planned 73 (+3 smoke)
+  arm runs by host family: gemm 5, gemmL 18, gemmc 37, gemmh 6
+  blocks in order: CTLB SCOPE LOOP16 REP GAP CTLA
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 62.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 55.0}; planned 47.9 card-minutes; planning line 52.0 W; cap_est_w None
+  highest planned peak in the schedule 49.0 W (smoke 1x1x4-fp32-zeros 0xffffffff 37.0 W, 1x1x4-fp16-ones 0xffffffff 51.0 W, 1x1x4-int8-rnd 0xffffffff 46.0 W)
+      1  CTLB    anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+      2  CTLB    null   null  null-1                       -           18.5 W
+      3  CTLB    arm    burst 1x1x1-fp16-zeros-s4          0xf         30.1 W
+      4  CTLB    arm    burst 1x1x1-int8-zeros-s8          0xff        31.8 W
+      5  CTLB    arm    burst gemmc1-fp16-zeros            0xffffffff  37.8 W
+      6  CTLB    anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+      7  SCOPE   arm    burst gemmc32r8-int8-zeros         0xffffffff  40.0 W
+      8  SCOPE   arm    burst gemmc4r8s-fp32-zeros         0xffffffff  37.8 W
+      9  SCOPE   arm    burst gemmc8r8-int8-zeros          0xffffffff  40.0 W
+     10  SCOPE   arm    burst gemmc4s-fp32-zeros           0xffffffff  37.8 W
+     11  SCOPE   arm    burst gemm1-int8-zeros             0xffffffff  40.0 W
+     12  SCOPE   arm    burst gemm1r8-fp32-zeros           0xffffffff  37.8 W
+     13  SCOPE   arm    burst gemmc4r4-int8-zeros          0xffffffff  40.0 W
+     14  SCOPE   arm    burst gemmc4r8-int8-zeros          0xffffffff  40.0 W
+     15  SCOPE   arm    burst gemm16r8-fp32-zeros          0xffffffff  37.8 W
+     16  SCOPE   arm    burst gemmc8s-fp32-zeros           0xffffffff  37.8 W
+     17  SCOPE   arm    burst gemmc8r4-int8-zeros          0xffffffff  40.0 W
+     18  SCOPE   arm    burst gemmc2s-fp32-zeros           0xffffffff  37.8 W
+     19  SCOPE   arm    burst gemm1-fp32-zeros             0xffffffff  37.8 W
+     20  SCOPE   arm    burst gemmc16r8s-fp32-zeros        0xffffffff  37.8 W
+     21  SCOPE   arm    burst gemmc4r4s-fp32-zeros         0xffffffff  37.8 W
+     22  SCOPE   arm    burst gemmc16r8s-int8-zeros        0xffffffff  40.0 W
+     23  SCOPE   arm    burst gemmc6r8-int8-zeros          0xffffffff  40.0 W
+     24  SCOPE   arm    burst gemmc16r32s-int8-zeros       0xffffffff  40.0 W
+     25  SCOPE   arm    burst gemmc16s-fp32-zeros          0xffffffff  37.8 W
+     26  SCOPE   arm    burst gemmc16r4s-fp32-zeros        0xffffffff  37.8 W
+     27  SCOPE   arm    burst gemmc2r32s-fp32-zeros        0xffffffff  37.8 W
+     28  SCOPE   arm    burst gemmc1r8-fp32-zeros          0xffffffff  37.8 W
+     29  SCOPE   arm    burst gemmc2r8s-fp32-zeros         0xffffffff  37.8 W
+     30  SCOPE   arm    burst gemmc16r32s-fp32-zeros       0xffffffff  37.8 W
+     31  SCOPE   arm    burst gemmc4s-int8-zeros           0xffffffff  40.0 W
+     32  SCOPE   arm    burst gemm2r8-fp32-zeros           0xffffffff  37.8 W
+     33  SCOPE   anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+     34  LOOP16  arm    burst gemmh16r32-fp16-zeros        0xffffffff  37.8 W
+     35  LOOP16  arm    burst gemmh16r4-fp16-zeros         0xffffffff  37.8 W
+     36  LOOP16  arm    burst gemmh1-fp16-zeros            0xffffffff  37.8 W
+     37  LOOP16  arm    burst gemmh2r8-fp16-zeros          0xffffffff  37.8 W
+     38  LOOP16  arm    burst gemmh2-fp16-zeros            0xffffffff  37.8 W
+     39  LOOP16  arm    burst gemmh16r8-fp16-zeros         0xffffffff  37.8 W
+     40  LOOP16  anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+     41  REP     arm    burst gemmc1-int8-zeros            0xffffffff  40.0 W
+     42  REP     arm    burst gemmc2r32-fp32-zeros         0xffffffff  37.8 W
+     43  REP     arm    burst gemmc2-fp32-zeros            0xffffffff  37.8 W
+     44  REP     arm    burst gemmc2r8-int8-zeros          0xffffffff  40.0 W
+     45  REP     arm    burst gemmc16r32-int8-zeros        0xffffffff  40.0 W
+     46  REP     arm    burst gemmc16r8-fp32-zeros         0xffffffff  37.8 W
+     47  REP     arm    burst gemmc2r4-int8-zeros          0xffffffff  40.0 W
+     48  REP     arm    burst gemmc2r32-int8-zeros         0xffffffff  40.0 W
+     49  REP     arm    burst gemmc16r16-int8-zeros        0xffffffff  40.0 W
+     50  REP     arm    burst gemmc16r8-int8-zeros         0xffffffff  40.0 W
+     51  REP     arm    burst gemmc16r4-fp32-zeros         0xffffffff  37.8 W
+     52  REP     arm    burst gemmc2r16-int8-zeros         0xffffffff  40.0 W
+     53  REP     arm    burst gemmc2r8-fp32-zeros          0xffffffff  37.8 W
+     54  REP     arm    burst gemmc16-fp32-zeros           0xffffffff  37.8 W
+     55  REP     anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+     56  GAP     arm    burst 1x2x15-int8-rnd              0xffffffff  46.0 W
+     57  GAP     arm    burst 1x2x12-fp32-ones             0xffffffff  49.0 W
+     58  GAP     arm    burst 4x3x3-fp32-zeros             0xffffffff  37.0 W
+     59  GAP     arm    burst 3x11x1-int8-rnd              0xffffffff  46.0 W
+     60  GAP     arm    burst 1x12x7-int8-rnd              0xffffffff  46.0 W
+     61  GAP     arm    burst 1x12x1-fp32-ones             0xffffffff  49.0 W
+     62  GAP     arm    burst 4x3x1-fp32-zeros             0xffffffff  37.0 W
+     63  GAP     arm    burst 6x3x1-fp16-ones              0xffffffff  49.0 W
+     64  GAP     null   null  null-2                       -           18.5 W
+     65  GAP     arm    burst 1x12x5-fp32-zeros            0xffffffff  37.0 W
+     66  GAP     arm    burst 3x3x2-fp16-zeros             0xffffffff  37.0 W
+     67  GAP     arm    burst 2x10x1-int8-rnd              0xffffffff  46.0 W
+     68  GAP     arm    burst 1x13x6-fp16-ones             0xffffffff  49.0 W
+     69  GAP     arm    burst 5x3x2-int8-rnd               0xffffffff  46.0 W
+     70  GAP     arm    burst 1x13x1-fp16-zeros            0xffffffff  37.0 W
+     71  GAP     null   null  null-3                       -           18.5 W
+     72  GAP     anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+     73  CTLA    arm    burst 1x1x1-int8-zeros             0xffffffff  40.0 W
+     74  CTLA    arm    burst gemmc1-fp32-zeros            0xffffffff  37.8 W
+     75  CTLA    arm    burst 1x1x1-fp16-zeros             0xffffffff  37.8 W
+     76  CTLA    null   null  null-4                       -           18.5 W
+     77  CTLA    anchor burst 4x8x8-int8-rnd               0xffffffff  46.0 W
+
+a1c1-S1.json: card a1c1 session S1 seed 1119-mmsweep5-syn-a1c1-S1 kit 1119-mmsweep5
+  runs 83 (anchor 7, arm 72, null 4); forms {'burst': 79, 'null': 4}; distinct arms 73 with the anchor (not in arms.json: 0); distinct arm labels 77 (arms, anchor, nulls); device processes planned 79 (+3 smoke)
+  arm runs by host family: gemmL 4, gemmc 55, gemmh 9, mm 2, tenb 2
+  blocks in order: CTLA FPL LOOP BIND I8L CTLB
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 67.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 60.0}; planned 51.3 card-minutes; planning line 70.0 W; cap_est_w None
+  highest planned peak in the schedule 62.8 W (smoke 1x1x4-fp32-zeros 0xffffffff 39.2 W, 1x1x4-fp16-ones 0xffffffff 48.3 W, 1x1x4-int8-rnd 0xffffffff 45.1 W)
+      1  CTLA    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+      2  CTLA    null   null  null-1                       -           31.0 W
+      3  CTLA    arm    burst gemmc1-fp32-zeros            0xffffffff  38.4 W
+      4  CTLA    arm    burst 1x1x1-fp32-zeros-s4          0xf         34.6 W
+      5  CTLA    arm    burst 1x1x1-fp16-zeros-s8          0xff        35.1 W
+      6  CTLA    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+      7  FPL     arm    burst gemmc16-fp32-zeros           0xffffffff  38.4 W
+      8  FPL     arm    burst gemmc16r6-fp32-zeros         0xffffffff  38.4 W
+      9  FPL     arm    burst gemmc2r8-fp16-zeros          0xffffffff  38.4 W
+     10  FPL     arm    burst gemmc16r5-fp32-zeros         0xffffffff  38.4 W
+     11  FPL     arm    burst gemmc2r32-fp32-zeros         0xffffffff  38.4 W
+     12  FPL     arm    burst gemmc2r2-fp32-zeros          0xffffffff  38.4 W
+     13  FPL     arm    burst gemmc16r4-fp16-zeros         0xffffffff  38.4 W
+     14  FPL     arm    burst gemmc16r2-fp32-zeros         0xffffffff  38.4 W
+     15  FPL     arm    burst gemmc16r4-fp32-zeros         0xffffffff  38.4 W
+     16  FPL     arm    burst gemmc16-fp16-zeros           0xffffffff  38.4 W
+     17  FPL     arm    burst gemmc2-fp32-zeros            0xffffffff  38.4 W
+     18  FPL     arm    burst gemmc2-fp16-zeros            0xffffffff  38.4 W
+     19  FPL     arm    burst gemmc2r4-fp32-zeros          0xffffffff  38.4 W
+     20  FPL     arm    burst gemmc2r12-fp32-zeros         0xffffffff  38.4 W
+     21  FPL     arm    burst gemmc16r24-fp32-zeros        0xffffffff  38.4 W
+     22  FPL     arm    burst gemmc16r32-fp32-zeros        0xffffffff  38.4 W
+     23  FPL     arm    burst gemmc16r16-fp32-zeros        0xffffffff  38.4 W
+     24  FPL     arm    burst gemmc2r32-fp16-zeros         0xffffffff  38.4 W
+     25  FPL     arm    burst gemmc16r3-fp32-zeros         0xffffffff  38.4 W
+     26  FPL     arm    burst gemmc16r12-fp32-zeros        0xffffffff  38.4 W
+     27  FPL     arm    burst gemmc2r16-fp32-zeros         0xffffffff  38.4 W
+     28  FPL     arm    burst gemmc16r8-fp32-zeros         0xffffffff  38.4 W
+     29  FPL     arm    burst gemmc2r3-fp32-zeros          0xffffffff  38.4 W
+     30  FPL     arm    burst gemmc2r8-fp32-zeros          0xffffffff  38.4 W
+     31  FPL     arm    burst gemmc2r6-fp32-zeros          0xffffffff  38.4 W
+     32  FPL     anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     33  LOOP    arm    burst mm16-fp32-zeros              0xffffffff  61.2 W
+     34  LOOP    arm    burst gemmh2r4-fp32-zeros          0xffffffff  38.4 W
+     35  LOOP    arm    burst tenb-fp32-zeros              0xffffffff  62.8 W
+     36  LOOP    null   null  null-2                       -           31.0 W
+     37  LOOP    arm    burst gemmh16r32-fp32-zeros        0xffffffff  38.4 W
+     38  LOOP    arm    burst gemmh1-fp32-zeros            0xffffffff  38.4 W
+     39  LOOP    arm    burst gemmh2-fp32-zeros            0xffffffff  38.4 W
+     40  LOOP    arm    burst gemmh16r8-fp32-zeros         0xffffffff  38.4 W
+     41  LOOP    arm    burst mm128-fp32-zeros             0xffffffff  61.2 W
+     42  LOOP    arm    burst gemmh2r32-fp32-zeros         0xffffffff  38.4 W
+     43  LOOP    arm    burst gemmh16r4-fp32-zeros         0xffffffff  38.4 W
+     44  LOOP    arm    burst gemmh2r8-fp32-zeros          0xffffffff  38.4 W
+     45  LOOP    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     46  BIND    arm    burst gemmc32r8-fp32-zeros         0xffffffff  38.4 W
+     47  BIND    arm    burst gemmc4r8-fp32-zeros          0xffffffff  38.4 W
+     48  BIND    arm    burst gemmc12r4-fp32-zeros         0xffffffff  38.4 W
+     49  BIND    arm    burst gemmc6r8-fp32-zeros          0xffffffff  38.4 W
+     50  BIND    arm    burst gemmc3r8-fp32-zeros          0xffffffff  38.4 W
+     51  BIND    arm    burst gemmc8r16-fp32-zeros         0xffffffff  38.4 W
+     52  BIND    arm    burst gemmc4r4-fp32-zeros          0xffffffff  38.4 W
+     53  BIND    arm    burst gemmc8r4-fp32-zeros          0xffffffff  38.4 W
+     54  BIND    arm    burst gemmc4r16-fp32-zeros         0xffffffff  38.4 W
+     55  BIND    arm    burst gemmc8r8-fp32-zeros          0xffffffff  38.4 W
+     56  BIND    arm    burst gemmc24r4-fp32-zeros         0xffffffff  38.4 W
+     57  BIND    arm    burst gemmc6r4-fp32-zeros          0xffffffff  38.4 W
+     58  BIND    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     59  I8L     arm    burst gemmc2r16-int8-rnd           0xffffffff  52.4 W
+     60  I8L     arm    burst tenb-int8-zeros              0xffffffff  51.2 W
+     61  I8L     arm    burst gemmc16r2-int8-rnd           0xffffffff  52.4 W
+     62  I8L     arm    burst gemmc16r4-int8-rnd           0xffffffff  52.4 W
+     63  I8L     arm    burst gemmc16-int8-rnd             0xffffffff  52.4 W
+     64  I8L     arm    burst gemmc1-int8-rnd              0xffffffff  52.4 W
+     65  I8L     arm    burst gemmc16r8-int8-rnd           0xffffffff  52.4 W
+     66  I8L     arm    burst gemmh1-int8-rnd              0xffffffff  52.4 W
+     67  I8L     arm    burst gemmc2-int8-rnd              0xffffffff  52.4 W
+     68  I8L     arm    burst gemmc2r8-int8-rnd            0xffffffff  52.4 W
+     69  I8L     arm    burst gemmc2r4-int8-rnd            0xffffffff  52.4 W
+     70  I8L     arm    burst gemmc2r2-int8-rnd            0xffffffff  52.4 W
+     71  I8L     arm    burst gemmc2r32-int8-rnd           0xffffffff  52.4 W
+     72  I8L     arm    burst gemmc16r24-int8-rnd          0xffffffff  52.4 W
+     73  I8L     arm    burst gemmc16r16-int8-rnd          0xffffffff  52.4 W
+     74  I8L     arm    burst gemmc8r16-int8-rnd           0xffffffff  52.4 W
+     75  I8L     arm    burst gemmc2r12-int8-rnd           0xffffffff  52.4 W
+     76  I8L     arm    burst gemmc16r32-int8-rnd          0xffffffff  52.4 W
+     77  I8L     null   null  null-3                       -           31.0 W
+     78  I8L     anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     79  CTLB    arm    burst 1x1x1-fp32-zeros-s8          0xff        35.1 W
+     80  CTLB    arm    burst 1x1x1-fp16-zeros-s4          0xf         34.6 W
+     81  CTLB    arm    burst gemmc1-fp16-zeros            0xffffffff  38.4 W
+     82  CTLB    null   null  null-4                       -           31.0 W
+     83  CTLB    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+
+a1c1-S2.json: card a1c1 session S2 seed 1119-mmsweep5-syn-a1c1-S2 kit 1119-mmsweep5
+  runs 89 (anchor 7, arm 78, null 4); forms {'burst': 85, 'null': 4}; distinct arms 79 with the anchor (not in arms.json: 0); distinct arm labels 83 (arms, anchor, nulls); device processes planned 85 (+3 smoke)
+  arm runs by host family: gemmL 4, gemmc 72, gemmh 1, tenb 1
+  blocks in order: CTLB FPL16 SCOPE I8Z REP CTLA
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 67.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 60.0}; planned 54.8 card-minutes; planning line 70.0 W; cap_est_w None
+  highest planned peak in the schedule 63.7 W (smoke 1x1x4-fp32-zeros 0xffffffff 39.2 W, 1x1x4-fp16-ones 0xffffffff 48.3 W, 1x1x4-int8-rnd 0xffffffff 45.1 W)
+      1  CTLB    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+      2  CTLB    null   null  null-1                       -           31.0 W
+      3  CTLB    arm    burst 1x1x1-fp32-zeros-s8          0xff        35.1 W
+      4  CTLB    arm    burst gemmc1-fp16-zeros            0xffffffff  38.4 W
+      5  CTLB    arm    burst 1x1x1-fp16-zeros-s4          0xf         34.6 W
+      6  CTLB    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+      7  FPL16   arm    burst gemmc16r12-fp16-zeros        0xffffffff  38.4 W
+      8  FPL16   arm    burst gemmc16r12-fp16-rnd          0xffffffff  63.7 W
+      9  FPL16   arm    burst gemmc2r6-fp16-rnd            0xffffffff  63.7 W
+     10  FPL16   arm    burst gemmc2r6-fp16-zeros          0xffffffff  38.4 W
+     11  FPL16   arm    burst gemmc16r8-fp16-zeros         0xffffffff  38.4 W
+     12  FPL16   arm    burst gemmc16r8-fp16-rnd           0xffffffff  63.7 W
+     13  FPL16   arm    burst gemmc16r3-fp16-zeros         0xffffffff  38.4 W
+     14  FPL16   arm    burst gemmc16r3-fp16-rnd           0xffffffff  63.7 W
+     15  FPL16   arm    burst gemmc2r12-fp16-zeros         0xffffffff  38.4 W
+     16  FPL16   arm    burst gemmc16r4-fp16-zeros         0xffffffff  38.4 W
+     17  FPL16   arm    burst gemmc16r4-fp16-rnd           0xffffffff  63.7 W
+     18  FPL16   arm    burst gemmc2r2-fp16-rnd            0xffffffff  63.7 W
+     19  FPL16   arm    burst gemmc2r2-fp16-zeros          0xffffffff  38.4 W
+     20  FPL16   arm    burst gemmc16r32-fp16-zeros        0xffffffff  38.4 W
+     21  FPL16   arm    burst gemmc16r32-fp16-rnd          0xffffffff  63.7 W
+     22  FPL16   arm    burst gemmc16r24-fp16-rnd          0xffffffff  63.7 W
+     23  FPL16   arm    burst gemmc16r24-fp16-zeros        0xffffffff  38.4 W
+     24  FPL16   arm    burst gemmc2r4-fp16-rnd            0xffffffff  63.7 W
+     25  FPL16   arm    burst gemmc2r4-fp16-zeros          0xffffffff  38.4 W
+     26  FPL16   arm    burst gemmc2r32-fp16-zeros         0xffffffff  38.4 W
+     27  FPL16   arm    burst gemmc16r16-fp16-zeros        0xffffffff  38.4 W
+     28  FPL16   arm    burst gemmc16r16-fp16-rnd          0xffffffff  63.7 W
+     29  FPL16   arm    burst gemmc2r8-fp16-rnd            0xffffffff  63.7 W
+     30  FPL16   arm    burst gemmc2r8-fp16-zeros          0xffffffff  38.4 W
+     31  FPL16   arm    burst gemmc8r8-fp16-rnd            0xffffffff  63.7 W
+     32  FPL16   null   null  null-2                       -           31.0 W
+     33  FPL16   arm    burst gemmc16-fp16-rnd             0xffffffff  63.7 W
+     34  FPL16   arm    burst gemmc16-fp16-zeros           0xffffffff  38.4 W
+     35  FPL16   arm    burst gemmc2r3-fp16-zeros          0xffffffff  38.4 W
+     36  FPL16   arm    burst gemmc2r3-fp16-rnd            0xffffffff  63.7 W
+     37  FPL16   arm    burst gemmc16r5-fp16-zeros         0xffffffff  38.4 W
+     38  FPL16   arm    burst gemmc16r5-fp16-rnd           0xffffffff  63.7 W
+     39  FPL16   arm    burst gemmc2-fp16-zeros            0xffffffff  38.4 W
+     40  FPL16   arm    burst gemmc2-fp16-rnd              0xffffffff  63.7 W
+     41  FPL16   arm    burst gemmc16r2-fp16-zeros         0xffffffff  38.4 W
+     42  FPL16   arm    burst gemmc16r2-fp16-rnd           0xffffffff  63.7 W
+     43  FPL16   arm    burst gemmc2r16-fp16-zeros         0xffffffff  38.4 W
+     44  FPL16   arm    burst gemmc16r6-fp16-zeros         0xffffffff  38.4 W
+     45  FPL16   arm    burst gemmc16r6-fp16-rnd           0xffffffff  63.7 W
+     46  FPL16   anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     47  SCOPE   arm    burst gemmc4r4s-fp32-zeros         0xffffffff  38.4 W
+     48  SCOPE   arm    burst gemmc4s-fp32-zeros           0xffffffff  38.4 W
+     49  SCOPE   arm    burst gemmc16r8s-fp32-zeros        0xffffffff  38.4 W
+     50  SCOPE   arm    burst gemmc16r4s-fp32-zeros        0xffffffff  38.4 W
+     51  SCOPE   arm    burst gemmc4r8s-fp32-zeros         0xffffffff  38.4 W
+     52  SCOPE   arm    burst gemmc1r8-fp32-zeros          0xffffffff  38.4 W
+     53  SCOPE   arm    burst gemmc16r32s-fp32-zeros       0xffffffff  38.4 W
+     54  SCOPE   arm    burst gemmc2r32s-fp32-zeros        0xffffffff  38.4 W
+     55  SCOPE   arm    burst gemmc2r8s-fp32-zeros         0xffffffff  38.4 W
+     56  SCOPE   arm    burst gemmc2s-fp32-zeros           0xffffffff  38.4 W
+     57  SCOPE   anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     58  I8Z     arm    burst gemmc2r12-int8-zeros         0xffffffff  39.5 W
+     59  I8Z     arm    burst gemmc2r4-int8-zeros          0xffffffff  39.5 W
+     60  I8Z     arm    burst gemmc16r4-int8-zeros         0xffffffff  39.5 W
+     61  I8Z     arm    burst gemmc16-int8-zeros           0xffffffff  39.5 W
+     62  I8Z     arm    burst gemmc16r24-int8-zeros        0xffffffff  39.5 W
+     63  I8Z     arm    burst gemmc1-int8-zeros            0xffffffff  39.5 W
+     64  I8Z     arm    burst gemmc16r32-int8-zeros        0xffffffff  39.5 W
+     65  I8Z     arm    burst gemmc2r16-int8-zeros         0xffffffff  39.5 W
+     66  I8Z     arm    burst gemmc16r8-int8-zeros         0xffffffff  39.5 W
+     67  I8Z     arm    burst gemmc16r2-int8-zeros         0xffffffff  39.5 W
+     68  I8Z     arm    burst gemmc2r32-int8-zeros         0xffffffff  39.5 W
+     69  I8Z     arm    burst gemmc2r2-int8-zeros          0xffffffff  39.5 W
+     70  I8Z     arm    burst gemmh1-int8-zeros            0xffffffff  39.5 W
+     71  I8Z     arm    burst gemmc2-int8-zeros            0xffffffff  39.5 W
+     72  I8Z     arm    burst gemmc2r8-int8-zeros          0xffffffff  39.5 W
+     73  I8Z     arm    burst gemmc8r16-int8-zeros         0xffffffff  39.5 W
+     74  I8Z     arm    burst gemmc16r16-int8-zeros        0xffffffff  39.5 W
+     75  I8Z     anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     76  REP     arm    burst tenb-fp32-zeros              0xffffffff  62.8 W
+     77  REP     arm    burst gemmc2-fp32-zeros            0xffffffff  38.4 W
+     78  REP     arm    burst gemmc16r8-fp32-zeros         0xffffffff  38.4 W
+     79  REP     arm    burst gemmc16r4-fp32-zeros         0xffffffff  38.4 W
+     80  REP     arm    burst gemmc2r8-fp32-zeros          0xffffffff  38.4 W
+     81  REP     arm    burst gemmc16-fp32-zeros           0xffffffff  38.4 W
+     82  REP     arm    burst gemmc2r32-fp32-zeros         0xffffffff  38.4 W
+     83  REP     null   null  null-3                       -           31.0 W
+     84  REP     anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     85  CTLA    arm    burst gemmc1-fp32-zeros            0xffffffff  38.4 W
+     86  CTLA    arm    burst 1x1x1-fp32-zeros-s4          0xf         34.6 W
+     87  CTLA    arm    burst 1x1x1-fp16-zeros-s8          0xff        35.1 W
+     88  CTLA    null   null  null-4                       -           31.0 W
+     89  CTLA    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+
+a1c1-S3.json: card a1c1 session S3 seed 1119-mmsweep5-syn-a1c1-S3 kit 1119-mmsweep5
+  runs 68 (anchor 7, arm 57, null 4); forms {'burst': 64, 'null': 4}; distinct arms 58 with the anchor (not in arms.json: 0); distinct arm labels 62 (arms, anchor, nulls); device processes planned 64 (+3 smoke)
+  arm runs by host family: gemm 5, gemmL 24, gemmc 13, gemmh 7, mm 4, tenb 4
+  blocks in order: CTLA LOOP16 PACK KIND GAP CTLB
+  process {"budget": 7.5, "seconds": 6, "smoke_budget": 3.5, "smoke_seconds": 2, "timeout_s": 10}
+  forms {"burst": {"nproc": 1, "rest_s": 10.0, "tail_s": 5.0}, "null": {"nproc": 0, "rest_s": 20.0, "tail_s": 20.0, "window_s": 6.5}, "sus3": {"nproc": 3, "rest_s": 20.0, "tail_s": 20.0}}
+  timing {"cap_min": 57.0, "gate_wait_s": 180.0, "open_rest_s": 60.0, "rule_min": 50.0}; planned 42.7 card-minutes; planning line 70.0 W; cap_est_w None
+  highest planned peak in the schedule 66.6 W (smoke 1x1x4-fp32-zeros 0xffffffff 39.2 W, 1x1x4-fp16-ones 0xffffffff 48.3 W, 1x1x4-int8-rnd 0xffffffff 45.1 W)
+      1  CTLA    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+      2  CTLA    null   null  null-1                       -           31.0 W
+      3  CTLA    arm    burst gemmc1-fp32-zeros            0xffffffff  38.4 W
+      4  CTLA    arm    burst 1x1x1-fp16-zeros-s8          0xff        35.1 W
+      5  CTLA    arm    burst 1x1x1-fp32-zeros-s4          0xf         34.6 W
+      6  CTLA    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+      7  LOOP16  arm    burst gemmh16r32-fp16-zeros        0xffffffff  38.4 W
+      8  LOOP16  arm    burst mm16-fp16-zeros              0xffffffff  62.6 W
+      9  LOOP16  arm    burst gemmh2r8-fp16-zeros          0xffffffff  38.4 W
+     10  LOOP16  arm    burst gemmh2-fp16-zeros            0xffffffff  38.4 W
+     11  LOOP16  arm    burst gemmh16r4-fp16-zeros         0xffffffff  38.4 W
+     12  LOOP16  arm    burst gemmh16r8-fp16-zeros         0xffffffff  38.4 W
+     13  LOOP16  arm    burst gemmh1-fp16-zeros            0xffffffff  38.4 W
+     14  LOOP16  arm    burst tenb-fp16-zeros              0xffffffff  61.4 W
+     15  LOOP16  arm    burst mm128-fp16-zeros             0xffffffff  62.6 W
+     16  LOOP16  anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     17  PACK    arm    burst gemm2r8-fp32-zeros           0xffffffff  38.4 W
+     18  PACK    arm    burst gemm16r8-fp32-zeros          0xffffffff  38.4 W
+     19  PACK    arm    burst gemm1-fp32-zeros             0xffffffff  38.4 W
+     20  PACK    arm    burst gemm1r8-fp32-zeros           0xffffffff  38.4 W
+     21  PACK    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     22  KIND    arm    burst gemmc2r8-fp32-ones           0xffffffff  46.9 W
+     23  KIND    arm    burst gemmc16r4-fp32-rnd           0xffffffff  66.6 W
+     24  KIND    arm    burst gemmc16r2-fp32-rnd           0xffffffff  66.6 W
+     25  KIND    arm    burst gemmc2-fp32-rnd              0xffffffff  66.6 W
+     26  KIND    arm    burst gemmh1-fp32-ones             0xffffffff  46.9 W
+     27  KIND    arm    burst gemmc16r8-fp32-rnd           0xffffffff  66.6 W
+     28  KIND    arm    burst gemmc16r8-fp32-ones          0xffffffff  46.9 W
+     29  KIND    arm    burst gemmc8r8-fp32-rnd            0xffffffff  66.6 W
+     30  KIND    arm    burst gemmc16r32-fp32-ones         0xffffffff  46.9 W
+     31  KIND    arm    burst tenb-fp16-ones               0xffffffff  61.4 W
+     32  KIND    arm    burst gemm1-fp32-rnd               0xffffffff  66.6 W
+     33  KIND    arm    burst gemmc16-fp32-rnd             0xffffffff  66.6 W
+     34  KIND    arm    burst gemmc2r32-fp32-ones          0xffffffff  46.9 W
+     35  KIND    arm    burst tenb-fp32-rnd                0xffffffff  66.6 W
+     36  KIND    null   null  null-2                       -           31.0 W
+     37  KIND    arm    burst tenb-fp32-ones               0xffffffff  62.8 W
+     38  KIND    arm    burst mm16-fp32-ones               0xffffffff  61.2 W
+     39  KIND    arm    burst gemmc1-fp32-ones             0xffffffff  46.9 W
+     40  KIND    arm    burst mm128-fp32-ones              0xffffffff  61.2 W
+     41  KIND    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     42  GAP     arm    burst 2x10x1-int8-rnd              0xffffffff  46.8 W
+     43  GAP     arm    burst 1x2x12-fp32-rnd              0xffffffff  57.3 W
+     44  GAP     arm    burst 1x12x1-fp32-rnd              0xffffffff  57.3 W
+     45  GAP     arm    burst 6x3x1-fp16-ones              0xffffffff  49.0 W
+     46  GAP     arm    burst 6x4x1-fp32-zeros             0xffffffff  40.0 W
+     47  GAP     arm    burst 1x12x5-fp32-rnd              0xffffffff  57.3 W
+     48  GAP     arm    burst 2x12x1-int8-zeros            0xffffffff  40.0 W
+     49  GAP     arm    burst 1x13x1-fp16-rnd              0xffffffff  57.3 W
+     50  GAP     arm    burst 1x11x6-fp32-zeros            0xffffffff  40.0 W
+     51  GAP     arm    burst 3x11x1-int8-rnd              0xffffffff  46.8 W
+     52  GAP     arm    burst 5x3x2-int8-rnd               0xffffffff  46.8 W
+     53  GAP     arm    burst 1x2x15-int8-rnd              0xffffffff  46.8 W
+     54  GAP     arm    burst 4x4x2-fp32-ones              0xffffffff  49.0 W
+     55  GAP     arm    burst 1x12x7-int8-rnd              0xffffffff  46.8 W
+     56  GAP     arm    burst 3x10x1-fp32-ones             0xffffffff  49.0 W
+     57  GAP     arm    burst 3x3x2-fp16-rnd               0xffffffff  57.3 W
+     58  GAP     arm    burst 4x3x1-fp32-rnd               0xffffffff  57.3 W
+     59  GAP     arm    burst 4x2x1-fp16-rnd               0xffffffff  60.0 W
+     60  GAP     arm    burst 1x13x6-fp16-rnd              0xffffffff  57.3 W
+     61  GAP     arm    burst 4x3x3-fp32-rnd               0xffffffff  57.3 W
+     62  GAP     null   null  null-3                       -           31.0 W
+     63  GAP     anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+     64  CTLB    arm    burst gemmc1-fp16-zeros            0xffffffff  38.4 W
+     65  CTLB    arm    burst 1x1x1-fp16-zeros-s4          0xf         34.6 W
+     66  CTLB    arm    burst 1x1x1-fp32-zeros-s8          0xff        35.1 W
+     67  CTLB    null   null  null-4                       -           31.0 W
+     68  CTLB    anchor burst 4x8x8-int8-rnd               0xffffffff  46.8 W
+
+runs in all sessions: 412; device processes planned in all: 392 (+3 smoke a session); planned card-minutes in all: 254.9
+arms scheduled in at least one session: 207 of 207; never scheduled: none

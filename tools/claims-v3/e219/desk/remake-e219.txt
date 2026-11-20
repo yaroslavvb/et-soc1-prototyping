@@ -1,0 +1,21 @@
+# E219: the lab's re-make of arms.json and the five schedules without the plan (make_schedule2.py, the proposal's own functions, with the host's grammar mms_common.arm_of)
+arms.json: kit 1119-mmsweep5, seed 1119-mmsweep5-syn, 207 arms (with the anchor), 0 tiles, sessions {"a1c0": ["S1", "S2"], "a1c1": ["S1", "S2", "S3"]}
+
+## A. the plan tiles: arms.json names 0; src/tiles holds 9 files: the lab's nine kinds only
+kinds the arms use: ones, rnd, zeros
+
+## B. the arm records from their plan fields (make_schedule2.arm_rec / block_rec), the anchor (anchor_rec), arms.json byte for byte
+anchor 4x8x8-int8-rnd: EQUAL
+arm records equal: 206 of 206 (171 block, stream or TenB arms, 35 gemmL arms besides the anchor)
+arms.json's arms in id order (as make() sorts them): True
+arms.json re-made byte for byte: EQUAL
+
+## C. the 5 schedules, byte for byte, from the arm records and each schedule's own blocks (make_schedule2.schedule)
+EQUAL   a1c0-S1: 95 runs, blocks CTLA FPL LOOP BIND I8L FPL16 CTLB; reverse no; nulls set none; planned 58.2, rule 65, cap 72, line 52 W, highest estimate 46.0 W
+EQUAL   a1c0-S2: 77 runs, blocks CTLB SCOPE LOOP16 REP GAP CTLA; reverse no; nulls set none; planned 47.9, rule 55, cap 62, line 52 W, highest estimate 49.0 W
+EQUAL   a1c1-S1: 83 runs, blocks CTLA FPL LOOP BIND I8L CTLB; reverse no; nulls set none; planned 51.3, rule 60, cap 67, line 70 W, highest estimate 62.8 W
+EQUAL   a1c1-S2: 89 runs, blocks CTLB FPL16 SCOPE I8Z REP CTLA; reverse yes; nulls set none; planned 54.8, rule 60, cap 67, line 70 W, highest estimate 63.7 W
+EQUAL   a1c1-S3: 68 runs, blocks CTLA LOOP16 PACK KIND GAP CTLB; reverse no; nulls set none; planned 42.7, rule 50, cap 57, line 70 W, highest estimate 66.6 W
+schedules re-made byte for byte: 5 of 5
+
+REMAKE PASS (0 difference(s))
