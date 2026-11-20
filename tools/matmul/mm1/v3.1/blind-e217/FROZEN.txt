@@ -1,0 +1,20 @@
+decl-e217 (round Q228): the lab's BLIND test of its frozen matmul models on E217 (#13, 1119-mmsweep4), DECLARED and its nominal forecasts FROZEN at Thu 19 Nov 2026 11:37:53 PST, before any E217 datum exists.
+Models frozen and unchanged: MM1-v3.1 2c971828, MM1-v3 b1493082, MM1-v2 3ca4b717, 'v3.1 + contention' F1 (#1.29.1), verify-lay's controls N1+N2, G1, G1+N1 and the layout-blind F1 (#1.29.1.1), 'v3.1 + both' (= F1 here); 'v3.1 + gemmLnc' NOT APPLICABLE (E217 runs no gemmLnc arm).
+Scope: 599 runs (544 arm + 55 anchor) in 486 cases over E217's seven sessions (aifoundry1 card 1 S1-S4 at 600 MHz, card 0 S1-S3 low power), from the kit copy out/orch/e217-src (SRC-SHA256SUMS.txt 854bd075...).
+sha256 (the freeze line):
+099806dc1a5cb6c53ed7ea0645d5e2b3ae55e0d7734872a467019222da324405  DECLARED-blind-e217.md
+633d725620d06295a144312956579fabc54462f109ea3a29e8026d992bdd4eb7  DECLARED-blind-e217.json
+4725efa361c16059bae8a5182a5455718ca1d053633293474668983370cdb3e6  forecasts-nominal-e217.csv
+611ca08d27c81f0972e5d2b1f23ac24d0455a602cfe87a665963d83af1fdc97c  forecasts-nominal-e217.json
+supporting (the makers and their records):
+0a13366ace4d819e22aac98d1055e1a4a08bfb7085f2c5cdab25879cc7e00f0b  scripts/s02b_nominal.py
+023231764a69015a4dee3000521a3264ef5227a3261282c0952a0b0efcb140bc  scripts/s02w_walk.py
+c4a1273acd59590f555e911a5743e21fa723e22628fa5de8e55afcaedb780cfe  scripts/s02c_write.py
+2842d09e88cec63ed1d6de5d4cbdf8310d162f4d0132e7ae5a0cc215d1dc1b0f  work/step2/fc-nominal.json
+6c65696dfe40bbdc69097ea5f4b05b980ee09d270f69dfdae029b102fac2bba0  work/step2/walk-feats-e217.json
+111937947f50bfcde24770d4c9351c3061d738eaea46bce52556c4d735b2ac47  logs/step1-sha256.txt
+e45e688ec492cab21b6593642df8f129d90bf41e83c4d87066e79da51bdc53e7  logs/step2-sha256.txt
+Times (Pacific): declared 11:35:59 (hash logged 11:36:23); nominal forecasts made 11:36:27-11:37:07, files written 11:37:13 (hash logged 11:37:24); this file Thu 19 Nov 2026 11:37:53 PST.
+State at the freeze: out/orch/e217-releases.txt holds 2 post lines (the last: '#13.1 2026-11-19 11:14:42 PST: the lab n...'), 0 claim files in out/orch; no E217 session has run, so no E217 datum exists.
+Label rule (the declaration's section g): BLIND for a session whose first datum comes after this freeze is posted; a session whose first datum precedes the post is UNREAD for it (POST-READ if a lab lane read its data first).
+Still to come (step 4): counts-e217, the switch counts of E217's 21 new tile kinds from the tile files alone (RTL bench, Verilator 5.042), then COUNTS-FROZEN.txt; group S's switch-route energy takes COUNTS-FROZEN.txt's post time by the same rule.

@@ -1,0 +1,16 @@
+counts-e217 re-count rule, written Thu 19 Nov 2026 11:47:29 PST before any re-count ran
+counts-e217 (decl-e217 step 4; counts-e214's s06a unchanged but for labels) step 6a: the re-count rule, written and hashed BEFORE any re-count runs, and the re-count specs (desk; no bench run).
+
+The two committed points (rows) re-counted first, one in each footing this lane's new counts use, both from the committed MM1-v3.1 counts
+(tools/matmul/mm1/v3.1/counts, landed 3e8991d0, the table these rows join), with the same drivers, depths, tiles and launch points:
+  (1) fp32 at a GEMM's accumulator states, count_e210.py: pattern:fld_mant at S1 (j 3, 11, 19, 27; its one file) and pattern:den8 at S2
+      (j 15, 47, 79, 111; its one file): 8 bench points, against counts/raw/new-fp32-S1.json and -S2.json (rows fp32.e212.fld_mant,
+      fp32.e212.den8) and the rows of counts-fp32-gemm-states.json;
+  (2) int8 and fp16 at the harness's launch points, run_kinds.py: pattern:i8_pm1 (int8) and pattern:fld16_mant (fp16): 6 bench points,
+      against counts/raw/new-launch.json and the rows of counts-fp16-int8-launch.json.
+The rule (as v31-counts declared its own): MATCH when every check_mismatch is 0 (fp16: equal to the committed point's), the tiles and
+depths (fp32) or launch points (fp16, int8) are the same, and every quantity that enters the switch route has a ratio within 0.999-1.001
+of the committed value: fp32 VPU nets_map, clock-net toggles, valid slots, and the row's signal lo / hi, clock, fin edges lo / hi, S and
+valid share; fp16 and int8 VPU nets_map, clock-net toggles, clocked register bits, and the row's signal_lo_zero_delay, signal_hi_timed,
+clock, register bits clocked a MAC and valid share v. Bit-equality on every quantity is expected (the same bench sources, Verilator 5.042,
+maps trained the same way) and is reported either way. NO MATCH: stop, no new count, NOT COUNTED.

@@ -1,0 +1,2815 @@
+{
+ "check_unchanged_K": [
+  {
+   "T_equal": true,
+   "W_equal": true,
+   "case": "aifoundry1 card 0|gemmL4x8x8|int8|random|0xffffffff"
+  },
+  {
+   "T_equal": true,
+   "W_equal": true,
+   "case": "aifoundry1 card 0|gemmL1x1x1|fp32|ones|0xffffff"
+  },
+  {
+   "T_equal": true,
+   "W_equal": true,
+   "case": "aifoundry1 card 0|gemmL1x1x1|fp32|zeros|0xffffff"
+  },
+  {
+   "T_equal": true,
+   "W_equal": true,
+   "case": "aifoundry1 card 0|gemmL1x1x1|fp32|ones|0x80000000"
+  },
+  {
+   "T_equal": true,
+   "W_equal": true,
+   "case": "aifoundry1 card 0|gemmL1x1x1|fp32|zeros|0x80000000"
+  },
+  {
+   "T_equal": true,
+   "W_equal": true,
+   "case": "aifoundry1 card 0|gemmL1x1x1|fp32|zeros|0xf0f0f0f0"
+  },
+  {
+   "T_equal": true,
+   "W_equal": true,
+   "case": "aifoundry1 card 0|gemmL1x1x1|fp32|ones|0xf0f0f0f0"
+  },
+  {
+   "T_equal": true,
+   "W_equal": true,
+   "case": "aifoundry1 card 0|gemmL1x1x1|fp16|ones|0x1f"
+  }
+ ],
+ "countgate": {
+  "aifoundry1 card 0|gemmL1x1x1|fp32|pattern:gt25|0xff": {
+   "T_op_us": 0.6769499999999999,
+   "W_A": 6.480106130975903,
+   "W_B": 2.1508943413891757,
+   "W_fc": 9.657437309628943,
+   "energy": "FORECAST",
+   "phi": 0.23558205108160968,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 4.3324799999999996e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 334586496041.3962
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 146418188748.44647,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 93162709162.92172
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.5686330462695919,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 146138104272.9619
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0001312462963869718,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 161194965974.60382
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      142942623133.80444,
+      571770492535.2178
+     ],
+     "count_estimated": 285885246267.6089,
+     "energy_J": 1.6858496232741937e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.4806146899309626e-06,
+     "governed_base": 0.0002742686874133738,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 4128024713411.2944,
+     "energy_J": 0.0002434273541159469,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp16|pattern:h_gt25|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 5.595981392010014,
+   "W_fc": 7.369678265760151,
+   "energy": "FORECAST",
+   "phi": 0.3218095193366351,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1334840393728
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 462676557824,
+     "label": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing); a MAC x MACs an op x ops",
+     "lo_zero_delay": 294391054336
+    },
+    "counts_footing": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing)",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.1554568568959622,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 340156162341.363
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.00040023613918384706,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 648285454336
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      598577597790.5258,
+      2394310391162.103
+     ],
+     "count_estimated": 1197155195581.0515,
+     "energy_J": 7.059558553021161e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0739528115541113,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11323227885783.764,
+     "energy_J": 0.0006677245403432781,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:gt125|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724106,
+   "W_B": 4.830679012906274,
+   "W_fc": 6.516244641006892,
+   "energy": "FORECAST",
+   "phi": 0.23166515991318387,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1226500674440.811
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 523362442796.6184,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 333004140140.1706
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 358276372071.6022
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0004427802160510118,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 756625173623.189
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      533920344598.9665,
+      2135681378395.866
+     ],
+     "count_estimated": 1067840689197.933,
+     "energy_J": 6.29699799868671e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:gt25|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724106,
+   "W_B": 6.167411723633679,
+   "W_fc": 8.006913785376163,
+   "energy": "FORECAST",
+   "phi": 0.23558205108160968,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1338345984165.5847
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 585672754993.7859,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 372650836651.6869
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 400931921593.57166
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.00036007603953983834,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 644779863898.4153
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      536729787426.23224,
+      2146919149704.929
+     ],
+     "count_estimated": 1073459574852.4645,
+     "energy_J": 6.330132259330038e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:gt875|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 10.666966852712054,
+   "W_fc": 13.024631942849632,
+   "energy": "FORECAST",
+   "phi": 0.25270265602747083,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1873617604512.5798
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 390786930849.7597,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 248649225172.26025
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 267519623857.0305
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 6.568554907027315e-05,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 109508243551.42017
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      549009771397.0234,
+      2196039085588.0935
+     ],
+     "count_estimated": 1098019542794.0468,
+     "energy_J": 6.474961043754909e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL4x8x8|fp32|pattern:gt25|0xffffffff": {
+   "T_op_us": 2.3139484037106834,
+   "W_A": 1.4741898397517748,
+   "W_B": 11.524493699734165,
+   "W_fc": 6.454635246941196,
+   "energy": "FORECAST",
+   "phi": 0.23558205108160968,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 0.03791173064639584,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 342616571946389.7
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 161661557868254.12,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 102861733417425.55
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 110668079556846.06
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0921794661221986,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 165063645157994.3
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      877590608060622.9,
+      3510362432242491.5
+     ],
+     "count_estimated": 1755181216121245.8,
+     "energy_J": 0.10350207401770344,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.01307647789394913,
+     "awake_minions": 0.042812610232373524,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 2899275062966786.0,
+     "energy_J": 0.1709686609044367,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  }
+ },
+ "counts_sha256": {
+  "counts-fp16-int8-launch.json": "6509e20d4fe21c942fdb89d7feaa0479e3b7efac847a0561405dfae9cd65f1f0",
+  "counts-fp32-gemm-states.json": "0169d260348ae8b0ae8a540f1c702ff2e931577215d5d60ba887447cc13893c2"
+ },
+ "declared": {
+  "aifoundry1 card 0|gemmL1x1x1|fp16|pattern:h_sg|0xff": {
+   "T_op_us": 0.6769499999999999,
+   "W_A": 6.480106130975903,
+   "W_B": 5.249607478779932,
+   "W_fc": 14.234899658976396,
+   "energy": "FORECAST",
+   "phi": 0.43004496323790925,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 4.3324799999999996e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 495781462016
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1128827682816,
+     "label": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing); a MAC x MACs an op x ops",
+     "lo_zero_delay": 718248509440
+    },
+    "counts_footing": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing)",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.6846378703379186,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 1209988639316.386
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      180089433445.70764,
+      720357733782.8306
+     ],
+     "count_estimated": 360178866891.4153,
+     "energy_J": 2.1239550308651785e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0739528115541113,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.4806146899309626e-06,
+     "governed_base": 0.0002742686874133738,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 4127271909161.2217,
+     "energy_J": 0.00024338296166205313,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 0|gemmL1x1x1|fp16|pattern:h_th_in|0xff": {
+   "T_op_us": 0.6769499999999999,
+   "W_A": 6.480106130975905,
+   "W_B": 10.020050834494196,
+   "W_fc": 21.281865248331982,
+   "energy": "FORECAST",
+   "phi": 1.0401696089155752,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 4.3324799999999996e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 495781462016
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 5741488291840,
+     "label": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing); a MAC x MACs an op x ops",
+     "lo_zero_delay": 3653184143360
+    },
+    "counts_footing": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing)",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.6846378703379181,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 6154292355222.242
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      296637027165.73303,
+      1186548108662.9321
+     ],
+     "count_estimated": 593274054331.4661,
+     "energy_J": 3.498504571504976e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0739528115541113,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.4806146899309626e-06,
+     "governed_base": 0.0002742686874133738,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 4127271909161.2217,
+     "energy_J": 0.00024338296166205313,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 0|gemmL1x1x1|fp32|pattern:gt25|0xff": {
+   "T_op_us": 0.6769499999999999,
+   "W_A": 6.480106130975905,
+   "W_B": 2.3311393167157135,
+   "W_fc": 9.923697706004656,
+   "energy": "FORECAST",
+   "phi": 0.23558205108160968,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 4.3324799999999996e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 334586496041.3962
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 146418188748.44647,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 93162709162.92172
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.5686330462695919,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 146138104272.9619
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0001197106179660732,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 161194965974.60382
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      142942623133.80444,
+      571770492535.2178
+     ],
+     "count_estimated": 285885246267.6089,
+     "energy_J": 1.6858496232741937e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.4806146899309626e-06,
+     "governed_base": 0.0002742686874133738,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 4128024713411.2944,
+     "energy_J": 0.0002434273541159469,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 0|gemmL1x1x1|fp32|pattern:rt32|0xff": {
+   "T_op_us": 0.6769499999999999,
+   "W_A": 6.480106130975903,
+   "W_B": 4.250816646551861,
+   "W_fc": 12.759471884062338,
+   "energy": "FORECAST",
+   "phi": 0.3608593928072283,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 4.3324799999999996e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 495781462016.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 151963160831.2773,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 96690854305.85071
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.5686330462695917,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 151672469336.19586
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      166873426174.13254,
+      667493704696.5302
+     ],
+     "count_estimated": 333746852348.2651,
+     "energy_J": 1.968086890267828e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.4806146899309626e-06,
+     "governed_base": 0.0002742686874133738,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 4128024713411.2944,
+     "energy_J": 0.0002434273541159469,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 0|gemmL1x1x1|fp32|pattern:sgm1|0xff": {
+   "T_op_us": 0.6769499999999999,
+   "W_A": 6.480106130975903,
+   "W_B": 5.266665989453024,
+   "W_fc": 14.260098729325891,
+   "energy": "FORECAST",
+   "phi": 0.33533642454845375,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 4.3324799999999996e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 495781462016.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1266354929944.6309,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 805754100934.5092
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.5686330462695919,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 1263932509893.1152
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      161997962518.91693,
+      647991850075.6677
+     ],
+     "count_estimated": 323995925037.83386,
+     "energy_J": 1.9105862065232852e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.4806146899309626e-06,
+     "governed_base": 0.0002742686874133738,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 4128024713411.2944,
+     "energy_J": 0.0002434273541159469,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 0|gemmL1x1x1|fp32|pattern:th_top|0xff": {
+   "T_op_us": 0.6769499999999999,
+   "W_A": 6.4801061309759085,
+   "W_B": 11.89804880300668,
+   "W_fc": 24.056070091396446,
+   "energy": "FORECAST",
+   "phi": 1.0370917003367401,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 4.3324799999999996e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 495781462016.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 8208623444468.8,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 5222968574613.662
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.5686330462695917,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 8192921105766.576
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      296049077078.657,
+      1184196308314.628
+     ],
+     "count_estimated": 592098154157.314,
+     "energy_J": 3.491570352647992e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.4806146899309626e-06,
+     "governed_base": 0.0002742686874133738,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 4128024713411.2944,
+     "energy_J": 0.0002434273541159469,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 0|gemmL1x1x1|int8|pattern:i8_t06|0xffff": {
+   "T_op_us": 0.49013786018810845,
+   "W_A": 6.629688233834564,
+   "W_B": 2.894757611476635,
+   "W_fc": 12.535695189440208,
+   "energy": "FORECAST",
+   "phi": 0.341920455653555,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 3.136882305203894e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 230913081344
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 77894418432,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 49562517504
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 4.796454290369519,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 237724349723.5752
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      326511322465.92847,
+      1306045289863.7139
+     ],
+     "count_estimated": 653022644931.8569,
+     "energy_J": 3.850838734494783e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 9.384429032650517e-06,
+     "governed_base": 0.00019858108806469052,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 2250955728878.392,
+     "energy_J": 0.00013273762522128716,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 0|gemmL1x1x1|int8|pattern:i8_t2|0xffff": {
+   "T_op_us": 0.49013786018810845,
+   "W_A": 6.629688233834566,
+   "W_B": 2.8931838204602123,
+   "W_fc": 12.53248427442169,
+   "energy": "FORECAST",
+   "phi": 0.3172928008827769,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 3.136882305203894e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 230913081344
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 83500695552,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 53129674752
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 4.796454290369519,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 254834056410.1675
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      317102445368.97504,
+      1268409781475.9001
+     ],
+     "count_estimated": 634204890737.9501,
+     "energy_J": 3.739871469716913e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 9.384429032650517e-06,
+     "governed_base": 0.00019858108806469052,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 2250955728878.392,
+     "energy_J": 0.00013273762522128716,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 0|gemmL1x1x1|int8|pattern:i8_t5|0xffff": {
+   "T_op_us": 0.49013786018810845,
+   "W_A": 6.629688233834566,
+   "W_B": 2.9137130519170746,
+   "W_fc": 12.57436888102805,
+   "energy": "FORECAST",
+   "phi": 0.35245887670956916,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 3.136882305203894e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 230913081344
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 81996873728,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 52172816384
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 4.796454290369519,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 250244528985.69797
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      330537475562.30994,
+      1322149902249.2397
+     ],
+     "count_estimated": 661074951124.6199,
+     "energy_J": 3.898322742637164e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 9.384429032650517e-06,
+     "governed_base": 0.00019858108806469052,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 2250955728878.392,
+     "energy_J": 0.00013273762522128716,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp16|pattern:h_gt25|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 5.6916508414195155,
+   "W_fc": 7.476364886914157,
+   "energy": "FORECAST",
+   "phi": 0.3218095193366351,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1334840393728
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 462676557824,
+     "label": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing); a MAC x MACs an op x ops",
+     "lo_zero_delay": 294391054336
+    },
+    "counts_footing": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing)",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.1554568568959622,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 340156162341.363
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.00039411329442163895,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 648285454336
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      598577597790.5258,
+      2394310391162.103
+     ],
+     "count_estimated": 1197155195581.0515,
+     "energy_J": 7.059558553021161e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0739528115541113,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11323227885783.764,
+     "energy_J": 0.0006677245403432781,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp16|pattern:h_rt32|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 12.207205381987476,
+   "W_fc": 14.742242376210077,
+   "energy": "FORECAST",
+   "phi": 0.48666447768748083,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1983125848064
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 668807528448,
+     "label": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing); a MAC x MACs an op x ops",
+     "lo_zero_delay": 425547726848
+    },
+    "counts_footing": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing)",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.155456856895962,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 491702038923.0115
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      716822032052.9496,
+      2867288128211.7983
+     ],
+     "count_estimated": 1433644064105.8992,
+     "energy_J": 8.454120444955793e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0739528115541113,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11323227885783.764,
+     "energy_J": 0.0006677245403432781,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp16|pattern:h_rt64|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 12.089967941156624,
+   "W_fc": 14.611504021257822,
+   "energy": "FORECAST",
+   "phi": 0.47191706927270866,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1983125848064
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 524514492416,
+     "label": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing); a MAC x MACs an op x ops",
+     "lo_zero_delay": 333737164800
+    },
+    "counts_footing": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing)",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.1554568568959622,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 385618895469.17773
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      706244255186.0236,
+      2824977020744.094
+     ],
+     "count_estimated": 1412488510372.047,
+     "energy_J": 8.329367304463237e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0739528115541113,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11323227885783.764,
+     "energy_J": 0.0006677245403432781,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp16|pattern:h_sg|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 14.738005088102547,
+   "W_fc": 17.564485747834944,
+   "energy": "FORECAST",
+   "phi": 0.43004496323790925,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1983125848064
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 4515310731264,
+     "label": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing); a MAC x MACs an op x ops",
+     "lo_zero_delay": 2872994037760
+    },
+    "counts_footing": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing)",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.1554568568959622,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 3319620660751.009
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      676210924438.8585,
+      2704843697755.434
+     ],
+     "count_estimated": 1352421848877.717,
+     "energy_J": 7.97515749485045e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0739528115541113,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11323227885783.764,
+     "energy_J": 0.0006677245403432781,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp16|pattern:h_th_in|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724115,
+   "W_B": 28.042993361834828,
+   "W_fc": 32.40165949744346,
+   "energy": "FORECAST",
+   "phi": 1.0401696089155752,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1983125848064
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 22965953167360,
+     "label": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing); a MAC x MACs an op x ops",
+     "lo_zero_delay": 14612736573440
+    },
+    "counts_footing": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing)",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.1554568568959622,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 16884386671795.656
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      1113831025644.3093,
+      4455324102577.237
+     ],
+     "count_estimated": 2227662051288.6187,
+     "energy_J": 0.0001313640098248273,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0739528115541113,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11323227885783.764,
+     "energy_J": 0.0006677245403432781,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:gt125|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724106,
+   "W_B": 5.077931311253716,
+   "W_fc": 6.791970198601987,
+   "energy": "FORECAST",
+   "phi": 0.23166515991318387,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1226500674440.811
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 523362442796.6184,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 333004140140.1706
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 358276372071.6022
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.00042695606895677544,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 756625173623.189
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      533920344598.9665,
+      2135681378395.866
+     ],
+     "count_estimated": 1067840689197.933,
+     "energy_J": 6.29699799868671e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:gt25|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 6.661916320328562,
+   "W_fc": 8.558364900566353,
+   "energy": "FORECAST",
+   "phi": 0.23558205108160968,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1338345984165.5847
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 585672754993.7859,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 372650836651.6869
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 400931921593.57166
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.00032842774535136576,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 644779863898.4153
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      536729787426.23224,
+      2146919149704.929
+     ],
+     "count_estimated": 1073459574852.4645,
+     "energy_J": 6.330132259330038e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:gt875|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 10.666966852712054,
+   "W_fc": 13.024631942849632,
+   "energy": "FORECAST",
+   "phi": 0.25270265602747083,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1873617604512.5798
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 390786930849.7597,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 248649225172.26025
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 267519623857.0305
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 6.568554907027315e-05,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 109508243551.42017
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      549009771397.0234,
+      2196039085588.0935
+     ],
+     "count_estimated": 1098019542794.0468,
+     "energy_J": 6.474961043754909e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:rt16|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724133,
+   "W_B": 12.226011669684926,
+   "W_fc": 14.763214372006805,
+   "energy": "FORECAST",
+   "phi": 0.36464993264764034,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1983125848064.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 1000750852137.9174,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 636756002646.9736
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 685080463045.1294
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      629305459944.0408,
+      2517221839776.163
+     ],
+     "count_estimated": 1258610919888.0815,
+     "energy_J": 7.421959589883578e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:rt32b|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 12.144344500111753,
+   "W_fc": 14.672142515371785,
+   "energy": "FORECAST",
+   "phi": 0.5074269333031614,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1983125848064.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 572083261625.9962,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 364004137569.30756
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 391629010295.4547
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      731714182357.2794,
+      2926856729429.1177
+     ],
+     "count_estimated": 1463428364714.5588,
+     "energy_J": 8.629756832688766e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:rt32|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 11.973177781778029,
+   "W_fc": 14.48126445611925,
+   "energy": "FORECAST",
+   "phi": 0.3608593928072283,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1983125848064.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 607852643325.1093,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 386763417223.40283
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329854,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 416115529117.7131
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      626586644304.7512,
+      2506346577219.005
+     ],
+     "count_estimated": 1253173288609.5024,
+     "energy_J": 7.389894176357777e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:rt64|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724115,
+   "W_B": 11.917504459656492,
+   "W_fc": 14.41917986524697,
+   "energy": "FORECAST",
+   "phi": 0.3608593928072283,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1983125848064.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 519588480337.1172,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 330602849904.22626
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329858,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 355692843969.9307
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      626586644304.7512,
+      2506346577219.005
+     ],
+     "count_estimated": 1253173288609.5024,
+     "energy_J": 7.389894176357777e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:sg_kk|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 11.808522525662838,
+   "W_fc": 14.29764771076739,
+   "energy": "FORECAST",
+   "phi": 0.3546681777345553,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1983125848064.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 359783005124.3843,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 228922101513.98026
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 246295376336.49994
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      622145912093.9115,
+      2488583648375.646
+     ],
+     "count_estimated": 1244291824187.823,
+     "energy_J": 7.337520667598966e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:sgm1|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.129270795672408,
+   "W_B": 14.751088146407849,
+   "W_fc": 17.57907543444408,
+   "energy": "FORECAST",
+   "phi": 0.33533642454845375,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1983125848064.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 5065419719778.523,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 3223016403738.0366
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 3467616419941.41
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      608279952333.5348,
+      2433119809334.139
+     ],
+     "count_estimated": 1216559904667.0696,
+     "energy_J": 7.173987058617377e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:th_top|0xffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 0.5646353978362058,
+   "W_B": 16.59710557064904,
+   "W_fc": 19.073042472383495,
+   "energy": "FORECAST",
+   "phi": 1.0370917003367401,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 991562924032.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 16417246888937.6,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 10445937149227.324
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329858,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 11238696501304.176
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      555811677177.0015,
+      2223246708708.006
+     ],
+     "count_estimated": 1111623354354.003,
+     "energy_J": 6.55518197468038e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 3.2404952474857784e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 5662646607357.003,
+     "energy_J": 0.00033392316582897785,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|int8|pattern:i8_t06|0xffffffff": {
+   "T_op_us": 0.6483550984083424,
+   "W_A": 1.1292707956724097,
+   "W_B": 4.275164620439926,
+   "W_fc": 7.723133681820908,
+   "energy": "FORECAST",
+   "phi": 0.341920455653555,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 4.149472629813391e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 461826162688
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 155788836864,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 99125035008
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.289784763940894,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 326100029894.42615
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      613002437122.449,
+      2452009748489.796
+     ],
+     "count_estimated": 1226004874244.898,
+     "energy_J": 7.229683526387223e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 4.6858782582902565e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 3087764174481.1094,
+     "energy_J": 0.00018208376046925507,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|int8|pattern:i8_t1|0xffffffff": {
+   "T_op_us": 0.6483550984083424,
+   "W_A": 1.1292707956724097,
+   "W_B": 4.273141012838285,
+   "W_fc": 7.720012540942077,
+   "energy": "FORECAST",
+   "phi": 0.33413472881464495,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 4.149472629813391e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 461826162688
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 160075350016,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 101852446720
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.289784763940895,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 335072627389.5578
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      607418019919.6044,
+      2429672079678.4175
+     ],
+     "count_estimated": 1214836039839.2087,
+     "energy_J": 7.163821522240224e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 4.6858782582902565e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 3087764174481.1094,
+     "energy_J": 0.00018208376046925507,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|int8|pattern:i8_t2|0xffffffff": {
+   "T_op_us": 0.6483550984083424,
+   "W_A": 1.1292707956724106,
+   "W_B": 4.264238066101849,
+   "W_fc": 7.706280950401196,
+   "energy": "FORECAST",
+   "phi": 0.3172928008827769,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 4.149472629813391e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 461826162688
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 167001391104,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 106259349504
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.2897847639408946,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 349570389024.52966
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      595337920782.0703,
+      2381351683128.2812
+     ],
+     "count_estimated": 1190675841564.1406,
+     "energy_J": 7.021350157620985e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 4.6858782582902565e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 3087764174481.1094,
+     "energy_J": 0.00018208376046925507,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|int8|pattern:i8_t3|0xffffffff": {
+   "T_op_us": 0.6483550984083424,
+   "W_A": 1.1292707956724106,
+   "W_B": 4.236323051225489,
+   "W_fc": 7.663225817581406,
+   "energy": "FORECAST",
+   "phi": 0.30911615888877514,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 4.149472629813391e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 461826162688
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 158131486720,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 100615585792
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.289784763940895,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 331003621153.5096
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      589473114430.9658,
+      2357892457723.8633
+     ],
+     "count_estimated": 1178946228861.9316,
+     "energy_J": 6.952181274604681e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 4.6858782582902565e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 3087764174481.1094,
+     "energy_J": 0.00018208376046925507,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|int8|pattern:i8_t46|0xffffffff": {
+   "T_op_us": 0.6483550984083424,
+   "W_A": 1.1292707956724115,
+   "W_B": 12.15252170023503,
+   "W_fc": 19.8728909662679,
+   "energy": "FORECAST",
+   "phi": 1.099807212587621,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 4.149472629813391e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 461826162688
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 3720704425984,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 2367403327488
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.2897847639408946,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 7788247396872.998
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      1156606898311.4812,
+      4626427593245.925
+     ],
+     "count_estimated": 2313213796622.9624,
+     "energy_J": 0.00013640894934252966,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 4.6858782582902565e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 3087764174481.1094,
+     "energy_J": 0.00018208376046925507,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|int8|pattern:i8_t5|0xffffffff": {
+   "T_op_us": 0.6483550984083424,
+   "W_A": 1.1292707956724106,
+   "W_B": 4.3049186627562745,
+   "W_fc": 7.769025265598676,
+   "energy": "FORECAST",
+   "phi": 0.35245887670956916,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 4.149472629813391e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 461826162688
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 163993747456,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 104345632768
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.2897847639408946,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 343274672863.9382
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      620561261244.2909,
+      2482245044977.1636
+     ],
+     "count_estimated": 1241122522488.5818,
+     "energy_J": 7.318831469238912e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 4.6858782582902565e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 3087764174481.1094,
+     "energy_J": 0.00018208376046925507,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL4x8x8|fp32|pattern:gt25|0xffffffff": {
+   "T_op_us": 2.3139484037106834,
+   "W_A": 1.4741898397517748,
+   "W_B": 12.018998296429048,
+   "W_fc": 6.668341220636153,
+   "energy": "FORECAST",
+   "phi": 0.23558205108160968,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 0.03791173064639584,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 342616571946389.7
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 161661557868254.12,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 102861733417425.55
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 110668079556846.06
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.08407750280994965,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 165063645157994.3
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      877590608060622.9,
+      3510362432242491.5
+     ],
+     "count_estimated": 1755181216121245.8,
+     "energy_J": 0.10350207401770344,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.01307647789394913,
+     "awake_minions": 0.042812610232373524,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 2899275062966786.0,
+     "energy_J": 0.1709686609044367,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL4x8x8|fp32|pattern:rt32|0xffffffff": {
+   "T_op_us": 2.3139484037106834,
+   "W_A": 1.4741898397517694,
+   "W_B": 17.879500987246853,
+   "W_fc": 9.20102634076234,
+   "energy": "FORECAST",
+   "phi": 0.3608593928072283,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 0.03791173064639584,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 507680217104384.0
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 156975740828578.66,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 99880249943347.39
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 107460326397877.75
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0.0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      980441595849561.1,
+      3921766383398244.5
+     ],
+     "count_estimated": 1960883191699122.2,
+     "energy_J": 0.11563220673921182,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.01307647789394913,
+     "awake_minions": 0.042812610232373524,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 2899275062966786.0,
+     "energy_J": 0.1709686609044367,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL4x8x8|int8|pattern:i8_t06|0xffffffff": {
+   "T_op_us": 2.336467501818799,
+   "W_A": 1.4741898397517712,
+   "W_B": 10.091230967130187,
+   "W_fc": 5.793201749515024,
+   "energy": "FORECAST",
+   "phi": 0.341920455653555,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 0.038280683549799195,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 118227497648128
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 39881942237184,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 25376008962048
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.289784763940894,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 83481607652973.1
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      964892986922384.4,
+      3859571947689537.5
+     ],
+     "count_estimated": 1929785973844768.8,
+     "energy_J": 0.11379842085172451,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.01320373677670132,
+     "awake_minions": 0.04322925797116548,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 790467628667163.9,
+     "energy_J": 0.04661344268012929,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL4x8x8|int8|pattern:i8_t46|0xffffffff": {
+   "T_op_us": 2.336467501818799,
+   "W_A": 1.4741898397517694,
+   "W_B": 21.445798517162704,
+   "W_fc": 10.65291734204677,
+   "energy": "FORECAST",
+   "phi": 1.099807212587621,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 0.038280683549799195,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 118227497648128
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 952500333051904,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 606055251836928
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.289784763940894,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 1993791333599487.2
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      1587107670831846.8,
+      6348430683327387.0
+     ],
+     "count_estimated": 3174215341663693.5,
+     "energy_J": 0.18718173840023047,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.01320373677670132,
+     "awake_minions": 0.04322925797116548,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 790467628667163.9,
+     "energy_J": 0.04661344268012929,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL4x8x8|int8|pattern:i8_t5|0xffffffff": {
+   "T_op_us": 2.336467501818799,
+   "W_A": 1.474189839751773,
+   "W_B": 10.169335647190866,
+   "W_fc": 5.8266302821181455,
+   "energy": "FORECAST",
+   "phi": 0.35245887670956916,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 0.038280683549799195,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 118227497648128
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 41982399348736,
+     "label": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows; a MAC x MACs an op x ops",
+     "lo_zero_delay": 26712481988608
+    },
+    "counts_footing": "counted (desk) around the arithmetic only: the behavioural RTL has no nets inside the int8 multiply, product sum and add, so the count is the VPU around them (MM1-v1's switch table footing); m_int8 scales it to the data term the card shows",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 3.2897847639408946,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 87878316253168.17
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 0
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      973544886782462.2,
+      3894179547129849.0
+     ],
+     "count_estimated": 1947089773564924.5,
+     "energy_J": 0.11481881643422792,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 3.057728703201872,
+    "not_converted_J": {
+     "awake_memory_path": 0.01320373677670132,
+     "awake_minions": 0.04322925797116548,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 790467628667163.9,
+     "energy_J": 0.04661344268012929,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  }
+ },
+ "literal": {
+  "aifoundry1 card 0|gemmL1x1x1|fp32|pattern:gt25|0xff": {
+   "T_op_us": 0.6769499999999999,
+   "W_A": 6.480106130975907,
+   "W_B": 4.201617722435607,
+   "W_fc": 12.68679454583019,
+   "energy": "FORECAST",
+   "phi": 0.23558205108160968,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 19.87195363700257,
+   "sec_gemm": 4.3324799999999996e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 334586496041.3962
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 146418188748.44647,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 93162709162.92172
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.5686330462695919,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 146138104272.9619
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 161194965974.60382
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      142942623133.80444,
+      571770492535.2178
+     ],
+     "count_estimated": 285885246267.6089,
+     "energy_J": 1.6858496232741937e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.4806146899309626e-06,
+     "governed_base": 0.0002742686874133738,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 4128024713411.2944,
+     "energy_J": 0.0002434273541159469,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp16|pattern:h_gt25|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 11.849671066757624,
+   "W_fc": 14.343534865359747,
+   "energy": "FORECAST",
+   "phi": 0.3218095193366351,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1334840393728
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 462676557824,
+     "label": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing); a MAC x MACs an op x ops",
+     "lo_zero_delay": 294391054336
+    },
+    "counts_footing": "estimated (desk), not counted: fp16's RTL toggles x the fp32 gate/RTL ratio (no fp16 gate-level run; MM1-v1's switch table footing)",
+    "counts_source": "v31-counts (counts/counts-fp16-int8-launch.json) at the harness launch points",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.1554568568959622,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 340156162341.363
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 648285454336
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      598577597790.5258,
+      2394310391162.103
+     ],
+     "count_estimated": 1197155195581.0515,
+     "energy_J": 7.059558553021161e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0739528115541113,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11323227885783.764,
+     "energy_J": 0.0006677245403432781,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:gt125|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.129270795672408,
+   "W_B": 11.749119888703337,
+   "W_fc": 14.231404341918045,
+   "energy": "FORECAST",
+   "phi": 0.23166515991318387,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1226500674440.811
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 523362442796.6184,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 333004140140.1706
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 358276372071.6022
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 756625173623.189
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      533920344598.9665,
+      2135681378395.866
+     ],
+     "count_estimated": 1067840689197.933,
+     "energy_J": 6.29699799868671e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:gt25|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 11.793599841443653,
+   "W_fc": 14.281006549271012,
+   "energy": "FORECAST",
+   "phi": 0.23558205108160968,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1338345984165.5847
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 585672754993.7859,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 372650836651.6869
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 400931921593.57166
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 644779863898.4153
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      536729787426.23224,
+      2146919149704.929
+     ],
+     "count_estimated": 1073459574852.4645,
+     "energy_J": 6.330132259330038e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL1x1x1|fp32|pattern:gt875|0xffffffff": {
+   "T_op_us": 0.8967333333333333,
+   "W_A": 1.1292707956724097,
+   "W_B": 11.693303556935074,
+   "W_fc": 14.169160272590567,
+   "energy": "FORECAST",
+   "phi": 0.25270265602747083,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 5.7390933333333326e-05,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 1873617604512.5798
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 390786930849.7597,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 248649225172.26025
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S1, KB = 1)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 267519623857.0305
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 109508243551.42017
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      549009771397.0234,
+      2196039085588.0935
+     ],
+     "count_estimated": 1098019542794.0468,
+     "energy_J": 6.474961043754909e-05,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.0,
+     "awake_minions": 6.480990494971557e-05,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 11325293214714.006,
+     "energy_J": 0.0006678463316579557,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  },
+  "aifoundry1 card 1|gemmL4x8x8|fp32|pattern:gt25|0xffffffff": {
+   "T_op_us": 2.3139484037106834,
+   "W_A": 1.4741898397517694,
+   "W_B": 17.150681817544147,
+   "W_fc": 8.8860585702909,
+   "energy": "FORECAST",
+   "phi": 0.23558205108160968,
+   "phi_rule": "kinds_v3.phi over E217's registered tile file (decl-e217's declaration)",
+   "rest_law_W": 34.08464816785563,
+   "sec_gemm": 0.03791173064639584,
+   "switches": {
+    "counted_clock_fin_edges": {
+     "label": "counted (desk): the bench clock nets x 39.8 fins a toggle",
+     "value": 342616571946389.7
+    },
+    "counted_signal_fin_edges": {
+     "hi_timed": 161661557868254.12,
+     "label": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units); a MAC x MACs an op x ops",
+     "lo_zero_delay": 102861733417425.55
+    },
+    "counts_footing": "counted (desk): the gate-level bench's VPU net toggles a MAC at GEMM states x the fin edges a toggle calibrated on the fp32 unit's gate-level run (E210's and v31-counts' rows, MM1-v1 units)",
+    "counts_source": "v31-counts (counts/counts-fp32-gemm-states.json) desk counts at GEMM states (S2, KB >= 2)",
+    "data_term_energy_equivalent": {
+     "factor_over_counted_signal_lo": 1.0758916448329856,
+     "label": "estimated, energy-calibrated: the data term joules x kappa = s_V x kc x m x the die factor x the counted signal fin edges (lo); it equals the counted edges only where all four factors are 1 (fp32 on aifoundry3 at 0.517 V and 50 C)",
+     "value": 110668079556846.06
+    },
+    "gate_counted_clock_fin_edges_removed": {
+     "energy_saved_J": 0.0,
+     "label": "counted (desk) and estimated (the fitted gate energy)",
+     "value": 165063645157994.3
+    },
+    "kappa_fin_edges_per_J_board": 1.6957932802593232e+16,
+    "lines": {
+     "band": [
+      877590608060622.9,
+      3510362432242491.5
+     ],
+     "count_estimated": 1755181216121245.8,
+     "energy_J": 0.10350207401770344,
+     "label": "estimated, wide band (x0.5 to x2): the line and C-store joules x kappa"
+    },
+    "m_fmt": 1.0,
+    "not_converted_J": {
+     "awake_memory_path": 0.01307647789394913,
+     "awake_minions": 0.042812610232373524,
+     "governed_base": 0.0,
+     "instructions_vs_rgm136": 0.0,
+     "label": "modelled energy, joules only (awake, memory path awake, governed base, leakage in the die term)"
+    },
+    "scope": "scorable through energy only: count differences at a fixed shape, format and mask (E210 R1 form); not scorable: any absolute count, the ungated base count, the lines count, the split inside a rail",
+    "ungated_base": {
+     "count_estimated": 2899275062966786.0,
+     "energy_J": 0.1709686609044367,
+     "label": "measured energy (fitted); its count estimated at kappa, never merged with the bench clock count"
+    }
+   }
+  }
+ },
+ "model": "MM1-v3.1",
+ "python": "3.12.3",
+ "rows_added": [
+  "E210C31[S1][pattern:gt125]",
+  "E210C31[S1][pattern:gt25]",
+  "E210C31[S1][pattern:gt875]",
+  "E210C31[S1][pattern:rt16]",
+  "E210C31[S1][pattern:rt32]",
+  "E210C31[S1][pattern:rt32b]",
+  "E210C31[S1][pattern:rt64]",
+  "E210C31[S1][pattern:sg_kk]",
+  "E210C31[S1][pattern:sgm1]",
+  "E210C31[S1][pattern:th_top]",
+  "E210C31[S2][pattern:gt125]",
+  "E210C31[S2][pattern:gt25]",
+  "E210C31[S2][pattern:gt875]",
+  "E210C31[S2][pattern:rt16]",
+  "E210C31[S2][pattern:rt32]",
+  "E210C31[S2][pattern:rt32b]",
+  "E210C31[S2][pattern:rt64]",
+  "E210C31[S2][pattern:sg_kk]",
+  "E210C31[S2][pattern:sgm1]",
+  "E210C31[S2][pattern:th_top]",
+  "SWT31[fp16.pattern:h_gt25]",
+  "SWT31[fp16.pattern:h_rt32]",
+  "SWT31[fp16.pattern:h_rt64]",
+  "SWT31[fp16.pattern:h_sg]",
+  "SWT31[fp16.pattern:h_th_in]",
+  "SWT31[int8.pattern:i8_t06]",
+  "SWT31[int8.pattern:i8_t1]",
+  "SWT31[int8.pattern:i8_t2]",
+  "SWT31[int8.pattern:i8_t3]",
+  "SWT31[int8.pattern:i8_t46]",
+  "SWT31[int8.pattern:i8_t5]"
+ ]
+}
