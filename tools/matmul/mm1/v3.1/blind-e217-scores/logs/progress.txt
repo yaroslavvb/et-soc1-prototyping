@@ -1,0 +1,43 @@
+Thu 19 Nov 2026 20:45:22 PST step 0: lane folder created, rc 0
+Thu 19 Nov 2026 20:53:06 PST step 0 s00_setup.sh: LAB = GitHub main 9f8b66bf; models v3.1 64/64, counts 71/71, v3 170/170, v2 114/114, layout 25/25 + note 6/6, gemmLnc 22/22 OK; posted term files, params, verify-lay files, FROZEN.txt 32311daf, COUNTS-FROZEN 4867c1d0, declaration 099806dc/633d7256, nominal 4725efa3/611ca08d, counts JSON 0169d260/6509e20d all equal; decl land 81/81 OK (copied to work/decl, 81/81), rc 0
+Thu 19 Nov 2026 20:53:41 PST step 2a conditions (slot job from Thu 19 Nov 2026 20:53:41 PST; load 0.35) rc=0
+Thu 19 Nov 2026 20:56:27 PST step 2b forecasts lay (measured conditions) (slot job from Thu 19 Nov 2026 20:56:26 PST; load 0.14) rc=0
+Thu 19 Nov 2026 20:56:46 PST step 2b forecasts v31 (measured conditions) (slot job from Thu 19 Nov 2026 20:56:27 PST; load 0.33) rc=0
+Thu 19 Nov 2026 20:57:06 PST step 2b forecasts v3 (measured conditions) (slot job from Thu 19 Nov 2026 20:56:46 PST; load 0.74) rc=0
+Thu 19 Nov 2026 20:57:25 PST step 2b forecasts v2 (measured conditions) (slot job from Thu 19 Nov 2026 20:57:06 PST; load 0.82) rc=0
+Thu 19 Nov 2026 20:57:45 PST step 2b nominal self-check v31 (slot job from Thu 19 Nov 2026 20:57:25 PST; load 0.95) rc=0
+Thu 19 Nov 2026 20:58:04 PST step 2b nominal self-check v3 (slot job from Thu 19 Nov 2026 20:57:45 PST; load 1.05) rc=0
+Thu 19 Nov 2026 20:58:24 PST step 2b nominal self-check v2 (slot job from Thu 19 Nov 2026 20:58:04 PST; load 1.03) rc=0
+Thu 19 Nov 2026 20:58:50 PST step 2d nominal procedure check (slot job from Thu 19 Nov 2026 20:58:50 PST; load 0.74) rc=0
+Thu 19 Nov 2026 20:59:00 PST step 2a s02a_conditions.py (20:53:41): conditions only from the 7 committed data-e217-<s>.json at main 9f8b66bf (fields: top card/session/primary_view; per run run,i,ran,role,arm,values,type,shires,minions,die_start_c; primary view kclock_mhz, rails.minion.mV): 599/599 listed runs found, all ran, 0 without clock/mV/die; conditions-e217.json ae9af0e5; rc 0
+Thu 19 Nov 2026 20:59:00 PST step 2b s02b_chain.sh (20:56:26-20:58:24): lay (factors 2430/2430 equal to the frozen nominal) fc-lay 8186dd8c; v31 599 runs energy 599, fc-v31 1d288a8b; v3 599/599, fc-v3 de0b5f95; v2 599 energy 517 (82 not forecast: S and C), fc-v2 a21dcd05; nominal self-checks fc-v31-nominalcheck 15d7d136, fc-v3-nominalcheck df691494, fc-v2-nominalcheck e3055c47; rc 0
+Thu 19 Nov 2026 20:59:00 PST step 2d s02d_nominal_check.py (20:58:50): this lane's forecast code at the declared nominal conditions re-makes decl-e217's frozen nominal forecasts BIT FOR BIT (MM1-v3.1 5015, MM1-v3 5015, MM1-v2 3947 fields, 0 differ; energy status 599/599 equal); nominal-check.json 6e974f14; rc 0
+Thu 19 Nov 2026 20:59:55 PST step 2c merge (the measured-conditions forecasts) (slot job from Thu 19 Nov 2026 20:59:55 PST; load 0.28) rc=0
+Thu 19 Nov 2026 21:00:04 PST step 2c s02c_merge.py (20:59:55): THE MEASURED-CONDITIONS FORECASTS, 599 runs, 486 cases, 9 models (MM1-v3.1, v3, v2, +contention, +both, 4 controls): forecasts-blind-e217.csv ed81a5db..., forecasts-blind-e217.json 74aa5a03...; twins at the measured clock MM1-v3.1 63 time / 24 energy, v3 63/24, v2 47/19; HASHED in logs/step2-sha256.txt before the scorer exists; rc 0
+Thu 19 Nov 2026 21:05:03 PST step 3s stand-in exact (slot job from Thu 19 Nov 2026 21:05:03 PST; load 0.18) rc=0
+Thu 19 Nov 2026 21:05:04 PST step 3t scorer on the stand-in exact (slot job from Thu 19 Nov 2026 21:05:03 PST; load 0.18) rc=0
+Thu 19 Nov 2026 21:05:04 PST step 3s stand-in noise (slot job from Thu 19 Nov 2026 21:05:04 PST; load 0.18) rc=0
+Thu 19 Nov 2026 21:05:05 PST step 3t scorer on the stand-in noise (slot job from Thu 19 Nov 2026 21:05:04 PST; load 0.18) rc=0
+Thu 19 Nov 2026 21:06:17 PST step 3s stand-in exact (slot job from Thu 19 Nov 2026 21:06:17 PST; load 0.25) rc=0
+Thu 19 Nov 2026 21:06:18 PST step 3t scorer on the stand-in exact (slot job from Thu 19 Nov 2026 21:06:17 PST; load 0.25) rc=0
+Thu 19 Nov 2026 21:06:18 PST step 3s stand-in noise (slot job from Thu 19 Nov 2026 21:06:18 PST; load 0.25) rc=0
+Thu 19 Nov 2026 21:06:19 PST step 3t scorer on the stand-in noise (slot job from Thu 19 Nov 2026 21:06:18 PST; load 0.25) rc=0
+Thu 19 Nov 2026 21:06:37 PST step 3t s03t_test.sh (21:06:17-21:06:19): the scorer code-tested on two stand-in days from the frozen forecasts alone (exact: VERDICT PASS, v3.1 errors 0, D1/D2/D3 v3.1 BETTER, part S PASS; noise: primary PASS, 3 capped runs skipped, nominal FAIL card 0 E1/E2), loader check 599/599 equal on both; rc 0
+Thu 19 Nov 2026 21:06:37 PST step 3h THE SCORER HASHED before the read: s03_score.py 2921d487dbe218984518dd0c60c541cad9b09287b6de407b23fa34565b729415 (logs/step3-scorer-sha256.txt); rc 0
+Thu 19 Nov 2026 21:06:45 PST step 3 THE READ AND THE SCORE (s03_score.py 2921d487) (slot job from Thu 19 Nov 2026 21:06:44 PST; load 0.16) rc=0
+Thu 19 Nov 2026 21:07:32 PST step 3 THE READ AND THE SCORE (s03_score.py 2921d487, read 21:06:44): 7 data files at 9f8b66bf equal to step 2a's bytes; loader check equal 599/599; label BLIND for all 7 sessions (T0 135-401 min after the freeze post #13.1.1 12:26:07); VERDICT FAIL: part A FAIL (card 1 T1 179/218, T3 179/218, E4 214/248; card 0 T1 172/205, T3 172/205, E4 175/210), part S PASS (Q1 6.30% vs N 47.58%, 30/2/3 p 2.5e-7; Q2 8.48% vs 27.46% of D, 24/1/4 p 1.5e-6); scores-blind-e217.json 662a1b68, .txt 7c2edd7b, cases.csv 3be37490, runs.csv cda36435; rc 0
+Thu 19 Nov 2026 21:08:47 PST step 4 recheck (independent code path) (slot job from Thu 19 Nov 2026 21:08:47 PST; load 0.22) rc=0
+Thu 19 Nov 2026 21:09:16 PST step 3p post hoc readings (REPORTED) (slot job from Thu 19 Nov 2026 21:09:16 PST; load 0.42) rc=0
+Thu 19 Nov 2026 21:09:30 PST step 4 s04_recheck.py (21:08:47): independent code path from the frozen CSV and a fresh git-show read: T1/T3/E4 per card, wall rms no twin per card, Q1 (35 cases, 6.298 vs 47.578%, 30/2), D1 H1 pooled 41/86/359 ALL EQUAL to the scorer; rc 0
+Thu 19 Nov 2026 21:09:30 PST step 3p s03p_posthoc.py (21:09:16): post hoc readings (REPORTED): every T1/T3/E4 miss is at a shape other than 1x1x1; posthoc-e217.json; rc 0
+Thu 19 Nov 2026 21:13:30 PST step 5 land dir (slot job from Thu 19 Nov 2026 21:13:30 PST; load 0.24) rc=1
+Thu 19 Nov 2026 21:14:02 PST step 5 land dir (2nd try: placeholders built at run time) (slot job from Thu 19 Nov 2026 21:14:01 PST; load 0.20) rc=1
+Thu 19 Nov 2026 21:14:09 PST step 5 land dir (3rd try: the round's scan tools kept outside the land) (slot job from Thu 19 Nov 2026 21:14:09 PST; load 0.39) rc=0
+Thu 19 Nov 2026 21:14:45 PST step 5 land dir (4th try: the git ssh prefix as a placeholder too) (slot job from Thu 19 Nov 2026 21:14:44 PST; load 0.49) rc=1
+Thu 19 Nov 2026 21:14:54 PST step 5 land dir (5th try: the scan script kept outside the land) (slot job from Thu 19 Nov 2026 21:14:54 PST; load 0.56) rc=0
+Thu 19 Nov 2026 21:15:46 PST step 5 land dir (6th: README adds per-session, D3 H5, zero-row gates, group C, nominal D1/D2) (slot job from Thu 19 Nov 2026 21:15:46 PST; load 0.64) rc=0
+Thu 19 Nov 2026 21:16:02 PST step 5 land dir (7th: no pipe inside a table cell) (slot job from Thu 19 Nov 2026 21:16:01 PST; load 0.57) rc=0
+Thu 19 Nov 2026 21:16:18 PST step 5 s05_land.py (21:13:30-21:16:02, 7 builds: 1 assert on a placeholder already in a copied scan tool; the round's scan tools and this lane's scan script then kept in scan/, outside the land; the git ssh prefix made a reversible placeholder; README additions; a table-cell pipe fixed): land 43 files, SHA256SUMS 9013668a..., 42/42 OK, the frozen files byte for byte, home/login scan 0; rc 0
+Thu 19 Nov 2026 21:16:18 PST step 6 scan/s06_scan.sh (21:16:06): pubscan_strict 0 hits over 43 files; tiers: only 'process' N1/N2 tokens (the control names N1+N2, G1+N1: false positives, read); lane grep 0 paths, logins, kit folders or seal prefixes, 0 hits of the flagged word; CLEAN; rc 0
+Thu 19 Nov 2026 21:16:18 PST step 5 land dir (final build, with the progress log up to here) (slot job from Thu 19 Nov 2026 21:16:18 PST; load 0.53) rc=0
+Thu 19 Nov 2026 21:16:32 PST note: the step 6 line above was reworded at this time (it named the scan's flagged word, which the final scan then found in this log's landed copy); nothing else changed; rc 0
