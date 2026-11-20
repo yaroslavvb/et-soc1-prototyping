@@ -1,0 +1,113 @@
+{
+ "what": "data-e219's check W of the claim's window for one E219 session (reads only)",
+ "session": "session",
+ "freeze_utc": "2026-11-20T02:12:33.755Z",
+ "meta": {
+  "label": "a1c1-S1",
+  "sid": "1795146645-a1c1-S1",
+  "box": "aifoundry1",
+  "card": "1",
+  "card_label": "aifoundry1 card 1 at 600 MHz",
+  "schedule": "a1c1-S1.json",
+  "claim": {
+   "post": "#14.1.1.1",
+   "posted": "19:50:39 PST",
+   "posted_utc": "2026-11-20T03:50:39.777Z",
+   "record": "Claiming aifoundry1 card 1 for the NDA box's fifth matmul sweep 1119-mmsweep5 (E219), session S1 (schedule `a1c1-S1`, 83 runs, sha256 7310c23c8414ef60...), about 51.3 card-minutes (at most 67) from 19:50 to 21:12 PST, the card's lock held for the whole window: E136's rgm136 unchanged (kernel ELF aace138caf80...), host sha256 f2e03410ed78a553..., reads only, one sampler, stops armed, host jobs single-threaded, files in the kit's box folder; forecast sha256 ba9e24aa789f....",
+   "record_kind": "its words after the tag and his line, verbatim, from the round's Discussion watcher's printed copy"
+  },
+  "window": [
+   "2026-11-19T19:50:00",
+   "2026-11-19T21:12:00",
+   null
+  ],
+  "plan": {
+   "runs": 83,
+   "planned_min": 51.3,
+   "cap_min": 67,
+   "arms_kind": "names_all",
+   "sched_sha_prefix": "7310c23c8414ef60"
+  },
+  "release": {
+   "post": "#14.1.1.1.1",
+   "posted": "20:25:22 PST",
+   "posted_utc": "2026-11-20T04:25:22.118Z",
+   "record": "Released aifoundry1 card 1 at 20:25 PST: E219 session S1 ended (runner rc 0, 83 of 83 runs, 33.61 card-minutes, no stop, every check exact, no leftover), the data in the kit's box folder under `sessions/1795146645-a1c1-S1/` for the lab session to commit; card 0's S1 claim follows after a five-minute gap and a preflight.",
+   "record_kind": "its words after the tag, verbatim, from the round's Discussion watcher's printed copy"
+  },
+  "copied": "20:26:47 PST: one read-only listing (the session's folder; the kit's top folder, build/ and run/ by name) and one read-only rsync from aifoundry1 of the model session's sessions/1795146645-a1c1-S1/ together with the kit's build record build/BUILD-mms.json and load record run/preflight-load.txt (rsync -a -R, rc 0; 272 session files; its MANIFEST.sha256 269 of 269 OK), 85 s after the release post, while no claim of the model session stood for aifoundry1 (the round's records of #14 and #13, the watcher's copies and the orchestrator's claim file read just before) and no lane of ours booked the box",
+  "host_sha256_claim": "f2e03410ed78a553",
+  "host_claim_is_prefix": true,
+  "host_words": null,
+  "registration": {
+   "sha": "bd0a29e872816eae3a86e5696cf5bdd3712adeb9",
+   "time": "2026-11-19T20:00:26-08:00"
+  }
+ },
+ "checks": {
+  "W1_claim_first": {
+   "verdict": "PASS",
+   "claim_post": "#14.1.1.1 Thu 19:50:39.777 PST",
+   "session_t0": "Thu 19:50:45.000 PST",
+   "first_card_command": "Thu 19:50:48.917 PST",
+   "claim_lead_s": 9.14
+  },
+  "W2_window_start": {
+   "verdict": "PASS",
+   "window_start": "Thu 19:50:00.000 PST",
+   "t0_after_s": 45.0,
+   "first_after_s": 48.917,
+   "first_log_line": "2026-11-19 19:50:45 PST session start (T0 1795146645; card a"
+  },
+  "W3_window_end": {
+   "verdict": "PASS",
+   "window_end": "Thu 21:12:00.000 PST",
+   "close": "Thu 20:24:25.220 PST",
+   "last_sample": "Thu 20:24:24.877 PST",
+   "close_before_end_s": 2854.78,
+   "last_line": "2026-11-19 20:24:25 PST session end (T0 1795146645; 83 runs ran; 33.61 card-minutes)"
+  },
+  "W4_bound": {
+   "verdict": "PASS",
+   "card_minutes": 33.61,
+   "status_card_min": 33.61,
+   "claim_cap_min": 67,
+   "schedule_cap_min": 67.0,
+   "planned_min_claim": 51.3,
+   "planned_min_schedule": 51.3,
+   "runner_end_bound": "Thu 20:57:48.917 PST"
+  },
+  "W5_plan": {
+   "verdict": "PASS",
+   "runs_ran": 83,
+   "runs_claim": 83,
+   "runs_listed": 83,
+   "arm_names_incl_anchor_and_nulls": 77,
+   "arm_names_without_nulls": 73,
+   "arms_alone": 72,
+   "anchor_runs": 7,
+   "null_runs": 4,
+   "arms_claim": "not named by the claim (it names its runs)",
+   "schedule": "a1c1-S1.json",
+   "schedule_sha256": "7310c23c8414ef606aa718bb6988997dbed1712e09c5919dac4b589f0ec0d6da",
+   "registered_entry": "7310c23c8414ef606aa718bb6988997dbed1712e09c5919dac4b589f0ec0d6da",
+   "claim_schedule_sha256": "7310c23c8414ef60... = the schedule's: True"
+  },
+  "W6_release": {
+   "verdict": "PASS",
+   "release_post": "#14.1.1.1.1 Thu 20:25:22.118 PST",
+   "released_by": "not named in the record of the claim",
+   "release_after_close_s": 56.898
+  },
+  "W7_freeze_first": {
+   "verdict": "PASS",
+   "freeze_post": "#14 Thu 18:12:33.755 PST",
+   "freeze_lead": "98.25 min",
+   "registration_commit": "bd0a29e8 2026-11-19T20:00:26-08:00",
+   "registration_vs_session": "during the session"
+  }
+ },
+ "verdict": "ALL PASS",
+ "python": "3.12.3",
+ "interpreter": "/usr/bin/python3"
+}
