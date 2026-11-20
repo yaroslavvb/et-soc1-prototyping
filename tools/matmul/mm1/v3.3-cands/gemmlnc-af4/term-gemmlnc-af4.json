@@ -1,0 +1,136 @@
+{
+ "name": "gemmLnc term AF4",
+ "model": "MM1-v3.2 + gemmLnc term AF4 (replaces F3)",
+ "equation": "dW = D x sL x (n / t_op) x 1e-12 x (c1 x dup + c2 x R4) [W over idle]; R4 = Lres x beyond + (1 - Lres) x a3 x (14 qA_b + 12 qBF)",
+ "features": {
+  "dup": "26 at rgm136 gemmLnc, 0 at every cooperative loop",
+  "beyond": "14 (1 - qA_L2) + 12 (1 - qB_L2), the map Q = (Q0 + Q1) / 2 of MM1-v3.2 at its all-data constants",
+  "qA_b": "1 - qA_L2",
+  "qBF": "B's fresh share of Q",
+  "phi": "1 if MB = 1 else (NB - 1) / NB",
+  "m": "1 if 2 KB sa + KB sb > x1 (37.334 MB, MM1-v3.2 time theta x1) else 0",
+  "a3": "1 if NB = 1 or m = 1; else (1 - phi) if NB = 2; else 0",
+  "Lres": "1 if MM1's footprint(MB, NB, KB, mask) <= x1 else 0",
+  "D, sL, n, t_op": "F3's: D = 1 + 0.0048 (die - 50 C), sL = 1 + xi (s_V - 1) at MM1-v3.2's xi, n minions, t_op the op time"
+ },
+ "constants_pJ_per_line": {
+  "c1": 236.34929517819657,
+  "c2": 597.3449869166602
+ },
+ "bounds_pJ": [
+  0.0,
+  10000.0
+ ],
+ "fit": "relative least squares of W over idle given the measured op time on the 36 committed gemmLnc points E211-E218 (bvls)",
+ "held_out": {
+  "in_sample": [
+   3.230042950308353,
+   0.3655926661900952
+  ],
+  "LOEO": [
+   3.8793781185918585,
+   0.14428102269669524
+  ],
+  "LOCO": [
+   4.652287057269756,
+   2.0305996018317134
+  ],
+  "LOPO": [
+   3.7098845905442164,
+   0.3296599293694866
+  ],
+  "LOEO_by_fold": {
+   "E211": [
+    8.448898007284217,
+    6.961340859847043,
+    2
+   ],
+   "E213": [
+    5.793460218092463,
+    -3.365402772683595,
+    7
+   ],
+   "E215": [
+    2.9576961082163047,
+    -0.9667065074969904,
+    5
+   ],
+   "E216": [
+    1.541354432127174,
+    1.3691212413232545,
+    10
+   ],
+   "E218": [
+    2.8368129824658688,
+    0.49763121920204284,
+    12
+   ]
+  },
+  "LOCO_by_fold": {
+   "aifoundry1 card 1": [
+    8.927593588132028,
+    -8.526916233173187,
+    3
+   ],
+   "aifoundry2 card 0": [
+    1.541354432127174,
+    1.3691212413232545,
+    10
+   ],
+   "aifoundry3 card 0": [
+    4.7379704809295715,
+    3.69526617183603,
+    23
+   ]
+  }
+ },
+ "comparator_F3r": {
+  "constants_all_data_pJ": [
+   239.610915356222,
+   396.1930147721334
+  ],
+  "in_sample": [
+   8.337632601531364,
+   -0.12127970530582584
+  ],
+  "LOEO": [
+   8.687658820448428,
+   -0.223506276693744
+  ],
+  "LOCO": [
+   9.05751078768089,
+   1.3224402807375206
+  ],
+  "LOPO": [
+   8.723727446549248,
+   -0.1619890965337693
+  ]
+ },
+ "keep_rule": {
+  "margin_1pt": true,
+  "pooled_guard": true,
+  "placebo_95": true,
+  "kept": true,
+  "LOEO": 3.8793781185918585,
+  "F3r_LOEO": 8.687658820448428,
+  "pooled": 4.921362032118248,
+  "pooled_v32": 5.047827634423209
+ },
+ "placebo": {
+  "real_LOEO": 3.8793781185918585,
+  "wins_of_100": 100,
+  "placebo_LOEO_median": 12.298318012987684,
+  "placebo_LOEO_min": 10.967698802973299
+ },
+ "pooled_guard": [
+  4.921362032118248,
+  1851
+ ],
+ "pooled_guard_MM1-v3.2": [
+  5.047827634423209,
+  1851
+ ],
+ "declaration": "DECLARED-lnc-form.md sha256 7e1c01e4eaf758263d35778ba8c5ffb35ba21362ede5d3f9f85b2272cae0b414 (hashed 2026-11-20 05:30:58 PST)",
+ "base": "MM1-v3.2 frozen (tools/matmul/mm1/v3.2/out/mm1_v32_params.json, sha256 c991de169b056e1e700a41738b8be0be14b107ef4c9494a7ac0e0f37fc603eab), F3 removed, no other constant changed",
+ "labels": "every constant post hoc; the form post hoc in design (DECLARED section 0); E220 forecasts blind once their sha256 is posted or pushed before E220 first card command"
+}
