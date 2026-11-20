@@ -1,0 +1,80 @@
+== Fri 20 Nov 2026 10:03:41 PST: bash W/slot.sh bash W/nodev.sh bash tools/claims-v3/e220/desk/desktest_build_e220a.sh <W>/out/kit-e220/work/final/build-a (from the scratch clone; /usr/bin/python3 3.12.3)
+desktest_build_e220a: 2026-11-20 10:03:41 PST; riscv gcc: riscv64-unknown-elf-gcc () 15.1.0; c++: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0; cmake version 3.28.3; python3 Python 3.12.3; this desk's /opt/et/lib/libdeviceLayer.a carries ET_DEVICES: no
+
+== B1 on aifoundry1 (its hostname, arm A): the real build
+COMPILER kernel: riscv64-unknown-elf-gcc () 15.1.0; host: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+KERNEL rgm136 aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0; KERNEL OK: rgm136: rgm136 gemmL: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones
+HOST rgm136 e1d1d328bf37b5d66ead881c6f87d13ec7082c2ea5c3e176264c97443594a374
+KERNEL rgm211 00402801a1a53a9330898ef023297d8967a2c655472a40e0f1cd65dea04f09ae; KERNEL OK: rgm211: rgm211's tree: its ELF 00402801a1a53a93... the pinned one (kernel-e220.json's rgm211_host)
+HOST rgm211 798f3ec99a0e3ac2b94d1645bd2e12d9ced9a32a5d6fd0fd27f945137cb2051a
+HOSTCHECK rgm136 unknown-option: rc 2, 'unknown option --no-such-option', before the device stage: ok
+HOSTCHECK rgm136 zero-shires: rc 2, 'bad --shires / --per-shire', before the device stage: ok
+HOSTCHECK rgm136 no-kernel: rc 1, 'cannot read kernel', before the device stage: ok
+HOSTCHECK rgm136 unknown-test: rc 2, '--test must be fma, tload, gemv, diverge or spin', before the device stage: ok
+HOSTCHECK rgm211 unknown-option: rc 2, 'unknown option --no-such-option', before the device stage: ok
+HOSTCHECK rgm211 zero-shires: rc 2, 'bad --shires / --per-shire', before the device stage: ok
+HOSTCHECK rgm211 no-kernel: rc 1, 'cannot read kernel', before the device stage: ok
+HOSTCHECK rgm211 unknown-test: rc 2, '--test must be fma, tload, gemv, diverge or spin', before the device stage: ok
+HOSTCHECK rgm211 arm-missing-kb: rc 1, 'want gemmL<MB>x<NB>x<KB>', before the device stage: ok
+HOSTCHECK rgm211 per-shire-16: rc 1, 'gemm needs --per-shire 32', before the device stage: ok
+HOSTCHECK rgm211 missing-tile: rc 1, 'cannot read 2 x 1024 bytes', before the device stage: ok
+HOSTCHECK rgm211 unknown-gen: rc 1, 'unknown gen', before the device stage: ok
+ETDEVICES both hosts no; /opt/et/lib/libdeviceLayer.a no; both CMakeCache deviceLayer_DIR from /opt/et yes
+RGM-BUILD-FAILED: ET_DEVICES: a host has no ET_DEVICES (built against a device layer that ignores it: it would open card 0)
+record: BUILD-FAILED build_e220a.sh aifoundry1 None     None 0
+-> B1 on aifoundry1: both trees built, rgm136 KERNEL OK at its whole ELF and rgm211's tree KERNEL OK on the desk ELFs, then THE ET_DEVICES GATE refuses (this desk's device layer carries none): BUILD-FAILED: PASS
+
+== B3 a changed rgm136 source; B3b a changed rgm211 source: refused before the build
+HARNESS DIFFERS: tools/claims-v3/e136/rgm136/host/main.cpp: dcff130859054cac (want f9b2279f838ad304)
+RGM-BUILD-FAILED: the two trees' sources are not harness-e220a.json's
+-> B3 a changed rgm136 source: refused, nothing built: PASS
+HARNESS DIFFERS: tools/claims-v3/e211/rgm211/host/main.cpp: c9193d832211feba (want 327f49b1e5256037)
+RGM-BUILD-FAILED: the two trees' sources are not harness-e220a.json's
+-> B3b a changed rgm211 host source: refused, nothing built: PASS
+
+== B4 the gates on another box's form (.comment rewritten to aifoundry3's '(g1b306039a) 15.1.0'), both builds; and with --whole (arm A's)
+    rgm136 ELF 0c66189d5d540b4d017553b7bcb65d66f8f0f1569e710268eb17d0c0af04e2e9; KERNEL OK: rgm136: rgm136 gemmL: rgm136, .text 61315bf6a449c282... the pinned one; ELF 0c66189d5d540b4d... not the desk build's (sections the card never loads differ), its loadable identity 649d40793
+    rgm211 ELF faece9f8f45651316264ef5809a1bd8531cc13df03d4609698fdb6600db78520; KERNEL OK: rgm211: rgm211's tree: its ELF faece9f8f4565131... not the desk build's (sections the card never loads differ), its loadable identity 1351a569e4a200cb... the pinned one (kernel-e220.json's
+    rgm136 with --whole: KERNEL FAILED: rgm136: rgm136 gemmL: .text rgm136's, but the whole ELF aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 is required, and this ELF is 0c66189d5d540b4d017553b7bcb65d66f8f0f1569e710268eb17d0c0af04e2e9 (its loadable identity 64
+    rgm136's desk ELF with --whole: KERNEL OK: rgm136: rgm136 gemmL: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones
+    rgm211 with --whole: KERNEL FAILED: rgm211: rgm211's tree: its ELF faece9f8f4565131... not the desk build's (sections the card never loads differ), its loadable identity 1351a569e4a200cb... the pinned one (kernel-e220.json's rgm211_host
+    rgm211's desk ELF with --whole: KERNEL OK: rgm211: rgm211's tree: its ELF 00402801a1a53a93... the pinned one (kernel-e220.json's rgm211_host)
+-> B4 aifoundry3's form, both builds: KERNEL OK by the loadable identity; with --whole the same ELFs refused, the desk ELFs passed: PASS
+
+== B5 one byte of .rodata changed; B6 one byte of .text changed (rgm136's ELF); B6t the same on rgm211's tree ELF
+    rgm136: .rodata at 0x37a0, .text at 0x1000: one byte flipped in each copy
+    rgm211: .rodata at 0x3c48, .text at 0x1000: one byte flipped in each copy
+    KERNEL FAILED: rgm136: rgm136 gemmL: .text rgm136's, but the ELF cccddf4cb4d812df8503574a755184250ff1b69b6b12d98cf54431ae89603508 is not the pinned aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 and its loadable identi
+    KERNEL FAILED: rgm136: rgm136 gemmL needs rgm136's .text 61315bf6a449c282...; this ELF's .text is a0fd6e924db1f0a48fa1f391b280c74659e55ba0ee357691e92f23c84eb3c056
+    KERNEL FAILED: rgm211: rgm211's tree: its ELF 5a3f97f122cc9968a81c98ee377fdf23146a79cb8b13cf75a8bb3726dc15bc1e is not the pinned 00402801a1a53a9330898ef023297d8967a2c655472a40e0f1cd65dea04f09ae and its loadable identity 1dcc08c1d8c61d1e
+    KERNEL FAILED: rgm211: rgm211's tree: its ELF 71d3c4b31fb64c227d10472ee09d7b10de21593271d6ef9952de09d3a4334319 is not the pinned 00402801a1a53a9330898ef023297d8967a2c655472a40e0f1cd65dea04f09ae and its loadable identity 83a90d1e616ebf61
+-> B5 a .rodata byte: refused by the identity; B6 a .text byte: refused by the .text; B6t both on rgm211's tree ELF: refused: PASS
+
+== B6b THE WRONG KERNEL each way, and the gate by family on the real desk ELFs (both families both ways)
+    KERNEL FAILED: rgm136: rgm136 gemmL needs rgm136's .text 61315bf6a449c282...; this ELF's .text is 82c7980716a0f0cacd24364ef9a23435343eb8f2c35c32b0ec5d60b46c8a4069 (rgm211's)
+    KERNEL FAILED: rgm211: rgm211's tree: its ELF aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0 is not the pinned 00402801a1a53a9330898ef023297d8967a2c655472a40e0f1cd65dea04f09ae and its loadable identity 649d40793e459e51
+    'rgm136 gemmL' on rgm136's ELF: rc 0: GATE OK: rgm136 gemmL: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones
+    'rgm136 gemmL' on rgm211's ELF: rc 1: GATE FAILED: rgm136 gemmL needs rgm136's .text 61315bf6a449c282...; this ELF's .text is 82c7980716a0f0cacd24364ef9a23435
+    'rgm136 gemmLnc' on rgm136's ELF: rc 0: GATE OK: rgm136 gemmLnc: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones
+    'rgm136 gemmLnc' on rgm211's ELF: rc 1: GATE FAILED: rgm136 gemmLnc needs rgm136's .text 61315bf6a449c282...; this ELF's .text is 82c7980716a0f0cacd24364ef9a234
+-> B6b the wrong kernel each way refused; the gate by family: each family on rgm136's ELF OK, on rgm211's FAILED: PASS
+
+== B7 on another box (hostname aifoundry2; and aifoundry3)
+RGM-BUILD-FAILED: the box is 'aifoundry2': E220 arm A builds on aifoundry1 only
+-> B7 another box (aifoundry2, aifoundry3): refused before anything is built: PASS
+
+== B8 the runner (no --dry) on B1's tree under aifoundry1: its box check on B1's failed record
+2026-11-20 10:03:49 PST refused, no device opened: the box or the build is not the registered one (the build record is not today's BUILT by build_e220a.sh on aifoundry1 (2026-11-20, BUILD-FAILED, aifoundry1, build_e220a.sh); the build record is arm None's, not
+-> B8 the runner's box check refuses the failed record (not today's BUILT): no device opened: PASS
+
+== B9 the guard
+    ettelem_guard_e220a: refused (box 'aifoundry2': E220 arm A runs on aifoundry1 only): not in E220's classified command list [rc 97]
+    ettelem_guard_e220a: refused (box 'aifoundry3': E220 arm A runs on aifoundry1 only): not in E220's classified command list [rc 97]
+    ettelem_guard_e220a: refused (ET_DEVICES is '0' on aifoundry1, not 1: E220 arm A opens card 1 only there): not in E220's classified command list [rc 97]
+    ettelem_guard_e220a: refused (ET_DEVICES is 'unset' on aifoundry1, not 1: E220 arm A opens card 1 only there): not in E220's classified command list [rc 97]
+    <W>/out/kit-e220/work/final/build-a/a1/tools/claims-v3/e220/ettelem_guard_e220a.sh: line 27: /hom [rc 127]
+    ettelem_guard_e220a: refused (sample --reset-ms 10): not in E220's classified command list [rc 97]
+-> B9 the guard: another box refused (aifoundry2, aifoundry3), ET_DEVICES 0 or unset on aifoundry1 refused, the statistics reset refused (each rc 97 before the reader opens); ET_DEVICES=1 on aifoundry1 let through to the (absent) reader: PASS
+
+DESKTEST-BUILD-E220A 9 of 9 PASS
+== rc 0 at 10:03:49 PST

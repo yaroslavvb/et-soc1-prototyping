@@ -1,0 +1,69 @@
+dryaudit_e220b (/usr/bin/python3 3.12.3): every line of E208's run_mms.py that reads the dry flag, the real path there, and the real-path cases that ran it (each must read PASS in tools/claims-v3/e220/logs/realpath-e220b.txt)
+  line  153 [__init__] self.dry = a.dry
+      real path: the flag itself (no branch): false on the real path; cases rp:MAIN: COVERED
+  line  154 [__init__] self.scale = a.scale if a.dry else 1.0
+      real path: the real pace, scale 1: every wait, rest and bound at its registered length (the 60 s opening rest, 10 s at rest, the 6 s burst, the die gate's waits); cases rp:MAIN, rp:STEP: COVERED
+  line  167 [__init__] self.kit_stop = os.path.join(self.out, "KITSTOP") if a.dry else os.path.join(ROOT, C.KIT_STOP)   # --dry: its 
+      real path: the box root's run/KITSTOP (the kit's own stop word, read before the card's lock: a present one opens no device; start_e220b.sh never makes it); cases rp:MAIN: COVERED
+  line  195 [__init__] self.dev_dir = os.path.join(self.out, "fakedev") if self.dry else N.DEV_DIR
+      real path: the card's real node folder (mms_ident.DEV_DIR): the identity read of the sampler's and every host's open nodes reads /dev/et0_ops and /dev/et0_mgmt there; cases rp:MAIN, rp:HOLDER, rp:WRONGCFG: COVERED
+  line  196 [__init__] if self.dry:
+      real path: no doubles' environment and no device-call log: E208's guard (guard_ettelem.sh) over the reader, the built host, the real nodes; ET_DEVICES and V3_DEVICE unset on aifoundry2; cases rp:MAIN, rp:BOARD, rp:DIE, rp:RUNTIME, rp:HANG, rp:QUIET, rp:TWOFAIL: COVERED
+  line  230 [say] line = f"{stamp()} {'DRY ' if self.dry and not words.startswith('session start') else ''}{words}"
+      real path: no DRY mark on any log line (the rest rule, the checker and the collection read the session as a card session); cases rp:MAIN: COVERED
+  line  237 [device_call] if not self.dry:
+      real path: device_call returns the REAL command: the config read and the sampler through the guard, each host under the plain `timeout 10` (never -k); cases rp:MAIN, rp:RUNTIME, rp:HANG, rp:WRONGCFG, rp:TWOFAIL: COVERED
+  line  261 [cmd_etwho] if self.dry:
+      real path: et-who under `timeout 20` (PATH's et-who), read before the session, at the identity read and before every run; cases rp:MAIN, rp:HOLDER, rp:BUSYLOCK: COVERED
+  line  319 [ps_block] if self.dry:
+      real path: the real ps read: a CI job, another device process of ours, another user's device process on aifoundry2; cases rp:MAIN, rp:HANG: COVERED
+  line  350 [holders] me = pwd.getpwuid(os.getuid()).pw_name if not self.dry else (os.environ.get("USER") or str(os.getuid()))
+      real path: the holder rule's own login from the password database (not $USER); cases rp:MAIN, rp:HOLDER: COVERED
+  line  444 [stop_sampler] w = w * self.scale if self.dry else w
+      real path: the sampler's SIGTERM waits at their real lengths (a deaf sampler is never joined by a second one); cases rp:MAIN, rp:QUIET: COVERED
+  line  446 [stop_sampler] w = min(w, max(2.0 * (self.scale if self.dry else 1.0), deadline - C.CLOSE_S * self.scale / 2 - time.time()))
+      real path: the same waits against the session's deadline at the real pace; cases rp:MAIN, rp:QUIET: COVERED
+  line  466 [fresh] limit = C.SAMPLE_FRESH_S if not self.dry else max(0.5, C.SAMPLE_FRESH_S * self.scale)
+      real path: the sampler is live only with a sample under 2 s old (else stopped by SIGTERM and started again); cases rp:QUIET: COVERED
+  line  503 [ours_alive] if not self.dry:
+      real path: ours_alive: the real ps read of our device processes (the LEFTOVER's wait holds the card's lock until none is left); cases rp:HANG: COVERED
+  line  634 [identity_read] me = pwd.getpwuid(os.getuid()).pw_name if not self.dry else (os.environ.get("USER") or str(os.getuid()))
+      real path: the identity read's own login from the password database; cases rp:MAIN, rp:HOLDER: COVERED
+  line  901 [card_lock_path] return os.path.join(self.dev_dir, "card.lock") if self.dry else self.K["lock"]
+      real path: the card's real lock /run/lock/etsoc-shire0.lock; cases rp:MAIN, rp:BUSYLOCK, rp:NOLOCK: COVERED
+  line  905 [take_card_lock] if not self.dry:
+      real path: the lock must exist, be no link and be root's: else no device opened; cases rp:MAIN, rp:NOLOCK, rp:R-REAL: COVERED
+  line  933 [run] f"{rel(self.out)}){' DRY scale ' + str(self.scale) if self.dry else ''}")
+      real path: the session start line carries no DRY tag; cases rp:MAIN: COVERED
+  line  935 [run] result = {"t0": a.t0, "card": self.card, "dry": self.dry, "scale": self.scale, "sched": os.path.basename(a.sch
+      real path: queue.json says dry false (the rest rule counts the session when it reached the card; the checker reads it); cases rp:MAIN, rp:R-REAL: COVERED
+  line  940 [run] if not self.dry:
+      real path: the box root's run/ folder; cases rp:MAIN: COVERED
+  line  942 [run] boxp = os.path.join(self.out, "box.lock") if self.dry else os.path.join(ROOT, C.BOX_LOCK)
+      real path: the box root's run/box.lock; cases rp:MAIN: COVERED
+  line  943 [run] boxfd, how = take_box_lock(boxp, None if self.dry else os.environ.get("MMS_BOX_LOCK_FD"))
+      real path: the lock start_e220b.sh took (fd 9, MMS_BOX_LOCK_FD): held from the start's checks to the session's end; cases rp:MAIN: COVERED
+  line  948 [run] if not self.dry:
+      real path: THE BOX CHECK: aifoundry2, today's build record, the kernel ELF at E136's pin, the host and the reader at the record's sha256, the harness, the device-command audit GO (its refusal side is not run by a case: the build desk test and step 2 check the same pins); cases rp:MAIN, rp:STEP: COVERED
+  line 1030 [run] if self.dry and a.stop_after and len(self.queue) == a.stop_after:
+      real path: --dry only: on the real path the operator's stop comes from stop_mms.sh touching run/STOP; cases rp:MAIN, rp:STEP, rp:RUNTIME, rp:QUIET: COVERED
+  line 1075 [run] bound = C.LEFTOVER_WAIT_S * (max(self.scale, 0.1) if self.dry else 1.0)
+      real path: the LEFTOVER's wait at its registered bound (10 minutes), never a kill; cases rp:HANG: COVERED
+  line 1104 [run] if self.dry:
+      real path: no device-call log to close; cases rp:MAIN: COVERED
+  line 1139 [main] parser.add_argument("--dry", action="store_true")
+      real path: the flag's definition (no branch); cases rp:MAIN: COVERED
+  line 1155 [main] if not a.dry and (a.scale != 1.0 or a.only or a.trip_arm or a.config_fail or a.wrong_card or a.stop_after or a
+      real path: the desk's overrides (--scale, --trip-arm, --stop-after and the rest) refused without --dry: the real session takes none (session_e220b.sh passes none; run_e220b.py passes its own arguments on); cases rp:MAIN: COVERED
+  box/run_e220b.py line  146 [__init__] if self.dry:
+      real path: no G knobs in the environment: rgm211's host's real stand-in at build/e220brgm211/host/sparsity_host, gated per process; a G failure is the host's own record (the walk check, the check of C, rc), never a knob; cases rp:MAIN, rp:GWALK, rp:GHANG, rp:GTRIP: COVERED
+  box/run_e220b.py line  170 [device_call] if self.dry and real and real[0] == "timeout" and len(real) > 2 and real[2] == G_HOST:
+      real path: device_call returns rgm211's REAL host command under its sized plain timeout (`timeout 10`; never -k), its argv E208's but argv[0]; cases rp:MAIN, rp:GWALK, rp:GHANG, rp:GTRIP: COVERED
+  box/run_e220b.py line  280 [main] parser.add_argument("--dry", action="store_true")
+      real path: the flag's definition (no branch); cases rp:MAIN: COVERED
+  box/run_e220b.py line  304 [main] if not a.dry and desk:
+      real path: the desk's overrides (E208's and E220's --g-* flags) refused without --dry: the real session takes none; cases rp:MAIN: COVERED
+  box/start_e220b.sh: E220B_DESKTEST
+      real path: a reboot-gate record that is a desk test's refused without E220B_DESKTEST=1; a real record (desk_test false) taken without it, the session unmarked; cases rp:R-NODESK, rp:R-REAL: COVERED
+DRY-AUDIT-E220B 33 of 33 COVERED
+== rc 0
