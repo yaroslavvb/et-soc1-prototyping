@@ -1,0 +1,99 @@
+{
+ "i": 56,
+ "block": "I8L",
+ "role": "arm",
+ "arm": "gemmc8r16-int8-zeros",
+ "run": "056-gemmc8r16-int8-zeros",
+ "form": "burst",
+ "sched": {
+  "arm": "gemmc8r16-int8-zeros",
+  "block": "I8L",
+  "est_peak_w": 40.0,
+  "est_s": 34.5,
+  "form": "burst",
+  "i": 56,
+  "role": "arm",
+  "shires": "0xffffffff",
+  "test": "fma",
+  "type": "int8",
+  "unit": "I8L:gemmc8r16-int8-u",
+  "values": "gemmc8r16:tiles:src/tiles/int8/zeros.bin"
+ },
+ "gate": {
+  "c": 45.0,
+  "die": 44,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795150355608,
+  "t1_ms": 1795150365608
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "build/rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "int8",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmc8r16:tiles:src/tiles/int8/zeros.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "build/rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "sessions/1795149048-a1c0-S1/STOP"
+   ],
+   "rc": 0,
+   "t0_ms": 1795150365608,
+   "t1_ms": 1795150371982,
+   "n_launch": 17,
+   "launches_ok": true,
+   "check": "exact",
+   "check_ok": true,
+   "check_cycles_per_op": 394.89,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1795150365801,
+    1795150371857
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 65,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1795150365608,
+  "t1_ms": 1795150371983
+ },
+ "tail": {
+  "t0_ms": 1795150371983,
+  "t1_ms": 1795150376983
+ }
+}
