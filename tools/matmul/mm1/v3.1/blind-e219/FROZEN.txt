@@ -1,0 +1,20 @@
+decl-e219 (round Q232): the lab's BLIND test of its frozen matmul models on E219 (#14, 1119-mmsweep5), DECLARED and its nominal forecasts FROZEN at Thu 19 Nov 2026 18:37:50 PST, before any E219 datum exists.
+MM1's domain first: 139 of E219's 314 cases are IN DOMAIN (rgm136's gemmL loop: the 1x1x1 controls, the gap cells and the anchor, 44 cases; run_gemm's c-arms in the models' table: gemmc1, gemmc4s, gemmc8s, gemmc16, gemmc16s, 22 cases, and the gemmc16r<R> ladder, 73 cases) and forecast; 175 are OUT OF DOMAIN (gemmc at other B, R or shared C 121, gemmh 32, gemm packed by k 10, mm16 and mm128 6, tenb 6): no frozen MM1 has a form for them, so no forecast; the scores report them apart.
+Models frozen and unchanged: MM1-v3.1 2c971828, MM1-v3 b1493082, MM1-v2 3ca4b717, 'v3.1 + contention' F1 (#1.29.1), verify-lay's controls N1+N2, G1, G1+N1 and the layout-blind F1 (#1.29.1.1), 'v3.1 + both' (= F1 here); 'v3.1 + gemmLnc' NOT APPLICABLE (E219 runs no gemmLnc arm). MM1-v3.2: NOT_ON_MAIN at the declaration (work/v32-status.json).
+Scope: 392 runs (arm + anchor) in 314 cases over E219's five sessions (aifoundry1 card 1 S1-S3 at 600 MHz, card 0 S1-S2 low power), from the kit copy out/orch/e219-src (SRC-SHA256SUMS.txt 247456da...); E219 designs no tile: no counts are made.
+sha256 (the freeze line):
+d629bd14aff6fe4d214931fc6bad6b684ab910cd42bb5afdc07b8f8f62330495  DECLARED-blind-e219.md
+670caa8c2f29a5d1d95591df0cba3ab80047d0f4b5dc27b8f2568c1da480f479  DECLARED-blind-e219.json
+5433f8c4e88642bad32909a491eb47321a854fad7f2785a188d4ce8d072a3a67  forecasts-nominal-e219.csv
+d605db13b6342a283cb5aacb9179c406d529846c3bfc8e152fbf3aef9bd04899  forecasts-nominal-e219.json
+supporting (the makers and their records):
+46d30dea607d7710eb1a2bf128d17115f96d8babac435e4167be38889fad5878  scripts/s02b_nominal.py
+4a745f7b70edb7594e201a9ee37c08f6d5c23188ecbce155f631074894bb1ad9  scripts/s02w_walk.py
+b8b9a4072caa006a2f11d4fe6f006496a161020201307735a8471652775b2b2d  scripts/s02c_write.py
+1c6172047d5aafa9f07f1e3bb4277cc1d896a0acd7ad1108469e70365ecdaed1  work/step2/fc-nominal.json
+9c13958d026c8a6f9e5fabfc34c580377dab9efa24ae8095b1dc47eb5e09020d  work/step2/walk-feats-e219.json
+3ebd6e637165b499ac40c186d4c1edc8cd4b01bb9d4b6a8db5e64db2e72aeddd  logs/step1-sha256.txt
+17699cfed6f3bdf89e1a92549502eccf0014fda303f747ebaa27078addd43cd0  logs/step2-sha256.txt
+Times (Pacific): declared 18:37:19 (hash logged 18:37:24); nominal forecasts made 18:37:29-18:37:34, files written 18:37:34 (hash logged 18:37:35); this file Thu 19 Nov 2026 18:37:50 PST.
+State at the freeze: out/orch/e219-releases.txt holds 2 post lines (the last: '#14.1 2026-11-19 18:15:03 PST: the lab n...') and no E219 claim; 1 claim files in out/orch (claim-aifoundry1.txt ; the claim file names the session it holds); no E219 session has run, so no E219 datum exists.
+Label rule (the declaration's section g): BLIND for a session whose first datum comes after this freeze is posted; a session whose first datum precedes the post is UNREAD for it (POST-READ if a lab lane read its data first).

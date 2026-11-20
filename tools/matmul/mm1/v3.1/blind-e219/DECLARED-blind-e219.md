@@ -1,0 +1,204 @@
+# decl-e219: the lab's BLIND test of its frozen matmul models on E219, DECLARED before any E219 datum exists
+
+*Declared Thu 19 Nov 2026 18:37:19 PST, round Q232, at the desk on aifoundry2 (work copy of GitHub main 1c446c93). Python: /usr/bin/python3 3.12.3, numpy 1.26.4, single-threaded in slot.sh. Nothing here was measured. E219 (the model session's fifth matmul sweep, 1119-mmsweep5, Discussion #14, named E219 in #14.1) has not run: no E219 datum exists.*
+
+**Label: BLIND.** BLIND: MM1-v3.1 (2c971828), MM1-v3 (b1493082), MM1-v2 (3ca4b717), the contention term F1 (#1.29.1, landed 595fcb59), verify-lay's controls (#1.29.1.1) and the gemmLnc term (#1.29, landed aaeaa495) frozen and unchanged; this declaration and the nominal forecasts hashed and frozen (FROZEN.txt, posted by the orchestrator) before any E219 datum exists. A session whose first datum precedes the freeze post is UNREAD for it.
+
+State at this declaration: out/orch/e219-releases.txt holds 2 post lines (no E219 claim, session or datum on record: only the proposal (#14) and the naming (#14.1)); claim files: ['claim-aifoundry1.txt']; the aifoundry2 quiet-desk flag absent. MM1-v3.2: NOT_ON_MAIN (tools/matmul/mm1/v3.2 is not in GitHub main's tree at Thu 19 Nov 2026 18:36:38 PST (LAB HEAD 2b25bd4a); W/out/q230-anchor-lines-v32.txt absent).
+
+## 0. MM1's domain, first
+- How: read from each frozen MM1's code and README (the arm a predictor maps, and what it raises on) and, for MM1-v2, MM1-v3 and MM1-v3.1, probed by calling each predictor unchanged on one spec a token (p01): a token IN DOMAIN gets a forecast, one OUT OF DOMAIN raises KeyError in every one of them (no class assignment, no walk, no census).
+- **IN DOMAIN: 139 cases (203 runs)**, by card {'aifoundry1 card 0': 55, 'aifoundry1 card 1': 84}, by class {'ANCHOR': 2, 'CTRL': 8, 'CTAB': 22, 'C16R': 73, 'GAP': 34}. **OUT OF DOMAIN: 175 cases (189 runs)**, by card {'aifoundry1 card 0': 75, 'aifoundry1 card 1': 100}, by class {'OUT-gemmc': 121, 'OUT-gemmh': 32, 'OUT-gemm': 10, 'OUT-mm': 6, 'OUT-tenb': 6}.
+- Out of domain: NO FORECAST by any model. The scores report them apart, as the model's domain limit: per class and case the measured cycles an op (wall and the counter's mean), the seconds a pass and the W over idle, with what each class measures (above); never in the pass rule, a comparison or a headline error.
+
+| arm class | domain | what it measures | MM1-v0 | MM1-v1 | MM1-v2 | MM1-v3 | MM1-v3.1 | MM1-v3.2 | cases |
+|---|---|---|---|---|---|---|---|---|---|
+| gemmL<MB>x<NB>x<KB> (rgm136's gemmL loop: CTRL, GAP, ANCHOR) | IN | rgm136's large GEMM: C (MB x NB blocks of 1,024 x 512) = A (MB x KB) x B (KB x NB), cooperative loads, each C tile accumulated over its whole K before one TensorStore; 64 MB NB KB ops a minion a pass | yes (mm1_v0.py classes_gemmL) | yes (mm1_core.py Shape, gemmL) | yes (mm1_core_v2.py) | yes (engine_v3.py, the census path) | yes (time_v31.Engine31) | not on main at this declaration | 44 |
+| run_gemm's c-arm table (CTAB: gemmc1, gemmc16, gemmc16s, gemmc4s, gemmc8s; the table also holds gemmc8, which E219 does not run) | IN | run_gemm's block walk (E105/E107): B blocks of C (1,024 x 512) = A (1,024 x K) x B (K x 512), B packed by column, cooperative loads, C per block (s: every block's C into the first block's); 64 B ops a minion a pass | yes, time and (zeros/random) energy (mm1_v0.py classes_carm; no awake power for aifoundry1 card 0) | yes (mm1_core.py carm_classes, CARMS) | yes (mm1_core_v2.py, the same table) | yes (engine_v3.py carm, census path 0: run_gemm's census NOT RUN) | yes (the same) | not on main at this declaration | 22 |
+| gemmc16r<R> (C16R: the R ladder, R 2, 3, 4, 5, 6, 8, 12, 16, 24, 32) | IN | gemmc16's walk with each of its 16 blocks passed R times before the walk moves on (E107's r<R>); 64 x 16 x R ops a minion a pass | NO in its predictor (classes_carm raises KeyError; only its energy refit's Qof held the R form) | yes (carm_classes: re.fullmatch gemmc16r(\d+): 1 - 1/R of the ops with A and B at the L2, 1/R with A fresh, half of those with B fresh too) | yes (the same) | yes (the same) | yes (the same) | not on main at this declaration | 73 |
+| OUT-gemmc (other B, R or shared C: gemmc12r4, gemmc16r32s, gemmc16r4s, gemmc16r8s, gemmc1r8, gemmc2, gemmc24r4, gemmc2r12, gemmc2r16, gemmc2r2, gemmc2r3, gemmc2r32, gemmc2r32s, gemmc2r4, gemmc2r6, gemmc2r8, gemmc2r8s, gemmc2s, gemmc32r8, gemmc3r8, gemmc4r16, gemmc4r4, gemmc4r4s, gemmc4r8, gemmc4r8s, gemmc6r4, gemmc6r8, gemmc8r16, gemmc8r4, gemmc8r8) | OUT | see the token: run_gemm's block walk at a B, R or shared-C combination the c-arm table does not hold | no (KeyError) | no (KeyError) | no (KeyError) | no (KeyError) | no (KeyError) | not on main | 121 |
+| OUT-gemmh (gemmh1, gemmh16r32, gemmh16r4, gemmh16r8, gemmh2, gemmh2r32, gemmh2r4, gemmh2r8) | OUT | gemmc's walk with half the K (16 k tiles a block): 32 B R ops a minion a pass | no (KeyError) | no (KeyError) | no (KeyError) | no (KeyError) | no (KeyError) | not on main | 32 |
+| OUT-gemm (gemm1, gemm16r8, gemm1r8, gemm2r8) | OUT | the block walk with B packed by k (E101's layout), cooperative loads: 64 B R ops a minion a pass | no (KeyError) | no (KeyError) | no (KeyError) | no (KeyError) | no (KeyError) | not on main | 10 |
+| OUT-mm (mm128, mm16) | OUT | the stream loop: a shared pool of N tile pairs, A into the core's scratchpad and B through TenB; N ops a pass | no (KeyError) | no (KeyError) | no (KeyError) | no (KeyError) | no (KeyError) | not on main | 6 |
+| OUT-tenb (tenb) | OUT | A held in the core, one B tile streamed through TenB every op; 1 op a pass. MM1's floors (529 cycles fp32/fp16, 270 int8) were measured on E101's tenb loop, but no predictor maps the tenb arm | no (KeyError) | no (KeyError) | no (KeyError) | no (KeyError) | no (KeyError) | not on main | 6 |
+| gemmLnc<..> (rgm136's non-cooperative branch) | NOT APPLICABLE | none: E219 runs no gemmLnc arm (the host's grammar here has no gemmLnc; the kit spells none) |  |  |  | yes | yes (+ the gemmLnc term F3) | not on main | 0 |
+
+- The c-arm training record (the experiments, cards and clocks of MM1-v3.1's landed c-arm points (out/points_time_v31.csv)): 426 time and 353 energy points, {'E105|aifoundry2 card 0': 31, 'E105|aifoundry3 card 0': 42, 'E107|aifoundry3 card 0': 224, 'E119|aifoundry2 card 0': 63, 'E126|aifoundry2 card 0': 46, 'E206|aifoundry1 card 1': 9, 'E206|aifoundry3 card 0': 11}; aifoundry1 card 1 holds E206's gemmc1, gemmc8s and gemmc16s at 600 MHz (configuration twins there); aifoundry1 card 0 holds no c-arm point: every card-0 c-arm case is a card transfer.
+- The R ladder: R in any fit [2, 4, 8, 32]; R never in a fit [3, 5, 6, 12, 16, 24].
+
+## a. The runs
+- **392 runs** ({'anchor': 36, 'arm': 356}) in E219's five sessions ({'a1c0-S1': 91, 'a1c0-S2': 73, 'a1c1-S1': 79, 'a1c1-S2': 85, 'a1c1-S3': 64}), 207 arms, **314 cases**; by card {'aifoundry1 card 0': 164, 'aifoundry1 card 1': 228} runs, {'aifoundry1 card 0': 130, 'aifoundry1 card 1': 184} cases; by format {'fp16': 103, 'fp32': 168, 'int8': 121} runs; by kind {'ones': 17, 'random': 98, 'zeros': 277} runs.
+- Source: the registered kit: the orchestrator's copy of EE/src (out/orch/e219-src, SRC-SHA256SUMS.txt 247456da..., copied 18:21:08 PST): src/sched/<card>-<S>.json (each run's i, block, role, arm, values, shires, type, form) and src/arms.json; nulls and smoke left out; no measurement. Run id: E219|<card>-<S>|<i:03d>-<arm>, the kit's own run key (run_mms.py: f"{i:03d}-{arm}"). The ids are in `DECLARED-blind-e219.json` (a_runs.run_ids, a_runs.cases).
+- Time selection: MM1-v3.1's own loader's conditions (data_v31.mms_runs_all = data_v3.mms_runs, unread-e214's and decl-e217's), applied to every in-domain token: the session's queue says ran, rc 0, check exact or approx; role not null; values <token>:<gen>:<file> with an IN-DOMAIN token and shires present; the primary view (band600 on card 1, win on card 0: reduce_mms.py) has T_op_us, cyc_op_max and n_launch >= 1; a c-arm run also needs the reducer's ops_pass_ok true (every counted launch's iters = its passes x the grammar's ops a pass). (The loader itself reads gemmL values only: the scorer applies the same conditions to the c-arm runs, the reducer reading them by the same rules: reduce_mms.py's BLOCK ARMS note.)
+- Energy selection: the same, and the primary view's dP_w is not None, its p_mean_w truthy, the run not capped and its role not 'time' (data_v31.mms_runs_all's energy condition).
+- A listed run that does not run (a session cut short or not run) is no data: never imputed, never re-listed.
+- Case: (card, arm token, format, kind as the arm spells it: rnd = random, zeros, ones, mask) over all of that card's sessions; the anchor (4x8x8 int8 random, full chip) is a case like any other; only the gemmL controls run masks (0xf, 0xff): the kit runs every block arm on the whole chip.
+- Classes: **CTRL** the gemmL 1x1x1 controls (family control): they tie E219 to E217; reported apart; **GAP** the gemmL gap cells (family gap): full chip; **ANCHOR** the 4x8x8 int8 random anchor; **CTAB** run_gemm's c-arm table arms; **C16R** gemmc16r<R>, the R ladder (gemmc16 is its R = 1); **OUT-*** out of domain (section 0).
+
+| card | class | cases | runs |
+|---|---|---|---|
+| aifoundry1 card 0 | ANCHOR | 1 | 15 |
+| aifoundry1 card 0 | C16R | 26 | 31 |
+| aifoundry1 card 0 | CTAB | 10 | 14 |
+| aifoundry1 card 0 | CTRL | 4 | 8 |
+| aifoundry1 card 0 | GAP | 14 | 14 |
+| aifoundry1 card 0 | OUT-gemm | 5 | 5 |
+| aifoundry1 card 0 | OUT-gemmc | 55 | 62 |
+| aifoundry1 card 0 | OUT-gemmh | 15 | 15 |
+| aifoundry1 card 1 | ANCHOR | 1 | 21 |
+| aifoundry1 card 1 | C16R | 47 | 50 |
+| aifoundry1 card 1 | CTAB | 12 | 18 |
+| aifoundry1 card 1 | CTRL | 4 | 12 |
+| aifoundry1 card 1 | GAP | 20 | 20 |
+| aifoundry1 card 1 | OUT-gemm | 5 | 5 |
+| aifoundry1 card 1 | OUT-gemmc | 66 | 72 |
+| aifoundry1 card 1 | OUT-gemmh | 17 | 17 |
+| aifoundry1 card 1 | OUT-mm | 6 | 6 |
+| aifoundry1 card 1 | OUT-tenb | 6 | 7 |
+
+- **Fit inclusion:** NO E219 point can be in any fit: E219 has no datum (no session has run). Checked all the same: no E219 token in any model's inputs or loaders (MM1-v3.1 28 files, MM1-v3 115, MM1-v2 86: 0 hits) and no E219 id in any landed point record (MM1-v3.1 E105-E213; MM1-v3 to E212; MM1-v2 to E208).
+- **Tiles:** E219 designs no tile: arms.json's tiles table is empty and every tile file its arms name (8 files: randn, zeros, ones and full of the three formats) equals the lab's kinds file (tools/claims-v3/kinds/tiles) byte for byte, each a committed blob on main. So no switch count is made (step 4 NOT NEEDED): the kinds' committed counts (3e8991d0) are in every model's tables already.
+
+## b. The quantities
+- **per_card**: aifoundry1 card 1 at 600 MHz (not governed); aifoundry1 card 0 low power under its governor (main band 800 MHz)
+- **T1_wall**: cycles an op, the slowest minion: forecast cycles_per_op_wall / cyc_op_max - 1
+- **T2_counter_mean**: the counter's mean cycles an op: forecast cycles_per_op_mean / cyc_op_mean - 1
+- **T3_seconds**: seconds a pass (one GEMM for gemmL; one walk of the blocks, R passes each, for a c-arm): ops_pass x T_forecast(us) x 1e-6 / t_pass_s - 1, ops_pass the host's ops a minion a pass by the kit's grammar (64 MB NB KB; 64 B R); at the measured clock T3's error equals T1's identically (the reducer's T_op_us = wall / ops): both printed
+- **E1_J_over_idle_given_t**: W over idle at the measured op time: W = A + B / t_meas (the predictor's W_affine at the run's conditions) against the primary view's dP_w; relative (= J over idle given t) when the case's mean MM1-v3.1 W given t and its mean measured dP_w are both 3 W or more; else a WATTS case, scored by the mean of its runs' W - dP_w in watts (E215's form; the watts set fixed by MM1-v3.1 and the measurement, the same for every model)
+- **E2_J_over_idle_t_forecast**: (W_fc x T_fc) / (dP_w x t_meas) - 1, W_fc the W over idle at the model's own op time T_fc; at a watts case W_fc - dP_w
+- **E3_J_at_rest_given_t**: (P_rest + W given t) / (P_rest + dP_w) - 1, P_rest = p_mean_w - dP_w (the run's rest, measured, given)
+- **E4_J_at_rest_t_forecast**: (P_rest + W_fc) x T_fc / ((P_rest + dP_w) x t_meas) - 1
+- **split**: per card; per format and kind; per class (CTRL apart: the controls that tie E219 to E217; GAP, ANCHOR, CTAB, C16R); FULL and SUB; configuration twins apart
+
+## The models
+- **MM1-v3.1**: tools/matmul/mm1/v3.1 (landed 2c971828): mm1_v31.Model(out/mm1_v31_params.json).predict_many([{card, arm, fmt, kind, mask, f, kernel 'rgm136', V, t0_c}]); a c-arm token runs as kernel run_gemm (the predictor's own rule: no gemmL prefix)
+- **MM1-v3**: tools/matmul/mm1/v3 (landed b1493082): mm1_v3.Model(out/mm1_v3_params.json).predict(card, arm, fmt, kind, mask, f, kernel='rgm136', V=, t0_c=) (c-arms as run_gemm, its own rule)
+- **MM1-v2**: tools/matmul/mm1/v2 (landed 3ca4b717) through MM1-v3's unread_v2_e212.call (its pins and SHA256SUMS checked): card 1 V None (the 0.517 V footing), card 0 the measured volts; energy for random, zeros and ones (E219's only kinds); no die term
+- **v3.1+contention**: form F1 (#1.29.1, frozen 09:31:34 PST Thu 19 Nov, landed 595fcb59): T = T_v3.1 x clip(1 + a Phi_fresh, 0.3, 3.0), a = -0.08316593007433395 (forecast-e215-v31-layout.json meta), Phi_fresh by the term's eval_layout.phi_of over the masked walk's features (the frozen cache holds all three E219 configurations: 1x1x1 at 0xf, 0xff and the full mask); phi_of returns 0 at the full mask and off the walk's loops (run_gemm), so the factor is exactly 1 at every full-chip case and every c-arm; at 1x1x1 the walk's fresh-line feature is 0 too (the L2 holds it), so the factor is 1 on every E219 case: it equals MM1-v3.1 everywhere (computed all the same); energy MM1-v3.1's affine at its own op time
+- **v3.1+gemmLnc**: term F3 (#1.29, landed aaeaa495): NOT APPLICABLE: E219 runs no gemmLnc arm (0 of 207 arms), so it equals MM1-v3.1 on every E219 case; not scored
+- **v3.1+both**: the composition declared in reg-e216: time = MM1-v3.1's x the contention factor; W at a measured t = A + (B + dW t_op,v3.1) / t with the gemmLnc term's dW, 0 on every E219 case: so it equals 'v3.1+contention' (= MM1-v3.1) on every E219 case
+- **controls**: verify-lay's controls (#1.29.1.1), by v02_fits.py's forms unchanged with its all-data constants (work/verify-lay/v02_fits.json): N1+N2 (N1 = 1 - n/32, N2 = N1^2; a = [-0.09348958586302018, 0.11765730189141044]); G1 (hop mean: (110 + 12 h)/(110 + 12 h_full) - 1; a = [0.30314251932286107]); G1+N1 (a = [0.6022127706566506, -0.021675728290377668]); the layout-blind F1 (fresh32_bar_narm: Phi_fresh averaged over E219's listed configurations of the same (n shires, arm): one configuration each here, whose feature is 0 at 1x1x1; a = [-0.17556875184106632]); factor 1 + sum a_i x_i (unclipped, as v02's E215 control columns), 1 at the full mask and at every c-arm (the whole chip); time MM1-v3.1's x the factor, energy MM1-v3.1's affine at its own op time; step 2 re-makes v02_e215_controls.csv's N3, N1+N2, G1, G1+N1 columns first
+- Not declared: MM1-v0 and MM1-v1 hold c-arm forms too (section 0) but are not among this test's models (the round's model list); the model session's sealed E219 forecast (ba9e24aa...) is theirs: not read, not scored here.
+
+## The forecast procedure
+- **footing_1_measured**: THE PRIMARY FOOTING: each frozen predictor unchanged at each run's measured conditions, read from the data's start-of-run records only, MM1-v3 README section 5's form as unread-e214 and decl-e217 did: the primary view's kernel clock kclock_mhz; minion volts: card 1 the models' footing 0.517 V, card 0 the primary view's rails.minion.mV / 1000 (else the model's own volts at f); the governed base by the model's own G_of_f(card, f); the run's die_start_c (50 C when absent). The terms and controls on MM1-v3.1's forecast at the same conditions; the layout features are configuration-only (step 2w).
+- **fields_read_before_scoring**: from each committed E219 data JSON ONLY: the top-level card, session and primary_view, and per run: run, i, ran, role, arm, values, type, shires, minions, die_start_c, arm_token, arm_family, ops_pass, ops_pass_ok, and the primary view's kclock_mhz and rails.minion.mV. No time, cycles, power, energy or seconds field is read until the forecasts at those conditions are hashed.
+- **footing_2_nominal**: the nominal forecasts frozen now (section h), scored beside by the same rules (REPORTED beside the primary footing)
+- **counts_as_inputs**: the switch counts are inputs, never fitted: each model's own tables (MM1-v3.1: MM1-v3's rows + counts 3e8991d0); E219's kinds (zeros, ones, random) are committed kinds with committed counts; E219 designs no tile, so counts-e214's and counts-e217's rows are not needed and nothing is added
+- **order**: 0 the work copies and MM1-v3.2's check -> 1 this declaration hashed -> 2 the nominal forecasts hashed -> FROZEN.txt (no step 4: no counts are made); then, after the data: the conditions read -> the measured-conditions forecasts hashed -> the scorer hashed -> the read and the scores
+
+## c. The metric
+- **error**: forecast / measured - 1 (the MM1 convention); rms % and signed mean (bias) %; watts cases rms and mean in W
+- **case**: a case's error = the mean of its runs' errors (each run at its own conditions); per-run figures REPORTED beside
+- **twins**: per model: a time case is a twin when (card, kernel, arm, format, mask, the mean of its runs' measured clocks to 25 MHz) is in that model's TRAINING time configurations (its landed out/points_time_*.csv, E146 store rungs out; the kernel run_gemm for a c-arm, rgm136 for gemmL); an energy case when that key and its energy kind are in its energy configurations (work/step1/twin-keys.json, 3418b7d8, equal to unread-e214's and decl-e217's). The no-twin cases carry the pass rule and the headline; twins and all cases printed beside. At the nominal clocks: MM1-v3.1 12 time-twin and 8 energy-twin cases of 139 in domain, MM1-v2 5 and 5 (a preview; the measured clock decides)
+
+## d. The comparisons
+- **test**: the exact two-sided sign test (binomial at 1/2) on the untied cases, alpha 0.05: A BETTER if p < 0.05 and A is closer in more cases; B BETTER the other way; NOT DECIDED otherwise; TOO FEW under 10 untied cases; NO DATA with none
+- **d**: per case, d = |ln(1 + e_B)| - |ln(1 + e_A)| for the pair (A vs B) (A closer when d > tie); at a watts case |dW_B| - |dW_A| in W; over every in-domain case both price (twins included); REPORTED beside over the cases that are twins for neither
+- **ties_how**: E215's rule (rules_e215.ties_of), unread-e214's and decl-e217's values: card 1 E215 arm B's registered ties; card 0 from E212 a1c0-S1/S2's pooled within-case spread (bands.json card0_floors)
+- **D1_v31_vs_v3**: MM1-v3.1 vs MM1-v3 on H1 wall, H2 counter mean, H3 seconds, H4 J over idle given t (E1), H5 J over idle with t forecast (E2): per card and pooled, over the in-domain cases; per class REPORTED
+- **D2_v31_vs_v2**: MM1-v3.1 vs MM1-v2 on H1-H5: per card and pooled; per class REPORTED
+- **D3_layout**: on the subset-mask cases (6: the gemmL 1x1x1 controls at 0xf and 0xff), per card and pooled: 'v3.1+contention' vs MM1-v3.1, and each control (N1+N2, G1, G1+N1, the layout-blind F1) vs MM1-v3.1, on H1 (wall) and H2 (counter mean). Stated before any datum: 'v3.1+contention' and the layout-blind F1 equal MM1-v3.1 there (factor 1: the fresh-line feature is 0 at 1x1x1), so those two tie by construction; with at most 6 cases every D3 test reads TOO FEW (fewer than 10 untied cases); the count controls' factors differ from 1 by under 1%
+- **D4_switch**: NOT APPLICABLE: E219 has no operand-pattern arm (no designed tile; its kinds are zeros, ones and random), so the switch route with counts against without has nothing to decide here
+- **verdicts**: each comparison is a verdict of its own, never part of PASS
+- ties: card 1 {'cycles_ln': 0.005, 'joules_ln': 0.01, 'seconds_ln': 0.005, 'watts_W': 0.1}; card 0 {'cycles_ln': 0.005, 'joules_ln': 0.01, 'seconds_ln': 0.005, 'watts_W': 0.15}
+
+## e. Reported beside (deciding nothing)
+- **what**: REPORTED, deciding nothing: on the C16R cases with gemmc16 as R = 1, per card, format and kind, each model's error against R; R [2, 3, 4, 5, 6, 8, 12, 16, 24, 32] in E219; R [2, 4, 8, 32] were in MM1-v3.1's fit (E107, E119, E126; never on aifoundry1), so R [3, 5, 6, 12, 16, 24] are never-fitted rungs of the same law (1 - 1/R of the ops with A and B at the L2)
+- **tie_to_E217**: REPORTED, deciding nothing: each CTRL case's measured mean (wall cycles, counter mean, W over idle) beside the same (card, arm, format, kind, mask)'s committed E217 mean where E217 ran it (read by the scoring lane from E217's committed data)
+
+## f. The pass rule (decided by a script)
+- **Part A:** MM1-v3.1 on the PRIMARY footing by E215's rule form on each card over the IN-DOMAIN NO-TWIN cases (every class: CTRL, GAP, ANCHOR, CTAB, C16R): a case passes T1, T2, T3, E3, E4 when |error| is within the band, E1, E2 when |error| is within the band or, at a watts case, |watts difference| within the watts band; a rule PASSES when at least 90% of its cases pass, FAILS otherwise, TOO FEW under 10 cases, NO DATA with none. PART A PASSES when no rule FAILS on either card and at least one rule PASSES; FAILS when any rule fails (named). Printed beside, deciding nothing: each class alone (CTRL apart), FULL and SUB, per format and kind, twins, the nominal footing.
+- Bands (E215's form (rules_e215.py, unchanged; unread-e214's s01d_bands.py re-run here, the same figures as decl-e217's): 2 x max(B1, B2) rounded up to a whole percent, B1 MM1-v3.1's LOEO no-twin error over every point (gemmL and c-arms), B2 over this card's points (holdout_v31.json reproduced first, 29/29); T3 takes T1's bases; watts band 2 x max(B1 W, B2 W, SD_rep) rounded up to 0.01 W. Card 1's equal E215 arm B's registered bands (checked).):
+
+| card | T1 | T2 | T3 | E1 | E2 | E3 | E4 | watts |
+|---|---|---|---|---|---|---|---|---|
+| aifoundry1 card 1 | 10% | 13% | 10% | 14% | 14% | 5% | 10% | 0.56 W |
+| aifoundry1 card 0 | 11% | 16% | 11% | 11% | 13% | 5% | 10% | 0.56 W |
+
+- aifoundry1 card 1: T1 2 x max(4.723, 4.998) = 10.00 -> 10%; T2 2 x max(6.050, 6.450) = 12.90 -> 13%; T3 2 x max(4.723, 4.998) = 10.00 -> 10%; E1 2 x max(5.476, 6.623) = 13.25 -> 14%; E2 2 x max(6.014, 6.731) = 13.46 -> 14%; E3 2 x max(2.153, 2.321) = 4.64 -> 5%; E4 2 x max(4.473, 4.628) = 9.26 -> 10%; watts 2 x max(0.2794, 0.2607, SD_rep 0.08373) -> 0.56 W
+- aifoundry1 card 0: T1 2 x max(4.723, 5.135) = 10.27 -> 11%; T2 2 x max(6.050, 7.523) = 15.05 -> 16%; T3 2 x max(4.723, 5.135) = 10.27 -> 11%; E1 2 x max(5.476, 5.417) = 10.95 -> 11%; E2 2 x max(6.014, 6.153) = 12.31 -> 13%; E3 2 x max(2.153, 1.919) = 4.31 -> 5%; E4 2 x max(4.473, 4.673) = 9.35 -> 10%; watts 2 x max(0.2794, None, SD_rep 0.11509) -> 0.56 W
+- **Part S:** NOT APPLICABLE (no operand-pattern arm: section d, D4)
+- **Verdict:** PASS when part A passes; FAIL when it fails (named); NOT DECIDED otherwise. Decided by a script: blind-e219's scorer (the scripts of the lane that scores E219), which implements sections 0-f of this declaration exactly, is code-tested on a stand-in day built from the frozen forecasts alone, and is hashed (sha256 in its progress log, posted with the result) BEFORE its first read of any E219 measurement; a departure from this declaration is a dated amendment hashed before that read. The nominal footing (section h) is scored by the same script and rules beside, REPORTED, deciding nothing. The OUT-OF-DOMAIN cases enter no rule.
+
+## g. The label rule
+- **BLIND**: a session is BLIND for this test when this declaration's and the nominal forecasts' sha256 (FROZEN.txt) were posted on the Discussion before the session's first datum (its first card command, the session's own log)
+- **UNREAD**: a session whose first datum precedes the freeze post is UNREAD for it, provided no lab lane had read its data before the post (data-e219's read times on record); else POST-READ (REPORTED)
+- **printed**: every result line names its label, the freeze post time and the session's first card command time
+
+## h. The nominal footing (a second footing, frozen now, scored beside)
+- **aifoundry1 card 1**: f 600.0 MHz; V 0.517 V (the models' card-1 footing); die at start 60.0 C (the kit's start-gate ceiling, mms_common.CARDS a1c1)
+- **aifoundry1 card 0**: f 800.0 MHz (its planned clock: the kit's main band "800" for the governed card); V the model's own volts at f; die at start 55.0 C (the kit's a1c0 start-gate ceiling)
+- **files**: forecasts-nominal-e219.csv and .json: one forecast a case and model for every in-domain case (every run of a case at the same nominal conditions); every out-of-domain case listed NOT FORECAST
+- **scored**: by the same rules as the primary footing, beside it, REPORTED
+
+## i. Earlier reads, disclosed
+- **E219_data**: none exists at this declaration (no session has run)
+- **this_lane**: read the kit copy's arms.json, schedules, README, mms_common.py (the cards, the arm grammar) and reduce_mms.py's change from E217's (block arms read by the gemmL rules), and the 8 tile files' sha256 only; the frozen models' code and READMEs (the domain); probe p01 (each predictor on one spec a token) and probe p02 (a code test of this lane's nominal-forecast script: its output deleted unread, only its counts and checks printed) ran before this declaration and chose nothing in it; MM1-v3.2's predictor docstring in its unlanded lane folder (its call form) and verify-fit-v32's progress log (whether it might land), choosing nothing; no E219 forecast of the model session's (its sealed ba9e24aa... was not read); no E217 datum
+- **others**: reg-e219 (Q232): the registration from #14 and the same copy; data-e219 (Q232): waiting for releases; the orchestrator: the copy and the naming (#14.1)
+
+## The out-of-domain cases
+
+| class | tokens (cases) |
+|---|---|
+| OUT-gemm | gemm1 (4), gemm16r8 (2), gemm1r8 (2), gemm2r8 (2) |
+| OUT-gemmc | gemmc12r4 (2), gemmc16r32s (3), gemmc16r4s (2), gemmc16r8s (3), gemmc1r8 (2), gemmc2 (9), gemmc24r4 (2), gemmc2r12 (7), gemmc2r16 (7), gemmc2r2 (8), gemmc2r3 (5), gemmc2r32 (8), gemmc2r32s (2), gemmc2r4 (8), gemmc2r6 (5), gemmc2r8 (9), gemmc2r8s (2), gemmc2s (2), gemmc32r8 (3), gemmc3r8 (2), gemmc4r16 (2), gemmc4r4 (3), gemmc4r4s (2), gemmc4r8 (3), gemmc4r8s (2), gemmc6r4 (2), gemmc6r8 (3), gemmc8r16 (5), gemmc8r4 (3), gemmc8r8 (5) |
+| OUT-gemmh | gemmh1 (8), gemmh16r32 (4), gemmh16r4 (4), gemmh16r8 (4), gemmh2 (4), gemmh2r32 (2), gemmh2r4 (2), gemmh2r8 (4) |
+| OUT-mm | mm128 (3), mm16 (3) |
+| OUT-tenb | tenb (6) |
+
+## The inputs, by sha256
+
+| input | sha256 |
+|---|---|
+| E219 kit src copy: out/orch/e219-src/SRC-SHA256SUMS.txt (49/49 OK) | `247456dafc1dfbd0bf05e879db7caf202de931a0026293f97e7243fdeb08fe4e` |
+| E219 src/arms.json | `bc81e84399c857f19d6cf7c27b9b467ea3ead4958096f9fe3dc193e50f9460e1` |
+| E219 src/sched/a1c0-S1.json | `4ca9442c36f14bf2c8e9909a05f32a5828061db75009e14e7a1b0905503e5cd2` |
+| E219 src/sched/a1c0-S2.json | `90d263a76da110d8a6a54c67bc9dbcdd0395181484134426dcfd3cf37b66b5b2` |
+| E219 src/sched/a1c1-S1.json | `7310c23c8414ef606aa718bb6988997dbed1712e09c5919dac4b589f0ec0d6da` |
+| E219 src/sched/a1c1-S2.json | `45403c431d07cf310cc7c0a3f0262a49985c450ed1ae4324bf7301a9e6b5824e` |
+| E219 src/sched/a1c1-S3.json | `09af3fb1a80d461a72e9385bd0e93952671abe4cff7240244ff68a7bbfe2495e` |
+| E219 src/README.md | `7bbd505e965468966e5fb1de5b98618c5e281c6773a38403b52480ceb03c8a74` |
+| E219 src/mms_common.py (the cards; the arm grammar arm_of) | `c79d0e7ed04d3c0aeb20dba6c7b2ea67ee2de06b1f580250c294378ea83a1f66` |
+| E219 src/reduce_mms.py (block arms read by the gemmL rules) | `2317b5c4c2c9e4182a2ce950a6e87966d45c7868a1cb739242ca5735e1101947` |
+| MM1-v3.1 out/mm1_v31_params.json | `d01009a0f586bb6e58ce5a5a1376fa0aaa567f086798f96c0d9dac7a83c9a7e3` |
+| MM1-v3.1 SHA256SUMS (2c971828; 64/64 OK) | `f6840d2de6617a739c30485904230e96b744b03b7c82c08b14b6de2d942528ed` |
+| MM1-v3.1 counts/SHA256SUMS (3e8991d0; 71/71 OK) | `c74c2d49c336159f6ca63aad2652601a10e22d6a8b5db00d46c66bfb1cf8aa7f` |
+| MM1-v3 out/mm1_v3_params.json | `1fdc07496a39a5398021c2da0e60f157a2e7f693d845e039f8dc661f6aa325db` |
+| MM1-v3 SHA256SUMS (b1493082; 170/170 OK) | `c24efc149110d0cb3d1c8603f0bb7ee83db85eebf9af7ba4254d267c7c85dc74` |
+| MM1-v2 out/mm1_v2_params.json | `9d79040bb8f86336987ff4b6aeaf7e5e6e3b2b2ba07e4bcdc4aa5f5b65c43fa5` |
+| MM1-v2 SHA256SUMS (3ca4b717; 114/114 OK) | `eafb6558c4eaa053e4e33b8a4d6b2a644175f325df9e9ba56a1b6373b556f2f2` |
+| MM1-v1 SHA256SUMS (domain read only; 77/77 OK) | `f77084ef6342964eafbea14d104ffc4dd324e83ee14cc4241158840a51ae468f` |
+| MM1-v0 SHA256SUMS (domain read only; 14/14 OK) | `08b2a226821ab8777bce4680faa474d7b925e0037ec65c6ea066c00f8a830eb2` |
+| contention term F1 (#1.29.1) forecast-e215-v31-layout.json | `f09f9e1abe8acdb4995e9945b75628637e6cf61487cf561818091ee673814259` |
+| contention term F1 (#1.29.1) eval_layout.py | `f076fa919ab4c28d438e5f4fcad9bd9ea8824a99afad63811d2f394cd4d97ae1` |
+| contention term F1 (#1.29.1) features_layout.py | `b1f16c83d7967df7483de3bc20c64f96f9a899dd1efcd722869d942a895e26b3` |
+| contention term F1 (#1.29.1) out/features_layout.json (the frozen walk cache) | `1de94e5611c0912eb4bfb4294df9fabeb07078f4c31344e29e15c5200f1b0183` |
+| layout term land SHA256SUMS (595fcb59; 25/25 OK) | `dc2ae92452f6c601de5ebfb0291c9a181a4d2334d516ccbb37cb283fcfc6fc48` |
+| gemmLnc term F3 (#1.29) term-gemmlnc.json | `2ee478f80aa1182aeb5d00e07fc302cffa668e66964ca7ebc2e61362128f3ee4` |
+| gemmLnc term land SHA256SUMS (aaeaa495; 22/22 OK) | `0f671361506bfcc92fb5976219f095affb604f6d1f6e260daedf2c6eebd0e0f5` |
+| verify-lay's maker v02_fits.py (#1.29.1.1) | `4fb92de3d4876a266ae14c1ad4cf7d4575e3ef4d83b34c60fe5e6f9db3babac8` |
+| verify-lay's fits record v02_fits.json (the controls' constants) | `1bfec7fc123787f5590356de65125df80d6bb4366f14e0376806913fbb27d312` |
+| verify-lay's E215 control columns v02_e215_controls.csv (#1.29.1.1) | `c5bc239479436db63649e3c83e0763a4b1d493af0bc4b4df1ce892e75b04066d` |
+| E215 rules_e215.py (the band form) | `5a44879ca9c4f0c7d8c4084f4dca93886fe6b18bfb1cf1a81bb76cc29d6f2272` |
+| work/step1/runs-listed.json | `0bd052dcbc277c9937c82b1c7dce04124e41deb1b57e21e4699271c8aa2d3376` |
+| work/step1/models-step1.json | `f2d6ee260e3b52c43fef4d5fcdb3f777def6928f0512dad27091aebb2ef70c5c` |
+| work/step1/twin-keys.json | `3418b7d8de1f0e07e765de8deb2486d44392788f83c7bb9159ff8230fb96893c` |
+| work/step1/bands.json | `af8c10325def157cc55b3cb173ed66cf8b544df128a65df305672221684056c6` |
+| work/step2/walk-feats-e219.json | `9c13958d026c8a6f9e5fabfc34c580377dab9efa24ae8095b1dc47eb5e09020d` |
+| work/v32-status.json | `bead8d4ff187163e525ea399647d5c19176fe72e6461d0b3483e1815d11cd309` |
+| scripts/s00a_setup_lab.sh | `e95ae6ca8ca62cf6515eb8131d733f77aa6e3e19390345eadf41d23a56b4d813` |
+| scripts/s00b_setup_kit.sh | `0ef56295b0897fc6c2a1342402236357119faf19ed0c463de7736bb676644a5c` |
+| scripts/s00c_v32.sh | `8a458be939c2966f5b4663b2bd00fa91fcb08ef3f9cbcb09e2cc582752de0f92` |
+| scripts/s01_list.py | `67990601ffe2fea0804027db26cc27c51fe4a4f3a944b1a56c7bfb325000b72c` |
+| scripts/s01b_models.py | `f09abb9710d6b076aa7375623fea0fb572accf4ab63007b7a548906ad4a7df62` |
+| scripts/s01d_bands.py | `a783291baa72809c8dccdaa00e9a5c947189716303a39189cdeadc7e70805995` |
+| scripts/s01e_declare.py | `ccefbe74a2f3e1e9fde28eb88d063c4402dc9f5dc76f0eae4b95d5b2f7cae5c3` |
+| scripts/s02w_walk.py | `4a745f7b70edb7594e201a9ee37c08f6d5c23188ecbce155f631074894bb1ad9` |
+| scripts/s02b_nominal.py | `46d30dea607d7710eb1a2bf128d17115f96d8babac435e4167be38889fad5878` |
+| scripts/s02c_write.py | `b8b9a4072caa006a2f11d4fe6f006496a161020201307735a8471652775b2b2d` |
+| scripts/p01_probe.py | `31f254cd4b87b35795af7682accf9ac0a378dd5b1d71580d6706ba351becbf86` |
+| scripts/env.sh | `1e715ae4b583d9de75f58c219e5e1d1e033cf56ad41812dcfda2be495d1044d3` |
+| scripts/run_slot.sh | `fe0863ed45b8d0171320047e4483a684f67715fdfb14a3e37ce878f711ccee1f` |
+
+**Order:** 0 the work copies and MM1-v3.2's check -> 1 this declaration hashed -> 2 the nominal forecasts hashed -> FROZEN.txt (no step 4: no counts are made); then, after the data: the conditions read -> the measured-conditions forecasts hashed -> the scorer hashed -> the read and the scores. Every sha256 and time in logs/progress.txt.
