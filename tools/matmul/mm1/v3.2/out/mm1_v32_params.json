@@ -1,0 +1,390 @@
+{
+ "baseline_v3_refitted": {
+  "energy_form": "E1u",
+  "energy_theta": {
+   "Eub|fp16": 10.194177718899486,
+   "Eub|fp32": 10.228372295065292,
+   "Eub|int8": 3.2826955550369625,
+   "Pa|aifoundry1 card 0": 1.179634787705928,
+   "Pa|aifoundry1 card 1": 1.316912610050843,
+   "Pa|aifoundry2 card 0": 1.5775732256541883,
+   "Pa|aifoundry3 card 0": 0.7549773745452208,
+   "Pm": 0.3209175986732848,
+   "a8": 1.4524717564116585,
+   "a_lane": 3.052399594538458,
+   "a_op": 7.699557221119217,
+   "b0": 6.091122296250355,
+   "b2": -89.3898097443057,
+   "b3": 293.63824528243174,
+   "bF": 929.1581726378719,
+   "d2": -160.1650223453059,
+   "d3": 699.9702396829267,
+   "dF": 852.2457991337942,
+   "eC": 3.598088212413754,
+   "g": 0.7291754983736346,
+   "kc|aifoundry1 card 0": 1.0254284716303073,
+   "kc|aifoundry1 card 1": 1.017373782912455,
+   "kc|aifoundry2 card 0": 1.0762393626325968,
+   "m|fp16": 1.0793986696113198,
+   "m|int8": 3.37419044650045,
+   "xi": 0.1683914599067467
+  },
+  "time_theta": {
+   "F2": 381.0298313061387,
+   "T2": 0.013667492313599955,
+   "Tcoop_2": 0.0,
+   "Tcoop_3": 0.0,
+   "Tcoop_F": 0.0,
+   "c3": 403.7738868150869,
+   "cF": 401.29632803432315,
+   "chi3": 0.05540167482355277,
+   "chiF": 0.09736125362134368,
+   "d8": 0.05323771400629972,
+   "eta": 1e-09,
+   "gamma_3": 0.0,
+   "gamma_A": 0.0,
+   "gamma_B": 0.0,
+   "gamma_F": 0.0,
+   "kA": 0.8972722119892261,
+   "m3": 0.8232831468092847,
+   "mF": 1.952491370510556,
+   "pB": 0.36344230547749684,
+   "piF0": 0.05906199503073937,
+   "r2": 0.6561758143255271,
+   "tC": 0.0,
+   "w1": 2.3898904494893216,
+   "w2": 2.520916218374732,
+   "x1": 37.33443295124848,
+   "x2": 101.4385441406368,
+   "zeta": 0.7420274311357004
+  },
+  "what": "MM1-v3 refitted (section 5): time T5r+G0+n32 (MM1-v3.2's base, the same fit), energy E1u (b2, d2 free, no F3)"
+ },
+ "data_commit": "7edf3477e4ca1ffc805ac91bf4c9f99652d091e7",
+ "declaration": {
+  "DECLARED-v32.md": "8d514febdc4abce21bd34801f8f3687c0abed5a26a76fdbd0594afb3ff686644",
+  "declared-v32.json": "13a925d63852f1f13b80b9d97352a081389fbf8167e09fb34bcab64eaea75309",
+  "layout_rule_v32.py": "4b90101cd9687fa4bc2eaa49d466d5eeb4621e926e843a70745bace4202d2476"
+ },
+ "energy": {
+  "F3": {
+   "c1_pJ": 247.7200919682366,
+   "c2_pJ": 448.64755338205657,
+   "equation": "dW = D x sL x (n / t_op) x 1e-12 x (c1 x dup + c2 x first) [W over idle]; dup = 26 at rgm136 gemmLnc, 0 at every cooperative loop; first = (14 qA_b + 12 qB_b) / NB, qA_b, qB_b = 1 - the L2 marginals of Q = (Q0 + Q1) / 2; D = 1 + 0.0048 (die - 50 C); sL = 1 + xi (s_V - 1)",
+   "frozen_constants_pJ_REPORTED": [
+    254.41259268104486,
+    552.0890289143084
+   ],
+   "frozen_term_sha256": "2ee478f80aa1182aeb5d00e07fc302cffa668e66964ca7ebc2e61362128f3ee4",
+   "pins_all_data": {
+    "c2_decision_same_at_xi_0_and_1": true,
+    "cond": 1.7211985610695402,
+    "cond_by_xi_REPORTED": {
+     "xi=0": 1.7181971123107131,
+     "xi=1": 1.7211985610695402
+    },
+    "first_values": [
+     8.338578759503903,
+     5.2,
+     0.0,
+     26.0,
+     4.333333333333333,
+     26.0,
+     26.0,
+     0.0,
+     26.0,
+     2.1666666666666665,
+     1.7333333333333334,
+     26.0,
+     26.0,
+     26.0
+    ],
+    "n_distinct_first": 7,
+    "n_gemmLnc_training": 14,
+    "training_ids": [
+     "E211|c01c",
+     "E211|c02c",
+     "E213|a3|a087",
+     "E213|a3|a086",
+     "E213|a3|a079",
+     "E213|a3|a075",
+     "E213|a3|a082",
+     "E213|c1|k40",
+     "E213|c1|k37",
+     "E215|a3|a026",
+     "E215|a3|a024",
+     "E215|a3|a032",
+     "E215|a3|a031",
+     "E215|c1|b013"
+    ],
+    "why": "c1 and c2 free",
+    "xi_reading_for_S": 1.0
+   }
+  },
+  "counts_SHA256SUMS": "c74c2d49c336159f6ca63aad2652601a10e22d6a8b5db00d46c66bfb1cf8aa7f",
+  "counts_e214_SHA256SUMS": "4c39d0d3cf4ad405d5d32d4128f828d0d39272aab8dc0c822a2eacbb49be664a",
+  "form": "E1t+F3",
+  "governed_base_w": [
+   [
+    600.0,
+    25.456
+   ],
+   [
+    700.0,
+    28.243
+   ],
+   [
+    800.0,
+    33.61
+   ]
+  ],
+  "lambda_per_C": 0.0048,
+  "r_L2": 0.373442,
+  "theta": {
+   "Eub|fp16": 9.369620318522239,
+   "Eub|fp32": 9.402664047781736,
+   "Eub|int8": 2.5053432451716784,
+   "Pa|aifoundry1 card 0": 1.0775467826806415,
+   "Pa|aifoundry1 card 1": 1.2424606588165603,
+   "Pa|aifoundry2 card 0": 1.5081566124299182,
+   "Pa|aifoundry3 card 0": 0.6742725463886903,
+   "Pm": 0.3256496310782676,
+   "a8": 1.177202596032101,
+   "a_lane": 3.111088027929143,
+   "a_op": 7.379387285465516,
+   "b0": 5.760248839921042,
+   "b2": 0.0,
+   "b3": 400.6392798594587,
+   "bF": 1047.2830453174388,
+   "c1": 247.7200919682366,
+   "c2": 448.64755338205657,
+   "d2": 0.0,
+   "d3": 852.9007516476191,
+   "dF": 1030.5959047494741,
+   "eC": 2.917313380457008,
+   "g": 0.7286034077170016,
+   "kc|aifoundry1 card 0": 1.0453007828375367,
+   "kc|aifoundry1 card 1": 1.0228408453356377,
+   "kc|aifoundry2 card 0": 1.0946110097988284,
+   "m|fp16": 1.0837004144146547,
+   "m|int8": 3.071820137306328,
+   "xi": 0.2973378471758955
+  },
+  "units": "Pa at 1,024 minions, Pm at u = 1, g a share of the governed base (W); Eub, a_op, a_lane, a8: nJ an op; b0: 1e-17 J a fin edge; b, d: pJ a line; kc, m, xi, eC dimensionless; c1, c2: pJ a duplicate line (F3)",
+  "volts": {
+   "aifoundry1 card 0": [
+    [
+     600.0,
+     0.517
+    ],
+    [
+     700.0,
+     0.5605
+    ],
+    [
+     800.0,
+     0.604
+    ]
+   ],
+   "aifoundry2 card 0": [
+    [
+     600.0,
+     0.517
+    ],
+    [
+     700.0,
+     0.568
+    ],
+    [
+     800.0,
+     0.618
+    ]
+   ],
+   "pinned": {
+    "aifoundry1 card 1": 0.517,
+    "aifoundry3 card 0": 0.522
+   }
+  }
+ },
+ "imbalance_source": "MM1-v2's counter-mean imbalance as MM1-v3 carries it",
+ "interpreter": "/usr/bin/python3 3.12.3, numpy 1.26.4, scipy 1.11.4",
+ "model": "MM1-v3.2",
+ "rest_law": {
+  "aifoundry1 card 0": {
+   "T0_forecast_c": 50.0,
+   "a": 0.0,
+   "b": 0.15941852908421528,
+   "c": 11.10393453737073,
+   "on_E208_rests": {
+    "mean_W": 0.0,
+    "n": 45,
+    "rms_W": 0.081
+   },
+   "source": "a line through E208 a1c0-S1 rests against the start die (45 runs; post hoc)"
+  },
+  "aifoundry1 card 1": {
+   "T0_forecast_c": 55.0,
+   "a": 0.01016842856255774,
+   "b": -0.7038226670865997,
+   "c": 39.707665367843745,
+   "on_E208_rests": {
+    "mean_W": 0.277,
+    "n": 195,
+    "rms_W": 0.312
+   },
+   "source": "ledger v2 frozen idle law aifoundry1-c1 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry1c1.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+  },
+  "aifoundry2 card 0": {
+   "T0_forecast_c": 51.0,
+   "a": 0.005804086519119737,
+   "b": -0.3351545020373176,
+   "c": 25.186366251351085,
+   "on_E208_rests": {
+    "mean_W": 0.135,
+    "n": 137,
+    "rms_W": 0.179
+   },
+   "source": "ledger v2 frozen idle law aifoundry2 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry2_idle.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+  },
+  "aifoundry3 card 0": {
+   "T0_forecast_c": 54.4,
+   "T0_how": "E206 arm A's median start die (MM1-v1's)",
+   "a": 0.005899869459451479,
+   "b": -0.33346324533196703,
+   "c": 25.421568539272126,
+   "on_E208_rests": null,
+   "source": "ledger v2 frozen idle law aifoundry3 (footing law): docs/reports/data/2026-11-05-q145a-footing-law/law.json law.aifoundry3.quad_w (the footing law, FL1-FL6, registered c14e5f35)"
+  }
+ },
+ "rest_law_source": "MM1-v2's rest law per card as MM1-v3 carries it (../v3/out/mm1_v3_params.json; REPORTED)",
+ "tag": "final",
+ "time": {
+  "c1_law": {
+   "fp16": [
+    527.48,
+    0.0176
+   ],
+   "fp32": [
+    527.48,
+    0.0176
+   ],
+   "int8": [
+    283.03,
+    0.0146
+   ]
+  },
+  "census_sha256": "3e5a088eb260d3f06eb8248a52e1267dc333e06c77a6206a2edd117b022058c1",
+  "floor_cycles": {
+   "fp16": 529.0,
+   "fp32": 529.0,
+   "int8": 270.0
+  },
+  "form": {
+   "G": "G0",
+   "census": true,
+   "d8": true,
+   "free_A": false,
+   "layout": "n32",
+   "ret": "v3",
+   "tc": "r2"
+  },
+  "form_name": "T5r+G0+n32",
+  "free": [
+   "c3",
+   "m3",
+   "cF",
+   "mF",
+   "kA",
+   "F2",
+   "T2",
+   "x1",
+   "w1",
+   "pB",
+   "x2",
+   "w2",
+   "zeta",
+   "piF0",
+   "chi3",
+   "chiF",
+   "eta",
+   "d8",
+   "r2"
+  ],
+  "imbalance_mean": {
+   "eta_m": 0.21366131750175743,
+   "fitted_on": [
+    {
+     "id": "p096",
+     "mask": "0xf",
+     "wall_over_mean": 1.2132
+    },
+    {
+     "id": "p097",
+     "mask": "0xf",
+     "wall_over_mean": 1.2141
+    },
+    {
+     "id": "p098",
+     "mask": "0xff",
+     "wall_over_mean": 1.0692
+    },
+    {
+     "id": "p099",
+     "mask": "0xff",
+     "wall_over_mean": 1.0833
+    }
+   ],
+   "gamma": 2.540196550325052,
+   "how": "MM1-v1's term on the same four E206 points (post hoc); v2 applies it only when MB >= 2 (E208's MB = 1 subsets read none)"
+  },
+  "layout_term": {
+   "bundle_sha256": "81f973a9a467a49822d5bb7cc13aca9540fac5505bb852646b55ad8be7666431",
+   "enters": "none",
+   "form": "T = T_base x clip(1 + sum a_i x_i, 0.3, 3.0) at the subset points of rgm136 gemmL (every x_i = 0 at the full mask)",
+   "placebo": "NOT RUN (no rule winner)",
+   "rule_output_sha256": "930cea8022d8ffcea6c059307f854e455f9fa45b5788996e315990fe9e1e720b",
+   "rule_winner": "none"
+  },
+  "pins_all_data": {},
+  "rho_wall_over_mean": {
+   "c4s": 1.143,
+   "c8s": 1.143,
+   "inside": 1.126,
+   "one_block": 1.006,
+   "past": 1.011,
+   "stream": 1.001
+  },
+  "t7_v31_sha256": "893ae962174678fcd1560dfc423722361e706319a188687f8f572a4e3ca89242",
+  "theta": {
+   "F2": 381.0298313061387,
+   "T2": 0.013667492313599955,
+   "Tcoop_2": 0.0,
+   "Tcoop_3": 0.0,
+   "Tcoop_F": 0.0,
+   "c3": 403.7738868150869,
+   "cF": 401.29632803432315,
+   "chi3": 0.05540167482355277,
+   "chiF": 0.09736125362134368,
+   "d8": 0.05323771400629972,
+   "eta": 1e-09,
+   "gamma_3": 0.0,
+   "gamma_A": 0.0,
+   "gamma_B": 0.0,
+   "gamma_F": 0.0,
+   "kA": 0.8972722119892261,
+   "m3": 0.8232831468092847,
+   "mF": 1.952491370510556,
+   "pB": 0.36344230547749684,
+   "piF0": 0.05906199503073937,
+   "r2": 0.6561758143255271,
+   "tC": 0.0,
+   "w1": 2.3898904494893216,
+   "w2": 2.520916218374732,
+   "x1": 37.33443295124848,
+   "x2": 101.4385441406368,
+   "zeta": 0.7420274311357004
+  },
+  "units": "c3, cF, F2, tC, Tcoop_*: cycles (tC a line); m3, mF, T2: us; x1, w1, x2, w2: MB; others dimensionless"
+ },
+ "what": "MM1-v3.2: MM1-v3.1's forms refitted (time T5r+G0+n32, energy E1t) plus the gemmLnc term F3 with its two constants refitted, plus at most one layout term chosen by DECLARED-v32.md section 3's rule, fitted on every committed matmul point through E215 and E214 (desk fits; post hoc as an act); frozen as built"
+}
