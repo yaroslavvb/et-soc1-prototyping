@@ -1,0 +1,1275 @@
+{
+ "F_dropped_by_the_plan": [],
+ "cap_min": 70.0,
+ "card": {
+  "box": "aifoundry3",
+  "card": "aifoundry3 card 0",
+  "clock": "600 MHz pinned (a boot-time TDP of 0 latches the governor), read, never set",
+  "config_gate": "TDP 0 W, temperature threshold 65 C, minion 600 MHz, as found (read, nothing set; E207, E211, E213 arm A and E215 arm A read the same)",
+  "devices": "the box's one card, its device nodes at index 0",
+  "die_gate": "min(60, the session's rest die + 4) C, waited at most 300 s, else that run is NO DATA (E207's, E213 arm A's and E215 arm A's)",
+  "lock": "/run/lock/etsoc-shire0.lock",
+  "measured_peaks": "E215 arm A 59.34 W (the gemmLnc smoke s03), its gemmLnc block 50.52 W, shires 55 C, the latch 61 C (session 12:05:55-12:58:41 PST Thu 19 Nov 2026, 52.76 card-minutes, no stop); E213 arm A 64.22 W (a075, gemmLnc3x1x3 fp32), 58 C, latch 51 -> 61 C (06:37:09-07:19:59 PST Wed 18 Nov 2026); E211 61.9 W, 59 C; E210 58.66 W, 59 C; E207 51.26 W, 56 C: all under the 70 W / 70 C stops",
+  "rest": "the first card command at least 40 minutes after the last session on aifoundry3 card 0 ended (E215 arm A's ended 12:58:41 PST Thu 19 Nov 2026; any later session counts; simulator runs on aifoundry3 are not card sessions)",
+  "run": "its die gate, 10 s at rest, one host process '--seconds 6 --budget 7.5' under a plain 'timeout 10' (never -k; no SIGKILL to a device process, sent or arranged), a 4 s tail (E206's form)",
+  "stops": "the board strictly above 70 W on 3 samples in a row (counting the samples that carry a board reading; a sample with none neither counts nor breaks the row); the shires' mean die (minshire[0]) at or above 70 C; the hottest-sensor latch (minshire[2]) at or above 70 C once it has risen during the session above the lowest value it read since the session's first sample (E213's and E215 arm A's lines); a stop touches the host's stop file, never a kill",
+  "window": "G = the card lane's booking on its day; last start G + 1:30, last end G + 3:30, each rounded up to the whole minute, inside the Pacific day; G at 20:29:00 PST or earlier (Thu 19 Nov 2026), else from 00:00:30 PST Fri 20 Nov 2026 (the queue bound 08:00 PST Fri)"
+ },
+ "card_minutes_planned": 48.0,
+ "drop_F_above_min": 55.0,
+ "eps_G": 0.0842859166373489,
+ "experiment": "E218",
+ "highest_G_PP_W": 56.46167904265906,
+ "highest_PP_W": 56.46167904265906,
+ "line_W": 67.0,
+ "margin_W": 2.0,
+ "order": {
+  "G_block": [
+   "g08",
+   "g04",
+   "g11",
+   "g01",
+   "g03",
+   "g02",
+   "g10",
+   "g12",
+   "g06",
+   "g07",
+   "g05",
+   "g09",
+   "g09",
+   "g05",
+   "g07",
+   "g06",
+   "g12",
+   "g10",
+   "g02",
+   "g03",
+   "g01",
+   "g11",
+   "g04",
+   "g08"
+  ],
+  "pass1": [
+   "y06b",
+   "y08a",
+   "y02b",
+   "y05b",
+   "y01b",
+   "f04",
+   "g05t",
+   "g04t",
+   "g01t",
+   "y01a",
+   "g02t",
+   "f06",
+   "y02a",
+   "f01",
+   "f03",
+   "f14",
+   "y05a",
+   "f08",
+   "g09t",
+   "y08b",
+   "f02",
+   "g08t",
+   "y06a",
+   "g12t",
+   "f10",
+   "f11",
+   "y04b",
+   "y07a",
+   "y03b",
+   "y07b",
+   "f12",
+   "f05",
+   "y04a",
+   "f13",
+   "g03t",
+   "g06t",
+   "f09",
+   "g10t",
+   "f07",
+   "g11t"
+  ],
+  "pass2": [
+   "g11t",
+   "f07",
+   "g10t",
+   "f09",
+   "g06t",
+   "g03t",
+   "f13",
+   "y04a",
+   "f05",
+   "f12",
+   "y07b",
+   "y03b",
+   "y07a",
+   "y04b",
+   "f11",
+   "f10",
+   "g12t",
+   "y06a",
+   "g08t",
+   "f02",
+   "y08b",
+   "g09t",
+   "f08",
+   "y05a",
+   "f14",
+   "f03",
+   "f01",
+   "y02a",
+   "f06",
+   "g02t",
+   "y01a",
+   "g01t",
+   "g04t",
+   "g05t",
+   "f04",
+   "y01b",
+   "y05b",
+   "y02b",
+   "y08a",
+   "y06b"
+  ],
+  "runs": 107,
+  "seed": "E218|A|pass1",
+  "sequence_blocks": [
+   [
+    "smoke",
+    "s01"
+   ],
+   [
+    "tie",
+    "t01"
+   ],
+   [
+    "pass1",
+    "y06b"
+   ],
+   [
+    "pass1",
+    "y08a"
+   ],
+   [
+    "pass1",
+    "y02b"
+   ],
+   [
+    "pass1",
+    "y05b"
+   ],
+   [
+    "pass1",
+    "y01b"
+   ],
+   [
+    "pass1",
+    "f04"
+   ],
+   [
+    "pass1",
+    "g05t"
+   ],
+   [
+    "pass1",
+    "g04t"
+   ],
+   [
+    "pass1",
+    "g01t"
+   ],
+   [
+    "pass1",
+    "y01a"
+   ],
+   [
+    "pass1",
+    "g02t"
+   ],
+   [
+    "pass1",
+    "f06"
+   ],
+   [
+    "pass1",
+    "y02a"
+   ],
+   [
+    "pass1",
+    "f01"
+   ],
+   [
+    "pass1",
+    "f03"
+   ],
+   [
+    "pass1",
+    "f14"
+   ],
+   [
+    "pass1",
+    "y05a"
+   ],
+   [
+    "pass1",
+    "f08"
+   ],
+   [
+    "pass1",
+    "g09t"
+   ],
+   [
+    "pass1",
+    "y08b"
+   ],
+   [
+    "pass1",
+    "f02"
+   ],
+   [
+    "pass1",
+    "g08t"
+   ],
+   [
+    "pass1",
+    "y06a"
+   ],
+   [
+    "pass1",
+    "g12t"
+   ],
+   [
+    "pass1",
+    "f10"
+   ],
+   [
+    "pass1",
+    "f11"
+   ],
+   [
+    "pass1",
+    "y04b"
+   ],
+   [
+    "pass1",
+    "y07a"
+   ],
+   [
+    "pass1",
+    "y03b"
+   ],
+   [
+    "pass1",
+    "y07b"
+   ],
+   [
+    "pass1",
+    "f12"
+   ],
+   [
+    "pass1",
+    "f05"
+   ],
+   [
+    "pass1",
+    "y04a"
+   ],
+   [
+    "pass1",
+    "f13"
+   ],
+   [
+    "pass1",
+    "g03t"
+   ],
+   [
+    "pass1",
+    "g06t"
+   ],
+   [
+    "pass1",
+    "f09"
+   ],
+   [
+    "pass1",
+    "g10t"
+   ],
+   [
+    "pass1",
+    "f07"
+   ],
+   [
+    "pass1",
+    "g11t"
+   ],
+   [
+    "tie",
+    "t01"
+   ],
+   [
+    "pass2",
+    "g11t"
+   ],
+   [
+    "pass2",
+    "f07"
+   ],
+   [
+    "pass2",
+    "g10t"
+   ],
+   [
+    "pass2",
+    "f09"
+   ],
+   [
+    "pass2",
+    "g06t"
+   ],
+   [
+    "pass2",
+    "g03t"
+   ],
+   [
+    "pass2",
+    "f13"
+   ],
+   [
+    "pass2",
+    "y04a"
+   ],
+   [
+    "pass2",
+    "f05"
+   ],
+   [
+    "pass2",
+    "f12"
+   ],
+   [
+    "pass2",
+    "y07b"
+   ],
+   [
+    "pass2",
+    "y03b"
+   ],
+   [
+    "pass2",
+    "y07a"
+   ],
+   [
+    "pass2",
+    "y04b"
+   ],
+   [
+    "pass2",
+    "f11"
+   ],
+   [
+    "pass2",
+    "f10"
+   ],
+   [
+    "pass2",
+    "g12t"
+   ],
+   [
+    "pass2",
+    "y06a"
+   ],
+   [
+    "pass2",
+    "g08t"
+   ],
+   [
+    "pass2",
+    "f02"
+   ],
+   [
+    "pass2",
+    "y08b"
+   ],
+   [
+    "pass2",
+    "g09t"
+   ],
+   [
+    "pass2",
+    "f08"
+   ],
+   [
+    "pass2",
+    "y05a"
+   ],
+   [
+    "pass2",
+    "f14"
+   ],
+   [
+    "pass2",
+    "f03"
+   ],
+   [
+    "pass2",
+    "f01"
+   ],
+   [
+    "pass2",
+    "y02a"
+   ],
+   [
+    "pass2",
+    "f06"
+   ],
+   [
+    "pass2",
+    "g02t"
+   ],
+   [
+    "pass2",
+    "y01a"
+   ],
+   [
+    "pass2",
+    "g01t"
+   ],
+   [
+    "pass2",
+    "g04t"
+   ],
+   [
+    "pass2",
+    "g05t"
+   ],
+   [
+    "pass2",
+    "f04"
+   ],
+   [
+    "pass2",
+    "y01b"
+   ],
+   [
+    "pass2",
+    "y05b"
+   ],
+   [
+    "pass2",
+    "y02b"
+   ],
+   [
+    "pass2",
+    "y08a"
+   ],
+   [
+    "pass2",
+    "y06b"
+   ],
+   [
+    "tie",
+    "t01"
+   ],
+   [
+    "G-smoke",
+    "s03"
+   ],
+   [
+    "G-pass1",
+    "g08"
+   ],
+   [
+    "G-pass1",
+    "g04"
+   ],
+   [
+    "G-pass1",
+    "g11"
+   ],
+   [
+    "G-pass1",
+    "g01"
+   ],
+   [
+    "G-pass1",
+    "g03"
+   ],
+   [
+    "G-pass1",
+    "g02"
+   ],
+   [
+    "G-pass1",
+    "g10"
+   ],
+   [
+    "G-pass1",
+    "g12"
+   ],
+   [
+    "G-pass1",
+    "g06"
+   ],
+   [
+    "G-pass1",
+    "g07"
+   ],
+   [
+    "G-pass1",
+    "g05"
+   ],
+   [
+    "G-pass1",
+    "g09"
+   ],
+   [
+    "G-pass2",
+    "g09"
+   ],
+   [
+    "G-pass2",
+    "g05"
+   ],
+   [
+    "G-pass2",
+    "g07"
+   ],
+   [
+    "G-pass2",
+    "g06"
+   ],
+   [
+    "G-pass2",
+    "g12"
+   ],
+   [
+    "G-pass2",
+    "g10"
+   ],
+   [
+    "G-pass2",
+    "g02"
+   ],
+   [
+    "G-pass2",
+    "g03"
+   ],
+   [
+    "G-pass2",
+    "g01"
+   ],
+   [
+    "G-pass2",
+    "g11"
+   ],
+   [
+    "G-pass2",
+    "g04"
+   ],
+   [
+    "G-pass2",
+    "g08"
+   ]
+  ],
+  "smoke_processes": 2
+ },
+ "pace": {
+  "E213_arm_A_REPORTED": "105 runs in 42.83 card-minutes (24.47 s a run)",
+  "s_per_run": 26.601680672268905,
+  "source": "E215 arm A (docs/reports/data/2026-11-19-e215-blind-matmul-aifoundry3/data-e215.json): 119 runs in 52.76 card-minutes, smoke, gates, die-gate waits and rests included"
+ },
+ "peaks": [
+  {
+   "E215_bound_W_REPORTED": 60.782,
+   "E215_bound_under_stop": true,
+   "PP_W": 54.32,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc2x6x8",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 54.31994127725132,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g01",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 61.4,
+   "E215_bound_under_stop": true,
+   "PP_W": 54.664,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc2x6x7",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 54.66448402340375,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g02",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 61.053,
+   "E215_bound_under_stop": true,
+   "PP_W": 54.36,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc2x5x8",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 54.36007215978316,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g03",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 56.753,
+   "E215_bound_under_stop": true,
+   "PP_W": 49.913,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc7x5x14",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 49.9126622642536,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g04",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 65.441,
+   "E215_bound_under_stop": true,
+   "PP_W": 56.358,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc8x6x3",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 56.35819748077161,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g05",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 62.148,
+   "E215_bound_under_stop": true,
+   "PP_W": 55.47,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc1x14x4",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 55.47046658826467,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g06",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 62.386,
+   "E215_bound_under_stop": true,
+   "PP_W": 55.551,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc1x13x4",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 55.551244850706084,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g07",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 56.707,
+   "E215_bound_under_stop": true,
+   "PP_W": 49.122,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc2x14x16",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 49.12196719664204,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g08",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 58.237,
+   "E215_bound_under_stop": true,
+   "PP_W": 56.462,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc5x1x3",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 56.46167904265906,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g09",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 57.122,
+   "E215_bound_under_stop": true,
+   "PP_W": 55.069,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc2x1x12",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 55.06924052027166,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g10",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 56.333,
+   "E215_bound_under_stop": true,
+   "PP_W": 51.258,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc6x2x48",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 51.25821553926983,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g11",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "E215_bound_W_REPORTED": 57.23,
+   "E215_bound_under_stop": true,
+   "PP_W": 55.139,
+   "PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "arm": "gemmLnc5x1x8",
+   "family": "G",
+   "format": "fp32",
+   "landed_PP_W": 55.13865505001833,
+   "landed_PP_by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "mask": "0xffffffff",
+   "point": "g12",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 45.716,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL2x6x8",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 45.71577504344301,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "g01t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 45.951,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL2x6x7",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 45.950880545908234,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "g02t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 45.581,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL2x5x8",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 45.58112003148688,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "g03t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 43.211,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL7x5x14",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 43.210534678220995,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "g04t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 47.375,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL8x6x3",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 47.374558835883825,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "g05t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 47.023,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL1x14x4",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 47.02342797221292,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "g06t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 43.097,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL2x14x16",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 43.096682421204406,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "g08t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 44.437,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL5x1x3",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 44.436553057339644,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "g09t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 43.041,
+   "PP_by": "v3.1 + gemmLnc term",
+   "arm": "gemmL2x1x12",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 43.04105656900518,
+   "landed_PP_by": "v3.1+lnc",
+   "mask": "0xffffffff",
+   "point": "g10t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 43.506,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL6x2x48",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 43.505990531788015,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "g11t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 43.105,
+   "PP_by": "MM1-v3",
+   "arm": "gemmL5x1x8",
+   "family": "Gt",
+   "format": "fp32",
+   "landed_PP_W": 43.10473098814434,
+   "landed_PP_by": "MM1-v3",
+   "mask": "0xffffffff",
+   "point": "g12t",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 29.452,
+   "PP_by": "v3.1 + gemmLnc term",
+   "arm": "gemmL4x2x8",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.66173833778672,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0xf000",
+   "point": "y01a",
+   "recheck_diff_W": -0.20929454667917113
+  },
+  {
+   "PP_W": 29.467,
+   "PP_by": "v3.1 + contention (its exact factor)",
+   "arm": "gemmL4x2x8",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.66173833778672,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0x1010101",
+   "point": "y01b",
+   "recheck_diff_W": -0.19520151226103977
+  },
+  {
+   "PP_W": 29.26,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL1x16x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.2753485977562,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0xf",
+   "point": "y02a",
+   "recheck_diff_W": -0.015100836325480316
+  },
+  {
+   "PP_W": 29.26,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL1x16x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.2753485977562,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0x3030",
+   "point": "y02b",
+   "recheck_diff_W": -0.015100836201980883
+  },
+  {
+   "PP_W": 29.26,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL1x4x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.275370537462997,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0x3030",
+   "point": "y03b",
+   "recheck_diff_W": -0.015122775908452013
+  },
+  {
+   "PP_W": 29.26,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL2x16x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.275348597756107,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0xf",
+   "point": "y04a",
+   "recheck_diff_W": -0.015101034675765845
+  },
+  {
+   "PP_W": 29.26,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL2x16x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.275348597756107,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0x3030",
+   "point": "y04b",
+   "recheck_diff_W": -0.015101034552266412
+  },
+  {
+   "PP_W": 29.361,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL2x2x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.360538536811934,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xf",
+   "point": "y05a",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 29.361,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL2x2x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.36053853694116,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0x3030",
+   "point": "y05b",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 29.26,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL2x8x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.275348598039617,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0xf",
+   "point": "y06a",
+   "recheck_diff_W": -0.015101233309525952
+  },
+  {
+   "PP_W": 29.26,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL2x8x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 29.275348598039617,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0x3030",
+   "point": "y06b",
+   "recheck_diff_W": -0.01510123318602652
+  },
+  {
+   "PP_W": 35.595,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL4x16x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 35.644155185102534,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0x55555555",
+   "point": "y07a",
+   "recheck_diff_W": -0.048949533949560475
+  },
+  {
+   "PP_W": 35.595,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL4x16x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 35.644155185102534,
+   "landed_PP_by": "v3.1+contention (upper bound over its factor range)",
+   "mask": "0xffff0000",
+   "point": "y07b",
+   "recheck_diff_W": -0.048949533949560475
+  },
+  {
+   "PP_W": 35.965,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL4x2x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 35.965217208654494,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0x55555555",
+   "point": "y08a",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 35.965,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL4x2x24",
+   "family": "Y",
+   "format": "fp32",
+   "landed_PP_W": 35.965217208654494,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffff0000",
+   "point": "y08b",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 45.181,
+   "PP_by": "MM1-v3.2",
+   "arm": "gemmL2x16x3",
+   "family": "F",
+   "format": "fp32",
+   "landed_PP_W": 45.18103555600976,
+   "landed_PP_by": "MM1-v3.2",
+   "mask": "0xffffffff",
+   "point": "f01",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 45.181,
+   "PP_by": "MM1-v3.2",
+   "arm": "gemmL10x16x3",
+   "family": "F",
+   "format": "fp32",
+   "landed_PP_W": 45.1810355559976,
+   "landed_PP_by": "MM1-v3.2",
+   "mask": "0xffffffff",
+   "point": "f02",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 47.316,
+   "PP_by": "MM1-v3",
+   "arm": "gemmL1x10x3",
+   "family": "F",
+   "format": "fp32",
+   "landed_PP_W": 47.31606375541404,
+   "landed_PP_by": "MM1-v3",
+   "mask": "0xffffffff",
+   "point": "f03",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 42.813,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL15x16x32",
+   "family": "F",
+   "format": "fp32",
+   "landed_PP_W": 42.81287609103449,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "f04",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 44.254,
+   "PP_by": "MM1-v3.2",
+   "arm": "gemmL11x16x3",
+   "family": "F",
+   "format": "fp16",
+   "landed_PP_W": 44.2541794949546,
+   "landed_PP_by": "MM1-v3.2",
+   "mask": "0xffffffff",
+   "point": "f05",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 44.254,
+   "PP_by": "MM1-v3.2",
+   "arm": "gemmL12x16x3",
+   "family": "F",
+   "format": "fp16",
+   "landed_PP_W": 44.2541794949546,
+   "landed_PP_by": "MM1-v3.2",
+   "mask": "0xffffffff",
+   "point": "f06",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 44.254,
+   "PP_by": "MM1-v3.2",
+   "arm": "gemmL13x16x3",
+   "family": "F",
+   "format": "fp16",
+   "landed_PP_W": 44.2541794949546,
+   "landed_PP_by": "MM1-v3.2",
+   "mask": "0xffffffff",
+   "point": "f07",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 45.468,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL3x14x4",
+   "family": "F",
+   "format": "fp16",
+   "landed_PP_W": 45.46833363267819,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "f08",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 45.442,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL6x13x4",
+   "family": "F",
+   "format": "fp16",
+   "landed_PP_W": 45.441818635666635,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "f09",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 36.017,
+   "PP_by": "MM1-v3.2",
+   "arm": "gemmL14x16x3",
+   "family": "F",
+   "format": "int8",
+   "landed_PP_W": 36.01702574499799,
+   "landed_PP_by": "MM1-v3.2",
+   "mask": "0xffffffff",
+   "point": "f10",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 36.017,
+   "PP_by": "MM1-v3.2",
+   "arm": "gemmL15x16x3",
+   "family": "F",
+   "format": "int8",
+   "landed_PP_W": 36.01702574499799,
+   "landed_PP_by": "MM1-v3.2",
+   "mask": "0xffffffff",
+   "point": "f11",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 36.017,
+   "PP_by": "MM1-v3.2",
+   "arm": "gemmL16x16x3",
+   "family": "F",
+   "format": "int8",
+   "landed_PP_W": 36.01702574499799,
+   "landed_PP_by": "MM1-v3.2",
+   "mask": "0xffffffff",
+   "point": "f12",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 36.579,
+   "PP_by": "MM1-v3",
+   "arm": "gemmL7x9x3",
+   "family": "F",
+   "format": "int8",
+   "landed_PP_W": 36.57886345323333,
+   "landed_PP_by": "MM1-v3",
+   "mask": "0xffffffff",
+   "point": "f13",
+   "recheck_diff_W": 0.0
+  },
+  {
+   "PP_W": 36.401,
+   "PP_by": "MM1-v2",
+   "arm": "gemmL5x7x4",
+   "family": "F",
+   "format": "int8",
+   "landed_PP_W": 36.40145124127299,
+   "landed_PP_by": "MM1-v2",
+   "mask": "0xffffffff",
+   "point": "f14",
+   "recheck_diff_W": 0.0
+  }
+ ],
+ "refusals": [],
+ "registered_subset_if_cut": {
+  "card_minutes": 19.2,
+  "runs": 42,
+  "what": "the opening smoke, tie 1, pass 1 and tie 2: every Gt, Y and F point once (the G block not reached)"
+ },
+ "request": "Q230",
+ "rest_law_T0_c": 54.4,
+ "rest_law_W_at_T0": 24.741005676735448,
+ "rule_min": 60.0,
+ "runs": 107,
+ "smoke_and_stop_path_min": 0.53,
+ "smoke_processes": 2,
+ "stop_W": 70.0,
+ "top5": [
+  {
+   "PP_W": 56.46167904265906,
+   "by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "point": "g09"
+  },
+  {
+   "PP_W": 56.35819748077161,
+   "by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "point": "g05"
+  },
+  {
+   "PP_W": 55.551244850706084,
+   "by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "point": "g07"
+  },
+  {
+   "PP_W": 55.47046658826467,
+   "by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "point": "g06"
+  },
+  {
+   "PP_W": 55.13865505001833,
+   "by": "MM1-v3.2 x (1 + 2 eps_G)",
+   "point": "g12"
+  }
+ ]
+}
