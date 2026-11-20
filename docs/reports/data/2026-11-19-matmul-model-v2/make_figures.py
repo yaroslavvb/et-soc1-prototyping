@@ -161,6 +161,8 @@ if E215_COMMITS:
     if E215_COMMITS.get("terms_ctl"):  # verify-lay's REPORTED controls, posted #1.29.1.1 before any E215 datum
         PINS["e215_ctl"] = (E215_COMMITS["terms_ctl"], T32 + "layout/controls-e215/v02_e215_controls.csv",
                             "c5bc239479436db63649e3c83e0763a4b1d493af0bc4b4df1ce892e75b04066d")
+    # report-v2-fix: the frozen terms' own REPORTED score on E215 (land-score-terms-e215, Q231), its verifier's dated note
+    PINS["terms_note"] = ("c9adc716", T32 + "scores-e215/README.md.dated-note-1.md", None)
 E214U_COMMITS = {"unread": "21ba4b45", "counts": "37ae4a87"}  # land-e214u (Q225), pushed 11:53-11:54 PST Thu 19 Nov  # E214U_COMMITS_LINE
 if E214U_COMMITS:
     PINS.update({
@@ -350,6 +352,7 @@ def readme_runs(txt):
 
 # ------------------------------------------------------------------------------------------------ E215 (desk; score_e215.py's definitions)
 G215 = {"registered": ("P", "C", "R"), "posthoc": ("L", "S")}
+FAM215 = ("L", "S", "P", "C", "R")  # a family letter as the 'only' filter (report-v2-fix added S, P, C and R to L)
 M215 = ("v31", "v3", "v2", "t7", "lnc", "lay", "lg1", "cnt")
 N215 = {"v31": "MM1-v3.1", "v3": "MM1-v3", "v2": "MM1-v2", "t7": "v3.1 with T7", "lnc": "v3.1 + gemmLnc term", "lay": "v3.1 + contention",
         "lg1": "v3.1 + G1 (hop mean)", "cnt": "v3.1 + N1+N2 (shire count only)"}
@@ -448,12 +451,13 @@ def e215_errors(R, fc, tag):
 
 
 def e215_rows(cache, arm, group, model, q, only=None):
-    """arm 'A', 'B' or 'P' (both); group 'registered', 'posthoc'; only: None, 'L' (family L), 'lnc' (the gemmLnc loop)"""
+    """arm 'A', 'B' or 'P' (both); group 'registered', 'posthoc'; only: None, one family's letter ('L', 'S', 'P', 'C', 'R'), 'lnc' (the
+    gemmLnc loop) or 'nolnc' (every other loop)"""
     rows = []
     for a in (["A", "B"] if arm == "P" else [arm]):
         rows += cache[a].get(group, {}).get(q, {}).get(model, [])
-    if only == "L":
-        rows = [r for r in rows if r["family"] == "L"]
+    if only in FAM215:
+        rows = [r for r in rows if r["family"] == only]
     elif only == "lnc":
         rows = [r for r in rows if r["loop"] == "rgm136 gemmLnc"]
     elif only == "nolnc":
@@ -473,22 +477,24 @@ def e215_one(cache, arm, group, model, q, conv, key):
     raise KeyError(key)
 
 
-def e215_miss(cache, rules, arm, group, model, q, rule):
-    """REPORTED: how many cases (points) of a model sit past MM1-v3.1's registered band of that rule (measured / forecast - 1)"""
+def e215_miss(cache, rules, arm, group, model, q, rule, only=None):
+    """REPORTED: how many cases (points) of a model sit past MM1-v3.1's registered band of that rule (measured / forecast - 1); only: as
+    e215_rows (report-v2-fix added it)"""
     n = 0
     for a in (["A", "B"] if arm == "P" else [arm]):
         band = rules["arms"][a]["bands"][rule]["band"]
-        n += sum(1 for r in cache[a].get(group, {}).get(q, {}).get(model, []) if abs(r["mf"]) > band)
+        n += sum(1 for r in e215_rows(cache, a, group, model, q, only) if abs(r["mf"]) > band)
     return n
 
 
-def e215_closer(cache, rules, arm, group, model, q, only=None):
-    """REPORTED: model against MM1-v3.1 case by case (point by point), E215's d = |ln(measured / MM1-v3.1)| - |ln(measured / model)| (in W
-    at a watts point) against each arm's registered tie; closer / farther / ties and the exact two-sided sign test"""
+def e215_closer(cache, rules, arm, group, model, q, only=None, base_model="v31"):
+    """REPORTED: model against MM1-v3.1 (or base_model, added by report-v2-fix) case by case (point by point), E215's d = |ln(measured /
+    base)| - |ln(measured / model)| (in W at a watts point) against each arm's registered tie; closer / farther / ties and the exact two-sided
+    sign test"""
     out = {"closer": 0, "farther": 0, "ties": 0}
     tk = {"wall": "cycles_ln", "mean": "cycles_ln", "t": "seconds_ln", "Jg": "joules_ln", "Jf": "joules_ln", "Wwatts": "watts_W"}[q]
     for a in (["A", "B"] if arm == "P" else [arm]):
-        base = {r["key"]: r for r in e215_rows(cache, a, group, "v31", q, only)}
+        base = {r["key"]: r for r in e215_rows(cache, a, group, base_model, q, only)}
         tie = rules["arms"][a]["ties"][tk]
         for r in e215_rows(cache, a, group, model, q, only):
             b = base[r["key"]]
@@ -804,9 +810,11 @@ def build_e215(G, R, c215, rules):
     p = "(sealed at 10:24:43 PST) was registered (committed 11:43:33 PST)"
     T("s45.d.seal", RA, "posted on the round's coordination thread at 10:24:43 PST Thu 19 Nov 2026", "10:24:43", p)
     T("s45.d.sreg", RA, "by `18398ed2` (committed 11:43:33 PST)", "11:43:33", p)
-    p = ("first card command at 12:05:55 PST, 119 of 119 runs in 52.76 card-minutes (planned 49.4), board peak 59.34 W in the gemmLnc "
-         "smoke, every sample at 600 MHz (31,606 / 31,606), and 60 of 60 scored points never run on any card")
+    p = ("first card command at 12:05:55 PST (after the card's configuration read at 12:05:24), 119 of 119 runs in 52.76 card-minutes "
+         "(planned 49.4), board peak 59.34 W in the gemmLnc smoke, every sample at 600 MHz (31,606 / 31,606), and 60 of 60 scored points "
+         "never run on any card")
     T("s45.d.fcc", RA, "session's first card command at 12:05:55", "12:05:55", p)
+    T("s45.d.cfg", RA, "step 7's config read at 12:05:24, reported apart", "12:05:24", p)  # report-v2-fix (L8)
     T("s45.d.r0", RA, "RAN FULL (the opening smoke, the stop-path test, 119 of 119 runs and the gemmLnc smoke)", "119", p)
     T("s45.d.r1", RA, "RAN FULL (the opening smoke, the stop-path test, 119 of 119 runs and the gemmLnc smoke)", "119", p)
     T("s45.d.cm", RA, "52.76 (planned 49.4", "52.76", p)
@@ -906,7 +914,10 @@ def build_e215(G, R, c215, rules):
            ("v3.1 + G1, frozen beside it", "lg1", PA215, "posthoc", "wall", "L", "family L, " + WHERE215),
            ("v3.1 + N1+N2, its verifier's shire-count control", "cnt", PA215, "posthoc", "wall", "L", "family L, " + WHERE215),
            ("v3.1 + gemmLnc term", "lnc", PA215, "registered", "Jg", "lnc", "the %s gemmLnc points, %s" % ({4: "four", 5: "five"}.get(nl, str(nl)), WHERE215)),
-           ("MM1-v2", "v2", PA215, "registered", "wall", None, "every registered case")]
+           ("MM1-v2", "v2", PA215, "registered", "wall", None, "every registered case"),
+           # report-v2-fix (finding M2): the two frozen MM1s at family L, beside the forms added to MM1-v3.1
+           ("MM1-v3", "v3", PA215, "posthoc", "wall", "L", "family L, " + WHERE215),
+           ("MM1-v2", "v2", PA215, "posthoc", "wall", "L", "family L, " + WHERE215)]
     for label, m, arm, g, q, only, where in rep:
         s = e215_stat(c215, arm, g, m, q, "fm", only)
         if s is None:
@@ -1004,6 +1015,20 @@ def build_e215(G, R, c215, rules):
         for k, ck in (("0", "rgm136 gemmL|gemmL1x15x4|fp32|0xffff0fff"), ("1", "rgm136 gemmL|gemmL1x15x4|fp32|0xfff0ffff")):
             D("s45.rdb.f28" + k, -e215_one(c215, "B", "posthoc", "v31", "wall", "mf", ck), "{:.1f}", p, "e215one_neg",
               {"arm": "B", "group": "posthoc", "model": "v31", "q": "wall", "conv": "mf", "key": ck}, E215_INPUTS, "how far under MM1-v3.1's forecast, %, desk")
+        # report-v2-fix (finding M7): arm B's switch-route reading beside arm A's
+        p = ("the switch route missed most at int8 real:blind4 (0.886 measured against 0.971) and fp32 blind3 (0.882 against 0.948), where "
+             "MM1-v3.1's J over idle given t read +9.1% and +5.6%")
+        swB = R.json("e215B_scores")["arms"]["B"]["readings_REPORTED"]["switch_route"]
+        kinds = [c["kind"] for c in swB]
+        for k, pt in (("0", "b030"), ("1", "b027")):
+            i = kinds.index(pt)
+            G.json("s45.rdb.sw%sm" % k, "e215B_scores", base + ["switch_route", i, "measured_W_ratio"], "{:.3f}", p, "measured ratio, REPORTED")
+            G.json("s45.rdb.sw%sf" % k, "e215B_scores", base + ["switch_route", i, "models_W_ratio", "MM1-v3.1"], "{:.3f}", p,
+                   "MM1-v3.1's ratio, REPORTED")
+        for k, pt in (("0", "b030"), ("1", "b027")):
+            D("s45.rdb.sw%se" % k, e215_one(c215, "B", "posthoc", "v31", "Jg", "fm", pt), "{:+.1f}", p, "e215one",
+              {"arm": "B", "group": "posthoc", "model": "v31", "q": "Jg", "conv": "fm", "key": pt}, E215_INPUTS,
+              "one E215 point, %, desk (forecast / measured - 1)")
         p = "the ties read 4.5% under the reference"
         D("s45.rdb.off", -100 * R.json("e215B_scores")["arms"]["B"]["day_offset_REPORTED"]["offset_W"], "{:.1f}", p, "e215off",
           {"arm": "B"}, ["e215B_scores"], "minus the day offset, %, REPORTED")
@@ -1074,14 +1099,14 @@ def build_e215(G, R, c215, rules):
         T("s45.va.t2.0", tA, "ARM A REGISTERED (P, C, R): R0 PASS; S6 PASS; T1 FAIL 27/32; T2 PASS 30/32", "30", p)
         T("s45.va.t2.1", tA, "ARM A REGISTERED (P, C, R): R0 PASS; S6 PASS; T1 FAIL 27/32; T2 PASS 30/32", "32", p)
         T("s45.va.t2.2", reg, "| T2 | cycles an op, the counter's mean, per case | 13% |", "13", p)
-        p = "Its four joule rules failed by its four gemmLnc points alone (28 of 32; E2 by a hair, a026 at 13.02% over its forecast against a 13% band)"
+        p = "E1 to E3 failed at its four gemmLnc points alone (28 of 32; E2 by a hair, a026 at 13.02% over its forecast against a 13% band)"
         T("s45.va.e1", tA, "E1 FAIL 28/32", "28", p)
         T("s45.va.e1b", tA, "E1 FAIL 28/32", "32", p)
         T("s45.va.e2n", reg, "| **E2** | J over idle with the seconds forecast, per point (watts under 3 W) | **13%** |", "2", p)
         ONE("s45.va.e2v", "registered", "Jf", "a026", "{:.2f}", p)
         T("s45.va.e2b", reg, "| **E2** | J over idle with the seconds forecast, per point (watts under 3 W) | **13%** |", "13", p)
         p = ("they drew 1.14 to 1.39 times its J over idle given the measured seconds (figure 5), and without them its J over idle given t read "
-             "3.75% (post hoc)")
+             "3.75% (forecast / measured - 1; 3.54% on the scorer's footing; post hoc)")
         D("s45.va.l0", 1 + e215_one(c215, "A", "registered", "v31", "Jg", "mf", "a026") / 100.0, "{:.2f}", p, "e215pt",
           {"point": "a026", "group": "registered", "model": "v31"}, E215_INPUTS, "measured / MM1-v3.1's J over idle given t, desk")
         D("s45.va.l1", 1 + e215_one(c215, "A", "registered", "v31", "Jg", "mf", "a031") / 100.0, "{:.2f}", p, "e215pt",
@@ -1089,6 +1114,28 @@ def build_e215(G, R, c215, rules):
         sn = e215_stat(c215, "A", "registered", "v31", "Jg", "fm", "nolnc")
         D("s45.va.nolnc", sn["rms"], "{:.2f}", p, "e215", {"arm": "A", "group": "registered", "model": "v31", "q": "Jg", "conv": "fm",
           "only": "nolnc", "stat": "rms"}, E215_INPUTS, "post hoc, without the gemmLnc points, rms %, desk")
+        # report-v2-fix (finding L3): the same on the scorer's footing
+        snm = e215_stat(c215, "A", "registered", "v31", "Jg", "mf", "nolnc")
+        D("s45.va.nolnc.mf", snm["rms"], "{:.2f}", p, "e215", {"arm": "A", "group": "registered", "model": "v31", "q": "Jg", "conv": "mf",
+          "only": "nolnc", "stat": "rms"}, E215_INPUTS, "post hoc, without the gemmLnc points, rms %, desk (measured / forecast - 1)")
+        # report-v2-fix (finding M1): E4's own misses, from the frozen scorer's cells
+        p = ("E4 (J at rest with the seconds forecast) failed at 28 of 32 too, but at a031 and a032 and at family R's two gemmL2x1x7 retention "
+             "points, a043 and a044 (+9.62% and +12.91% against a 9% band); a024 and a026 passed it")
+        T("s45.va.e4.0", tA, "E4 FAIL 28/32", "28", p)
+        T("s45.va.e4.1", tA, "E4 FAIL 28/32", "32", p)
+        cellsA = R.json("e215A_scores")["arms"]["A"]["cells"]["registered"]["E4"]
+        for k, pt in (("2", "a043"), ("3", "a044")):
+            i = [c["point"] for c in cellsA].index(pt)
+            G.json("s45.va.e4." + k, "e215A_scores", ["arms", "A", "cells", "registered", "E4", i, "err"], "{:+.2f}", p,
+                   "the frozen scorer's E4 error at %s, measured / forecast - 1, %%" % pt, scale=100.0)
+        T("s45.va.e4.4", reg, "| **E4** | J with the card at rest with the seconds forecast, per point | **9%** |", "9", p)
+        if "B" in ARMS215:
+            p = "E4's two misses are b013 and b022 (gemmL2x1x7 in int8, +12.78% against a 10% band)"
+            cellsB = R.json("e215B_scores")["arms"]["B"]["cells"]["registered"]["E4"]
+            i = [c["point"] for c in cellsB].index("b022")
+            G.json("s45.vb.e4.0", "e215B_scores", ["arms", "B", "cells", "registered", "E4", i, "err"], "{:+.2f}", p,
+                   "the frozen scorer's E4 error at b022, measured / forecast - 1, %", scale=100.0)
+            T("s45.vb.e4.1", reg, "| **E4** | J with the card at rest with the seconds forecast, per point | **10%** | 4.47% | 4.63%", "10", p)
         p = "(MM1-v3.1 closer at 8 cases, MM1-v3 at 12, with 12 ties)"
         lit = "registered H1 NOT DECIDED (v3.1 8 / v3 12 / ties 12"
         for i, tok in enumerate(("8", "12", "12")):
@@ -1131,11 +1178,34 @@ def build_e215(G, R, c215, rules):
         for k, ck in (("0", "rgm136 gemmL|gemmL1x9x6|fp32|0x2002202"), ("1", "rgm136 gemmL|gemmL2x4x4|fp32|0xee0e00")):
             D("s7a.lm" + k, -e215_one(c215, "A", "posthoc", "v31", "wall", "mf", ck), "{:.1f}", p, "e215one_neg",
               {"arm": "A", "group": "posthoc", "model": "v31", "q": "wall", "conv": "mf", "key": ck}, E215_INPUTS, "how far under MM1-v3.1's forecast, %, desk")
-        p = "ran 10.9% to 14.9% slower than MM1-v3.1 forecast"
+        # report-v2-fix (finding M4): the retention miss as its own item, and the one-K-block item with its own two points only
+        p = ("gemmL2x1x7 (a 39 MB GEMM, just past the retention's first edge at 37.4 MB) ran 12.7% to 14.9% slower than MM1-v3.1 forecast in "
+             "fp32 and int8 on both cards (the scorer's measured / forecast - 1): 4 of the 8 cases past E215's registered T1 band")
+        ia = [q["id"] for q in R.json("e215_points")["arms"]["A"]["points"]].index("a043")
+        G.json("s7a.rt.mb", "e215_points", ["arms", "A", "points", ia, "bytes_MB", "all"], "{:.0f}", p, "the registration's footprint, MB")
+        T("s7a.rt.x1", "v3_readme", "the first edge at x1 = 37.4 MB", "37.4", p)
+        for k, arm, ck in (("r0", "B", "rgm136 gemmL|gemmL2x1x7|fp32|0xffffffff"), ("r1", "A", "rgm136 gemmL|gemmL2x1x7|int8|0xffffffff")):
+            D("s7a.rt." + k, e215_one(c215, arm, "registered", "v31", "wall", "mf", ck), "{:.1f}", p, "e215one",
+              {"arm": arm, "group": "registered", "model": "v31", "q": "wall", "conv": "mf", "key": ck}, E215_INPUTS,
+              "one E215 case, %, desk (measured / forecast - 1)")
+        for k, only in (("nR", "R"), ("n", None)):
+            args = {"arm": PA215, "group": "registered", "model": "v31", "q": "wall", "rule": "T1"}
+            if only:
+                args["only"] = only
+            D("s7a.rt." + k, e215_miss(c215, rules, PA215, "registered", "v31", "wall", "T1", only), "{:d}", p, "e215miss", args,
+              E215_INPUTS + ["e215_rules"], "cases past MM1-v3.1's registered T1 band%s, desk" % (" in family " + only if only else ""))
+        p = ("On E215, one of family C's one-block points on each card ran 11.0% and 10.9% slower than MM1-v3.1 forecast (gemmL8x15x1 in int8 "
+             "on aifoundry3, gemmL16x14x1 in fp32 on card 1), 2 of the 8 cases past the registered T1 band")
+        ONE("s7a.k1", "registered", "wall", "rgm136 gemmL|gemmL8x15x1|int8|0xffffffff", "{:.1f}", p)
         D("s7a.k0", e215_one(c215, "B", "registered", "v31", "wall", "mf", "rgm136 gemmL|gemmL16x14x1|fp32|0xffffffff"), "{:.1f}", p, "e215one",
           {"arm": "B", "group": "registered", "model": "v31", "q": "wall", "conv": "mf", "key": "rgm136 gemmL|gemmL16x14x1|fp32|0xffffffff"},
           E215_INPUTS, "one E215 case, %, desk (measured / forecast - 1)")
-        ONE("s7a.k1", "registered", "wall", "rgm136 gemmL|gemmL2x1x7|int8|0xffffffff", "{:.1f}", p)
+        for k, only in (("nC", "C"), ("n", None)):
+            args = {"arm": PA215, "group": "registered", "model": "v31", "q": "wall", "rule": "T1"}
+            if only:
+                args["only"] = only
+            D("s7a.k." + k, e215_miss(c215, rules, PA215, "registered", "v31", "wall", "T1", only), "{:d}", p, "e215miss", args,
+              E215_INPUTS + ["e215_rules"], "cases past MM1-v3.1's registered T1 band%s, desk" % (" in family " + only if only else ""))
         # REPORTED beside, arm A
         p = "the card drew 0.88 to 0.95 times its forecast at all four"
         D("s45.ra.l0", 1 + e215_one(c215, "A", "registered", "lnc", "Jg", "mf", "a032") / 100.0, "{:.2f}", p, "e215pt",
@@ -1143,14 +1213,49 @@ def build_e215(G, R, c215, rules):
         D("s45.ra.l1", 1 + e215_one(c215, "A", "registered", "lnc", "Jg", "mf", "a024") / 100.0, "{:.2f}", p, "e215pt",
           {"point": "a024", "group": "registered", "model": "lnc"}, E215_INPUTS, "measured / the term's J over idle given t, desk")
         T("s45.ra.an", "lnc_note", "F3 may read high on arm A (by about 3 W at a031 and a032)", "3", "had said it might read high there by about 3 W")
+        # report-v2-fix (finding M5): when that reading was written and when it was committed
+        p = ("That reading was written at 09:59-10:25 PST, before any E215 datum, but it was committed with the term (aaeaa495, 13:14:37 PST) "
+             "after arm A's data commit (8355db15, 13:00:32 PST), in a section its note heads \"REPORTED, post hoc; not a freeze\"")
+        T("s45.ra.anw", "lnc_note", "**verify-lnc: HOLDS WITH FIXES** (09:59-10:25 PST; desk;", "09:59-10:25", p, "its verifier's own time")
+        G.git("s45.ra.anc", "aaeaa495", "13:14:37", p)
+        G.git("s45.ra.dat", "8355db15", "13:00:32", p)
+        T("s45.ra.anl", "lnc_note", "## For E215's scores (REPORTED, post hoc; not a freeze)", "REPORTED, post hoc; not a freeze", p,
+          "the note's own heading, quoted")
+        # report-v2-fix (finding M2): the count-only control came closest only among the forms added to MM1-v3.1
+        p = ("Of the forms added to MM1-v3.1, the verifier's count-only control N1+N2 came closest (closer than MM1-v3.1 at 18 cases, farther "
+             "at 4)")
+        aL = {"arm": PA215, "group": "posthoc", "q": "wall", "conv": "fm", "only": "L"}
+        cl = e215_closer(c215, rules, PA215, "posthoc", "cnt", "wall", "L")
+        for st in ("closer", "farther"):
+            D("s45.ra.cnt." + st, cl[st], "{:d}", p, "e215c", dict(aL, model="cnt", stat=st), E215_INPUTS, "against MM1-v3.1, desk")
+        p = ("But MM1-v3, which has no layout term, read those layouts at 9.65% and was closer than N1+N2 at 17 cases, farther at 6, with 5 "
+             "ties (p 0.035)")
+        s3L = e215_stat(c215, PA215, "posthoc", "v3", "wall", "fm", "L")
+        D("s45.ra.v3L", s3L["rms"], "{:.2f}", p, "e215", dict(aL, model="v3", stat="rms"), E215_INPUTS, "REPORTED, rms %, desk")
+        cl = e215_closer(c215, rules, PA215, "posthoc", "v3", "wall", "L", base_model="cnt")
+        for st in ("closer", "farther", "ties"):
+            D("s45.ra.v3cnt." + st, cl[st], "{:d}", p, "e215c", dict(aL, model="v3", base="cnt", stat=st), E215_INPUTS,
+              "MM1-v3 against N1+N2, desk")
+        D("s45.ra.v3cnt.p", cl["p"], "{:.2g}", p, "e215c", dict(aL, model="v3", base="cnt", stat="p"), E215_INPUTS,
+          "the exact two-sided sign test, REPORTED, desk")
+        p = ("the terms' own REPORTED score (c9adc716) finds the same against G1+N1 (MM1-v3 closer at 18 cases, G1+N1 at 6, with 4 ties, p "
+             "0.023) and reads \"no frozen layout form beats MM1-v3 on these points\"")
+        lit = "| G1+N1 | **MM1-v3 CLOSER 6/18/4 (p 0.023)** |"
+        for i, tok in enumerate(("18", "6", "4", "0.023")):
+            T("s45.ra.g1n1.%d" % i, "terms_note", lit, tok, p, "the terms' REPORTED score's dated note (post hoc)")
+        T("s45.ra.g1n1.q", "terms_note", "but no frozen layout form beats MM1-v3 on these points", "no frozen layout form beats MM1-v3 on these points",
+          p, "the note's words, quoted")
         if "B" in ARMS215:
             D("s45.ra.b013", 1 + e215_one(c215, "B", "registered", "lnc", "Jg", "mf", "b013") / 100.0, "{:.2f}", "on arm B's one point it read 1.01",
               "e215pt", {"point": "b013", "group": "registered", "model": "lnc"}, E215_INPUTS, "measured / the term's J over idle given t, desk")
         T("s45.ra.nb1", "lnc_note", "at NB 1 it is the highest (a031 25.90, a032 25.75", "1", "most at NB 1 (a031, a032)")
         T("s45.ra.l28", "lay_readme", "At the 28 subset rows the factor runs 0.9942-1.0139", "28", "At family L's 28 layouts MM1-v3.1 and every form beside it")
         if "e215P_note" in PINS:
-            T("s45.ra.v2L", "e215P_note", "| MM1-v2 | 6.98% (28) | 7.47% | 6.97% | 6.04% (23) | 6.77% | 1.42% (28) | 6.88% | 0.24 W (5) |", "6.98",
-              "MM1-v2 read those layouts best (6.98% on the scorer's footing, the pooled note)")
+            p = "MM1-v2 read those layouts best: 6.81% on this report's footing, 6.98% on the scorer's (the pooled note)"
+            s2L = e215_stat(c215, PA215, "posthoc", "v2", "wall", "fm", "L")
+            D("s45.ra.v2L.fm", s2L["rms"], "{:.2f}", p, "e215", {"arm": PA215, "group": "posthoc", "model": "v2", "q": "wall", "conv": "fm",
+              "only": "L", "stat": "rms"}, E215_INPUTS, "REPORTED, rms %, desk")  # report-v2-fix (M2)
+            T("s45.ra.v2L", "e215P_note", "| MM1-v2 | 6.98% (28) | 7.47% | 6.97% | 6.04% (23) | 6.77% | 1.42% (28) | 6.88% | 0.24 W (5) |", "6.98", p)
         # the readings (the frozen scorer's REPORTED readings, arm A)
         base = ["arms", "A", "readings_REPORTED"]
         G.json("s45.rd.n28", "e215A_scores", base + ["layout_sets", 1, "shape_format_kind_shires", 3], "{:d}", "at gemmL1x9x6's eight 28-shire masks",
@@ -1176,6 +1281,60 @@ def build_e215(G, R, c215, rules):
         p = "the ties read 1.9% under the committed reference in W over idle"
         D("s45.rd.off", -100 * R.json("e215A_scores")["arms"]["A"]["day_offset_REPORTED"]["offset_W"], "{:.1f}", p, "e215off",
           {"arm": "A"}, ["e215A_scores"], "minus the day offset, %, REPORTED")
+        # report-v2-fix (finding M6): T7 blind on E215's layouts, in section 6.3
+        p = "blind on E215's 28 layouts it read 13.93% against MM1-v3.1's 10.72%"
+        for k, m, st, fmt in (("n", "t7", "n", "{:d}"), ("t7", "t7", "rms", "{:.2f}"), ("v31", "v31", "rms", "{:.2f}")):
+            s = e215_stat(c215, PA215, "posthoc", m, "wall", "fm", "L")
+            D("s63.t7L." + k, s[st], fmt, p, "e215", {"arm": PA215, "group": "posthoc", "model": m, "q": "wall", "conv": "fm", "only": "L",
+              "stat": st}, E215_INPUTS, "blind, post hoc-selected, desk")
+        # report-v2-fix (finding M7): section 5, E215's family S (blind, post hoc-selected): the paragraph and its table
+        aS = {"arm": PA215, "group": "posthoc", "model": "v31", "q": "Jg", "conv": "fm", "only": "S"}
+        sS = e215_stat(c215, PA215, "posthoc", "v31", "Jg", "fm", "S")
+        p = "read 8.45% rms (+2.53) over the 12 (forecast / measured - 1; figure 3)"
+        D("s5S.rms", sS["rms"], "{:.2f}", p, "e215", dict(aS, stat="rms"), E215_INPUTS, "blind, post hoc-selected, rms %, desk")
+        D("s5S.bias", sS["bias"], "{:+.2f}", p, "e215", dict(aS, stat="bias"), E215_INPUTS, "blind, post hoc-selected, bias %, desk")
+        D("s5S.n", sS["n"], "{:d}", p, "e215", dict(aS, stat="n"), E215_INPUTS, "points, desk")
+        p = ("It missed most at int8 data of plus and minus one (a057): +23.6%, where the measured kind-over-random W ratio was 0.816 "
+             "against MM1-v3.1's 0.991")
+        D("s5S.a057", e215_one(c215, "A", "posthoc", "v31", "Jg", "fm", "a057"), "{:+.1f}", p, "e215one",
+          {"arm": "A", "group": "posthoc", "model": "v31", "q": "Jg", "conv": "fm", "key": "a057"}, E215_INPUTS,
+          "one E215 point, %, desk (forecast / measured - 1)")
+        swA = R.json("e215A_scores")["arms"]["A"]["readings_REPORTED"]["switch_route"]
+        i = [c["kind"] for c in swA].index("a057")
+        G.json("s5S.a057m", "e215A_scores", base + ["switch_route", i, "measured_W_ratio"], "{:.3f}", p, "measured ratio, REPORTED")
+        G.json("s5S.a057f", "e215A_scores", base + ["switch_route", i, "models_W_ratio", "MM1-v3.1"], "{:.3f}", p, "MM1-v3.1's ratio, REPORTED")
+        Mf = {a: R.json("e215%s_scores" % a)["arms"][a]["measured"] for a in ARMS215}
+        byfmt = {}
+        for a in ARMS215:
+            for r in e215_rows(c215, a, "posthoc", "v31", "Jg", "S"):
+                pt = r["key"].split(":")[1]
+                byfmt.setdefault(Mf[a][pt]["format"], []).append((100.0 * r["fm"], a, pt))
+        p = "The eight fp32 kinds read -6.7% to +5.6%; the four int8 kinds all read high, +5.7% to +23.6%"
+        for fmt_name in ("fp32", "int8"):
+            for k, (v, a, pt) in (("lo", min(byfmt[fmt_name])), ("hi", max(byfmt[fmt_name]))):
+                D("s5S.%s.%s" % (fmt_name, k), v, "{:+.1f}", p, "e215one",
+                  {"arm": a, "group": "posthoc", "model": "v31", "q": "Jg", "conv": "fm", "key": pt}, E215_INPUTS,
+                  "the %s end of the %s kinds: one E215 point, %%, desk (forecast / measured - 1)" % ({"lo": "low", "hi": "high"}[k], fmt_name))
+        tabs["switch_S"] = []
+        tabs["switch_S_fig"] = []
+        for a in ARMS215:
+            sw = R.json("e215%s_scores" % a)["arms"][a]["readings_REPORTED"]["switch_route"]
+            errs = {r["key"].split(":")[1]: 100.0 * r["fm"] for r in e215_rows(c215, a, "posthoc", "v31", "Jg", "S")}
+            bs = ["arms", a, "readings_REPORTED", "switch_route"]
+            for i, c in enumerate(sw):
+                pt = c["kind"]
+                kind = c["what"].split(" / random")[0]
+                fmt_name = Mf[a][pt]["format"]
+                row = (f"| {pt} | {a}, {fmt_name} | {kind} | {c['measured_W_ratio']:.3f} | {c['models_W_ratio']['MM1-v3.1']:.3f} | "
+                       f"{sgn(errs[pt])}% |")
+                G.json(f"s5S.t.{pt}.m", "e215%s_scores" % a, bs + [i, "measured_W_ratio"], "{:.3f}", row, "measured ratio, REPORTED")
+                G.json(f"s5S.t.{pt}.f", "e215%s_scores" % a, bs + [i, "models_W_ratio", "MM1-v3.1"], "{:.3f}", row, "MM1-v3.1's ratio, REPORTED")
+                D(f"s5S.t.{pt}.e", errs[pt], "{:+.1f}", row, "e215one",
+                  {"arm": a, "group": "posthoc", "model": "v31", "q": "Jg", "conv": "fm", "key": pt}, E215_INPUTS,
+                  "one E215 point, %, desk (forecast / measured - 1)")
+                tabs["switch_S"].append(row)
+                tabs["switch_S_fig"].append({"point": pt, "format": fmt_name, "kind": kind, "measured": c["measured_W_ratio"],
+                                             "v31": c["models_W_ratio"]["MM1-v3.1"], "err": errs[pt]})
     return tabs
 
 
@@ -1243,6 +1402,46 @@ def build(G, R, cache, c215=None, rules215=None):
     p = "against 14.5 to 19.7% and 18.4 to 31.0% for F1"
     range_entry(G, "os.f1.wall", sel_f, "wall", p)
     range_entry(G, "os.f1.jg3", sel_f, "jg3", p)
+    # report-v2-fix (finding M3): E215's post hoc-selected points beside the registered range, and the low end's repeated configurations
+    sel_ph = [r for r in rows if r[1] == "MM1-v3.1" and r[0] in ("E215 arm A, families L, S (aifoundry3 card 0, 600 MHz)",
+                                                                "E215 arm B, families L, S (aifoundry1 card 1, 600 MHz)")]
+    if sel_ph:
+        range_entry(G, "os.posthoc.wall", sel_ph, "wall",
+                    "On E215's post hoc-selected points (families L and S), MM1-v3.1 read 10.2 and 11.8% in wall cycles")
+    p = "the low end, 2.7%, is E212's S3, where 29 of its 46 cases repeat a configuration MM1-v3 was fitted on (4.21% on its 17 new ones)"
+    tws = ["twins", "wall cycles (time configuration)"]
+    Jn("os.s3.low", "e212s3", ["per_case", "v3", "wall", "rms_pct"], "{:.1f}", p, "blind, REPORTED, rms %")
+    Jn("os.s3.tw", "e212s3", tws + ["twin", "v3", "n"], "{:d}", p, "cases")
+    Jn("os.s3.n", "e212s3", ["n_cases"], "{:d}", p, "cases")
+    Jn("os.s3.nt", "e212s3", tws + ["no_twin", "v3", "rms_pct"], "{:.2f}", p, "rms %")
+    Jn("os.s3.ntn", "e212s3", tws + ["no_twin", "v3", "n"], "{:d}", p, "cases")
+    if c215 is not None:
+        # report-v2-fix (finding M7): E215's family S in the summary; (finding M4): the retention and one-K-block misses in the summary
+        p = ("blind on E215's 12 newly counted kinds (post hoc-selected), MM1-v3.1's J over idle given the seconds read 8.45%, but +23.6% at "
+             "int8 data of plus and minus one")
+        sS = e215_stat(c215, PA215, "posthoc", "v31", "Jg", "fm", "S")
+        aS = {"arm": PA215, "group": "posthoc", "model": "v31", "q": "Jg", "conv": "fm", "only": "S"}
+        D("os.sw.S.n", sS["n"], "{:d}", p, "e215", dict(aS, stat="n"), E215_INPUTS, "family S points, desk")
+        D("os.sw.S.rms", sS["rms"], "{:.2f}", p, "e215", dict(aS, stat="rms"), E215_INPUTS, "blind, post hoc-selected, rms %, desk")
+        D("os.sw.S.a057", e215_one(c215, "A", "posthoc", "v31", "Jg", "fm", "a057"), "{:+.1f}", p, "e215one",
+          {"arm": "A", "group": "posthoc", "model": "v31", "q": "Jg", "conv": "fm", "key": "a057"}, E215_INPUTS,
+          "one E215 point, %, desk (forecast / measured - 1)")
+        p = ("the time just past the L3's first retention edge (gemmL2x1x7 ran 12.7% to 14.9% slower than MM1-v3.1 forecast on both cards: 4 of "
+             "the 8 cases past E215's registered T1 band) and at one K block (11.0% and 10.9% slower)")
+        for k, arm, ck in (("r0", "B", "rgm136 gemmL|gemmL2x1x7|fp32|0xffffffff"), ("r1", "A", "rgm136 gemmL|gemmL2x1x7|int8|0xffffffff")):
+            D("os.sw7." + k, e215_one(c215, arm, "registered", "v31", "wall", "mf", ck), "{:.1f}", p, "e215one",
+              {"arm": arm, "group": "registered", "model": "v31", "q": "wall", "conv": "mf", "key": ck}, E215_INPUTS,
+              "one E215 case, %, desk (measured / forecast - 1)")
+        for k, only in (("nR", "R"), ("n", None)):
+            args = {"arm": PA215, "group": "registered", "model": "v31", "q": "wall", "rule": "T1"}
+            if only:
+                args["only"] = only
+            D("os.sw7." + k, e215_miss(c215, rules215, PA215, "registered", "v31", "wall", "T1", only), "{:d}", p, "e215miss", args,
+              E215_INPUTS + ["e215_rules"], "cases past MM1-v3.1's registered T1 band%s, desk" % (" in family " + only if only else ""))
+        for k, arm, ck in (("k0", "A", "rgm136 gemmL|gemmL8x15x1|int8|0xffffffff"), ("k1", "B", "rgm136 gemmL|gemmL16x14x1|fp32|0xffffffff")):
+            D("os.sw7." + k, e215_one(c215, arm, "registered", "v31", "wall", "mf", ck), "{:.1f}", p, "e215one",
+              {"arm": arm, "group": "registered", "model": "v31", "q": "wall", "conv": "mf", "key": ck}, E215_INPUTS,
+              "one E215 case, %, desk (measured / forecast - 1)")
     p = "(wall cycles closer at 86 cases, farther at 13)"
     T("os.hp1.v3", "e213P_txt", "HP1 MM1-v3 BETTER (86/13/16", "86", p)
     T("os.hp1.v2", "e213P_txt", "HP1 MM1-v3 BETTER (86/13/16", "13", p)
@@ -1275,6 +1474,7 @@ def build(G, R, cache, c215=None, rules215=None):
 
     # ---------------- the header
     G.git("hdr.pin", "7edf3477", "15:51:20", "up to GitHub main 7edf3477 (E215's pooled scores, committed at 15:51:20 PST)")
+    G.git("hdr.fix", "c9adc716", "16:14:47", "the corrections also cite c9adc716, the frozen terms' own REPORTED score on E215 (committed at 16:14:47 PST)")
 
     # ---------------- 1
     T("s1.time", "v0_readme", "at or before 09:48:24 PST", "09:48:24", "(Mon 16 Nov 2026, at or before 09:48:24 PST;")
@@ -1450,6 +1650,8 @@ def build(G, R, cache, c215=None, rules215=None):
     Jn("s42.s3.tw.3", "e212s3", tw + ["no_twin", "v3", "n"], "{:d}", p, "cases")
     Jn("s42.s3.tw.4", "e212s3", tw + ["no_twin", "v3", "rms_pct"], "{:.2f}", p, "rms %")
     Jn("s42.s3.tw.5", "e212s3", tw + ["no_twin", "v2", "rms_pct"], "{:.2f}", p, "rms %")
+    Jn("s42.s3.v2form", "e212s3", tw + ["no_twin", "v2form", "rms_pct"], "{:.2f}",
+       "and v2form, MM1-v2's form refitted on MM1-v3's data and shown beside, 4.08%", "REPORTED beside, rms %")  # report-v2-fix (L5)
     p = "+9.68%, +9.40% and +9.13%"
     for i, tok in enumerate(("+9.68", "+9.40", "+9.13")):
         T("s42.s3.miss.%d" % i, "e212s3_readme", "0x33333333 at +9.68%, 0x1111 at +9.40% and 0x11111111 at +9.13%", tok, p)
@@ -1494,10 +1696,11 @@ def build(G, R, cache, c215=None, rules215=None):
     T("s43.b.85", "e213B_readme", "(79 of 85 runs", "85", p)
     T("s43.b.cm", "e213B_readme", "| 29.74 (planned 32.5", "29.74", p)
     T("s43.b.079", "e213B_readme", "During run 079 (k37, gemmLnc3x1x3 fp32 random", "079", "in run 079 (k37, gemmLnc3x1x3 fp32)")
-    p = ("the stop left only runs 080-085 unstarted, where in the registered order the same stop, at k37's run 40, would have left all of pass 2 "
-         "unrun (runs 43-85)")
+    p = ("the stop left only runs 080-085 unstarted, where in the registered order the same stop, at k37's run 40, would have started nothing "
+         "further: k38 and k39 (runs 41-42), the middle tie and all of pass 2 (runs 43-85) unrun")
     T("s43.a3.lost", "e213B_readme", "runs 080-085 (k38 and k39 in pass 1; k39, k38, k37 and k40 in pass 2)", "080-085", p)
     T("s43.a3.run40", "e213_a3", "a stop at k37 (run 40) starts nothing further", "40", p)
+    T("s43.a3.r4142", "e213_a3", "so k38 and k39 (runs 41-42), the middle tie and **all of pass 2** (runs 43-85)", "41-42", p)  # report-v2-fix (L8)
     T("s43.a3.pass2", "e213_a3", "all of pass 2 (runs 43-85)", "43-85", p)
     q = "STOP: board 72.24 W above 72 W on 3 samples in a row: nothing further started"
     T("s43.b.stopq", "e213B_readme", q, q, q, "the session log's words")
@@ -1599,9 +1802,15 @@ def build(G, R, cache, c215=None, rules215=None):
         T("s44u.t1", UR, "| 1. DECLARED (before any E214 measurement) | 10:42:28 written", "10:42:28", p)
         T("s44u.t2", UR, "| 2. FORECAST (the frozen predictors, unchanged) | 10:44-10:46:14 written", "10:46:14", p)
         T("s44u.t3", UR, "| the scorer frozen (after a stand-in code test) | 10:49:30 |", "10:49:30", p)
-        p = ("On the 425 cases whose configuration no MM1-v3.1 training point shares, MM1-v3.1 read 6.66% in wall cycles and 5.48% in J over "
-             "idle given the measured seconds, MM1-v3 6.52% and 5.55%, MM1-v2 8.06% and 7.91%")
+        # report-v2-fix (finding L1): each model's own no-twin set, as the scores have them
+        p = ("On the cases whose configuration none of a model's own training points shares (MM1-v3.1's 425 cases, MM1-v3's 429 and MM1-v2's "
+             "462 in wall cycles; 425, 426 and 372 in J over idle), MM1-v3.1 read 6.66% in wall cycles and 5.48% in J over idle given the "
+             "measured seconds, MM1-v3 6.52% and 5.55%, MM1-v2 8.06% and 7.91%")
         Jn("s44u.n", "e214u_scores", ["tables_per_case", "v31", "wall", "pooled", "no_twin", "n"], "{:d}", p, "cases, no twin")
+        Jn("s44u.v3.nw", "e214u_scores", ["tables_per_case", "v3", "wall", "pooled", "no_twin", "n"], "{:d}", p, "cases, no twin")
+        Jn("s44u.v2.nw", "e214u_scores", ["tables_per_case", "v2", "wall", "pooled", "no_twin", "n"], "{:d}", p, "cases, no twin")
+        for m in ("v31", "v3", "v2"):
+            Jn(f"s44u.{m}.ne", "e214u_scores", ["tables_per_case", m, "E1", "pooled", "no_twin", "relative", "n"], "{:d}", p, "points, no twin")
         for m in ("v31", "v3", "v2"):
             Jn(f"s44u.{m}.wall", "e214u_scores", ["tables_per_case", m, "wall", "pooled", "no_twin", "rms_pct"], "{:.2f}", p, "unread, rms %")
             Jn(f"s44u.{m}.e1", "e214u_scores", ["tables_per_case", m, "E1", "pooled", "no_twin", "relative", "rms_pct"], "{:.2f}", p, "unread, rms %")
@@ -1615,6 +1824,8 @@ def build(G, R, cache, c215=None, rules215=None):
         T("s44u.f6", UR, "| T1 | 10% | **FAIL** 195/224 (87.1%) | 11% | **FAIL** 175/201 (87.1%) |", "11", p)
         T("s44u.f7", UR, "a rule passes when at least 90% of its cases pass", "90", p)
         T("s44u.f8", UR, "| E4 | 10% | **PASS** 243/265 (91.7%) | 10% | **FAIL** 179/209 (85.6%) |", "4", p)
+        Jn("s44u.h.n", "e214u_scores", ["head_to_head", "MM1-v3.1 vs MM1-v3", "H1", "pooled", "n"], "{:d}",
+           "Head to head, over all 518 cases, twins included", "cases, twins included")  # report-v2-fix (L1)
         p = "(wall cycles closer at 61 cases, farther at 71, with 386 ties)"
         Jn("s44u.h.c", "e214u_scores", ["head_to_head", "MM1-v3.1 vs MM1-v3", "H1", "pooled", "closer_A"], "{:d}", p, "cases")
         Jn("s44u.h.f", "e214u_scores", ["head_to_head", "MM1-v3.1 vs MM1-v3", "H1", "pooled", "closer_B"], "{:d}", p, "cases")
@@ -1647,6 +1858,8 @@ def build(G, R, cache, c215=None, rules215=None):
     T("s45.b30", "e215_reg", "30 points chosen here by the same rule", "30", p)
     T("s45.bL", "e215_reg", "(L 8, S 4; section 3)", "8", p)
     T("s45.bS", "e215_reg", "(L 8, S 4; section 3)", "4", p)
+    T("s45.famR", "e215_reg", "**R** the two-edge retention at 36-140 MB", "36-140", "R the two-edge retention at 36-140 MB",
+      "the registration's family R")  # report-v2-fix (L7: the families defined)
     p = "(arm A: 10% in wall cycles, 13% in J over idle given the seconds)"
     T("s45.t1", "e215_reg", "| T1 | cycles an op, the wall, per case | 10% |", "10", p)
     T("s45.e1", "e215_reg", "| E1 | J over idle given the measured seconds, per point (watts under 3 W) | 13% |", "13", p)
@@ -1735,14 +1948,33 @@ def build(G, R, cache, c215=None, rules215=None):
     p = "NOT DECIDED, then T5r by its pooled LOEO (4.29% against 4.44%)"
     T("s6.i8b.0", "v31_readme", "pooled LOEO wall rms: T5r 4.29%, tC 4.44%", "4.29", p)
     T("s6.i8b.1", "v31_readme", "pooled LOEO wall rms: T5r 4.29%, tC 4.44%", "4.44", p)
-    p = "| LOEO wall over the touched points: G0 6.58% against 9.19-24.40% |"
+    # report-v2-fix (findings L4 and M6): item 3's scores labelled unidentified; item 4's LOLO read with the unidentified fold named
+    p = ("| LOEO wall over the touched points: G0 6.58% against 9.19-24.40%, those three scores unidentified (the training cost is flat in the "
+         "E213 fold) |")
     T("s6.i3.0", "v31_readme", "G0 6.58%, Gplace 24.40%", "6.58", p)
     T("s6.i3.1", "v31_readme", "Gcoop 9.19%", "9.19", p)
     T("s6.i3.2", "v31_readme", "G0 6.58%, Gplace 24.40%", "24.40", p)
-    p = "| T7: LOLO 14.40%, pooled LOEO 6.20%; n/32: 89.78% and 4.29% |"
+    T("s6.i3.u", "v31_readme", "Item 3's scores of Gplace, Goperand and Gcoop are unidentified", "unidentified", p, "the README's label, quoted")
+    p = ("| T7: LOLO 14.40%, pooled LOEO 6.20%; n/32: 89.78% and 4.29%, its LOLO set by the compact fold, where eta is not identified (118.2%; "
+         "6.17% with eta at its neutral 0) |")
     lit = "T7 14.40% / 6.20%, demand 92.50% / 4.39%, n32 89.78% / 4.29%"
     for i, tok in enumerate(("14.40", "6.20", "89.78", "4.29")):
         T("s6.i4.%d" % i, "v31_readme", lit, tok, p)
+    by = ["item4_LOLO_by_class_each_form"]
+    e0 = ["item4_LOLO_compact_eta_not_identified_post_hoc", "n32", "compact_rms_eta_0_post_hoc", "rms_pct"]
+    Jn("s6.i4.c", "v31_reported", by + ["n32", "compact"], "{:.1f}", p, "LOLO, compact class, n/32, eta as fitted (not identified), %")
+    Jn("s6.i4.e0", "v31_reported", e0, "{:.2f}", p, "the same with eta at its neutral 0, post hoc, REPORTED, %")
+    p = ("| n/32: T7 failed its pooled LOEO condition, and class by class T7 was worse (compact 12.96% against 6.17% at eta 0, other 18.66% "
+         "against 6.47%, spread 14.32% against 6.55%) |")
+    Jn("s6.i4.d0", "v31_reported", by + ["T7", "compact"], "{:.2f}", p, "LOLO by class, T7, %")
+    Jn("s6.i4.d1", "v31_reported", e0, "{:.2f}", p, "n/32's compact class with eta at its neutral 0, post hoc, REPORTED, %")
+    Jn("s6.i4.d2", "v31_reported", by + ["T7", "other"], "{:.2f}", p, "LOLO by class, T7, %")
+    Jn("s6.i4.d3", "v31_reported", by + ["n32", "other"], "{:.2f}", p, "LOLO by class, n/32, %")
+    Jn("s6.i4.d4", "v31_reported", by + ["T7", "spread"], "{:.2f}", p, "LOLO by class, T7, %")
+    Jn("s6.i4.d5", "v31_reported", by + ["n32", "spread"], "{:.2f}", p, "LOLO by class, n/32, %")
+    p = "Its pooled layout-held-out error (14.40% against n/32's 89.78%)"
+    T("s63.lolo.0", "v31_readme", lit, "14.40", p)
+    T("s63.lolo.1", "v31_readme", lit, "89.78", p)
     T("s6.i1", "v31_readme", "E1t 5.48%", "5.48", "| LOEO W given t: E1t 5.48% |")
     T("s6.i1b", "v31_readme", "E1b's all-data b2, d2 at their bound 0: True", "0", "| E1t (the L2 line energy at its bound 0) |")
     v31rows = [("LOEO, wall cycles", "LOEO", "all", None), ("LOCO, wall cycles", "LOCO", "all", None),
@@ -1848,13 +2080,39 @@ def build(G, R, cache, c215=None, rules215=None):
     p = "MM1-v3's card-1 zeros held out read 5.32% against 8.50% for MM1-v2's form"
     T("s7.z.0", "v3_readme", "card 1's all-zero data 5.32% (+0.10) against 8.50% (+2.97)", "5.32", p)
     T("s7.z.1", "v3_readme", "card 1's all-zero data 5.32% (+0.10) against 8.50% (+2.97)", "8.50", p)
-    Jn("s7.tiles", "unread_sw", ["groups", "A", "all", "V3", "Q1_cases", "rms_pct"], "{:.1f}", "(now counted, and priced to 6.8% unread)", "unread, rms %")
+    # report-v2-fix (finding M7): "priced to 6.8% unread" tempered by E215's family S
+    p = ("(now counted: priced to 6.8% unread, and blind on E215's 12 new kinds to 8.45%, though int8 data of plus and minus one read +23.6%)"
+         if c215 is not None else "(now counted, and priced to 6.8% unread)")
+    Jn("s7.tiles", "unread_sw", ["groups", "A", "all", "V3", "Q1_cases", "rms_pct"], "{:.1f}", p, "unread, rms %")
+    if c215 is not None:
+        sS = e215_stat(c215, PA215, "posthoc", "v31", "Jg", "fm", "S")
+        aS = {"arm": PA215, "group": "posthoc", "model": "v31", "q": "Jg", "conv": "fm", "only": "S"}
+        D("s7.tiles.S.n", sS["n"], "{:d}", p, "e215", dict(aS, stat="n"), E215_INPUTS, "family S points, desk")
+        D("s7.tiles.S.rms", sS["rms"], "{:.2f}", p, "e215", dict(aS, stat="rms"), E215_INPUTS, "blind, post hoc-selected, rms %, desk")
+        D("s7.tiles.S.a057", e215_one(c215, "A", "posthoc", "v31", "Jg", "fm", "a057"), "{:+.1f}", p, "e215one",
+          {"arm": "A", "group": "posthoc", "model": "v31", "q": "Jg", "conv": "fm", "key": "a057"}, E215_INPUTS,
+          "one E215 point, %, desk (forecast / measured - 1)")
     p = "(with rgm211 held out MM1-v3 reads 7.78% against 9.31%)"
     T("s7.r211.0", "v3_readme", "leave rgm211 out 7.78% against 9.31%", "7.78", p)
     T("s7.r211.1", "v3_readme", "leave rgm211 out 7.78% against 9.31%", "9.31", p)
     p = "rgm136's gemmL loop runs 46 instructions an op, not 36 (E211's dated correction 1)"
     T("chg.46", "e211_corr", "the gemmL loops run 46 and 40 instructions an op, not 36 and 35", "46", p)
     T("chg.36", "e211_corr", "the gemmL loops run 46 and 40 instructions an op, not 36 and 35", "36", p)
+    # report-v2-fix: the numbers its changelog entry restates, from the same sources as the body's; and eta's neutral 0 in section 6.3
+    p = "the scorecard's 2.7-9.0% is on each test's registered points, with E215's post hoc-selected 10.2% and 11.8%"
+    range_entry(G, "chg.fix.reg", sel_n, "wall", p)
+    if sel_ph:
+        range_entry(G, "chg.fix.ph", sel_ph, "wall", p)
+    if c215 is not None:
+        sn = e215_stat(c215, "A", "registered", "v31", "Jg", "fm", "nolnc")
+        D("chg.fix.375", sn["rms"], "{:.2f}", "3.75%'s footing", "e215", {"arm": "A", "group": "registered", "model": "v31", "q": "Jg",
+          "conv": "fm", "only": "nolnc", "stat": "rms"}, E215_INPUTS, "post hoc, without the gemmLnc points, rms %, desk")
+    Jn("chg.fix.v2form", "e212s3", ["twins", "wall cycles (time configuration)", "no_twin", "v2form", "rms_pct"], "{:.2f}",
+       "v2form's 4.08% on S3's new configurations", "REPORTED beside, rms %")
+    T("chg.fix.4142", "e213_a3", "so k38 and k39 (runs 41-42), the middle tie and **all of pass 2** (runs 43-85)", "41-42",
+      "A3's counterfactual counts runs 41-42")
+    T("s63.eta0", "v31_readme", "re-read with that fold's constants and eta at its neutral 0 (REPORTED, post hoc)", "0",
+      "with that fold read at eta's neutral 0, T7 was worse than n/32 on every layout class")
 
     # ---------------- E215
     t215 = build_e215(G, R, c215, rules215) if c215 is not None else None
@@ -1869,7 +2127,7 @@ def build(G, R, cache, c215=None, rules215=None):
     tables += ["", "<!-- MM1-v3.1 held out -->"] + [r for r in G.rows if any(r.startswith("| " + n[0] + " |") for n in v31rows)]
     if t215:
         for k, title in (("verdicts", "E215's verdicts"), ("footings", "E215's two footings"), ("reported", "E215 REPORTED beside"),
-                         ("lnc", "E215's gemmLnc points")):
+                         ("lnc", "E215's gemmLnc points"), ("switch_S", "E215's family S (section 5)")):
             tables += ["", f"<!-- {title} -->"] + t215[k]
     figs = {}
     figs["fig-1-timing.svg"] = fig_timing(sim, st)
@@ -1879,16 +2137,17 @@ def build(G, R, cache, c215=None, rules215=None):
             ("E207", "E207 (aifoundry3 card 0, 600 MHz)", "MM1-v2", [("MM1-v1", "hol"), ("F1", "sq"), ("F2", "tri")]),
             ("E209", "E209 (aifoundry2 card 0, its governor)", "MM1-v2", [("MM1-v1", "hol"), ("F1@800", "sq")]),
             ("E211 rgm211", "E211, rgm211's 12 points (aifoundry3 card 0)", "MM1-v2", [("MM1-v1", "hol"), ("F1", "sq")]),
-            ("E212 S4 (unread)", "E212 a2c0-S4 (aifoundry2 card 0, its governor)", "MM1-v3", [("MM1-v2", "hol")]),
             ("E212 S3", "E212 a2c0-S3, re-run (aifoundry2 card 0, its governor)", "MM1-v3", [("MM1-v2", "hol")]),
             ("E213 arm A", "E213 arm A (aifoundry3 card 0, 600 MHz)", "MM1-v3", [("MM1-v2", "hol")]),
-            ("E213 arm B", "E213 arm B (aifoundry1 card 1, 600 MHz)", "MM1-v3", [("MM1-v2", "hol")]),
-            ("tiles (unread)", "E212's plan tiles and E206's and E207's real tiles (three cards)", "MM1-v3 with the new counts",
-             [("N, each format's mean kind", "dia")])]
+            ("E213 arm B", "E213 arm B (aifoundry1 card 1, 600 MHz)", "MM1-v3", [("MM1-v2", "hol")])]
+    # report-v2-fix (findings M3 and L6): figure 2 draws the blind tests only (the two unread rows are in the table alone), and E215's
+    # post hoc-selected families L and S beside its registered ones, marked open
     if c215 is not None:
-        pick[-1:-1] = [x for x in [("E215 arm A", "E215 arm A, families P, C, R (aifoundry3 card 0, 600 MHz)", "MM1-v3.1", [("MM1-v3", "hol")]),
-                                   ("E215 arm B", "E215 arm B, families P, C, R (aifoundry1 card 1, 600 MHz)", "MM1-v3.1", [("MM1-v3", "hol")])]
-                       if x[0][-1] in ARMS215]
+        pick += [x for x in [("E215 arm A", "E215 arm A, families P, C, R (aifoundry3 card 0, 600 MHz)", "MM1-v3.1", [("MM1-v3", "hol")]),
+                             ("E215 arm B", "E215 arm B, families P, C, R (aifoundry1 card 1, 600 MHz)", "MM1-v3.1", [("MM1-v3", "hol")]),
+                             ("E215 A L,S (post hoc)", "E215 arm A, families L, S (aifoundry3 card 0, 600 MHz)", "MM1-v3.1", [("MM1-v3", "hol")]),
+                             ("E215 B L,S (post hoc)", "E215 arm B, families L, S (aifoundry1 card 1, 600 MHz)", "MM1-v3.1", [("MM1-v3", "hol")])]
+                 if x[1].split(",")[0][-1] in ARMS215]
     byk = {(r[0], r[1]): r[3] for r in rows}
     for short, test, newest, comps in pick:
         nv = {q: (byk[(test, newest)][q]["rms"] if byk[(test, newest)].get(q) else None) for q in ("wall", "jg3")}
@@ -1896,10 +2155,14 @@ def build(G, R, cache, c215=None, rules215=None):
         for cl, shape in comps:
             c = byk[(test, cl)]
             cs.append((cl, {q: (c[q]["rms"] if c.get(q) else None) for q in ("wall", "jg3")}, shape))
-        fig_rows.append((short, newest, nv, cs))
+        fig_rows.append((short, newest, nv, cs, "post hoc" in short))
     lo_w = min(c["rms"] for r in sel_n for c in [r[3]["wall"]])
     hi_w = max(c["rms"] for r in sel_n for c in [r[3]["wall"]])
-    figs["fig-2-scorecard.svg"] = fig_scorecard(fig_rows, "Frozen before each blind test, the newest MM1 read %.1f-%.1f%% in wall cycles" % (lo_w, hi_w))
+    ph = [r[3]["wall"]["rms"] for r in sel_ph] if sel_ph else []
+    head2 = "Frozen before each blind test, the newest MM1 read %.1f-%.1f%% in wall cycles on the registered points" % (lo_w, hi_w)
+    if ph:
+        head2 += ", %.1f-%.1f%% on E215's post hoc ones (open)" % (min(ph), max(ph))
+    figs["fig-2-scorecard.svg"] = fig_scorecard(fig_rows, head2)
     sw = R.json("v1_numbers")["switch"]["routes"]
     U = R.json("unread_sw")["pass_rule_against_N"]["Q2"]
     bars = [("E210, blind (13 test cases)", "switch route (R1)", sw["R1"]["rms_over_D_pct"], True),
@@ -1909,8 +2172,12 @@ def build(G, R, cache, c215=None, rules215=None):
             ("E210, blind (13 test cases)", "bit flips, raw (R3)", sw["R3"]["rms_over_D_pct"], False),
             ("Unread tiles (29 cases)", "MM1-v3 + new counts", U["V3"]["rms_pct"], True),
             ("Unread tiles (29 cases)", "null N", U["N"]["rms_pct"], False)]
-    figs["fig-3-switch.svg"] = fig_switch(bars, "Energy followed the counted switches: %.1f%% of D blind and %.1f%% unread, against 16-47%% and %.0f%%"
-                                          % (sw["R1"]["rms_over_D_pct"], U["V3"]["rms_pct"], U["N"]["rms_pct"]))
+    head3 = ("Energy followed the counted switches: %.1f%% of D blind and %.1f%% unread, against 16-47%% and %.0f%%"
+             % (sw["R1"]["rms_over_D_pct"], U["V3"]["rms_pct"], U["N"]["rms_pct"]))
+    sS_fig = t215.get("switch_S_fig") if t215 else None
+    if sS_fig:  # report-v2-fix (finding M7)
+        head3 += "; on E215's %d new kinds, int8 data of plus and minus one missed" % len(sS_fig)
+    figs["fig-3-switch.svg"] = fig_switch(bars, head3, sS_fig)
     figs["fig-4-v31.svg"] = fig_v31(v31_fig, "MM1-v3.1 equalled MM1-v3 refitted in time and lost on a held-out card's energy")
     f5 = None
     if t215:
@@ -2054,14 +2321,17 @@ def fig_timing(vals, st):
 
 
 def fig_scorecard(rows_fig, head):
-    """rows_fig: list of (test label, newest MM1 label, {q: value}, [(comparator label, {q: value}, shape)])"""
+    """rows_fig: list of (test label, newest MM1 label, {q: value}, [(comparator label, {q: value}, shape)], post hoc?); a post hoc row's
+    newest-MM1 dot is drawn open (report-v2-fix: E215's post hoc-selected families L and S, apart from the registered points)"""
     title = head
-    desc = ("Two panels, log scale 1% to 100%: the rms error of the newest MM1 frozen before each test (filled circle) against the lab's "
-            "earlier routes and the previous MM1 (grey), in wall cycles an op and in J over idle given the measured seconds (3 W and "
-            "above). The shaded band is the card's own session repeat.")
+    desc = ("Two panels, log scale 1% to 100%: the rms error of the newest MM1 frozen before each blind test (filled circle; open for E215's "
+            "post hoc-selected families L and S) against the lab's earlier routes and the previous MM1 (grey), in wall cycles an op and in J "
+            "over idle given the measured seconds (3 W and above). The shaded band is the card's own session repeat. The unread tests are in "
+            "the README's table only.")
     s = SVG(400, title, desc)
-    y = s.head("rms of forecast / measured - 1, log scale. Filled: the newest MM1 frozen before the test. Grey: the previous MM1 (open "
-               "circle), F1 (square), F2 (triangle), N, the null (diamond). Shaded: the card's own session repeat (0.38% and 1.16%).")
+    y = s.head("rms of forecast / measured - 1, log scale. Filled: the newest MM1 frozen before the test, on its registered points; open: "
+               "E215's post hoc-selected points. Grey: the previous MM1 (open circle), F1 (square), F2 (triangle). Shaded: the card's own "
+               "session repeat (0.38% and 1.16%).")
     pans = [("wall cycles an op", "wall", 110, 243, 0.383), ("J over idle, given t", "jg3", 262, 390, 1.163)]
     lo, hi = 0.3, 100.0
     for name, q, xa, xb, rep in pans:
@@ -2069,7 +2339,7 @@ def fig_scorecard(rows_fig, head):
     y += 22
     ytop = y
     rh = 30
-    for i, (test, newest, nv, comps) in enumerate(rows_fig):
+    for i, (test, newest, nv, comps, posthoc) in enumerate(rows_fig):
         yy = y + i * rh + rh / 2
         for ln_i, ln in enumerate(wrap(test, 15)[:2]):
             s.t(16, yy - 3 + ln_i * 13 - (6 if len(wrap(test, 15)) > 1 else 0) + 4, ln, "t3 ink")
@@ -2092,7 +2362,8 @@ def fig_scorecard(rows_fig, head):
             v = nv.get(q)
             if v is not None:
                 cx = logx(v, lo, hi, xa, xb)
-                s.raw(f'<circle class="acc" cx="{cx:.1f}" cy="{yy:.1f}" r="5.5"><title>{esc(f"{test}: {newest} {v:.1f}%")}</title></circle>')
+                tip = f"{test}: {newest} {v:.1f}%" + (" (post hoc-selected points)" if posthoc else "")
+                s.raw(f'<circle class="{"hol" if posthoc else "acc"}" cx="{cx:.1f}" cy="{yy:.1f}" r="5.5"><title>{esc(tip)}</title></circle>')
                 s.t(cx, yy - 8, f"{v:.1f}", "tn ink", "middle")
     yb = y + len(rows_fig) * rh
     for name, q, xa, xb, rep in pans:
@@ -2107,10 +2378,14 @@ def fig_scorecard(rows_fig, head):
     return s.done(yb + 30)
 
 
-def fig_switch(bars, head):
-    """bars: list of (group, label, value % of D, accent?)"""
+def fig_switch(bars, head, pts=None):
+    """bars: list of (group, label, value % of D, accent?); pts (report-v2-fix): E215's family S kinds, each {point, format, kind,
+    measured, v31, err}, drawn as a scatter of the measured kind-over-random W ratio against MM1-v3.1's"""
     desc = ("Horizontal bars: each route's rms error in the data-dependent power as a share of D (random minus zeros), on E210's 13 blind "
-            "test cases and on the unread test's 29 cases. The switch route is the accent bar.")
+            "test cases and on the unread test's 29 cases. The switch route is the accent bar."
+            + (" Below, a scatter of E215's family S kinds (blind, post hoc-selected): each kind's W over idle over its random partner's, "
+               "measured against MM1-v3.1's forecast, fp32 as circles and int8 as squares; the diagonal is an exact forecast, and the one "
+               "kind far from it is int8 data of plus and minus one." if pts else ""))
     s = SVG(400, head, desc)
     y = s.head("rms error of the data-dependent power, % of D (random minus zeros). E210: blind, nine patterns at two shapes; unread: new "
                "switch counts for E212's plan tiles and the real tiles.")
@@ -2129,7 +2404,58 @@ def fig_switch(bars, head):
         s.t(x0 + w + 5, y + 13.5, f"{v:.1f}%", "tn ink")
         y += 22
     s.raw(f'<line class="base" x1="{x0}" x2="{x0}" y1="{y - 22 * len(bars) - 40}" y2="{y}"/>')
-    return s.done(y + 14)
+    if not pts:
+        return s.done(y + 14)
+    # report-v2-fix (finding M7): E215's family S, blind and post hoc-selected: each kind's W over idle over its random partner's, measured
+    # against MM1-v3.1's forecast ratio; on the diagonal the forecast is exact. fp32 circles, int8 squares; the one miss in the accent.
+    y += 20
+    for ln in wrap("E215 family S, blind (post hoc-selected), %d kinds: each kind's W over idle over its random partner's, measured "
+                   "(up) against MM1-v3.1's forecast (across)" % len(pts), 60):
+        s.t(16, y, ln, "t3 ink2")
+        y += 16
+    y += 4
+    s.raw(f'<circle class="gry" cx="22" cy="{y - 4:.1f}" r="4.5"/>')
+    s.t(31, y, "fp32", "t3 ink")
+    s.raw(f'<rect class="gry2" x="68" y="{y - 8.5:.1f}" width="9" height="9" rx="1.5"/>')
+    s.t(82, y, "int8", "t3 ink")
+    s.t(120, y, "on the line: exactly as forecast", "t3 muted")
+    y += 34
+    lo, hi = 0.4, 1.05
+    px0, px1, ph = 70, 370, 230
+    py0, py1 = y + ph, y
+
+    def X(v):
+        return px0 + (v - lo) / (hi - lo) * (px1 - px0)
+
+    def Y(v):
+        return py0 - (v - lo) / (hi - lo) * (py0 - py1)
+    for g in (0.5, 0.6, 0.7, 0.8, 0.9, 1.0):
+        s.raw(f'<line class="grid" x1="{px0}" x2="{px1}" y1="{Y(g):.1f}" y2="{Y(g):.1f}"/>')
+        s.raw(f'<line class="grid" x1="{X(g):.1f}" x2="{X(g):.1f}" y1="{py1}" y2="{py0}"/>')
+        s.t(px0 - 6, Y(g) + 4, f"{g:.1f}", "tn muted", "end")
+        s.t(X(g), py0 + 15, f"{g:.1f}", "tn muted", "middle")
+    s.raw(f'<line class="base" x1="{px0}" x2="{px1}" y1="{py0}" y2="{py0}"/>')
+    s.raw(f'<line class="base" x1="{px0}" x2="{px0}" y1="{py1}" y2="{py0}"/>')
+    s.raw(f'<line class="accs" x1="{X(lo):.1f}" y1="{Y(lo):.1f}" x2="{X(hi):.1f}" y2="{Y(hi):.1f}" stroke-opacity="0.35"/>')
+    worst = max(pts, key=lambda q: abs(q["err"]))
+    for q in sorted(pts, key=lambda q: q is worst):
+        cx, cy = X(q["v31"]), Y(q["measured"])
+        tip = (f"{q['point']} ({q['format']}, {q['kind']}): measured {q['measured']:.3f}, MM1-v3.1 {q['v31']:.3f}; J over idle given t "
+               f"{sgn(q['err'])}%")
+        cls = "acc" if q is worst else ("gry2" if q["format"] == "int8" else "gry")
+        if q["format"] == "int8":
+            s.raw(f'<rect class="bg" x="{cx - 6.5:.1f}" y="{cy - 6.5:.1f}" width="13" height="13" rx="2.5"/>')
+            s.raw(f'<rect class="{cls}" x="{cx - 4.5:.1f}" y="{cy - 4.5:.1f}" width="9" height="9" rx="1.5"><title>{esc(tip)}</title></rect>')
+        else:
+            s.raw(f'<circle class="bg" cx="{cx:.1f}" cy="{cy:.1f}" r="6.5"/>')
+            s.raw(f'<circle class="{cls}" cx="{cx:.1f}" cy="{cy:.1f}" r="4.5"><title>{esc(tip)}</title></circle>')
+    cy = Y(worst["measured"])
+    name = "int8 ±1" if worst["kind"] == "pattern:i8_pm1" else worst["kind"]
+    s.t(px1, cy + 20, f"{worst['point']}, {name}", "t3 ink", "end")
+    s.t(px1, cy + 34, f"J over idle {sgn(worst['err'])}%", "t3 ink", "end")
+    s.t((px0 + px1) / 2, py0 + 32, "MM1-v3.1's forecast ratio", "t3 ink2", "middle")
+    s.t(16, py1 - 6, "measured ratio", "t3 ink2")
+    return s.done(py0 + 44)
 
 
 def fig_v31(pairs, head):

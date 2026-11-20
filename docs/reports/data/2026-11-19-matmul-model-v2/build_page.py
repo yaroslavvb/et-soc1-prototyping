@@ -196,27 +196,23 @@ def render(md, folder):
     return "\n".join(out)
 
 
-def summary_first(md):
-    """For the page, the summary ("On one screen") comes right after the title and the header paragraph, before the labels, the words
-    and the meter, which follow it unchanged; every other part keeps the README's order."""
-    i, j = md.index("\n**Labels.**"), md.index("\n## On one screen")
-    k = md.index("\n## 1. ")
-    return md[:i] + md[j:k] + md[i:j] + md[k:]
-
-
 def build(folder):
+    """The page follows the README's own order: since report-v2-fix (Q226) the README puts the summary ("On one screen") right after the
+    title and the provenance, labels, words and meter after it ("About this report"), so the page no longer reorders anything."""
     md = open(os.path.join(folder, "README.md"), encoding="utf-8").read()
     md = md.replace("\nSPDX-License-Identifier: Apache-2.0\n", "\n")
-    md = summary_first(md)
+    if md.index("\n## On one screen") > md.index("\n**Labels.**"):
+        raise SystemExit("build_page: the README's summary must come before its labels")
     body = render(md, folder)
-    src = f"{REPO_URL}/tree/main/{HERE}"
+    tree = f"{REPO_URL}/tree/main/{HERE}"
+    blob = f"{REPO_URL}/blob/main/{HERE}"
     return ("<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
             "<meta name=\"color-scheme\" content=\"light\">\n"
             f"<title>{html.escape(TITLE)}</title>\n<meta name=\"description\" content=\"{html.escape(DESC)}\">\n"
             f"<style>{CSS}</style>\n</head>\n<body>\n<main>\n{body}\n"
-            f"<footer>Built by <a href=\"{src}/build_page.py\">build_page.py</a> from <a href=\"{src}/README.md\">README.md</a> "
-            f"in <a href=\"{src}\">{HERE}</a> on the lab's GitHub main. SPDX-License-Identifier: Apache-2.0</footer>\n"
+            f"<footer>Built by <a href=\"{blob}/build_page.py\">build_page.py</a> from <a href=\"{blob}/README.md\">README.md</a> "
+            f"in <a href=\"{tree}\">{HERE}</a> on the lab's GitHub main. SPDX-License-Identifier: Apache-2.0</footer>\n"
             "</main>\n</body>\n</html>\n")
 
 

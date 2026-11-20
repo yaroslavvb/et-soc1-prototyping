@@ -102,6 +102,8 @@
 | v3.1 + N1+N2, its verifier's shire-count control | family L, both arms, wall cycles (28) | 10.13% (+7.97) | 10.72% (+8.52) | 18 / 4 / 6 (p 0.0043) |
 | v3.1 + gemmLnc term | the five gemmLnc points, both arms, J over idle given t (5) | 9.18% (+7.50) | 24.53% (-22.86) | 5 / 0 / 0 (p 0.062) |
 | MM1-v2 | every registered case, wall cycles (50) | 9.07% (-2.47) | 6.97% (-0.12) | 19 / 30 / 1 (p 0.15) |
+| MM1-v3 | family L, both arms, wall cycles (28) | 9.65% (+7.20) | 10.72% (+8.52) | 17 / 3 / 8 (p 0.0026) |
+| MM1-v2 | family L, both arms, wall cycles (28) | 6.81% (+0.83) | 10.72% (+8.52) | 20 / 8 / 0 (p 0.036) |
 
 <!-- E215's gemmLnc points -->
 | a024 | gemmLnc1x15x3 fp32 | 1.15 | 0.95 |
@@ -109,3 +111,17 @@
 | a031 | gemmLnc8x1x5 fp32 | 1.39 | 0.89 |
 | a032 | gemmLnc5x1x10 fp32 | 1.38 | 0.88 |
 | b013 | gemmLnc2x1x37 fp32 | 1.52 | 1.01 |
+
+<!-- E215's family S (section 5) -->
+| a053 | A, int8 | pattern:i8_den6 | 0.570 | 0.599 | +7.2% |
+| a054 | A, int8 | pattern:i8_den3 | 0.521 | 0.539 | +5.7% |
+| a055 | A, fp32 | pattern:pow2 | 0.590 | 0.569 | -6.7% |
+| a056 | A, fp32 | pattern:den21 | 0.818 | 0.811 | -4.3% |
+| a057 | A, int8 | pattern:i8_pm1 | 0.816 | 0.991 | +23.6% |
+| a058 | A, fp32 | pattern:lanes2 | 0.478 | 0.488 | -1.3% |
+| a059 | A, fp32 | pattern:fp16grid | 0.762 | 0.782 | -0.9% |
+| a060 | A, fp32 | pattern:bf16trunc | 0.710 | 0.719 | -2.1% |
+| b027 | B, fp32 | designed:blind3 a_colconst_b_randn | 0.882 | 0.948 | +5.6% |
+| b028 | B, fp32 | e37 | 0.583 | 0.561 | -5.4% |
+| b029 | B, fp32 | real:blind4 | 0.739 | 0.751 | -0.1% |
+| b030 | B, int8 | real:blind4 | 0.886 | 0.971 | +9.1% |

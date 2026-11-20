@@ -1,10 +1,57 @@
 # The lab's matmul model, MM1, second version: a GEMM's cycles, joules and transistor switches on the ET-SoC-1, and how it held up blind
 
+## On one screen
+
+**In short.** The lab's matmul model, MM1, predicts how many clock cycles and joules a matrix multiplication (a GEMM) takes on an ET-SoC-1
+card, and how many transistors switch, from the matrix sizes, the number format, the data, the card and, since its fourth version, the
+operations the kernel's loop contains. Since the first version of this report, MM1-v3 was frozen and tested blind on two cards (E213): it kept
+the wall cycles to 4.1% rms and beat its predecessor on all five registered head-to-head rules, but it under-priced one loop's energy by up to
+1.8 times. Its declared refit, MM1-v3.1, came out no better held out, and on its own blind day (E215) it failed its registered time bands on both
+cards (27 of 32 and 15 of 18 cases within 10%, against 90% needed) and its four energy rules on aifoundry3: three by that loop's four points
+alone, the fourth (the card's whole joules with the seconds forecast) by two of them and by two points just past the L3's first retention
+edge. *E206 to
+E215 are the lab's numbered experiments (E208, E212 and E214 are a separate modelling session's sweeps); MM1-v0 to MM1-v3.1 are successive
+versions of the model, each frozen before a test; F1 is the lab's earlier GEMM route and F2 its energy ledger. The labels (blind, unread,
+REPORTED and the rest) are defined under "About this report", below the summary.*
+
+- **The timing simulation** (section 3): it counts a kernel's instructions and memory requests exactly (its traces matched MM1-v3.1's
+  masked walk at 352 of 352 working minions at each of two masks), but it has no clock and no caches: over 451 blind points the card took 8.2 to 35.1 cycles for each simulated instruction.
+- **The scorecard** (section 4): frozen before each blind test, the newest MM1 read **2.7 to 9.0%** rms in wall cycles on each test's
+  registered points and **3.2 to 11.9%** in joules over idle given the measured seconds, against **14.5 to 19.7%** and **18.4 to 31.0%** for F1
+  on the first version's five tests. On E215's post hoc-selected points (families L and S), MM1-v3.1 read 10.2 and 11.8% in wall cycles on
+  arms A and B; the low end, 2.7%, is E212's S3, where 29 of its 46 cases repeat a configuration MM1-v3 was fitted on (4.21% on its 17 new ones).
+- **E213** (section 4.3), MM1-v3's blind day on two cards: every time rule and all but one energy rule passed, and MM1-v3 beat MM1-v2 on all
+  five pooled head-to-head rules (wall cycles closer at 86 cases, farther at 13).
+- **E215** (section 4.5), MM1-v3.1's blind day: both arms ran full (aifoundry3 card 0, 119 of 119 runs; aifoundry1 card 1, 71 of 71 runs
+  after a second booking); pooled against MM1-v3, MM1-v3.1 was NOT DECIDED in time, as registered, and on the post hoc layouts MM1-v3 was
+  better.
+- **The two candidate terms, on E215** (sections 4.5 and 6.5; REPORTED): the gemmLnc term cut that loop's energy miss from 24.53% to 9.18%
+  rms at its five points but overshot on arm A; the layout term moved almost no case. Of the forms added to MM1-v3.1, a shire-count-only
+  control came closest, but MM1-v3 itself, with no layout term, was closer than every frozen layout form, and MM1-v2 closer still.
+- **The switch count, through energy** (section 5): blind on E210, energy followed MM1's counted switches to **1.9%** of the data-dependent
+  power (one fitted constant per shape; REPORTED); unread, on data patterns MM1-v3 could not price before, its switch route with 179 new bench
+  counts read **6.8%** against **25.0%** for a null (closer at 35 cases, farther at 5), and on E214's 20 new kinds 7.76% against 28.05%; blind
+  on E215's 12 newly counted kinds (post hoc-selected), MM1-v3.1's J over idle given the seconds read 8.45%, but +23.6% at int8 data of plus
+  and minus one.
+- **E214** (section 4.4), the separate session's third sweep (622 runs on aifoundry1's two cards, committed and verified), scored unread:
+  MM1-v3.1 read 6.66% in wall cycles and MM1-v2 8.06%, and MM1-v3.1's declared time bands failed on both cards.
+- **MM1-v3.1** (section 6), declared before E213's data and fitted after it, kept MM1-v3's time form by its own rules (4.72% against 4.72% in
+  wall cycles held out) and failed two of its acceptance rules: it is frozen as built.
+- **The card repeats itself** to about **0.4%** in cycles and **1.2%** in joules over idle, so model error, not noise, dominates.
+- **Still wrong** (section 7): the non-cooperative loop's energy (1.15 to 1.80 times the forecast at all seven E213 points; on E215 the frozen
+  term overshot), the time of sparse shire subsets (10 of E215's layouts ran 10.1% to 16.6% faster than MM1-v3.1 forecast), the time just
+  past the L3's first retention edge (gemmL2x1x7 ran 12.7% to 14.9% slower than MM1-v3.1 forecast on both cards: 4 of the 8 cases past E215's
+  registered T1 band) and at one K block (11.0% and 10.9% slower), and a held-out card's energy scale.
+
+## About this report
+
 *Thu 19 Nov 2026 (week 47), Pacific time. Written by the round's lanes `report-v2-draft` and `report-v2-final` (Q226) at the desk on
-aifoundry2: no card, no device command, no simulator run; every figure here is quoted from a committed file or is desk arithmetic on committed
-files. It is the second version of the report first committed in `600a8fb9` (Tue 17 Nov 2026; [the first version](../2026-11-17-matmul-model/README.md))
-and adds the matmul work committed since, up to GitHub main `7edf3477` (E215's pooled scores, committed at 15:51:20 PST); E216, registered
-that afternoon, and E217, the separate session's fourth sweep, are left to a later version. Every number is traced to its committed source:
+aifoundry2, and corrected by `report-v2-fix` after an independent verification (the changelog at the end): no card, no device command, no
+simulator run; every figure here is quoted from a committed file or is desk arithmetic on committed files. It is the second version of the
+report first committed in `600a8fb9` (Tue 17 Nov 2026; [the first version](../2026-11-17-matmul-model/README.md)) and adds the matmul work
+committed since, up to GitHub main `7edf3477` (E215's pooled scores, committed at 15:51:20 PST); the corrections also cite `c9adc716`, the
+frozen terms' own REPORTED score on E215 (committed at 16:14:47 PST). E216, registered that afternoon, and E217, the separate session's
+fourth sweep, are left to a later version. Every number is traced to its committed source:
 [`numbers.json`](numbers.json) gives each one's value, the token printed here, the phrase that holds it, its label and its source (a commit
 and a file, with a key path, a literal or a named desk function), and [`check_numbers.py`](check_numbers.py) re-reads every one from that
 source with its own code and fails on any mismatch. The figures and every desk number come from committed files only, by
@@ -31,40 +78,6 @@ card or one mask layout out of a fit.
 
 **The meter.** Every joule here is the card's own board-power reading, whose absolute scale is one fixed gain for every board, never set
 beside an outside meter. The joules compare models and cards with each other, not with another lab's meter.
-
-## On one screen
-
-**In short.** The lab's matmul model, MM1, predicts how many clock cycles and joules a matrix multiplication (a GEMM) takes on an ET-SoC-1
-card, and how many transistors switch, from the matrix sizes, the number format, the data, the card and, since its fourth version, the
-operations the kernel's loop contains. Since the first version of this report, MM1-v3 was frozen and tested blind on two cards (E213): it kept
-the wall cycles to 4.1% rms and beat its predecessor on all five registered head-to-head rules, but it under-priced one loop's energy by up to
-1.8 times. Its declared refit, MM1-v3.1, came out no better held out, and on its own blind day (E215) it failed its registered time bands on both
-cards (27 of 32 and 15 of 18 cases within 10%, against 90% needed) and, on aifoundry3, its energy bands at that loop's four points. *E206 to E215 are the lab's
-numbered experiments (E208, E212 and E214 are a separate modelling session's sweeps); MM1-v0 to MM1-v3.1 are successive versions of the
-model, each frozen before a test; F1 is the lab's earlier GEMM route and F2 its energy ledger.*
-
-- **The timing simulation** (section 3): it counts a kernel's instructions and memory requests exactly (its traces matched MM1-v3.1's
-  masked walk at 352 of 352 working minions at each of two masks), but it has no clock and no caches: over 451 blind points the card took 8.2 to 35.1 cycles for each simulated instruction.
-- **The scorecard** (section 4): frozen before each blind test, the newest MM1 read **2.7 to 9.0%** rms in wall cycles and **3.2 to 11.9%** in
-  joules over idle given the measured seconds, against **14.5 to 19.7%** and **18.4 to 31.0%** for F1 on the first version's five tests.
-- **E213** (section 4.3), MM1-v3's blind day on two cards: every time rule and all but one energy rule passed, and MM1-v3 beat MM1-v2 on all
-  five pooled head-to-head rules (wall cycles closer at 86 cases, farther at 13).
-- **E215** (section 4.5), MM1-v3.1's blind day: both arms ran full (aifoundry3 card 0, 119 of 119 runs; aifoundry1 card 1, 71 of 71 runs
-  after a second booking); pooled against MM1-v3, MM1-v3.1 was NOT DECIDED in time, as registered, and on the post hoc layouts MM1-v3 was
-  better.
-- **The two candidate terms, on E215** (sections 4.5 and 6.5; REPORTED): the gemmLnc term cut that loop's energy miss from 24.53% to 9.18%
-  rms at its five points but overshot on arm A; the layout term moved almost no case, and a shire-count-only control came closest.
-- **The switch count, through energy** (section 5): blind on E210, energy followed MM1's counted switches to **1.9%** of the data-dependent
-  power; unread, on data patterns MM1-v3 could not price before, its switch route with 179 new bench counts read **6.8%** against **25.0%** for
-  a null (closer at 35 cases, farther at 5), and on E214's 20 new kinds 7.76% against 28.05%.
-- **E214** (section 4.4), the separate session's third sweep (622 runs on aifoundry1's two cards, committed and verified), scored unread:
-  MM1-v3.1 read 6.66% in wall cycles and MM1-v2 8.06%, and MM1-v3.1's declared time bands failed on both cards.
-- **MM1-v3.1** (section 6), declared before E213's data and fitted after it, kept MM1-v3's time form by its own rules (4.72% against 4.72% in
-  wall cycles held out) and failed two of its acceptance rules: it is frozen as built.
-- **The card repeats itself** to about **0.4%** in cycles and **1.2%** in joules over idle, so model error, not noise, dominates.
-- **Still wrong** (section 7): the non-cooperative loop's energy (1.15 to 1.80 times the forecast at all seven E213 points; on E215 the frozen
-  term overshot), the time of sparse shire subsets (10 of E215's layouts ran 10.1% to 16.6% faster than MM1-v3.1 forecast) and of one or two
-  K blocks, and a held-out card's energy scale.
 
 ## 1. The question
 
@@ -175,7 +188,7 @@ none (section 4.7).
 **Every blind or unread test, one row a model** (each cell: rms (bias) of forecast / measured - 1, in %; cycles per case; J over idle given the
 measured seconds per point at 3 W over idle and above; J with the card at rest given the seconds per point; n = cases with cycles / points with
 J over idle). The first version's five tests come from its committed `numbers.json`; E212's and E214's from their committed scores (E214's on
-the cases whose configuration no MM1-v3.1 training point shares); E213's and E215's are desk, on this footing, from their frozen scorers'
+each model's own cases whose configuration none of its training points shares); E213's and E215's are desk, on this footing, from their frozen scorers'
 committed points and the frozen forecasts (the scorers' own figures, measured / forecast - 1, are in sections 4.3 and 4.5); the unread
 switch tests' from their committed scores.
 
@@ -238,7 +251,9 @@ version's shape-blind test. E209's figures are at each run's measured clock (rou
 E209's and E211's F2 have no given-seconds figure and are not rows here (the first version's note under its figure 3). E212's two MM1-v3 rows and its MM1-v2
 row are per case at each run's measured clock, minion volts and die (MM1-v3's README section 5 form), as are E214's. The unread switch tests'
 rows are their Q1, the W over idle given the measured seconds, on their pass rules' cases (42 and 33). E215's families L and S were chosen
-after MM1-v3.1's fit and are reported apart (section 4.5). A row's counts are its own model's.
+after MM1-v3.1's fit and are reported apart (section 4.5). A row's counts are its own model's. Figure 2 draws the blind rows only: each
+test's newest MM1 (filled) beside the models it was compared with, and E215's post hoc-selected families L and S as open circles; the unread
+rows are in the table alone.
 
 ### 4.1 The first version's five tests, in one paragraph
 
@@ -268,16 +283,18 @@ REPORTED: no pass rule is registered for S3). Its forecasts were frozen in `b149
 at 14:10:50 PST Wed, before the re-run's first card command at 16:00:08. MM1-v3 read **2.70%** in wall cycles against MM1-v2's 4.33%, and
 **3.55%** in W over idle given the seconds against 5.65%; per case it was closer on 26 cases in cycles, farther on 4, with 16 ties. **S3 is a weak
 test of time**: 29 of its 46 cases repeat a configuration in MM1-v3's fit data, where it read 1.07%; on the 17 new ones it read 4.21% against
-MM1-v2's 6.58%. Its three largest misses are spread-mask cases (2x4x16 fp32 zeros at 0x33333333, 0x1111 and 0x11111111, +9.68%, +9.40% and +9.13%),
-the layout gap section 7 names.
+MM1-v2's 6.58%, and v2form, MM1-v2's form refitted on MM1-v3's data and shown beside, 4.08%. Its three largest misses are spread-mask
+cases (2x4x16 fp32 zeros at 0x33333333, 0x1111 and 0x11111111, +9.68%, +9.40% and +9.13%), the layout gap section 7 names.
 
 ### 4.3 E213: MM1-v3's blind day on two cards
 
 **The design** ([`E213.md`](../../../../tools/claims-v3/e213/E213.md), registered `291c8201` with Amendment A1 before any datum; kit `6efdb002`).
 Arm A: MM1-v3's own 90 frozen points on aifoundry3 card 0 at its pinned 600 MHz (87 never run on any card, 3 references), frozen in MM1-v3's land
-`b1493082` and testing each new term: int8 against fp32 inside the L3, the two-edge retention, one K block, eleven never-run shire masks, the
-four loops of the two kernels, and deep K. Arm B: 41 points chosen by the registration on aifoundry1 card 1 at 600 MHz (40 never run there, 1
-reference), with MM1-v3's and MM1-v2's forecasts frozen by the registration's commit. **The rules:** a case or point passes when it is within
+`b1493082` and testing each new term in a family of its own: I, int8 against fp32 inside the L3; R, the two-edge retention; C, one K block;
+M, fp32 zeros at eleven never-run shire masks beside each shape's full chip; P, the four loops of the two kernels; E, deep K. Arm B: 41 points
+chosen by the registration on aifoundry1 card 1 at 600 MHz (40 never run there, 1 reference), with MM1-v3's and MM1-v2's forecasts frozen by
+the registration's commit; its families BI, BR, BK, BE and BP repeat arm A's I, R, C, E and P on a second card (BK with one and two K blocks),
+and BS sets zeros, ones and sparse data beside random at one shape. **The rules:** a case or point passes when it is within
 twice MM1-v3's larger held-out error without twins (arm A: 11% in wall cycles, 13% in the counter's mean, 11% in seconds; 11%, 12%, 4% and 10%
 in the four joule rules; 0.60 W at the points under 3 W), and a rule passes at 90%. Head to head against MM1-v2, by the exact sign test, per arm
 and pooled; the registration said the pooled rules carry the comparison, because arm B alone has a power of only 0.24-0.50.
@@ -295,8 +312,9 @@ management node was opened only inside that one call. **Amendment A3** moved arm
 had shown gemmLnc drawing 1.26-1.72 times MM1-v3's W over idle and card 1 rests higher than aifoundry3: "In the registered order a trip there
 costs most of the session". **The session** (15:15:28-15:45:12 PST): 79 of 85 runs in 29.74 card-minutes; in run 079 (k37, gemmLnc3x1x3 fp32)
 the registered board stop tripped, "STOP: board 72.24 W above 72 W on 3 samples in a row: nothing further started", so k38 and k39 have no data.
-**A3 contained it:** the stop left only runs 080-085 unstarted, where in the registered order the same stop, at k37's run 40, would have left
-all of pass 2 unrun (runs 43-85) (data `b0c727c5`, scores `b99b5265`, pooled `f0d58c84`). Every arm B point kept its blind label: its never-run scan named each one, but only
+**A3 contained it:** the stop left only runs 080-085 unstarted, where in the registered order the same stop, at k37's run 40, would have
+started nothing further: k38 and k39 (runs 41-42), the middle tie and all of pass 2 (runs 43-85) unrun (data `b0c727c5`, scores `b99b5265`,
+pooled `f0d58c84`). Every arm B point kept its blind label: its never-run scan named each one, but only
 because the separate session's E214 kit, copied into one of the lab's working folders that day, plans the same shapes; E214 had not run.
 
 **The registered verdicts** (the frozen scorer's printed lines; MM1-v3 / MM1-v2 / ties for the head-to-head rules):
@@ -346,11 +364,12 @@ fitted on E214: MM1-v3.1's declaration admits a new experiment only by a dated a
 counts, [`counts-e214/`](../../../../tools/matmul/mm1/v3.1/counts-e214/), `37ae4a87`). MM1-v3.1, MM1-v3 and MM1-v2, frozen and unchanged,
 with switch counts made for E214's 20 new tile kinds, forecast all 593 of E214's runs; the declaration, the forecasts and the scorer were
 each hashed before the first read of an E214 measurement (10:42:28, 10:46:14 and 10:49:30 PST Thu 19 Nov), and no E214 point is in any of
-the three fits. On the 425 cases whose configuration no MM1-v3.1 training point shares, MM1-v3.1 read 6.66% in wall cycles and 5.48% in J
-over idle given the measured seconds, MM1-v3 6.52% and 5.55%, MM1-v2 8.06% and 7.91% (the scorecard's E214 rows). **The declared pass rule
+the three fits. On the cases whose configuration none of a model's own training points shares (MM1-v3.1's 425 cases, MM1-v3's 429 and
+MM1-v2's 462 in wall cycles; 425, 426 and 372 in J over idle), MM1-v3.1 read 6.66% in wall cycles and 5.48% in J over idle given the measured
+seconds, MM1-v3 6.52% and 5.55%, MM1-v2 8.06% and 7.91% (the scorecard's E214 rows). **The declared pass rule
 reads FAIL**: E215's bands and 90% bar, applied to MM1-v3.1's no-twin cases on its own footing, fail T1 and T3 (wall cycles and seconds) on both cards, 195 of 224 and 175 of 201
-cases within their 10% and 11% bands against 90% needed, and E4 on card 0; its other energy rules pass. Head to head, MM1-v3.1 and MM1-v3
-are NOT DECIDED on all five rules (wall cycles closer at 61 cases, farther at 71, with 386 ties), and both beat MM1-v2 on all five. **The
+cases within their 10% and 11% bands against 90% needed, and E4 on card 0; its other energy rules pass. Head to head, over all 518 cases,
+twins included, MM1-v3.1 and MM1-v3 are NOT DECIDED on all five rules (wall cycles closer at 61 cases, farther at 71, with 386 ties), and both beat MM1-v2 on all five. **The
 switch route passes**: 7.76% against 28.05% for the null at the new kinds' 33 cases (closer at 29, farther at 3, p = 2.6e-06). Post hoc,
 45 of the 55 cases outside T1's band are over-forecasts, mostly at mid-depth shapes (KB 2-16, NB above 4) on both cards.
 
@@ -361,20 +380,24 @@ MM1-v3.1's frozen forecasts of a GEMM's cycles, seconds and joules hold on point
 there? **What was frozen:** arm A's 60 points on aifoundry3 card 0 and their forecasts in MM1-v3.1's land (`2c971828`, Wed 23:09:13 PST): 32 by
 MM1-v3.1's declared point rule (families P, C and R), and 20 of family L (layouts) and 8 of family S (data patterns) chosen beside them post
 hoc, adopted by a dated departure and reported apart; arm B's 30 points on aifoundry1 card 1 (8 of family L and 4 of family S post hoc) and
-every arm B forecast, frozen by the registration's commit. **The rules:** each case or point within twice MM1-v3.1's held-out error without twins (arm A: 10% in wall cycles, 13% in
+every arm B forecast, frozen by the registration's commit. Family P tests the census path (rgm211's gemmLn and gemmL and rgm136's gemmLnc
+beside rgm136's gemmL), C one and two K blocks at large C, R the two-edge retention at 36-140 MB, L never-run shire masks of shapes whose
+full chip ran on the card, and S the switch route on newly counted kinds beside random data. **The rules:** each case or point within twice
+MM1-v3.1's held-out error without twins (arm A: 10% in wall cycles, 13% in
 J over idle given the seconds), PASS at 90%, per arm and group; head to head against MM1-v3 by the sign test, with MM1-v2 and "v3.1 with T7"
 beside (REPORTED). The registration says before the data what E215 cannot show: MM1-v3.1's time form is MM1-v3's refitted, so the head-to-head
 tests a refit, and "A NOT DECIDED is the expected reading whichever model is better."
 
 **The day** (Thu 19 Nov). Both arms were held from 09:59:39 PST, after the two candidate terms' freeze posts (section 6.5), until the
-separate session's seal of all 90 points (sealed at 10:24:43 PST) was registered (committed 11:43:33 PST). **Arm A** (aifoundry3 card 0 at 600 MHz) ran
-full: first card command at 12:05:55 PST, 119 of 119 runs in 52.76 card-minutes (planned 49.4), board peak 59.34 W in the gemmLnc smoke, every
-sample at 600 MHz (31,606 / 31,606), and 60 of 60 scored points never run on any card (data `8355db15`, scores `7cddc406`).
+separate session's seal of all 90 points (sealed at 10:24:43 PST) was registered (committed 11:43:33 PST). **Arm A** (aifoundry3 card 0 at
+600 MHz) ran full: its session's first card command at 12:05:55 PST (after the card's configuration read at 12:05:24), 119 of 119 runs in
+52.76 card-minutes (planned 49.4), board peak 59.34 W in the gemmLnc smoke, every sample at 600 MHz (31,606 / 31,606), and 60 of 60 scored
+points never run on any card (data `8355db15`, scores `7cddc406`).
 **Arm B** (aifoundry1 card 1 at 600 MHz): its first booking (12:00:51 PST) stopped at its kit's rest rule before any card command, because
 the separate session's preparation for its next sweep wrote on that box; a second booking the same afternoon took one firmware read on the
-card's present boot, EQUAL at 13:41:24 PST, then ran full: first card command at 13:42:22 PST, 71 of 71 runs in 28.55 card-minutes (planned
-28.0), board peak 66 W, every sample at 600 MHz (17,106 / 17,106) (data `4f648f24`, scores `4cd7b864`). Its never-run scan named 26 of its 30 points as run on card 1 after the freeze line, but
-only because E217, the separate session's next sweep, registered at 13:14:57 PST and not yet run, plans the same configurations: all 44 of
+card's present boot, EQUAL at 13:41:24 PST, then ran full: its session's first card command at 13:42:22 PST, 71 of 71 runs in 28.55
+card-minutes (planned 28.0), board peak 66 W, every sample at 600 MHz (17,106 / 17,106) (data `4f648f24`, scores `4cd7b864`). Its never-run
+scan named 26 of its 30 points as run on card 1 after the freeze line, but only because E217, the separate session's next sweep, registered at 13:14:57 PST and not yet run, plans the same configurations: all 44 of
 its hits are in a lab lane's copy of E217's registration (a dated note says so), and every point kept its blind label (REPORTED).
 
 **The registered verdicts** (the frozen scorer's printed words, each group apart; for the head-to-head rules MM1-v3.1 / MM1-v3 / ties):
@@ -397,16 +420,18 @@ its hits are in a lab lane's copy of E217's registration (a dated note says so),
 
 **On arm A, MM1-v3.1 failed its time bands** (T1 and T3, 27 of 32 cases within 10%, against 90% needed): two gemmLnc cases ran 14.8% and
 15.5% under its forecast, and three cases 11.0% to 14.9% over it: two of family R's retention points (gemmL2x1x7 in fp32 and int8) and one
-of family C's one-block points (gemmL8x15x1 in int8);
-the counter's mean passed (T2, 30 of 32 within 13%). Its four joule rules failed by its four gemmLnc points alone (28 of 32; E2 by a hair, a026 at 13.02% over
-its forecast against a 13% band): they drew 1.14 to 1.39 times its J over idle given the measured seconds (figure 5), and without them its J over idle given t read 3.75% (post hoc). Head to
-head, MM1-v3.1 and MM1-v3 were NOT DECIDED in time (MM1-v3.1 closer at 8 cases, MM1-v3 at 12, with 12 ties) and TOO FEW in energy, as the
+of family C's one-block points (gemmL8x15x1 in int8); the counter's mean passed (T2, 30 of 32 within 13%). E1 to E3 failed at its four
+gemmLnc points alone (28 of 32; E2 by a hair, a026 at 13.02% over its forecast against a 13% band): they drew 1.14 to 1.39 times its J over
+idle given the measured seconds (figure 5), and without them its J over idle given t read 3.75% (forecast / measured - 1; 3.54% on the
+scorer's footing; post hoc). E4 (J at rest with the seconds forecast) failed at 28 of 32 too, but at a031 and a032 and at family R's two
+gemmL2x1x7 retention points, a043 and a044 (+9.62% and +12.91% against a 9% band); a024 and a026 passed it. Head to head, MM1-v3.1 and MM1-v3
+were NOT DECIDED in time (MM1-v3.1 closer at 8 cases, MM1-v3 at 12, with 12 ties) and TOO FEW in energy, as the
 registration said they would be. **The post hoc group (L, S)** failed its time bands (16 of 20) and E4, passed E1 to E3, and there MM1-v3
 was BETTER than MM1-v3.1 on all three time rules (closer at 12 cases against 2); its four time misses are sparse masks the card ran 10.1% to
 16.6% faster than MM1-v3.1 forecast.
 **On arm B**, MM1-v3.1 failed its time bands there too (15 of 18 cases within 10%) and E4 (16 of 18), and passed E1 to E3 (17 of 18):
-its one gemmLnc point, b013, drew 1.52 times its forecast; on both cards the card ran gemmL2x1x7 (fp32 and int8) 12.7% to 14.9% slower than
-forecast. Head to head it was NOT DECIDED (MM1-v3.1 closer at 5 cases, MM1-v3 at 7, with 6 ties), and its post hoc time rules are TOO FEW
+its one gemmLnc point, b013, drew 1.52 times its forecast; E4's two misses are b013 and b022 (gemmL2x1x7 in int8, +12.78% against a 10%
+band); on both cards the card ran gemmL2x1x7 (fp32 and int8) 12.7% to 14.9% slower than forecast. Head to head it was NOT DECIDED (MM1-v3.1 closer at 5 cases, MM1-v3 at 7, with 6 ties), and its post hoc time rules are TOO FEW
 by construction (2 of 8 cases within the band). **Pooled over both arms** (the registered group), MM1-v3.1 and MM1-v3 are NOT DECIDED on HP1
 to HP3 (MM1-v3.1 closer at 13 cases, MM1-v3 at 19, with 18 ties) and TOO FEW on HP4 and HP5; in the post hoc group MM1-v3 is BETTER on HP1
 to HP3 (closer at 17 cases against 3). MM1-v3.1's refit made nothing measurably better than MM1-v3 on its own blind day.
@@ -436,13 +461,20 @@ each file's sha256 checked first; forecast / measured - 1; closer or farther tha
 | v3.1 + N1+N2, its verifier's shire-count control | family L, both arms, wall cycles (28) | 10.13% (+7.97) | 10.72% (+8.52) | 18 / 4 / 6 (p 0.0043) |
 | v3.1 + gemmLnc term | the five gemmLnc points, both arms, J over idle given t (5) | 9.18% (+7.50) | 24.53% (-22.86) | 5 / 0 / 0 (p 0.062) |
 | MM1-v2 | every registered case, wall cycles (50) | 9.07% (-2.47) | 6.97% (-0.12) | 19 / 30 / 1 (p 0.15) |
+| MM1-v3 | family L, both arms, wall cycles (28) | 9.65% (+7.20) | 10.72% (+8.52) | 17 / 3 / 8 (p 0.0026) |
+| MM1-v2 | family L, both arms, wall cycles (28) | 6.81% (+0.83) | 10.72% (+8.52) | 20 / 8 / 0 (p 0.036) |
 
 **What they say.** The gemmLnc term cut the miss at the five gemmLnc points (the table above): on arm B's one point it read 1.01, but on arm A
 it overshot: the card drew 0.88 to 0.95 times its forecast at all four, most at NB 1 (a031, a032), where its verifier's nearest-analog
-reading, committed before the data, had said it might read high there by about 3 W. At family L's 28 layouts MM1-v3.1 and every form beside it
-forecast the card too slow on average: the frozen contention term and its REPORTED G1 form moved almost no case past E215's tie, the
-verifier's count-only control N1+N2 came closest, and "v3.1 with T7" lowered the bias but not the rms; MM1-v2 read those layouts best (6.98%
-on the scorer's footing, the pooled note).
+reading had said it might read high there by about 3 W. That reading was written at 09:59-10:25 PST, before any E215 datum, but it was
+committed with the term (`aaeaa495`, 13:14:37 PST) after arm A's data commit (`8355db15`, 13:00:32 PST), in a section its note heads
+"REPORTED, post hoc; not a freeze": it is not a freeze line. At family L's 28 layouts MM1-v3.1 and every form beside it forecast the card too
+slow on average: the frozen contention term and its REPORTED G1 form moved almost no case past E215's tie, and "v3.1 with T7" lowered the
+bias but not the rms. Of the forms added to MM1-v3.1, the verifier's count-only control N1+N2 came closest (closer than MM1-v3.1 at 18
+cases, farther at 4). But MM1-v3, which has no layout term, read those layouts at 9.65% and was closer than N1+N2 at 17 cases, farther at 6,
+with 5 ties (p 0.035); the terms' own REPORTED score (`c9adc716`) finds the same against G1+N1 (MM1-v3 closer at 18 cases, G1+N1 at 6,
+with 4 ties, p 0.023) and reads "no frozen layout form beats MM1-v3 on these points". MM1-v2 read those layouts best: 6.81% on this report's footing, 6.98% on the scorer's
+(the pooled note).
 
 **The five gemmLnc points** (measured J over idle over each forecast given the measured seconds; figure 5):
 
@@ -463,7 +495,8 @@ plus and minus one (0.816 measured against 0.991); at the other seven kinds the 
 under the committed reference in W over idle.
 
 On arm B, its four 28-shire masks of gemmL1x15x4 spread by 0.47% and all ran 10.8% to 11.2% faster than MM1-v3.1 forecast, past the band;
-the ties read 4.5% under the reference.
+the switch route missed most at int8 real:blind4 (0.886 measured against 0.971) and fp32 blind3 (0.882 against 0.948), where MM1-v3.1's J
+over idle given t read +9.1% and +5.6%; the ties read 4.5% under the reference.
 
 ### 4.6 The card's repeat floor
 
@@ -516,6 +549,29 @@ hashed before the first read of the test runs. **The registered pass rule reads 
   8 runs, read by none of MM1-v3's design or fitting steps, reads 1.34% in Q1. Every case's configuration is in MM1-v3's fit with other kinds: it tests the data term on
   known shapes. Against MM1-v1's kind term, on aifoundry3's 10 points it applies to, MM1-v1 read 5.98% and MM1-v3 7.82%: NOT DECIDED.
 
+**Blind, post hoc-selected: E215's family S** (section 4.5; scored by E215's energy rules, with no switch-route rule registered there).
+Twelve newly counted kinds, eight on arm A and four on arm B, ran each beside random data at gemmL3x1x3, chosen after MM1-v3.1's fit and
+frozen before the data: the only blind test of the switch route on kinds counted for MM1-v3.1. MM1-v3.1's J over idle given the measured
+seconds read **8.45%** rms (+2.53) over the 12 (forecast / measured - 1; figure 3). It missed most at int8 data of plus and minus one (a057):
+**+23.6%**, where the measured kind-over-random W ratio was 0.816 against MM1-v3.1's 0.991, so a057 is arm A's one E1 and E2 miss in families L
+and S. The eight fp32 kinds read -6.7% to +5.6%; the four int8 kinds all read high, +5.7% to +23.6%, and int8 is the format MM1 counts around
+the arithmetic only (post hoc readings):
+
+| E215 point | arm, format | the kind beside random | measured W ratio | MM1-v3.1's W ratio | J over idle given t, forecast / measured - 1 |
+|---|---|---|---|---|---|
+| a053 | A, int8 | pattern:i8_den6 | 0.570 | 0.599 | +7.2% |
+| a054 | A, int8 | pattern:i8_den3 | 0.521 | 0.539 | +5.7% |
+| a055 | A, fp32 | pattern:pow2 | 0.590 | 0.569 | -6.7% |
+| a056 | A, fp32 | pattern:den21 | 0.818 | 0.811 | -4.3% |
+| a057 | A, int8 | pattern:i8_pm1 | 0.816 | 0.991 | +23.6% |
+| a058 | A, fp32 | pattern:lanes2 | 0.478 | 0.488 | -1.3% |
+| a059 | A, fp32 | pattern:fp16grid | 0.762 | 0.782 | -0.9% |
+| a060 | A, fp32 | pattern:bf16trunc | 0.710 | 0.719 | -2.1% |
+| b027 | B, fp32 | designed:blind3 a_colconst_b_randn | 0.882 | 0.948 | +5.6% |
+| b028 | B, fp32 | e37 | 0.583 | 0.561 | -5.4% |
+| b029 | B, fp32 | real:blind4 | 0.739 | 0.751 | -0.1% |
+| b030 | B, int8 | real:blind4 | 0.886 | 0.971 | +9.1% |
+
 **What it tests, and what it does not:** the signal-net part of the count, through energy, on three cards; never an absolute count of switches.
 
 ## 6. MM1-v3.1: declared before E213's data, fitted after it, and a null result
@@ -535,8 +591,8 @@ points and 1,832 energy points through E213's two arms. Every choice was made by
 |---|---|---|
 | the one-K-block form (item 8) | E213's family C and BK: T5r closer at 10 cases, tC at 10 (p 1.0000) | NOT DECIDED, then T5r by its pooled LOEO (4.29% against 4.44%) |
 | the trace check (item 4) | the committed verdict | PASS |
-| the exposure and cooperation cost (item 3) | LOEO wall over the touched points: G0 6.58% against 9.19-24.40% | G0 (no term) |
-| the subset layout (item 4) | T7: LOLO 14.40%, pooled LOEO 6.20%; n/32: 89.78% and 4.29% | n/32: T7 had the lowest layout-held-out error but failed its pooled LOEO condition |
+| the exposure and cooperation cost (item 3) | LOEO wall over the touched points: G0 6.58% against 9.19-24.40%, those three scores unidentified (the training cost is flat in the E213 fold) | G0 (no term) |
+| the subset layout (item 4) | T7: LOLO 14.40%, pooled LOEO 6.20%; n/32: 89.78% and 4.29%, its LOLO set by the compact fold, where eta is not identified (118.2%; 6.17% with eta at its neutral 0) | n/32: T7 failed its pooled LOEO condition, and class by class T7 was worse (compact 12.96% against 6.17% at eta 0, other 18.66% against 6.47%, spread 14.32% against 6.55%) |
 | the energy split (item 1) | LOEO W given t: E1t 5.48% | E1t (the L2 line energy at its bound 0) |
 
 So **MM1-v3.1's time model is MM1-v3's form refitted**, and held out, on the same points and folds, the two read the same:
@@ -556,10 +612,12 @@ So **MM1-v3.1's time model is MM1-v3's form refitted**, and held out, on the sam
 
 **Acceptance** (MM1-v3's four rules, restated in the declaration): rule 1 FAILS on its time half (4.723% against 4.723%: equal, not lower), rule 2
 FAILS on its energy half (a held-out card's W over idle by the declared anchor route, 10.92% against 8.85%), and rules 3, 4(a) and 4(b) PASS. By
-the declaration **MM1-v3.1 is frozen as built, the failing rules named**: an honest null. The masked walk, exact against the simulator, gave the
-lowest error with a mask layout held out but not the pooled error its rule asked, so it stays out (and is REPORTED beside E215 as "v3.1 with
-T7"). A post hoc finding: in the compact-layout fold no training point carries the row-imbalance term, so that fold's figure is not identified
-(the README's finding; it does not decide item 4).
+the declaration **MM1-v3.1 is frozen as built, the failing rules named**: an honest null. The masked walk is exact against the simulator in
+its requests, not in time. Its pooled layout-held-out error (14.40% against n/32's 89.78%) is the lower only because in the compact-layout
+fold no training point carries the row-imbalance term, so n/32's eta is not identified there (the README's post hoc finding; it does not
+decide item 4); with that fold read at eta's neutral 0, T7 was worse than n/32 on every layout class (the table above). It failed its pooled
+LOEO condition and stays out (REPORTED beside E215 as "v3.1 with T7"), and blind on E215's 28 layouts it read 13.93% against MM1-v3.1's
+10.72% (section 4.5).
 
 **6.4 What it froze:** E215's arm A points and forecasts (section 4.5).
 
@@ -577,12 +635,12 @@ and no E215 rule scores them: their E215 figures are REPORTED (section 4.5).
   points it read 7.99% in W over idle in sample against MM1-v3.1's 32.56%, and held out one point at a time 9.81%. Its two checks hold; its
   verifier adds that the second variable describes NB rather than counting traffic, so E215's two points at NB 12 and 15 extrapolate from NB
   of 6 or less, and that the constants include self-heating (3-13% of each excess).
-- **The layout term** ([`layout/README.md`](../../../../tools/matmul/mm1/v3.2-terms/layout/README.md); "v3.1 + contention", form F1): MM1-v3.1's
-  time times (1 + a Phi_fresh), a = -0.0832, where Phi_fresh is the masked walk's fresh DRAM lines a step over its line requests, less the full
+- **The layout term** ([`layout/README.md`](../../../../tools/matmul/mm1/v3.2-terms/layout/README.md); "v3.1 + contention", the contention
+  form, which its README calls F1, not the earlier route F1): MM1-v3.1's time times (1 + a Phi_fresh), a = -0.0832, where Phi_fresh is the masked walk's fresh DRAM lines a step over its line requests, less the full
   chip's: exactly zero at the full mask, and 0.9942 to 1.0139 at E215's 28 subset points. Held out (post hoc), it moved the
   leave-one-layout-class-out error from 6.3195% to 6.2480% and the pooled one from 4.7228% to 4.7101%. Its verifier found that no L3 slice or
-  memory controller runs hot (every mask loads them evenly, max/mean 1.000), and that F1 is a correction for shire count and shape, not a
-  placement or contention term: permuting its feature within a shire count and shape does as well in 92.4% of draws, a count-only control
+  memory controller runs hot (every mask loads them evenly, max/mean 1.000), and that the contention form is a correction for shire count and
+  shape, not a placement or contention term: permuting its feature within a shire count and shape does as well in 92.4% of draws, a count-only control
   (N1+N2) would have won, and the gain is within noise (an interval of -0.171 to +0.032 points). Those controls' E215 forecasts, posted
   before any E215 datum, are committed beside it and REPORTED in section 4.5.
 
@@ -602,12 +660,17 @@ and no E215 rule scores them: their E215 figures are REPORTED (section 4.5).
   subset by its shire count alone, so every E213 time miss and the three largest E212 S3 misses are subset masks. The masked walk is exact in its
   requests but its fresh-line count does not order the measured layouts (section 3). On E215, MM1-v3.1 forecast family L's 28 layouts too
   slow by 8.52% on average (this report's footing), 10 of them past its band (the card 10.1% to 16.6% faster); neither the frozen layout term
-  nor the masked walk ("v3.1 with T7") fixed it (REPORTED).
+  nor the masked walk ("v3.1 with T7") fixed it, and MM1-v3, with no layout term, read them closer than every frozen layout form (REPORTED;
+  section 4.5).
 - **A held-out card's energy.** With a card left out, MM1-v3.1's energy reads 10.92% by the declared anchor route against MM1-v3 refitted's
   8.85%, and 9.64% against 9.11% by the fallback: each card still needs its own energy anchor.
+- **The L3 retention, just past its first edge.** gemmL2x1x7 (a 39 MB GEMM, just past the retention's first edge at 37.4 MB) ran 12.7% to
+  14.9% slower than MM1-v3.1 forecast in fp32 and int8 on both cards (the scorer's measured / forecast - 1): 4 of the 8 cases past E215's
+  registered T1 band, and its points a043, a044 and b022 are E4 misses (section 4.5). The edge was fitted on E212's K ladders (MM1-v3's
+  README); why the card ran slower just past it is not yet known.
 - **The one-K-block form.** T5r and tC split E213's family C 10 to 10; T5r won on pooled error, while tC reads E146's never-trained store rungs
-  better (3.5% against 5.1%, REPORTED). On E215, one of family C's one-block points on each card and family R's gemmL2x1x7 on both cards
-  ran 10.9% to 14.9% slower than MM1-v3.1 forecast.
+  better (3.5% against 5.1%, REPORTED). On E215, one of family C's one-block points on each card ran 11.0% and 10.9% slower than MM1-v3.1
+  forecast (gemmL8x15x1 in int8 on aifoundry3, gemmL16x14x1 in fp32 on card 1), 2 of the 8 cases past the registered T1 band.
 - **E213 arm A's E4** (J at rest with the seconds forecast) failed by one point.
 
 **The scope limits** (each stated in the registrations before the data):
@@ -620,8 +683,9 @@ and no E215 rule scores them: their E215 figures are REPORTED (section 4.5).
   counted signal-net difference through energy only.
 
 **Better since the first version:** all-zero data on aifoundry1 card 1 (the first version's first named miss: MM1-v3's card-1 zeros held out
-read 5.32% against 8.50% for MM1-v2's form); unseen tile kinds (now counted, and priced to 6.8% unread); the kernel variant's code path (with
-rgm211 held out MM1-v3 reads 7.78% against 9.31%).
+read 5.32% against 8.50% for MM1-v2's form); unseen tile kinds (now counted: priced to 6.8% unread, and blind on E215's 12 new kinds to
+8.45%, though int8 data of plus and minus one read +23.6%); the kernel variant's code path (with rgm211 held out MM1-v3 reads 7.78% against
+9.31%).
 
 ## 8. How to reproduce
 
@@ -637,6 +701,7 @@ rgm211 held out MM1-v3 reads 7.78% against 9.31%).
 | E214: registration; seven sessions; notes; second seal | `95eb8069`; `3b3e4182`, `f7f3257c`, `317ce38c`, `a457d7fc`, `117ca637`, `9ac3c338`, `0e95201d`; `10f662e3`; `b2230d68` | [`tools/claims-v3/e214/`](../../../../tools/claims-v3/e214/), `docs/reports/data/2026-11-18-e214-mmsweep3-*` |
 | E214's switch counts; the lab's unread score of MM1-v3.1, MM1-v3 and MM1-v2 on it | `37ae4a87`; `21ba4b45` | [`counts-e214/`](../../../../tools/matmul/mm1/v3.1/counts-e214/), [`unread-e214/`](../../../../tools/matmul/mm1/v3.1/unread-e214/) |
 | The two candidate terms, frozen before E215's data, with their checks and the layout term's REPORTED controls | `aaeaa495`; `595fcb59` | [`tools/matmul/mm1/v3.2-terms/`](../../../../tools/matmul/mm1/v3.2-terms/) |
+| The terms' own REPORTED score on E215, with its verifier's dated note (cited by this report's corrections) | `c9adc716` | [`tools/matmul/mm1/v3.2-terms/scores-e215/`](../../../../tools/matmul/mm1/v3.2-terms/scores-e215/) |
 | E215: registration and kit; the separate session's seal; arm A's data; arm B's data; post hoc records; the scorer's outputs, per arm and pooled | `4cb2c2ad`, `8bde0182`; `18398ed2`; `8355db15`; `4f648f24`; `2b0c8814`; `7cddc406`, `4cd7b864`, `7edf3477` | [`tools/claims-v3/e215/`](../../../../tools/claims-v3/e215/), [arm A](../2026-11-19-e215-blind-matmul-aifoundry3/), [arm B](../2026-11-19-e215-blind-matmul-aifoundry1-c1/) |
 
 The first version's commits (MM1-v0 to MM1-v2, E206 to E211) are in its section 7.
@@ -688,5 +753,22 @@ MM1-v3's, MM1-v3.1's and the unread test's own commands are in their READMEs' la
   - **Checked:** `check_numbers.py` re-reads every number of this README from its committed source (`check-numbers.txt`); this report's E215
     errors equal the frozen scorer's cells at every rule, group and arm, its measured / forecast - 1 figures equal the scores lane's pooled
     note, and its "v3.1 with T7" counts equal the scorer's REPORTED head-to-head.
+- **2026-11-19 (Thu, week 47), lane `report-v2-fix` (Q226)**: the independent verification's findings answered (`report-v2-verify`: SOUND
+  WITH FIXES, no wrong figure; seven medium findings, all wording, attribution or omission, and eight low). No number printed before changes;
+  every number added is checked against its committed source like the rest.
+  - **Attribution (M1, M4):** E215 arm A's E4 failed at a031, a032 and the two gemmL2x1x7 retention points, not at the gemmLnc points alone,
+    and arm B's E4 misses are named; the L3 retention just past its first edge is its own item under "still wrong", and the one-K-block item
+    keeps only its own two points.
+  - **Claims tempered (M2, M3, M6, M7):** the count-only control came closest only among the forms added to MM1-v3.1 (MM1-v3 was closer than
+    every frozen layout form, MM1-v2 closer still); the scorecard's 2.7-9.0% is on each test's registered points, with E215's post
+    hoc-selected 10.2% and 11.8% and S3's repeated configurations named beside it; T7's lower layout-held-out error rests on an unidentified
+    fold, and class by class it was worse; E215's family S, the switch route on newly counted kinds, is added to section 5 (with a table) and
+    to figure 3, and arm B's switch reading to 4.5.
+  - **Labels (M5, L1-L4):** the gemmLnc verifier's nearest-analog reading was written before E215's data but committed after arm A's, so it is
+    not a freeze line; E214's case sets are each model's own; E210's one fitted constant per shape and REPORTED in the summary; 3.75%'s
+    footing; item 3's scores unidentified. **Added (L5):** v2form's 4.08% on S3's new configurations.
+  - **For a reader new to the chip (L6-L8):** the summary now comes first, the provenance below it; E213's and E215's families are defined;
+    the layout form is called the contention form here, apart from the route F1; figure 2 draws the blind tests only, E215's post hoc rows
+    open; session starts are named as such; A3's counterfactual counts runs 41-42; the page's footer links its files as files.
 
 SPDX-License-Identifier: Apache-2.0

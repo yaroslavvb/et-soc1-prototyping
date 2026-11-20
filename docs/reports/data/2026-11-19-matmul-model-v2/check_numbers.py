@@ -322,8 +322,8 @@ def e215_err_list(S, arm, group, model, q, conv, only):
     F = e215_forecasts(S, arm)
     fams = E215_GROUPS[group]
     pts = sorted(p for p, v in meas.items() if v["role"] == "point" and v["family"] in fams)
-    if only == "L":
-        pts = [p for p in pts if meas[p]["family"] == "L"]
+    if only in ("L", "S", "P", "C", "R"):  # one family (report-v2-fix added S, P, C and R to L)
+        pts = [p for p in pts if meas[p]["family"] == only]
     elif only == "lnc":
         pts = [p for p in pts if meas[p]["loop"] == "rgm136 gemmLnc"]
     elif only == "nolnc":
@@ -379,13 +379,14 @@ def d_e215(S, a):
 
 
 def d_e215c(S, a):
-    """closer / farther / ties of a model against MM1-v3.1 with each arm's registered tie, and the exact two-sided sign test"""
+    """closer / farther / ties of a model against MM1-v3.1 (or the model named by 'base', report-v2-fix) with each arm's registered tie,
+    and the exact two-sided sign test"""
     tiekey = {"wall": "cycles_ln", "mean": "cycles_ln", "t": "seconds_ln", "Jg": "joules_ln", "Jf": "joules_ln", "Wwatts": "watts_W"}[a["q"]]
     rules = S.pjson("e215_rules")
     c = f = t = 0
     for arm in (["A", "B"] if a["arm"] == "P" else [a["arm"]]):
         tie = rules["arms"][arm]["ties"][tiekey]
-        base = dict(e215_err_list(S, arm, a["group"], "v31", a["q"], "fm", a.get("only")))
+        base = dict(e215_err_list(S, arm, a["group"], a.get("base", "v31"), a["q"], "fm", a.get("only")))
         for key, e in e215_err_list(S, arm, a["group"], a["model"], a["q"], "fm", a.get("only")):
             if a["q"] == "Wwatts":
                 d = abs(base[key]) - abs(e)
@@ -432,7 +433,7 @@ def d_e215miss(S, a):
     n = 0
     for arm in (["A", "B"] if a["arm"] == "P" else [a["arm"]]):
         band = rules["arms"][arm]["bands"][a["rule"]]["band"]
-        n += sum(1 for _, e in e215_err_list(S, arm, a["group"], a["model"], a["q"], "mf", None) if abs(e) > band)
+        n += sum(1 for _, e in e215_err_list(S, arm, a["group"], a["model"], a["q"], "mf", a.get("only")) if abs(e) > band)
     return n
 
 

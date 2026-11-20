@@ -9,7 +9,9 @@ Before the deploy (this lane's commit): (1) a dated note in the space's row (its
 deployed to this space by the orchestrator, when this row's repo file changes to the new page; the row's repo file stays the first
 version's, which is what the space serves until then, so scripts/check-mirror.py keeps reading equal; (2) a new line in "How each page
 is built" for the second version's page, beside the first version's (whose page file stays in the repository).
-After the deploy (--after-deploy, the orchestrator's): the row's repo file becomes the second version's page and the note says when.
+After the deploy (--after-deploy, the orchestrator's): the row's repo file becomes the second version's page and the note says that it
+was deployed to this space; the note carries no deploy time (the commit that makes this edit dates it). (Docstring corrected by
+report-v2-fix, Q226; the edits themselves are unchanged.)
 Standard library only. SPDX-License-Identifier: Apache-2.0
 """
 import sys
