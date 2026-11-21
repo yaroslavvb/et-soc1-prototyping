@@ -1,0 +1,135 @@
+{
+ "name": "proc",
+ "argv": [
+  "~/aifoundry/build/e222rgm/rgm211/host/sparsity_host",
+  "--test",
+  "fma",
+  "--type",
+  "fp32",
+  "--pattern",
+  "none",
+  "--values",
+  "gemmLnc2x2x2:randn:tools/claims-v3/kinds/tiles/fp32/randn.bin",
+  "--shires",
+  "0xffffffff",
+  "--per-shire",
+  "32",
+  "--seconds",
+  "2",
+  "--budget",
+  "3.5",
+  "--seed",
+  "1",
+  "--kernel",
+  "~/aifoundry/build/e222rgm/rgm136/kernel/sparsity.elf",
+  "--stop-file",
+  "~/aifoundry/build/e222/T1795248390-A/STOP"
+ ],
+ "rc": 0,
+ "hung": false,
+ "t0_ms": 1795250610857,
+ "t1_ms": 1795250613329,
+ "n_launch": 6,
+ "runtime_other_cards": [],
+ "family": "rgm136 gemmLnc",
+ "host": "rgm211",
+ "kernel": "rgm136",
+ "gate": "GATE OK: rgm136 gemmLnc: rgm136, .text 61315bf6a449c282... the pinned one; ELF ff2723b81e2ce409... not the desk build's (sections the card never loads differ), its loadable identity 649d40793e459e51... the pinned one",
+ "walk_ok": true,
+ "walk_words": "walk mn on every launch, walk_ok true, walk_launches_bad 0",
+ "walk": {
+  "want": "mn",
+  "names": [
+   "mn",
+   "mn",
+   "mn",
+   "mn",
+   "mn",
+   "mn"
+  ],
+  "ok": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "tagged": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "check_walk": "mn",
+  "launches_bad": 0
+ },
+ "tensor_errors": 0,
+ "launches_ok": true,
+ "check": "approx",
+ "check_ok": true,
+ "check_cycles_per_op": 754.819,
+ "counted_cycles_per_op": 754.8045,
+ "stopped_by_file": false,
+ "k1": false,
+ "records": {
+  "runtime_lines": 0,
+  "unparsed": 0,
+  "mismatched": 0,
+  "other": 0
+ },
+ "launch_window_ms": [
+  1795250611096,
+  1795250613215
+ ],
+ "ident": {
+  "stderr_targets": [
+   "/dev/et0_ops"
+  ],
+  "stderr_ids": [
+   0
+  ],
+  "nodes_held": [
+   "/dev/et0_ops"
+  ],
+  "wrong": [],
+  "right": true,
+  "polls": 26,
+  "tripped": null
+ },
+ "sequence_n": 99,
+ "sequence_block": "G-smoke",
+ "run": "099-G-smoke-s03",
+ "rest": {
+  "t0_ms": 1795250600854,
+  "t1_ms": 1795250610854,
+  "samples": 50,
+  "board_w_median_last5s": 23.41
+ },
+ "gate_die": {
+  "c": 50.0,
+  "die": 50,
+  "waited_s": 2.0
+ },
+ "cycles_band": [
+  200.0,
+  4000.0
+ ],
+ "cycles_band_is": "R0's: the smoke's counter mean 200-4,000 cycles an op (E222.md 7), read on the median over the process's counted launches (the scorer's reading)",
+ "cycles_in_band": true,
+ "identity_ok": true,
+ "kernel_stop": "",
+ "board_rise": {
+  "ok": true,
+  "rise_w": 34.79,
+  "samples": 21,
+  "rest_w": 23.41,
+  "rest_is": "this smoke's own 10 s rest, its last 5 s",
+  "min_w": 2.0
+ },
+ "good": true,
+ "a1_family_dropped": null,
+ "a1_session_level": ""
+}
