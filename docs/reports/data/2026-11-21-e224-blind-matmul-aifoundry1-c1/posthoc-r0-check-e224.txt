@@ -1,0 +1,41 @@
+self-test: halfValue 4/4; one rounding to fp32 from 80 bits (RNE above a tie, RNE at a tie to even, RZ) 6/6: OK
+measured p3a at 800 k-tiles (gemmL1x1x25): 4 records, each words 16384, within 0, exact 0, result wrong: per 256-word tile within 0, exact 0
+measured p3b at 800 k-tiles (gemmL1x1x25): 4 records, each words 16384, within 12160, exact 0, result wrong: per 256-word tile within 190, exact 0
+measured p3a at 32 k-tiles (gemmL1x1x1): 2 records, each words 16384, within 16384, exact 0, result approx: per 256-word tile within 256, exact 0
+measured p3b at 32 k-tiles (gemmL1x1x1): 3 records, each words 16384, within 16384, exact 0, result approx: per 256-word tile within 256, exact 0
+p3a = fld16_mant (tools/claims-v3/e212/proposal/src/tiles/fp16/fld16_mant.bin, sha256 a7d401d3e2f880f3...): 1024 halves, 0 negative, 0 zero, 0 subnormal, 0 Inf/NaN; exponent fields {'15': 1024}; one k-tile's partial product 64.3182 to 81.5564, 0 of 256 words negative, median |sum| / sum|p| 1.0000; exact span 2^-20 .. 2^17
+p3b = h_th_in (tools/claims-v3/e217/proposal/src/tiles/fp16/h_th_in.bin, sha256 c5da4e977eb04257...): 1024 halves, 512 negative, 0 zero, 0 subnormal, 0 Inf/NaN; exponent fields {'6': 2, '7': 2, '8': 8, '9': 18, '10': 40, '11': 32, '12': 88, '13': 182, '14': 328, '15': 278, '16': 46}; one k-tile's partial product -22.4396 to 19.3179, 129 of 256 words negative, median |sum| / sum|p| 0.1655; exact span 2^-32 .. 2^17
+models: per 256-word tile, within / exact at 800 k-tiles; at 32 k-tiles; the median |C - want| / abs at 800 (p3a, p3b)
+  fused-g1-RNE           p3a 800 255/0   32 256/2   | p3b 800 256/0   32 256/0   | rel err 2.47e-05, 2.85e-06
+  fused-g2-RNE           p3a 800 256/0   32 256/1   | p3b 800 256/0   32 256/0   | rel err 1.71e-05, 2.31e-06
+  fused-g4-RNE           p3a 800 256/0   32 256/2   | p3b 800 256/0   32 256/0   | rel err 1.33e-05, 1.40e-06
+  fused-g8-RNE           p3a 800 256/0   32 256/3   | p3b 800 256/0   32 256/0   | rel err 8.61e-06, 8.66e-07
+  fused-g16-RNE          p3a 800 256/0   32 256/4   | p3b 800 256/0   32 256/1   | rel err 6.50e-06, 6.85e-07
+  fused-g32-RNE          p3a 800 256/0   32 256/6   | p3b 800 256/0   32 256/1   | rel err 5.86e-06, 6.15e-07
+  fused-g1-RZ            p3a 800   0/0   32 256/0   | p3b 800 144/0   32 256/0   | rel err 5.34e-04, 8.83e-05
+  fused-g2-RZ            p3a 800   0/0   32 256/0   | p3b 800 209/0   32 256/0   | rel err 2.68e-04, 4.42e-05
+  fused-g4-RZ            p3a 800  19/0   32 256/0   | p3b 800 255/0   32 256/0   | rel err 1.33e-04, 2.09e-05
+  fused-g8-RZ            p3a 800 250/0   32 256/0   | p3b 800 256/0   32 256/0   | rel err 6.69e-05, 1.10e-05
+  fused-g16-RZ           p3a 800 256/0   32 256/0   | p3b 800 256/0   32 256/0   | rel err 3.47e-05, 4.85e-06
+  fused-g32-RZ           p3a 800 256/0   32 256/1   | p3b 800 256/0   32 256/0   | rel err 1.69e-05, 2.07e-06
+  align-g1-guard0-RNE    p3a 800   0/0   32 256/0   | p3b 800 253/0   32 256/1   | rel err 5.34e-04, 8.44e-06
+  align-g1-guard0-RZ     p3a 800   0/0   32 256/0   | p3b 800 253/0   32 256/0   | rel err 5.34e-04, 8.45e-06
+  align-g1-guard1-RNE    p3a 800   0/0   32 256/0   | p3b 800 256/0   32 256/0   | rel err 2.65e-04, 5.63e-06
+  align-g1-guard1-RZ     p3a 800   0/0   32 256/0   | p3b 800 208/0   32 256/0   | rel err 5.34e-04, 4.67e-05
+  align-g1-guard2-RNE    p3a 800  67/0   32 256/0   | p3b 800 256/0   32 256/0   | rel err 1.32e-04, 4.29e-06
+  align-g1-guard2-RZ     p3a 800   0/0   32 256/0   | p3b 800 174/0   32 256/0   | rel err 5.34e-04, 6.93e-05
+  align-g1-guard3-RNE    p3a 800 200/0   32 256/0   | p3b 800 256/0   32 256/0   | rel err 6.90e-05, 3.11e-06
+  align-g1-guard3-RZ     p3a 800   0/0   32 256/0   | p3b 800 157/0   32 256/0   | rel err 5.34e-04, 7.94e-05
+  align-g2-guard0-RNE    p3a 800   0/0   32 256/0   | p3b 800 256/0   32 256/1   | rel err 2.68e-04, 6.18e-06
+  align-g2-guard0-RZ     p3a 800   0/0   32 256/0   | p3b 800 256/0   32 256/0   | rel err 2.68e-04, 6.19e-06
+  align-g2-guard1-RNE    p3a 800  52/0   32 256/0   | p3b 800 256/0   32 256/0   | rel err 1.31e-04, 4.32e-06
+  align-g2-guard1-RZ     p3a 800   0/0   32 256/0   | p3b 800 251/0   32 256/0   | rel err 2.68e-04, 2.22e-05
+  align-g2-guard2-RNE    p3a 800 211/0   32 256/0   | p3b 800 256/0   32 256/0   | rel err 6.52e-05, 2.82e-06
+  align-g2-guard2-RZ     p3a 800   0/0   32 256/0   | p3b 800 238/0   32 256/0   | rel err 2.68e-04, 3.29e-05
+  align-g2-guard3-RNE    p3a 800 255/0   32 256/0   | p3b 800 256/0   32 256/0   | rel err 3.35e-05, 2.20e-06
+  align-g2-guard3-RZ     p3a 800   0/0   32 256/0   | p3b 800 225/0   32 256/0   | rel err 2.68e-04, 3.86e-05
+models giving p3a's measured counts at both depths (800: 0/0, 32: 256/0): 13: fused-g1-RZ, fused-g2-RZ, align-g1-guard0-RNE, align-g1-guard0-RZ, align-g1-guard1-RNE, align-g1-guard1-RZ, align-g1-guard2-RZ, align-g1-guard3-RZ, align-g2-guard0-RNE, align-g2-guard0-RZ, align-g2-guard1-RZ, align-g2-guard2-RZ, align-g2-guard3-RZ
+  of those, also p3b's at 32 k-tiles (256/0): 11; their p3b within at 800 k-tiles: [144, 157, 174, 208, 209, 225, 238, 251, 253, 256] (measured 190)
+  models giving all four measured counts: 0
+fused round-to-nearest models: p3a within at 800 k-tiles [255, 256]; p3a exact words at 32 k-tiles [1, 2, 3, 4, 6] (measured 0)
+the loss of an accumulator that truncates, about K x 2^-25 of an all-positive sum: 7.63e-04 at K 25,600, 3.05e-05 at K 1,024, against the tolerance 0.0001
