@@ -1,0 +1,31 @@
+== Fri 20 Nov 2026 18:00:04 PST: bash W/slot.sh bash W/nodev.sh /usr/bin/python3 -I -B tools/claims-v3/e224/desk/nokill_e224.py <W>/out/kit-e224/work/clone (from the scratch clone; /usr/bin/python3 3.12.3)
+states the rule: tools/claims-v3/e224/e224a_common.py:38: `timeout <T> <the point's host> <the point's host_args> --kernel <the point's ELF> --stop-file <STOP>`, never `timeout -k`, T the kit's
+states the rule: tools/claims-v3/e224/run_e224a.py:30: NO SIGKILL ANYWHERE (W/out/orch/kill-rule.txt; AGENT.md "never kill -9"): every device process runs under a plain `timeout 10`; a host whose
+states the rule: tools/claims-v3/e224/run_e224a.py:419: """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s; each wait ends CLOSE_S / 2 before the end bound but lasts
+states the rule: tools/claims-v3/e224/run_e224a.py:438: self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+states the rule: tools/claims-v3/e224/desk/realpath_e224b.py:320: own 'never kill -9' / 'no kill -9' words are its statements of the rule, not a kill)"""
+states the rule: tools/claims-v3/e224/desk/realpath_e224b.py:323: t = re.sub(r"(never|no) (kill -9|SIGKILL|`?timeout -k`?)", "", t)
+states the rule: tools/claims-v3/e224/desk/realpath_e224b.py:328: return [("no SIGKILL, kill -9 or timeout -k in any record of the case", not any(w in t for w in ("SIGKILL", "kill -9", "timeout -k"))),
+states the rule: tools/claims-v3/e224/rb/s20_wait_e224b.sh:8: # smoke gate) or with a LEFTOVER (tell the orchestrator; never kill -9), or GONE (no runner, no manifest: read session.log); 17 still
+states the rule: tools/claims-v3/e208/proposal/src/run_mms.py:183: self.leftover = []                 # device processes of ours alive when they should not be (recorded; never kill -9)
+states the rule: tools/claims-v3/e208/proposal/src/run_mms.py:273: nothing else is done to it (never SIGKILL, never kill -9). -> (rc or None, stdout, stderr, the pids left running)."""
+states the rule: tools/claims-v3/e208/proposal/src/run_mms.py:436: """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s, each wait ending CLOSE_S / 2 before the end bound
+states the rule: tools/claims-v3/e208/proposal/src/run_mms.py:457: self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+states the rule: tools/claims-v3/e208/proposal/src/run_mms.py:492: self.say(f"LEFTOVER: {why} (recorded; never kill -9; the card's lock stays held until no device process of ours is left)")
+states the rule: tools/claims-v3/e208/proposal/src/run_mms.py:1074: # hold the card's lock until no device process of ours is left, at most LEFTOVER_WAIT_S (never kill -9)
+states the rule: tools/claims-v3/e208/proposal/src/run_mms.py:1086: "the card's lock is released at the bound: tell the owner (no kill -9)"))
+states the rule: tools/claims-v3/e208/proposal/src/status_mms.sh:33: f"resolved {lo.get('resolved')}: do not post the release; tell the owner (never kill -9)")
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/rb_run.py:91: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/rb_run.py:93: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/rb_run.py:98: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v2/rb_run.py:97: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v2/rb_run.py:99: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v2/rb_run.py:104: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3/rb_run.py:102: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3/rb_run.py:104: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3/rb_run.py:109: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3.1/rb_run.py:102: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3.1/rb_run.py:104: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3.1/rb_run.py:109: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+NOKILL-E224: 0 lines that could send SIGKILL toward a device process (want 0); 12 lines that send SIGKILL to the desk's own call tree only (k6's rb_run.py kill_tree(), TERM then KILL past a call's bound or on a login link: the desk's ssh, rsync, git or desk Python on aifoundry2, where arm A runs no device process; arm B's runbook does not use rb_run.py); 16 lines state the rule; read: tools/claims-v3/e224 (both arms, A2), E208's runner src/, the q141k runbook folder (k6's library and rb_run.py)
+== rc 0 at 18:00:04 PST

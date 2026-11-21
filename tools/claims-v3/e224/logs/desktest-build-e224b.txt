@@ -1,0 +1,40 @@
+== Fri 20 Nov 2026 17:03:52 PST: bash W/slot.sh bash W/nodev.sh bash tools/claims-v3/e224/desk/desktest_build_e224b.sh <W>/out/kit-e224/work/final/build-b (from the scratch clone; /usr/bin/python3 3.12.3)
+== sync
+SYNCED: 85 files at the harness's sha256 (85 copied, 0 already there, 0 pruned []) from HEAD 4d154605790f6b86f591096fc39d8a355a6f655f
+== B1: E208's build, then E224's, from the box root (step 6)
+HOSTCHECK unknown-test: rc 2: ok
+ETDEVICES host no; reader yes; /opt/et/lib/libdeviceLayer.a no; both CMakeCache deviceLayer_DIR from /opt/et yes
+MMS-BUILT rc=0
+== E224's build of rgm211's host on aifoundry2, 2026-11-20 17:03:56 PST
+SOURCES OK: 10 of 10 at kernel-e224.json's pins
+COMPILER kernel: riscv64-unknown-elf-gcc () 15.1.0; host: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+HOST rgm211 97b2dd4aa979377dfa0f915683a5ebb0f034188a9f2f46c7c63f3ba558a93f95
+rgm211's own ELF (never run in E224) 00402801a1a53a9330898ef023297d8967a2c655472a40e0f1cd65dea04f09ae
+HOSTCHECK rgm211 unknown-option: rc 2, 'unknown option --no-such-option', before the device stage: ok
+HOSTCHECK rgm211 zero-shires: rc 2, 'bad --shires / --per-shire', before the device stage: ok
+HOSTCHECK rgm211 no-kernel: rc 1, 'cannot read kernel', before the device stage: ok
+HOSTCHECK rgm211 unknown-test: rc 2, '--test must be fma, tload, gemv, diverge or spin', before the device stage: ok
+HOSTCHECK rgm211 arm-missing-kb: rc 1, 'want gemmL<MB>x<NB>x<KB>', before the device stage: ok
+HOSTCHECK rgm211 per-shire-16: rc 1, 'gemm needs --per-shire 32', before the device stage: ok
+HOSTCHECK rgm211 missing-tile: rc 1, 'cannot read 2 x 1024 bytes', before the device stage: ok
+HOSTCHECK rgm211 unknown-gen: rc 1, 'unknown gen', before the device stage: ok
+GATE rgm136's ELF for 'rgm136 gemmLnc': GATE OK: rgm136 gemmLnc: rgm136's ELF, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones (loadable identity 649d40793e459e51...)
+GATE rgm136's ELF for 'rgm136 gemmL': GATE OK: rgm136 gemmL: rgm136's ELF, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones (loadable identity 649d40793e459e51...)
+GATE rgm211's own ELF for 'rgm136 gemmLnc' (must fail): GATE FAILED: rgm136 gemmLnc needs rgm136's .text 61315bf6a449c282...; this ELF's .text is 82c7980716a0f0cacd24364ef9a23435343eb8f2c35c32b0ec5d60b46c8a4069 (rgm211's)
+GATE rgm211's own ELF for 'rgm136 gemmL' (must fail): GATE FAILED: rgm136 gemmL needs rgm136's .text 61315bf6a449c282...; this ELF's .text is 82c7980716a0f0cacd24364ef9a23435343eb8f2c35c32b0ec5d60b46c8a4069 (rgm211's)
+IDENT CHECK: CHECK PASS
+E224-BUILT rc=0
+builds rc 0 and 0 in 8 s
+CASE B1: PASS (rgm136 ELF aace138caf8071cc (pin EQUAL); rgm211 host 97b2dd4aa979377d; its refusals 8 ok; rgm211's own ELF 00402801a1a53a93 (E211's whole pin: True); GATE OK: rgm136 gemmLnc: rgm136's ELF, .text 61315bf6a449c28)
+== B2: E224's build without E208's build of today
+CASE B2: PASS (rc 1: E224-BUILD-FAILED: no E208 build of today before it (src/build_mms.sh first): E208's build record reads BUILT )
+== B3: an rgm211 source changed
+CASE B3: PASS (rc 1: SOURCES DIFFER, no build)
+== B4: the box lock held
+CASE B4: PASS (rc 3: refused)
+== B5: rgm211's own ELF in rgm136's place
+CASE B5: PASS (rc 1, the record BUILD-FAILED: GATE rgm136's ELF for 'rgm136 gemmLnc': GATE FAILED: rgm136 gemmLnc needs rgm136's .text 61315bf6a449c282...; this ELF's)
+== B6: the root rebuilt as step 6 leaves it (for the real-path and dry tests)
+CASE B6: PASS (both BUILT again: <W>/out/kit-e224/work/final/build-b/root)
+DESKTEST-BUILD-E224B 6 of 6 PASS
+== rc 0 at 17:04:11 PST

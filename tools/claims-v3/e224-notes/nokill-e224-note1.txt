@@ -1,0 +1,61 @@
+== Fri 20 Nov 2026 21:18:43 PST: bash W/slot.sh /usr/bin/python3 -I -B tools/claims-v3/e224-notes/nokill_e224_note1.py <the lab clone at the kit commit> (fix-e224's scratch clone; /usr/bin/python3 3.12.3)
+states the rule (a docstring): tools/claims-v3/e224/e224a_common.py:38: `timeout <T> <the point's host> <the point's host_args> --kernel <the point's ELF> --stop-file <STOP>`, never `timeout -k`, T the kit's
+states the rule (SIGKILL named in a Python string (text)): tools/claims-v3/e224/plan_e224.py:30: "run_form": ("its die gate, 10 s at rest, one host process '--seconds 6 --budget 7.5' under a plain 'timeout 10' (never -k; no SIGKILL to a "
+states the rule (SIGKILL named in a Python string (text)): tools/claims-v3/e224/plan_e224.py:50: "run_form": ("E216's run form (E208's runner and schedule form, the plain 'timeout 10', never -k; no SIGKILL to a device process, sent or "
+states the rule (a docstring): tools/claims-v3/e224/run_e224a.py:30: NO SIGKILL ANYWHERE (W/out/orch/kill-rule.txt; AGENT.md "never kill -9"): every device process runs under a plain `timeout 10`; a host whose
+states the rule (a docstring): tools/claims-v3/e224/run_e224a.py:419: """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s; each wait ends CLOSE_S / 2 before the end bound but lasts
+states the rule (a string with a statement word before the form): tools/claims-v3/e224/run_e224a.py:438: self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+states the rule (SIGKILL named in a Python string (text)): tools/claims-v3/e224/run_e224a.py:587: f"at {to} s: nothing kills it (no SIGKILL, ever); the stop file is touched, nothing further starts and no "
+states the rule (a docstring): tools/claims-v3/e224/desk/nokill_e224.py:3: F4), both arms: NO SIGKILL TOWARD A DEVICE PROCESS, read in the code: every line of the kit's .py and .sh files (both arms, A2's) and of the code
+states the rule (a docstring): tools/claims-v3/e224/desk/nokill_e224.py:4: the kit runs unchanged (E208's runner src/, k6's library and the q141k runbook folder it sits in) that could send SIGKILL is listed, and each is
+states the rule (a docstring): tools/claims-v3/e224/desk/nokill_e224.py:7: - kit-e224's (unchanged): Popen.kill(); os.kill or send_signal with 9 or SIGKILL; `kill -9`, `kill -KILL`, `kill -s KILL`; `timeout -k`,
+states the rule (a docstring): tools/claims-v3/e224/desk/nokill_e224.py:8: `--kill-after`; `pkill -9`, `killall -9`;
+states the rule (a docstring): tools/claims-v3/e224/desk/nokill_e224.py:9: - fix-e220's (verify-e220's F4: k6's q141k-runbook/v3.1/rb_run.py kill_tree() sends SIGTERM, then SIGKILL, with os.killpg and with os.kill,
+states the rule (a docstring): tools/claims-v3/e224/desk/nokill_e224.py:11: os.kill and send_signal with a signal held in a VARIABLE (any argument but 0, 15 or a named signal other than KILL); SIGKILL named in code
+states the rule (a docstring): tools/claims-v3/e224/desk/nokill_e224.py:12: (signal.SIGKILL in a tuple, a list or an assignment); `kill -SIGKILL`, `kill -s 9`, `kill -s SIGKILL`, `kill -n 9`; `pkill`/`killall`
+states the rule (a docstring): tools/claims-v3/e224/desk/nokill_e224.py:13: with `-KILL`, `-SIGKILL` or `--signal KILL`; `timeout -s KILL` / `--signal=KILL`. Comments and docstrings are statements; the forms are
+states the rule (a docstring): tools/claims-v3/e224/desk/nokill_e224.py:22: Prints, last: "NOKILL-E224: <n> lines that could send SIGKILL toward a device process (want 0); <d> lines that send SIGKILL to the desk's own
+states the rule (SIGKILL named in a Python string (text)): tools/claims-v3/e224/desk/nokill_e224.py:34: SEND = re.compile(r"\.kill\(\)|os\.kill\([^)]*(SIGKILL|,\s*9\))|send_signal\([^)]*(SIGKILL|9\))|\bkill\s+-(9|KILL)\b|\bkill\s+-s\s+KILL\b|"
+states the rule (a string with a statement word before the form): tools/claims-v3/e224/desk/nokill_e224.py:36: STATE = re.compile(r"#|never|no SIGKILL|no kill|not .*kill|\"\"\"|'never|kill -9 a|rule|words|statement", re.I)
+states the rule (a comment): tools/claims-v3/e224/desk/nokill_e224.py:43: r"|\bSIGKILL\b")                                                              # SIGKILL named in code
+states the rule (SIGKILL named in a Python string (text)): tools/claims-v3/e224/desk/nokill_e224.py:45: SHFORM = re.compile(r"\bkill\s+(?:-SIGKILL|-s\s*(?:9|SIGKILL|KILL)|-n\s*9)\b"
+states the rule (SIGKILL named in a Python string (text)): tools/claims-v3/e224/desk/nokill_e224.py:46: r"|\bp?kill(?:all)?\s+(?:-KILL|-SIGKILL|--signal[ =]?(?:KILL|9|SIGKILL))\b"
+states the rule (SIGKILL named in a Python string (text)): tools/claims-v3/e224/desk/nokill_e224.py:47: r"|\btimeout\b[^\n#]*?(?:-s\s*|--signal[ =])(?:KILL|9|SIGKILL)\b")
+states the rule (SIGKILL named in a Python string (text)): tools/claims-v3/e224/desk/nokill_e224.py:137: print(f"NOKILL-E224: {len(send)} lines that could send SIGKILL toward a device process (want 0); {len(desk)} lines that send SIGKILL to the desk's own
+states the rule (a docstring): tools/claims-v3/e224/desk/realpath_e224b.py:47: no G point starts; the 96 runs before stand; no SIGKILL
+states the rule (a docstring): tools/claims-v3/e224/desk/realpath_e224b.py:49: no closing read, the card's lock held until the host ends BY ITSELF; no SIGKILL
+states the rule (a docstring): tools/claims-v3/e224/desk/realpath_e224b.py:320: own 'never kill -9' / 'no kill -9' words are its statements of the rule, not a kill)"""
+states the rule (a string with a statement word before the form): tools/claims-v3/e224/desk/realpath_e224b.py:323: t = re.sub(r"(never|no) (kill -9|SIGKILL|`?timeout -k`?)", "", t)
+states the rule (a needle (a string holding the form alone); a string with a statement word before the form): tools/claims-v3/e224/desk/realpath_e224b.py:328: return [("no SIGKILL, kill -9 or timeout -k in any record of the case", not any(w in t for w in ("SIGKILL", "kill -9", "timeout -k"))),
+states the rule (SIGKILL named in a Python string (text)): tools/claims-v3/e224/desk/realpath_e224b.py:497: ("the host ended BY ITSELF (its stderr's last line 'device held for'; no SIGKILL could have let it write it)",
+states the rule (a docstring): tools/claims-v3/e224/desk/standin_e224b.py:14: and writes <MMS_FAKE_DIR>/host-hang.ended (nothing may kill it: no SIGKILL)
+states the rule (a comment): tools/claims-v3/e224/rb/s20_wait_e224b.sh:8: # smoke gate) or with a LEFTOVER (tell the orchestrator; never kill -9), or GONE (no runner, no manifest: read session.log); 17 still
+states the rule (a docstring): tools/claims-v3/e208/proposal/src/run_mms.py:31: (never SIGKILL): anything of it still alive then is a LEFTOVER (below), and the session makes no other read of the node;
+states the rule (a docstring): tools/claims-v3/e208/proposal/src/run_mms.py:50: `timeout` wrapper (which ignores it once it has sent its own; never SIGKILL); alive 30 s later it is
+states the rule (a docstring): tools/claims-v3/e208/proposal/src/run_mms.py:58: No child process of the runner is ever sent SIGKILL: every bounded wait (the config reads, et-who, the box check, the hosts)
+states the rule (a comment): tools/claims-v3/e208/proposal/src/run_mms.py:183: self.leftover = []                 # device processes of ours alive when they should not be (recorded; never kill -9)
+states the rule (a comment): tools/claims-v3/e208/proposal/src/run_mms.py:268: # ------------------------------------------------------------------ a bounded child process (never SIGKILL)
+states the rule (a docstring): tools/claims-v3/e208/proposal/src/run_mms.py:273: nothing else is done to it (never SIGKILL, never kill -9). -> (rc or None, stdout, stderr, the pids left running)."""
+states the rule (a docstring): tools/claims-v3/e208/proposal/src/run_mms.py:436: """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s, each wait ending CLOSE_S / 2 before the end bound
+states the rule (a string with a statement word before the form): tools/claims-v3/e208/proposal/src/run_mms.py:457: self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+states the rule (a string with a statement word before the form): tools/claims-v3/e208/proposal/src/run_mms.py:492: self.say(f"LEFTOVER: {why} (recorded; never kill -9; the card's lock stays held until no device process of ours is left)")
+states the rule (a docstring): tools/claims-v3/e208/proposal/src/run_mms.py:604: more (never SIGKILL). Anything of it still running then holds or may hold the card's mgmt node: a LEFTOVER, the session
+states the rule (a comment): tools/claims-v3/e208/proposal/src/run_mms.py:668: # ignores it once it has sent its own), never SIGKILL; still alive 30 s later, the tree is a leftover and the
+states the rule (a comment): tools/claims-v3/e208/proposal/src/run_mms.py:1074: # hold the card's lock until no device process of ours is left, at most LEFTOVER_WAIT_S (never kill -9)
+states the rule (a string with a statement word before the form): tools/claims-v3/e208/proposal/src/run_mms.py:1086: "the card's lock is released at the bound: tell the owner (no kill -9)"))
+states the rule (a docstring): tools/claims-v3/e208/proposal/src/selftest_mms.py:28: D13 the start config read outlives its bound, deaf to SIGTERM: no SIGKILL (the double ends by itself), no re-run, no launch,
+states the rule (a string with a statement word before the form): tools/claims-v3/e208/proposal/src/status_mms.sh:33: f"resolved {lo.get('resolved')}: do not post the release; tell the owner (never kill -9)")
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/rb_run.py:91: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/rb_run.py:93: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/rb_run.py:98: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v2/rb_run.py:97: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v2/rb_run.py:99: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v2/rb_run.py:104: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3/rb_run.py:102: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3/rb_run.py:104: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3/rb_run.py:109: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3.1/rb_run.py:102: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3.1/rb_run.py:104: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3.1/rb_run.py:109: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+NOKILL-E224-NOTE1: 0 lines that could send SIGKILL toward a device process (want 0); 12 lines that send SIGKILL to the desk's own call tree only (k6's rb_run.py kill_tree(), TERM then KILL past a call's bound or on a login link: the desk's ssh, rsync, git or desk Python); 46 lines state the rule (SIGKILL named in a Python string (text): 9, a comment: 6, a docstring: 23, a needle (a string holding the form alone): 1, a string with a statement word before the form: 8); read: tools/claims-v3/e224, tools/claims-v3/e208/proposal/src, tools/claims-v3/q141k-runbook, tools/claims-v3/fwgate (every .py and .sh file, logs folders not read)
+== rc 0 at 21:18:44 PST
