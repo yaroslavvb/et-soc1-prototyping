@@ -1,0 +1,137 @@
+# E223 desk checks on the registered source (run Sat 21 Nov 2026 02:04:23 PST)
+# interpreter: /usr/bin/python3 3.12.3 -I -B; no device opened, no simulator
+
+## 1. sha256sum -c src/SRC-SHA256SUMS
+OK 52 of 52 listed files; files in src/: 53 (the list and the 52 it names)
+sha256 of src/SRC-SHA256SUMS: 257a660a54466a1d1fc5e82261257a47469554b0a7db02a01743c17112e025ea
+
+## 2. src/check_mms.py --check
+src/SRC-SHA256SUMS re-made: equal
+CHECK PASS
+rc 0
+
+## 3. src/make_schedule2.py --check (plan.json beside src/: absent)
+MAKE CHECK FAIL: no plan.json beside src/, but src/ holds what a plan made: ['arms.json', 'sched/a1c0-S1.json', 'sched/a1c0-S2.json', 'sched/a1c0-S3.json', 'sch
+rc 1
+
+## 4. src/mms_common.py (self-check)
+MMS-COMMON SELF-CHECK PASS
+rc 0
+
+## 5. src/mms_ident.py (self-check)
+MMS-IDENT SELF-CHECK PASS
+rc 0
+
+## 6. src/tiles_gen.py --check (plan.json beside src/: absent)
+tiles: 9 of the lab's, 0 of the plan's (no plan.json beside src/)
+TILES CHECK PASS
+rc 0
+
+## 7. the lab's device-command audit on the session's files
+audit tool: tools/claims-v3/dmcmd_audit.py, sha256 f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e; src/dmcmd/dmcmd_audit.py f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e
+dmcmd_audit: GO (11 send site(s), 0 disallowed; allow-list: none)
+src/guard_ettelem.sh:33: ettelem config: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_MODULE_POWER_STATE [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_MODULE_STATIC_TDP_LEVEL [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:33: ettelem config: GET_MODULE_TEMPERATURE_THRESHOLDS [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_ASIC_FREQUENCIES [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_ASIC_VOLTAGE [READ, pmic read] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_MODULE_CURRENT_TEMPERATURE [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_MODULE_POWER [READ, pmic none] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_MODULE_VOLTAGE [READ, pmic read] ok - variant ettelem
+src/guard_ettelem.sh:40: ettelem sample: GET_SP_STATS [READ, pmic none] ok - variant ettelem
+summary:
+  GET_ASIC_FREQUENCIES                       READ         pmic none      2 site(s)  ok
+  GET_ASIC_VOLTAGE                           READ         pmic read      2 site(s)  ok
+  GET_MODULE_CURRENT_TEMPERATURE             READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER                           READ         pmic none      1 site(s)  ok
+  GET_MODULE_POWER_STATE                     READ         pmic none      1 site(s)  ok
+  GET_MODULE_STATIC_TDP_LEVEL                READ         pmic none      1 site(s)  ok
+  GET_MODULE_TEMPERATURE_THRESHOLDS          READ         pmic none      1 site(s)  ok
+  GET_MODULE_VOLTAGE                         READ         pmic read      1 site(s)  ok
+  GET_SP_STATS                               READ         pmic none      1 site(s)  ok
+rc 0
+
+## 8. the copied files against the lab's committed files (the mapping of src/README.md); src/tiles holds the lab's nine alone
+EQUAL 123ef6e4ac1572d31914b6049fa700b30af1338c13cc96ec850cd047966dfcfd src/rgm136/CMakeLists.txt = tools/claims-v3/e136/rgm136/CMakeLists.txt
+EQUAL 52815705cbea14c0aea28c81a9e094bbe9e16a04280cb67db5a975aa35d5f8ef src/rgm136/README.md = tools/claims-v3/e136/rgm136/README.md
+EQUAL a7e0144ef468dec18ed2d20ec150688a825d6482f17fa7be4dc23c7d17a15332 src/rgm136/sparsity_args.h = tools/claims-v3/e136/rgm136/sparsity_args.h
+EQUAL 6b6c1c80139ec0eadc8940bb93c264806412ab93ae90779d9ec6ad13d88a0477 src/rgm136/host/CMakeLists.txt = tools/claims-v3/e136/rgm136/host/CMakeLists.txt
+EQUAL c464f57f54f0efd6d5659483c9121a0299bf86d82eacacc66938c8226f7ceebb src/rgm136/host/Constants.h.in = tools/claims-v3/e136/rgm136/host/Constants.h.in
+EQUAL f9b2279f838ad30444748f2a5abad5dd646df631735fc029a6ac01f9036e2fda src/rgm136/host/main.cpp = tools/claims-v3/e136/rgm136/host/main.cpp
+EQUAL 061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948 src/rgm136/kernel/CMakeLists.txt = tools/claims-v3/e136/rgm136/kernel/CMakeLists.txt
+EQUAL dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4 src/rgm136/kernel/crt.S = tools/claims-v3/e136/rgm136/kernel/crt.S
+EQUAL b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09 src/rgm136/kernel/sections.ld = tools/claims-v3/e136/rgm136/kernel/sections.ld
+EQUAL 4be70db597aa2120b9c9904643ff9fc6108ef5eb1f4fb17ac844f9e037619f74 src/rgm136/kernel/sparsity.c = tools/claims-v3/e136/rgm136/kernel/sparsity.c
+EQUAL a6cf931b2a123e88699c046eb45f438b06d1648cabb86fc114577a32ec153377 src/ettelem/ettelem.cpp = tools/ettelem/ettelem.cpp
+EQUAL 64793f7eeeea9d7371cd36680e2c8324b1ba6b9547fd1815fd04a0dec9f7ad39 src/ettelem/CMakeLists.txt = tools/ettelem/CMakeLists.txt
+EQUAL f29e91ca97705454f67c46c28974a085c5bb70ff43e940538b1f670b88ae844e src/dmcmd/dmcmd_audit.py = tools/claims-v3/dmcmd_audit.py
+EQUAL 50168632931fd8c1fab40794cbaaac6aca3d31f01d4367d8a21fcf69c0bdc638 src/dmcmd/dmcmd_table.json = tools/claims-v3/dmcmd_table.json
+EQUAL 34b2add3eb5b7b3c83be7ca7286cf1625c0fca7a1ac9957cafe4fd22e1b804fa src/tiles/fp32/randn.bin = tools/claims-v3/kinds/tiles/fp32/randn.bin
+EQUAL e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad src/tiles/fp32/zeros.bin = tools/claims-v3/kinds/tiles/fp32/zeros.bin
+EQUAL fef951e6c76ad6a01b208af650ca6d95769bec840e009981c5ae1316a42c90b1 src/tiles/fp32/ones.bin = tools/claims-v3/kinds/tiles/fp32/ones.bin
+EQUAL 2ab30f0f335cbe8aa87fe7a7cf27f66458deb6e34d04d5633a61d3fd96b0c974 src/tiles/fp16/randn.bin = tools/claims-v3/kinds/tiles/fp16/randn.bin
+EQUAL e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad src/tiles/fp16/zeros.bin = tools/claims-v3/kinds/tiles/fp16/zeros.bin
+EQUAL c02234fb476b3e4817612e727ce439fa7030fc9c3566b4a761dccac7febedba8 src/tiles/fp16/ones.bin = tools/claims-v3/kinds/tiles/fp16/ones.bin
+EQUAL f5a5f3bf675fca97e857be3747d5f58b6b3d020f25ed11f5d047a87f161444a9 src/tiles/int8/full.bin = tools/claims-v3/kinds/tiles/int8/full.bin
+EQUAL e5a00aa9991ac8a5ee3109844d84a55583bd20572ad3ffcd42792f3c36b183ad src/tiles/int8/zeros.bin = tools/claims-v3/kinds/tiles/int8/zeros.bin
+EQUAL 7c7d2eb358671b401d2a5e59bf56e7163e16994a170d4788faad9be5d82363b2 src/tiles/int8/ones.bin = tools/claims-v3/kinds/tiles/int8/ones.bin
+EQUAL 23 of 23 (the README's copies)
+tile files in src/tiles: 9 (the lab's nine kinds: yes); plan tiles: 0
+the kit's own files: 30; tile files: 9
+
+## 9. gemmL arms past the first sweep's largest K (fp32 16,384, fp16 8,192, int8 32,768) and past the fourth, fifth and sixth sweeps' (E217's, E219's and E221's committed arms.json)
+gemmL arms: 300 (with the anchor); largest K a type: fp32 16384, fp16 8192, int8 20480
+past the first sweep's largest K: 0 arm(s)
+the fourth (E217) sweep's largest gemmL K a type: fp32 23552, fp16 20480, int8 49152
+past the fourth (E217) sweep's largest K: 0 arm(s)
+the fifth (E219) sweep's largest gemmL K a type: fp32 6144, fp16 6144, int8 30720
+past the fifth (E219) sweep's largest K: 50 arm(s): 1x10x22-fp32-ones (K 11264), 1x10x22-fp32-rnd (K 11264), 1x10x30-fp32-ones (K 15360), 1x10x30-fp32-rnd (K 15360), 1x12x25-fp32-ones (K 12800), 1x12x25-fp32-rnd (K 12800), 1x12x8-fp16-zeros-m400 (K 8192), 1x12x8-fp16-zeros-m4002 (K 8192), 1x16x18-fp32-ones (K 9216), 1x16x26-fp32-ones (K 13312), 1x16x26-fp32-rnd (K 13312), 1x20x22-fp32-ones (K 11264), 1x20x22-fp32-rnd (K 11264), 1x24x20-fp32-ones (K 10240), 1x24x20-fp32-rnd (K 10240), 1x9x18-fp32-ones (K 9216), 1x9x18-fp32-rnd (K 9216), 2x10x16-fp32-ones (K 8192), 2x10x16-fp32-rnd (K 8192), 2x10x22-fp32-ones (K 11264), 2x10x22-fp32-rnd (K 11264), 2x10x22-fp32-zeros (K 11264), 2x12x19-fp32-ones (K 9728), 2x12x19-fp32-rnd (K 9728), 2x12x24-fp32-rnd (K 12288), 2x14x21-fp32-ones (K 10752), 2x14x21-fp32-rnd (K 10752), 2x1x16-fp32-ones (K 8192), 2x1x16-fp32-ones-s26 (K 8192), 2x1x16-fp32-rnd (K 8192), 2x1x16-fp32-rnd-s26 (K 8192), 2x1x16-fp32-zeros (K 8192), 2x1x16-fp32-zeros-m400 (K 8192), 2x1x16-fp32-zeros-m4000 (K 8192), 2x1x16-fp32-zeros-m4002 (K 8192), 2x1x16-fp32-zeros-m4010 (K 8192), 2x1x16-fp32-zeros-m5a5a (K 8192), 2x1x16-fp32-zeros-s26 (K 8192), 2x4x24-fp32-zeros-m400 (K 12288), 2x4x24-fp32-zeros-m4000 (K 12288), 2x4x24-fp32-zeros-m4002 (K 12288), 2x4x24-fp32-zeros-m4010 (K 12288), 2x4x24-fp32-zeros-m5a5a (K 12288), 2x9x28-fp32-zeros (K 14336), 2x9x32-fp32-ones (K 16384), 2x9x32-fp32-rnd (K 16384), 3x9x23-fp32-ones (K 11776), 3x9x23-fp32-rnd (K 11776), 3x9x27-fp32-rnd (K 13824), 6x10x18-fp32-rnd (K 9216)
+the sixth (E221) sweep's largest gemmL K a type: fp32 16384, fp16 1024, int8 26624
+past the sixth (E221) sweep's largest K: 2 arm(s): 1x12x8-fp16-zeros-m400 (K 8192), 1x12x8-fp16-zeros-m4002 (K 8192)
+
+## 10. THE ARM GRAMMAR read independently (rgm136's host rules as the lab reads src/rgm136/host/main.cpp and sparsity_args.h)
+sparsity_args.h: SP_GEMM_KT 32, SP_GEMM_MT 64, SP_GEMM_NT 32, SP_TILE_BYTES 1024
+arms parsed: 300; by the host's family: gemmL 300; block, stream and TenB arms: 0
+block, stream and TenB arms: none (this sweep's arms are gemmL arms only)
+gemmL arms: ops a minion a pass 64-69120; M 1024-16384, N 512-12288, K 512-20480; footprints 5-568 MB
+selftest_mms.py HOST_LINES: 17 lines; found in main.cpp: 17; the first nine (parseArm's branches) in order: True
+ARM GRAMMAR PASS (0 finding(s))
+
+## 11. the pair check: arms.json's plan tiles
+plan tiles in arms.json: 0; arms on a plan tile: 0 (nothing to pair: the pair check reads plan tiles only)
+
+## 12. the host rules the README names, as lines of code, and the runner's own preflight call
+58:nice -n 10 cmake --build build/rgm -j1 > build/rgm-build.log 2>&1 || fail "the rgm build (build/rgm-build.log)"
+60:nice -n 10 cmake --build build/ettelem -j1 > build/ettelem-build.log 2>&1 || fail "the ettelem build (build/ettelem-build.log)"
+7:# The looks: the host; uptime; the box's one-minute load (/proc/loadavg, recorded in run/preflight-load.txt: 6 or more is a
+31:LOAD1=$(cut -d ' ' -f 1 /proc/loadavg 2>/dev/null)
+32:echo "load (one minute, /proc/loadavg): ${LOAD1:-unread} (NO-GO at 6 or more)"
+34:echo "$(date +%s) $CARD ${LOAD1:-unread}" >> run/preflight-load.txt
+35:if [ -z "$LOAD1" ]; then nogo "the box's one-minute load is unread (/proc/loadavg)"
+36:elif awk -v l="$LOAD1" 'BEGIN { exit !(l + 0 >= 6) }'; then nogo "the box's one-minute load is $LOAD1 (6 or more: the lab's host rule)"; fi
+preflight NO-GO lines on the load: 2
+src/preflight_mms.sh:4:#   bash ~/claude/work/ee-1121-mmsweep7/src/preflight_mms.sh <card> --audit-only   the audit alone (the runner's own call)
+src/preflight_mms.sh:19:  *) echo "usage: preflight_mms.sh a2c0|a1c1|a1c0 [--audit-only]"; exit 2 ;; esac
+src/preflight_mms.sh:24:if [ "${2:-}" = "--audit-only" ]; then audit; exit $?; fi
+src/run_mms.py:20:     audit GO (src/preflight_mms.sh --audit-only); else no device is opened; the kit's STOP file run/STOP and the session's STOP
+src/run_mms.py:888:                                ("preflight", ["bash", os.path.join(HERE, "preflight_mms.sh"), self.card, "--audit-only"],
+files of the session's path that name the preflight: src/run_mms.py
+
+## 13. the masks and the post's planning claims, per card (as the schedules hold them)
+masks: 50 distinct; shires a mask (count of arms): 1: 40, 2: 60, 3: 5, 4: 4, 5: 4, 6: 4, 7: 4, 8: 25, 16: 11, 24: 18, 26: 16, 28: 1, 32: 108
+subset masks of more than 24 shires (the README says 'here 1 to 24 shires'): 0x3ffffff, 0xfffffff0
+MASK NAMES PASS (0 finding(s))
+a1c0-S1.json: highest planned run 49.0 W (4x9x1-fp32-ones), smoke 51.0 W (1x1x4-fp16-ones); the post's line 52.0 W: AT OR UNDER; the card's planning line 52.0 W; time-role runs 0; fp random runs 0 (footprints - MB; tagged L3served 0)
+a1c0-S2.json: highest planned run 49.9 W (1x1x1-fp32-ones-s26), smoke 51.0 W (1x1x4-fp16-ones); the post's line 52.0 W: AT OR UNDER; the card's planning line 52.0 W; time-role runs 0; fp random runs 0 (footprints - MB; tagged L3served 0)
+a1c0-S3.json: highest planned run 49.0 W (2x9x1-fp32-ones), smoke 51.0 W (1x1x4-fp16-ones); the post's line 52.0 W: AT OR UNDER; the card's planning line 52.0 W; time-role runs 0; fp random runs 0 (footprints - MB; tagged L3served 0)
+a1c1-S1.json: highest planned run 57.3 W (6x10x1-fp32-rnd), smoke 48.3 W (1x1x4-fp16-ones); the post's line 66.6 W: AT OR UNDER; the card's planning line 70.0 W; time-role runs 0; fp random runs 22 (footprints 50,89,98,124,129,136,142,249,274,284,348,374,399,432,434,500 MB; tagged L3served 0)
+a1c1-S2.json: highest planned run 60.2 W (7x1x1-fp32-rnd), smoke 48.3 W (1x1x4-fp16-ones); the post's line 66.6 W: AT OR UNDER; the card's planning line 70.0 W; time-role runs 0; fp random runs 10 (footprints 29,33,34,35,36,84,124 MB; tagged L3served 0)
+a1c1-S3.json: highest planned run 60.2 W (5x1x2-fp32-rnd), smoke 48.3 W (1x1x4-fp16-ones); the post's line 66.6 W: AT OR UNDER; the card's planning line 70.0 W; time-role runs 0; fp random runs 25 (footprints 26,32,34,49,50,51,54,56,59,69,108,122,136,140,158,216,264,329,352,362,380,452,459,524,568 MB; tagged L3served 0)
+a2c0-S1.json: highest planned run 64.0 W (2x12x24-fp32-rnd), smoke 55.0 W (1x1x4-fp16-ones); the post's line 66.6 W: AT OR UNDER; the card's planning line 80.0 W; time-role runs 0; fp random runs 15 (footprints 124,136,284,348,374,399,432,434,500 MB; tagged L3served 0)
+a2c0-S2.json: highest planned run 64.0 W (2x1x16-fp32-rnd), smoke 55.0 W (1x1x4-fp16-ones); the post's line 66.6 W: AT OR UNDER; the card's planning line 80.0 W; time-role runs 0; fp random runs 4 (footprints 84,124 MB; tagged L3served 0)
+a2c0-S3.json: highest planned run 64.0 W (6x10x18-fp32-rnd), smoke 55.0 W (1x1x4-fp16-ones); the post's line 66.6 W: AT OR UNDER; the card's planning line 80.0 W; time-role runs 0; fp random runs 13 (footprints 50,51,54,59,136,216,264,352,380,452,516,524,568 MB; tagged L3served 0)
+arms tagged L3served: none
+arms tagged L3R: 26: 2x1x5-fp32-zeros (29 MB), 2x1x6-fp32-ones (34 MB), 2x1x6-fp32-rnd (34 MB), 2x1x6-int8-rnd (34 MB), 3x1x4-fp32-ones (34 MB), 3x1x4-fp32-rnd (34 MB), 3x2x3-fp32-ones (36 MB), 3x2x3-fp32-rnd (36 MB), 4x1x3-fp32-ones (35 MB), 4x1x3-fp32-rnd (35 MB), 4x2x2-fp32-ones (36 MB), 4x2x2-fp32-rnd (36 MB), 5x1x2-fp32-ones (32 MB), 5x1x2-fp32-rnd (32 MB), 5x1x4-fp32-ones (54 MB), 5x1x4-fp32-rnd (54 MB), 6x1x3-fp32-ones (51 MB), 6x1x3-fp32-rnd (51 MB), 7x1x1-fp32-ones (29 MB), 7x1x1-fp32-rnd (29 MB), 7x1x3-fp32-ones (59 MB), 7x1x3-fp32-rnd (59 MB), 8x1x1-fp32-ones (33 MB), 8x1x1-fp32-rnd (33 MB), 8x1x2-fp32-ones (50 MB), 8x1x2-fp32-rnd (50 MB)
+arms tagged L3R2: 10: 2x1x5-fp32-zeros (29 MB), 2x1x6-fp32-ones (34 MB), 2x1x6-fp32-rnd (34 MB), 2x1x6-int8-rnd (34 MB), 5x1x2-fp32-ones (32 MB), 5x1x2-fp32-rnd (32 MB), 5x1x4-fp32-ones (54 MB), 5x1x4-fp32-rnd (54 MB), 6x1x3-fp32-ones (51 MB), 6x1x3-fp32-rnd (51 MB)
