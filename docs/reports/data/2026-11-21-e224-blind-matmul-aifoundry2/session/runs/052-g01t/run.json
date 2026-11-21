@@ -1,0 +1,110 @@
+{
+ "i": 52,
+ "block": "pass1",
+ "role": "arm",
+ "arm": "g01t",
+ "run": "052-g01t",
+ "form": "burst",
+ "sched": {
+  "arm": "g01t",
+  "block": "pass1",
+  "est_peak_w": 55.756,
+  "est_s": 23.96,
+  "family": "rgm136 gemmL",
+  "form": "burst",
+  "i": 52,
+  "plan_n": 53,
+  "role": "arm",
+  "shires": "0xffffffff",
+  "test": "fma",
+  "timeout_s": 10,
+  "type": "fp32",
+  "unit": "gemmL3x6x12|fp32|0xffffffff|random",
+  "values": "gemmL3x6x12:randn:src/tiles/fp32/randn.bin"
+ },
+ "gate": {
+  "c": 55.0,
+  "die": 44,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795249816632,
+  "t1_ms": 1795249826632
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "build/rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL3x6x12:randn:src/tiles/fp32/randn.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "build/rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "sessions/1795248610-a2c0-E224/STOP"
+   ],
+   "rc": 0,
+   "t0_ms": 1795249826633,
+   "t1_ms": 1795249833360,
+   "n_launch": 16,
+   "launches_ok": true,
+   "check": "approx",
+   "check_ok": true,
+   "check_cycles_per_op": 1769.824,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1795249827106,
+    1795249833156
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 68,
+    "tripped": null
+   },
+   "family": "rgm136 gemmL",
+   "gate": {
+    "t_ms": 1795249826633,
+    "proc": "runs/052-g01t/proc-00",
+    "family": "rgm136 gemmL",
+    "ok": true,
+    "words": "rgm136 gemmL: rgm136's ELF, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones (loadable identity 649d40793e459e51...)"
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1795249826633,
+  "t1_ms": 1795249833360
+ },
+ "tail": {
+  "t0_ms": 1795249833360,
+  "t1_ms": 1795249838360
+ }
+}

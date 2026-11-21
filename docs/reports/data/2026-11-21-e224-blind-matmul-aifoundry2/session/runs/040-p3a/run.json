@@ -1,0 +1,112 @@
+{
+ "i": 40,
+ "block": "pass1",
+ "role": "arm",
+ "arm": "p3a",
+ "run": "040-p3a",
+ "form": "burst",
+ "sched": {
+  "arm": "p3a",
+  "block": "pass1",
+  "est_peak_w": 51.651,
+  "est_s": 23.96,
+  "family": "rgm136 gemmL",
+  "form": "burst",
+  "i": 40,
+  "plan_n": 41,
+  "role": "arm",
+  "shires": "0xffffffff",
+  "test": "fma",
+  "timeout_s": 10,
+  "type": "fp16",
+  "unit": "gemmL1x1x25|fp16|0xffffffff|pattern:fld16_mant",
+  "values": "gemmL1x1x25:tiles:src/tiles/e212/fp16/fld16_mant.bin"
+ },
+ "gate": {
+  "c": 55.0,
+  "die": 43,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795249551987,
+  "t1_ms": 1795249561987
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "build/rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp16",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL1x1x25:tiles:src/tiles/e212/fp16/fld16_mant.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "build/rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "sessions/1795248610-a2c0-E224/STOP"
+   ],
+   "rc": 1,
+   "t0_ms": 1795249561989,
+   "t1_ms": 1795249569065,
+   "n_launch": 16,
+   "launches_ok": true,
+   "check": "wrong",
+   "check_ok": false,
+   "check_cycles_per_op": 1741.425,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1795249562365,
+    1795249568572
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 72,
+    "tripped": null
+   },
+   "family": "rgm136 gemmL",
+   "gate": {
+    "t_ms": 1795249561988,
+    "proc": "runs/040-p3a/proc-00",
+    "family": "rgm136 gemmL",
+    "ok": true,
+    "words": "rgm136 gemmL: rgm136's ELF, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones (loadable identity 649d40793e459e51...)"
+   }
+  }
+ ],
+ "flags": [
+  "proc-00: process rc 1"
+ ],
+ "ran": true,
+ "work": {
+  "t0_ms": 1795249561989,
+  "t1_ms": 1795249569065
+ },
+ "tail": {
+  "t0_ms": 1795249569065,
+  "t1_ms": 1795249574065
+ }
+}

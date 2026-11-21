@@ -1,0 +1,122 @@
+{
+ "i": 104,
+ "block": "G block reversed",
+ "role": "arm",
+ "arm": "g01",
+ "run": "104-g01",
+ "form": "burst",
+ "sched": {
+  "arm": "g01",
+  "block": "G block reversed",
+  "est_peak_w": 66.128,
+  "est_s": 23.96,
+  "family": "rgm136 gemmLnc",
+  "form": "burst",
+  "i": 104,
+  "plan_n": 105,
+  "role": "arm",
+  "shires": "0xffffffff",
+  "test": "fma",
+  "timeout_s": 10,
+  "type": "fp32",
+  "unit": "gemmLnc3x6x12|fp32|0xffffffff|random",
+  "values": "gemmLnc3x6x12:randn:src/tiles/fp32/randn.bin"
+ },
+ "gate": {
+  "c": 55.0,
+  "die": 46,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795250956845,
+  "t1_ms": 1795250966846
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "build/e224brgm211/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmLnc3x6x12:randn:src/tiles/fp32/randn.bin",
+    "--shires",
+    "0xffffffff",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "build/rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "sessions/1795248610-a2c0-E224/STOP"
+   ],
+   "rc": 0,
+   "t0_ms": 1795250966847,
+   "t1_ms": 1795250973622,
+   "n_launch": 16,
+   "launches_ok": true,
+   "check": "approx",
+   "check_ok": true,
+   "check_cycles_per_op": 1574.917,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1795250967309,
+    1795250973445
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 69,
+    "tripped": null
+   },
+   "family": "rgm136 gemmLnc",
+   "gate": {
+    "t_ms": 1795250966847,
+    "proc": "runs/104-g01/proc-00",
+    "family": "rgm136 gemmLnc",
+    "ok": true,
+    "words": "rgm136 gemmLnc: rgm136's ELF, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones (loadable identity 649d40793e459e51...)"
+   },
+   "walk": {
+    "launches": 16,
+    "walk": [
+     "mn"
+    ],
+    "walk_ok_false": 0,
+    "tagged": 0,
+    "check_walk": "mn",
+    "check_walk_launches_bad": 0,
+    "ok": true,
+    "words": "walk mn on every launch, no tag, walk_launches_bad 0"
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1795250966847,
+  "t1_ms": 1795250973622
+ },
+ "tail": {
+  "t0_ms": 1795250973622,
+  "t1_ms": 1795250978622
+ }
+}
