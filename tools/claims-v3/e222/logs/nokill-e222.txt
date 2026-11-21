@@ -1,0 +1,20 @@
+(kit-e222: this run's scratch paths masked as <scratch> before the commit; nothing else in this log changed)
+== 2026-11-20 16:33:59 PST: bash <scratch> /usr/bin/python3 -I -B tools/claims-v3/e222/desk/nokill_e222.py <scratch> (from the scratch clone; /usr/bin/python3 3.12.3; under the lane's quiet-desk guard, w02_guard.py)
+states the rule: tools/claims-v3/e222/e222_common.py:45: host process `timeout 10 <the point's host> <the point's host_args> --kernel <the point's ELF> --stop-file <STOP>`, never `timeout -k`;
+states the rule: tools/claims-v3/e222/run_e222.py:29: NO SIGKILL ANYWHERE (W/out/orch/kill-rule.txt; AGENT.md "never kill -9"): every device process runs under a plain `timeout 10`; a host whose
+states the rule: tools/claims-v3/e222/run_e222.py:406: """SIGTERM only (never kill -9 a tool): 30 s, then once more and 60 s; each wait ends CLOSE_S / 2 before the end bound but lasts
+states the rule: tools/claims-v3/e222/run_e222.py:425: self.say("the sampler did not stop on SIGTERM: left running, recorded (no kill -9)")
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/rb_run.py:91: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/rb_run.py:93: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/rb_run.py:98: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v2/rb_run.py:97: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v2/rb_run.py:99: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v2/rb_run.py:104: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3/rb_run.py:102: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3/rb_run.py:104: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3/rb_run.py:109: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3.1/rb_run.py:102: for sig in (signal.SIGTERM, signal.SIGKILL):   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3.1/rb_run.py:104: os.killpg(proc.pid, sig)   [in kill_tree(): the desk's own call tree only]
+SENDS TO THE DESK'S OWN CALL TREE ONLY: tools/claims-v3/q141k-runbook/v3.1/rb_run.py:109: os.kill(p, sig)   [in kill_tree(): the desk's own call tree only]
+NOKILL-E222: 0 lines that could send SIGKILL toward a device process (want 0); 12 lines that send SIGKILL to the desk's own call tree only (k6's rb_run.py kill_tree(), TERM then KILL past a call's bound or on a login link: the desk's ssh, rsync, git or desk Python on aifoundry2, where E222 runs no device process); 4 lines state the rule; read: 175 files under tools/claims-v3/e222 (the kit and the registration) and the q141k runbook folder (k6's library and rb_run.py)
+== rc 0 at 2026-11-20 16:33:59 PST
