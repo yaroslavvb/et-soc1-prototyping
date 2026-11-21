@@ -1,0 +1,99 @@
+{
+ "i": 73,
+ "block": "K111",
+ "role": "arm",
+ "arm": "1x16x6-fp32-zeros-m4002",
+ "run": "073-1x16x6-fp32-zeros-m4002",
+ "form": "burst",
+ "sched": {
+  "arm": "1x16x6-fp32-zeros-m4002",
+  "block": "K111",
+  "est_peak_w": 33.5,
+  "est_s": 34.6,
+  "form": "burst",
+  "i": 73,
+  "role": "arm",
+  "shires": "0x4002",
+  "test": "fma",
+  "type": "fp32",
+  "unit": "K111:1x16x6-fp32-u-m4002",
+  "values": "gemmL1x16x6:tiles:src/tiles/fp32/zeros.bin"
+ },
+ "gate": {
+  "c": 55.0,
+  "die": 41,
+  "waited_s": 0.0
+ },
+ "rest": {
+  "t0_ms": 1795264590091,
+  "t1_ms": 1795264600092
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "build/rgm/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp32",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL1x16x6:tiles:src/tiles/fp32/zeros.bin",
+    "--shires",
+    "0x4002",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "build/rgm/kernel/sparsity.elf",
+    "--stop-file",
+    "sessions/1795262908-a2c0-S3/STOP"
+   ],
+   "rc": 0,
+   "t0_ms": 1795264600092,
+   "t1_ms": 1795264606867,
+   "n_launch": 16,
+   "launches_ok": true,
+   "check": "exact",
+   "check_ok": true,
+   "check_cycles_per_op": 1558.321,
+   "stopped_by_file": false,
+   "launch_window_ms": [
+    1795264600472,
+    1795264606746
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et0_ops"
+    ],
+    "stderr_ids": [
+     0
+    ],
+    "nodes_held": [
+     "/dev/et0_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 69,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "ran": true,
+ "work": {
+  "t0_ms": 1795264600092,
+  "t1_ms": 1795264606867
+ },
+ "tail": {
+  "t0_ms": 1795264606867,
+  "t1_ms": 1795264611868
+ }
+}
