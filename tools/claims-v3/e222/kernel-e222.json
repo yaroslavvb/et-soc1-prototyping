@@ -1,0 +1,160 @@
+{
+ "experiment": "E222",
+ "request": "Q236",
+ "what": "E222's kernel and hosts by path and sha256 and the arm families (desk)",
+ "kernels": {
+  "rgm136": {
+   "tree": "tools/claims-v3/e136/rgm136",
+   "sources_sha256": {
+    "tools/claims-v3/e136/rgm136/CMakeLists.txt": "123ef6e4ac1572d31914b6049fa700b30af1338c13cc96ec850cd047966dfcfd",
+    "tools/claims-v3/e136/rgm136/README.md": "52815705cbea14c0aea28c81a9e094bbe9e16a04280cb67db5a975aa35d5f8ef",
+    "tools/claims-v3/e136/rgm136/host/CMakeLists.txt": "6b6c1c80139ec0eadc8940bb93c264806412ab93ae90779d9ec6ad13d88a0477",
+    "tools/claims-v3/e136/rgm136/host/Constants.h.in": "c464f57f54f0efd6d5659483c9121a0299bf86d82eacacc66938c8226f7ceebb",
+    "tools/claims-v3/e136/rgm136/host/main.cpp": "f9b2279f838ad30444748f2a5abad5dd646df631735fc029a6ac01f9036e2fda",
+    "tools/claims-v3/e136/rgm136/kernel/CMakeLists.txt": "061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948",
+    "tools/claims-v3/e136/rgm136/kernel/crt.S": "dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4",
+    "tools/claims-v3/e136/rgm136/kernel/sections.ld": "b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09",
+    "tools/claims-v3/e136/rgm136/kernel/sparsity.c": "4be70db597aa2120b9c9904643ff9fc6108ef5eb1f4fb17ac844f9e037619f74",
+    "tools/claims-v3/e136/rgm136/sparsity_args.h": "a7e0144ef468dec18ed2d20ec150688a825d6482f17fa7be4dc23c7d17a15332"
+   },
+   "equal_to": [
+    "tools/claims-v3/e220/kernel-e220.json",
+    "tools/claims-v3/e218/kernel-e218.json",
+    "tools/claims-v3/e215/kernel-e215.json",
+    "tools/claims-v3/e206/kernel-e206.json",
+    "tools/claims-v3/e211/kernel-e211.json",
+    "tools/claims-v3/e213/kernel-e213.json"
+   ],
+   "elf_sha256": "aace138caf8071cc7679134211045a89fb09b65cc9a170bfe33409fd36b4fda0",
+   "text_sha256": "61315bf6a449c2823fbffc33834b4c0a68aa19e8436a29c1124b15c04114b763",
+   "loadable_identity_sha256": "649d40793e459e51db9a590ca90dd1363da3a00398f98938c3ef6e190514e2b7",
+   "pins_note": "E136's build record (aifoundry2's and aifoundry1's builds byte-identical: arm B gates on the whole ELF, as E206 arm B did); aifoundry3's GCC prints '(g1b306039a) 15.1.0' into the ELF, so arm A gates on the .text and the loadable identity (E191's kit fix; E206, E207 and E211 on aifoundry3)"
+  },
+  "rgm211_host": {
+   "elf_sha256": "00402801a1a53a9330898ef023297d8967a2c655472a40e0f1cd65dea04f09ae",
+   "loadable_identity_sha256": "1351a569e4a200cb4cd916c4c6af822b45ce6e1cac9b7aa8b71c945a1f5bd847",
+   "sources_sha256": {
+    "tools/claims-v3/e211/rgm211/CMakeLists.txt": "123ef6e4ac1572d31914b6049fa700b30af1338c13cc96ec850cd047966dfcfd",
+    "tools/claims-v3/e211/rgm211/README.md": "75935f6ae9326ae26f52e44f56ac519ef2c19db2cd19defb79bfcf500ac9529b",
+    "tools/claims-v3/e211/rgm211/host/CMakeLists.txt": "6b6c1c80139ec0eadc8940bb93c264806412ab93ae90779d9ec6ad13d88a0477",
+    "tools/claims-v3/e211/rgm211/host/Constants.h.in": "c464f57f54f0efd6d5659483c9121a0299bf86d82eacacc66938c8226f7ceebb",
+    "tools/claims-v3/e211/rgm211/host/main.cpp": "327f49b1e52560378a9e463547fd9b417a9aa8079c1cee3277d08b9b6234cc39",
+    "tools/claims-v3/e211/rgm211/kernel/CMakeLists.txt": "061b87dfa8850f7f6714121f0313dee587fb85509db684693b5f38091ab10948",
+    "tools/claims-v3/e211/rgm211/kernel/crt.S": "dffcc2a9668d87bf21501cb6ac5331206e3e86b066453ba0fe530e6e3ab902c4",
+    "tools/claims-v3/e211/rgm211/kernel/sections.ld": "b595c374f947fd8a7e3545e934a0946de651c2bd5d6d93a6a64f3f597f1a8c09",
+    "tools/claims-v3/e211/rgm211/kernel/sparsity.c": "57e632a87e0eb74aacc613826c463600e27e6e868cd1cf20b5a3bff2c71fae6e",
+    "tools/claims-v3/e211/rgm211/sparsity_args.h": "0007ba722efe5f19c11076958aafca2d21450a2f1f33d204618a506b38e3b9cd"
+   },
+   "tree": "tools/claims-v3/e211/rgm211",
+   "role_in_E218": "its host only: it runs rgm136's ELF for the gemmLnc branch (family G and the smoke s03); rgm211's own ELF runs no E218 point",
+   "role_in_E222": "its host only: it runs rgm136's ELF for the gemmLnc branch (R's rg01, T-G2, G3, the smoke s03); rgm211's own ELF runs no E222 point"
+  }
+ },
+ "arm_families": {
+  "rgm136 gemmL": {
+   "host": "rgm136",
+   "elf": "rgm136",
+   "arms": "gemmL<MB>x<NB>x<KB>",
+   "points": [
+    "ry01a",
+    "ry01b",
+    "rg01t",
+    "wl01",
+    "wl02",
+    "wl03",
+    "wl04",
+    "wl05",
+    "wl06",
+    "wl07",
+    "wl08",
+    "wp01a",
+    "wp01b",
+    "wp02a",
+    "wp02b",
+    "wp03a",
+    "wp03b",
+    "wp04a",
+    "wp04b",
+    "wp05a",
+    "wp05b",
+    "wn01t",
+    "wn02t",
+    "wn03t",
+    "wn04t",
+    "wn05t",
+    "wn06t",
+    "wn07t",
+    "b01",
+    "b02",
+    "b03",
+    "b04",
+    "b05",
+    "b06",
+    "b07",
+    "b08",
+    "b09",
+    "b10",
+    "q01a",
+    "q01b",
+    "q02a",
+    "q02b",
+    "q03a",
+    "q03b",
+    "q04a",
+    "q04b",
+    "q05a",
+    "q05b",
+    "k01t",
+    "k02t",
+    "k03t",
+    "k04t",
+    "k05t",
+    "k06t",
+    "k07t"
+   ],
+   "also": [
+    "t01 (tie)",
+    "s01 (smoke, the session gate)"
+   ]
+  },
+  "rgm136 gemmLnc": {
+   "host": "rgm211",
+   "elf": "rgm136",
+   "arms": "gemmLnc<MB>x<NB>x<KB>",
+   "points": [
+    "rg01",
+    "wn01",
+    "wn02",
+    "wn03",
+    "wn04",
+    "wn05",
+    "wn06",
+    "wn07",
+    "k01",
+    "k02",
+    "k03",
+    "k04",
+    "k05",
+    "k06",
+    "k07"
+   ],
+   "also": [
+    "s03 (smoke, the G block's gate and stop path)"
+   ],
+   "gate": "E211's family C gate (E211, E213 arm A, E215 arm A and E218 ran it on aifoundry3 card 0)"
+  }
+ },
+ "build": {
+  "commands": [
+   "cmake -S <tree> -B <build> -DCMAKE_PREFIX_PATH=/opt/et -Wno-dev",
+   "cmake --build <build> -j4"
+  ],
+  "host": "<build>/host/sparsity_host (its bytes carry the build path: hosts are gated by behaviour, E190's form)",
+  "identity_recipe": "E206's check_e206.elf_identity / identity_sha (check_e191.py's second form)",
+  "kernel": "<build>/kernel/sparsity.elf",
+  "text_recipe": "objcopy -O binary -j .text <elf> (E206's check_e206.text_sha)",
+  "toolchain": "riscv64-unknown-elf-gcc () 15.1.0; cmake 3.28.3; g++ 13.3.0",
+  "where": "aifoundry2, inside the round's CPU slot (nice 10) and nodev.sh (no device node), from the registration's scratch clone"
+ },
+ "host_arguments": "--test fma --type <fmt> --pattern none --values <arm>:randn:<tile> --shires <mask> --per-shire 32 --seconds 6 --budget 7.5 --seed 1 (the kit adds --kernel, --stop-file and its absolute paths); random data: fp32 and fp16 kinds/tiles/<fmt>/randn.bin, int8 kinds/tiles/int8/full.bin (E101's grammar)"
+}
