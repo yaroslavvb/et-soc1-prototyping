@@ -1,0 +1,104 @@
+{
+ "n": 28,
+ "block": "pass1",
+ "id": "d26",
+ "name": "gemmL3x5x5.fp16.random.m0x1110001",
+ "pair": null,
+ "arm": "A",
+ "run": "028-pass1-d26",
+ "gate": {
+  "c": 47.0,
+  "die": 47,
+  "waited_s": 1.5
+ },
+ "rest": {
+  "t0_ms": 1795248948058,
+  "t1_ms": 1795248958059
+ },
+ "procs": [
+  {
+   "name": "proc-00",
+   "argv": [
+    "~/nekko/build/e224argm/rgm136/host/sparsity_host",
+    "--test",
+    "fma",
+    "--type",
+    "fp16",
+    "--pattern",
+    "none",
+    "--values",
+    "gemmL3x5x5:randn:tools/claims-v3/kinds/tiles/fp16/randn.bin",
+    "--shires",
+    "0x1110001",
+    "--per-shire",
+    "32",
+    "--seconds",
+    "6",
+    "--budget",
+    "7.5",
+    "--seed",
+    "1",
+    "--kernel",
+    "~/nekko/build/e224argm/rgm136/kernel/sparsity.elf",
+    "--stop-file",
+    "~/nekko/build/e224a/T1795248328-A/STOP"
+   ],
+   "timeout_s": 10,
+   "rc": 0,
+   "hung": false,
+   "t0_ms": 1795248958060,
+   "t1_ms": 1795248965141,
+   "n_launch": 15,
+   "runtime_other_cards": [],
+   "family": "rgm136 gemmL",
+   "host": "rgm136",
+   "kernel": "rgm136",
+   "gate": "GATE OK: rgm136 gemmL: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones",
+   "walk_ok": true,
+   "walk_words": "no walk (rgm136's host prints none)",
+   "walk": {},
+   "tensor_errors": 0,
+   "launches_ok": true,
+   "check": "approx",
+   "check_ok": true,
+   "check_cycles_per_op": 1058.861,
+   "counted_cycles_per_op": 1058.711,
+   "stopped_by_file": false,
+   "k1": false,
+   "records": {
+    "runtime_lines": 1,
+    "unparsed": 0,
+    "mismatched": 0,
+    "other": 0
+   },
+   "launch_window_ms": [
+    1795248958382,
+    1795248964913
+   ],
+   "ident": {
+    "stderr_targets": [
+     "/dev/et1_ops"
+    ],
+    "stderr_ids": [
+     1
+    ],
+    "nodes_held": [
+     "/dev/et1_ops"
+    ],
+    "wrong": [],
+    "right": true,
+    "polls": 72,
+    "tripped": null
+   }
+  }
+ ],
+ "flags": [],
+ "gate_words": "GATE OK: rgm136 gemmL: rgm136, .text 61315bf6a449c282... and the whole ELF aace138caf8071cc... the pinned ones",
+ "ran": true,
+ "work": {
+  "t0_ms": 1795248958060,
+  "t1_ms": 1795248965141
+ },
+ "tail_end_ms": 1795248969141,
+ "stop": null
+}
