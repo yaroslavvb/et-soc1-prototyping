@@ -1,0 +1,22 @@
+decl-e221 (round Q235): the lab's BLIND test of its frozen matmul models on E221 (#15, 1120-mmsweep6), DECLARED and its nominal forecasts FROZEN at Fri 20 Nov 2026 06:17:38 PST, before any E221 datum it could read (no E221 run has run).
+MM1's domain first: all 733 of E221's cases (811 runs: 740 arm + 71 anchor, over 345 gemmL arms and the anchor in nine sessions) are IN DOMAIN: every arm is rgm136's cooperative gemmL loop, and every declared model has a form for every case (probe p01: 733/733 in MM1-v3.2, MM1-v3.1, MM1-v3 and MM1-v2); OUT OF DOMAIN: none. Classes: the core-group masks 392, the 1x1x1 cells at new masks 79, KB = 1 72, the int8 L2 point 54, MB = 3 ladders 47, deep K 30, the held walks 23, BW 18, NB = 1 15, the anchor 3; 461 cases at shire subsets (65 masks).
+Models frozen and unchanged: MM1-v3.2 (4e386f75, the lab's newest: the pass rule's model), MM1-v3.1 2c971828, MM1-v3 b1493082, MM1-v2, 'v3.1 + contention' F1 (#1.29.1), verify-lay's controls N1+N2, G1, G1+N1 and the layout-blind F1 (#1.29.1.1), 'v3.1 + both' (= F1 here); REPORTED: the MM1-v3.3 candidates 'MM1-v3.2 + posimb' (layout2, FROZEN 81d04c97, 05:39:48) at the subset masks and 'MM1-v3.2 + L3S' (l3-edge, FROZEN e8216cbb, 05:57:20; its post line in out/orch/q234-frozen-posts.txt: 1) at the full chip, by their own frozen makers; NOT APPLICABLE (no gemmLnc arm): 'v3.1 + gemmLnc' and 'MM1-v3.2 + gemmLnc term AF4' (lnc-form, FROZEN 5373973f).
+Cards: aifoundry1 card 1 at 600 MHz; aifoundry1 card 0 low power and aifoundry2 card 0 under their governors (nominal 800 MHz). Kit copy out/orch/e221-src (SRC-SHA256SUMS.txt 5680112f...); E221 designs no tile: no counts are made.
+sha256 (the freeze line):
+9cd8256bbc9a40b2850094bf936c02d2efd8fe65b886e95b92774dd1d5bc9f1b  DECLARED-blind-e221.md
+b483f46cdcc0138d912e445a01fadb84a113cce0967f80e2b3f0ebe1f08c8ec4  DECLARED-blind-e221.json
+e3361847c4d1600b1b3deeaac3a42131b26f7bcb6434450bd8094c4965cbe59a  forecasts-nominal-e221.csv
+f787561175410898cca55f223652307ed5799062f18165b02f88285e3cf30831  forecasts-nominal-e221.json
+supporting (the makers and their records):
+b43030186fe153b96634e642f75ca73b75a62332ac3b2bfd01cc2443042e75d0  scripts/s02b_nominal.py
+0a8571ccfbcc8a9fd3418b0a18ca4b1a5508820f30a020f8b29ef476e463357f  scripts/s02w_walk.py
+342138469cba6ed5ed6bd835214d7ebd883a61c8e07eb30b3ee3502233b8476a  scripts/s02f_cands.py
+84bc47b8f7021c9e9a89f8b1ade1140df3b34da79f9ddbab3f58ab2033eb910c  scripts/s02c_write.py
+a80943cb770dc7f5681671fdeadecea4c571270a0a6674ae1a6911ab8895756c  work/step2/fc-nominal.json
+b316da119b61c2ec2ab275e9528d843ae6bfad146e29edc36f0ddac6949be7b8  work/step2/walk-feats-e221.json
+848db0174a64edd81265ff2bfc8261585b93861b9b9437a27d02e95980e599b2  work/step2/cand-feats-e221.json
+deb15fa9340303c32e4f9fc101c0e20caf51592b475687564423118c3c17de6f  logs/step1-sha256.txt
+49e4de9a690e5a727426fcd0ff9ca1450a27ba347fe0b636f19bee15bafccf9d  logs/step2-sha256.txt
+Times (Pacific): declared 06:15:39 (hash logged 06:15:58); nominal forecasts made 06:16:27-06:17:04, files written 06:17:05 (hash logged 06:17:11); this file Fri 20 Nov 2026 06:17:38 PST.
+State at the freeze: out/orch/e221-releases.txt holds 4 post lines (the last: '#15.2.1 2026-11-20 05:55:48 PST: the model sessi...'), 1 of them a CLAIM (#15.1, S1 on aifoundry1 card 1, whose start at 05:53:56 was stopped at 05:55:27 with no run run: #15.2.1, kept apart, not scored); 0 claim files in out/orch (none).
+Label rule (the declaration's section g): BLIND for a session whose first datum (first card command) comes after this freeze is posted; a session whose first datum precedes the post is UNREAD for it (POST-READ if a lab lane read its data first). S1, claimed again whole after the post, is labelled by its own first card command.
